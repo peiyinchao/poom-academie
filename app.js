@@ -27,6 +27,12 @@
   function foundationPoomsae() { return C.poomsae.filter(function (p) { return (p.level || 0) === 0; }); }
   function examPoomsae() { var L = curLevel(); return C.poomsae.filter(function (p) { return p.level >= 1 && p.level <= L; }); }
   function examChecks() { prog.exam[prog.level] = prog.exam[prog.level] || {}; return prog.exam[prog.level]; }
+  var TILE_IDS = ['poomsae', 'techniek', 'termen', 'quiz', 'standen', 'examen', 'theorie', 'teller'];
+  function tileOrderIds() {
+    var saved = (prog.tileOrder || []).filter(function (id) { return TILE_IDS.indexOf(id) >= 0; });
+    TILE_IDS.forEach(function (id) { if (saved.indexOf(id) < 0) saved.push(id); });
+    return saved;
+  }
 
   function poomDone() { return visPoomsae().filter(function (p) { return prog.poomsae[p.id]; }).length; }
   function refreshStreak() { document.getElementById('streakN').textContent = poomDone(); }
@@ -120,7 +126,7 @@
     var seg = parse();
     var r = seg[0];
     if (routes.indexOf(r) < 0) r = 'home';
-    if (tellerTimer) { clearInterval(tellerTimer); tellerTimer = null; }
+    if (tellerTimer) { clearInterval(tellerTimer); tellerTimer = null; } tellerRunning = false; tileEdit = false;
     if ('speechSynthesis' in window) speechSynthesis.cancel();
     view.innerHTML = '';
     if (r === 'home') viewHome();
@@ -177,16 +183,26 @@
       '<span class="examcta-bar"><i style="width:' + Math.round(ekDone / ekTotal * 100) + '%"></i></span>' +
       '<span class="examcta-chev">' + ICON_CHEV + '</span></a>';
 
-    var tiles = [
-      ['#/poomsae', 'Poomsae', 'De Taegeuk-vormen', svgCircle()],
-      ['#/techniek', 'Techniek', 'Standen, blokken, trappen', svgBolt()],
-      ['#/termen', 'Termen', 'Koreaans met uitspraak', svgChat()],
-      ['#/quiz', 'Quiz', 'Test wat je weet', svgQuiz()],
-      ['#/standen', 'Standen', 'De 6 basisstanden', feetMini()],
-      ['#/examen', 'Examen', 'Sparren, breken, zelfverdediging', svgExam()],
-      ['#/theorie', 'Theorie', 'Achtergrond & etiquette', svgBook()],
-      ['#/teller', 'Teller', 'Koreaans tellen 1–10', svgTimer()]
-    ].map(function (t) {
+    var tileDefs = {
+      poomsae: ['#/poomsae', 'Poomsae', 'De Taegeuk-vormen', svgCircle()],
+      techniek: ['#/techniek', 'Techniek', 'Standen, blokken, trappen', svgBolt()],
+      termen: ['#/termen', 'Termen', 'Koreaans met uitspraak', svgChat()],
+      quiz: ['#/quiz', 'Quiz', 'Test wat je weet', svgQuiz()],
+      standen: ['#/standen', 'Standen', 'Standen met voetdiagram', feetMini()],
+      examen: ['#/examen', 'Examen', 'Sparren, breken, zelfverdediging', svgExam()],
+      theorie: ['#/theorie', 'Theorie', 'Achtergrond & etiquette', svgBook()],
+      teller: ['#/teller', 'Teller', 'Koreaans tellen 1–10', svgTimer()]
+    };
+    var order = tileOrderIds();
+    var tiles = order.map(function (id, idx) {
+      var t = tileDefs[id]; if (!t) return '';
+      if (tileEdit) {
+        var up = idx > 0 ? '<button class="tmove" data-act="tileMove" data-id="' + id + '" data-dir="-1" aria-label="Omhoog">↑</button>' : '<span class="tmove ph"></span>';
+        var dn = idx < order.length - 1 ? '<button class="tmove" data-act="tileMove" data-id="' + id + '" data-dir="1" aria-label="Omlaag">↓</button>' : '<span class="tmove ph"></span>';
+        return '<div class="tile edit"><span class="ti">' + t[3] + '</span>' +
+          '<h3>' + t[1] + '</h3><small>' + t[2] + '</small>' +
+          '<div class="tmoves">' + up + dn + '</div></div>';
+      }
       return '<a class="tile" href="' + t[0] + '"><span class="ti">' + t[3] + '</span>' +
         '<h3>' + t[1] + '</h3><small>' + t[2] + '</small></a>';
     }).join('');
@@ -219,8 +235,9 @@
 
         examCTA +
 
-        '<span class="secnum">Ontdek</span>' +
-        '<div class="tiles">' + tiles + '</div>' +
+        '<div class="ontdek-hd"><span class="secnum" style="margin:0">Ontdek</span>' +
+          '<button class="editlink" data-act="tileEdit">' + (tileEdit ? 'Klaar' : 'Aanpassen') + '</button></div>' +
+        '<div class="tiles' + (tileEdit ? ' editing' : '') + '">' + tiles + '</div>' +
         '<div class="notecard">' + esc(C.meta.bron) + ' Bekijk ook de <a href="styleguide.html">merk- &amp; stijlgids</a>.</div>' +
       '</div></div>';
   }
@@ -306,7 +323,7 @@
 
     var body;
     if (sub === 'standen') {
-      body = '<div class="stancelegend">' + legFoot('red') + ' gewicht &nbsp;·&nbsp; ' + legFoot('ink') + ' 50/50 &nbsp;·&nbsp; ' + legFoot('out') + ' lichte voet</div>' +
+      body = '<div class="stancelegend">' + legFoot('red') + ' gewicht &nbsp;·&nbsp; ' + legFoot('ink') + ' 50/50 &nbsp;·&nbsp; ' + legFoot('out') + ' lichte voet &nbsp;·&nbsp; <b class="facear">↑</b> voorkant</div>' +
         '<div class="rows">' + C.standen.map(function (s) {
         return '<div class="stance"><span class="feet">' + stanceSVG(s.roman) + '</span>' +
           '<div class="sd"><div class="sdhd"><b>' + esc(s.roman) + '</b>' +
@@ -360,7 +377,8 @@
 
   /* ---------- View: Quiz ---------- */
   var quizState = null;
-  var tellerTimer = null;
+  var tileEdit = false;
+  var tellerTimer = null, tellerIdx = 0, tellerSpeed = 1, tellerRunning = false;
   var flashState = null;
   function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function viewQuiz() {
@@ -511,45 +529,63 @@
     var dots = document.querySelectorAll('#cdots span');
     [].forEach.call(dots, function (d, i) { d.classList.toggle('on', i === activeIdx); });
   }
-  function tellerStart() {
+  function tellLabel(t) { var b = document.getElementById('cstart'); if (b) b.textContent = t; }
+  function tellStep() {
     var counts = tellCounts(); if (!counts.length) return;
-    if (tellerTimer) { clearInterval(tellerTimer); tellerTimer = null; }
     var loop = !!(document.getElementById('cloop') && document.getElementById('cloop').checked);
-    var startBtn = document.getElementById('cstart'); if (startBtn) startBtn.textContent = 'Opnieuw';
-    var i = 0;
-    function step() {
-      if (i >= counts.length) {
-        if (loop) { i = 0; }
-        else { clearInterval(tellerTimer); tellerTimer = null; tellSet('', { roman: 'Klaar! Goed geteld 🎉', nl: '' }, -1); return; }
-      }
-      var c = counts[i];
-      tellSet(String(i + 1), c, i);
-      speak(c.ko);
-      i++;
+    if (tellerIdx >= counts.length) {
+      if (loop) { tellerIdx = 0; }
+      else { tellerPause(); tellSet('', { roman: 'Klaar! Goed geteld 🎉', nl: '' }, -1); tellerIdx = 0; tellLabel('Start'); return; }
     }
-    step();
-    tellerTimer = setInterval(step, 1000);
+    var c = counts[tellerIdx];
+    tellSet(String(tellerIdx + 1), c, tellerIdx);
+    speak(c.ko);
+    tellerIdx++;
   }
-  function tellerStop() {
+  function tellArm() {
+    if (tellerTimer) clearInterval(tellerTimer);
+    tellerTimer = setInterval(tellStep, Math.round(1000 / tellerSpeed));
+  }
+  function tellerPause() {
+    tellerRunning = false;
     if (tellerTimer) { clearInterval(tellerTimer); tellerTimer = null; }
     if ('speechSynthesis' in window) speechSynthesis.cancel();
-    var startBtn = document.getElementById('cstart'); if (startBtn) startBtn.textContent = 'Start';
+  }
+  function tellerToggle() {
+    if (!tellCounts().length) return;
+    if (tellerRunning) { tellerPause(); tellLabel(tellerIdx > 0 ? 'Ga door' : 'Start'); return; }
+    tellerRunning = true; tellLabel('Pauze');
+    tellStep(); tellArm();
+  }
+  function tellerReset() {
+    tellerPause(); tellerIdx = 0; tellSet('', null, -1); tellLabel('Start');
+  }
+  function tellerSetSpeed(sp) {
+    tellerSpeed = sp;
+    var btns = document.querySelectorAll('#cspeed button');
+    [].forEach.call(btns, function (b) { b.classList.toggle('on', parseFloat(b.getAttribute('data-sp')) === sp); });
+    if (tellerRunning) tellArm();
   }
   function viewTeller() {
+    tellerIdx = 0; tellerRunning = false;
     var counts = tellCounts();
     var dots = counts.map(function (_, i) { return '<span data-i="' + i + '"></span>'; }).join('');
+    var speeds = [0.5, 1, 1.5, 2].map(function (sp) {
+      return '<button data-act="tellerSpeed" data-sp="' + sp + '"' + (sp === tellerSpeed ? ' class="on"' : '') + '>' + sp + '×</button>';
+    }).join('');
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<span class="secnum">Tellen</span>' +
       '<h1 class="screen-title">Koreaans tellen</h1>' +
-      '<p class="screen-sub">Voor je 10-herhalingen: de app telt hardop mee in het Koreaans, één tel per seconde.</p>' +
+      '<p class="screen-sub">Voor je 10-herhalingen: de app telt hardop mee in het Koreaans. Kies je tempo en tik op de rode knop.</p>' +
       '<div class="counter">' +
         '<div class="cnum" id="cnum"></div>' +
-        '<div class="cko" id="cko">Druk op start</div>' +
+        '<div class="cko" id="cko"></div>' +
         '<div class="cdots" id="cdots">' + dots + '</div>' +
       '</div>' +
+      '<div class="cspeed-wrap"><span class="csl">Tempo</span><div class="cspeed" id="cspeed">' + speeds + '</div></div>' +
       '<div class="cctrl">' +
-        '<button class="btn primary" id="cstart" data-act="tellerStart">Start</button>' +
-        '<button class="btn ghost" id="cstop" data-act="tellerStop">Stop</button>' +
+        '<button class="btn primary" id="cstart" data-act="tellerToggle">Start</button>' +
+        '<button class="btn ghost" id="creset" data-act="tellerReset">Reset</button>' +
       '</div>' +
       '<label class="cloop"><input type="checkbox" id="cloop"> <span>Blijf herhalen</span></label>' +
       '<div class="notecard">Tip: zet je toestel op de standaard, tel hardop mee en beweeg op de tel. Zo leer je de telwoorden vanzelf. Heb je geluid nodig? Zet je iPhone uit stil-stand.</div>' +
@@ -617,16 +653,20 @@
   function legFoot(kind) {
     return '<svg viewBox="0 0 12 34" width="10" height="28" aria-hidden="true">' + sfoot(6, 17, 0, false, kind) + '</svg>';
   }
+  var FACE = '<g stroke="#AEB6C2" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M32 4v9M28.6 7.4 32 4l3.4 3.4"/></g>';
   function stanceSVG(roman) {
-    var r = String(roman).toLowerCase(), s;
-    if (r.indexOf('moa') >= 0) s = sfoot(27, 33, 0, false, 'ink') + sfoot(37, 33, 0, true, 'ink');
-    else if (r.indexOf('naranhi') >= 0) s = sfoot(22, 33, 0, false, 'ink') + sfoot(42, 33, 0, true, 'ink');
-    else if (r.indexOf('ap seogi') >= 0) s = sfoot(25, 45, 0, false, 'ink') + sfoot(39, 21, 0, true, 'ink');
-    else if (r.indexOf('ap kubi') >= 0) s = sfoot(24, 47, 20, false, 'out') + sfoot(41, 17, 0, true, 'red');
-    else if (r.indexOf('dwit') >= 0) s = sfoot(35, 17, 0, false, 'out') + sfoot(29, 46, 90, true, 'red');
-    else if (r.indexOf('juchum') >= 0) s = sfoot(20, 33, 0, false, 'ink') + sfoot(44, 33, 0, true, 'ink');
-    else s = sfoot(27, 33, 0, false, 'ink') + sfoot(37, 33, 0, true, 'ink');
-    return '<svg viewBox="0 0 64 64" width="58" height="58" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#EEF1F6"/>' + s + '</svg>';
+    var r = String(roman).toLowerCase(), s, face = true;
+    if (r.indexOf('moa') >= 0) { s = sfoot(27, 33, 0, false, 'ink') + sfoot(37, 33, 0, true, 'ink'); face = false; }
+    else if (r.indexOf('naranhi') >= 0) { s = sfoot(22, 33, 0, false, 'ink') + sfoot(42, 33, 0, true, 'ink'); face = false; }
+    else if (r.indexOf('ap seogi') >= 0) s = sfoot(25, 46, 0, false, 'ink') + sfoot(39, 22, 0, true, 'ink');
+    else if (r.indexOf('ap kubi') >= 0) s = sfoot(23, 47, 28, false, 'out') + sfoot(42, 18, 0, true, 'red');
+    else if (r.indexOf('dwit') >= 0) s = sfoot(38, 18, 0, false, 'out') + sfoot(28, 46, 90, true, 'red');
+    else if (r.indexOf('beom') >= 0) s = sfoot(30, 46, 0, false, 'red') + sfoot(34, 25, 0, true, 'out');
+    else if (r.indexOf('koa') >= 0) s = sfoot(29, 44, 0, false, 'red') + sfoot(36, 31, 64, true, 'out');
+    else if (r.indexOf('hakdari') >= 0 || r.indexOf('haktari') >= 0) s = sfoot(31, 47, 0, false, 'red') + sfoot(35, 29, 90, true, 'out');
+    else if (r.indexOf('juchum') >= 0) { s = sfoot(20, 33, 0, false, 'ink') + sfoot(44, 33, 0, true, 'ink'); face = false; }
+    else { s = sfoot(27, 33, 0, false, 'ink') + sfoot(37, 33, 0, true, 'ink'); face = false; }
+    return '<svg viewBox="0 0 64 64" width="58" height="58" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#EEF1F6"/>' + (face ? FACE : '') + s + '</svg>';
   }
 
 
@@ -676,8 +716,15 @@
       b.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + v + '?rel=0&modestbranding=1&autoplay=1" title="Poomsae-video" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
       b.classList.add('playing'); b.removeAttribute('data-act');
     }
-    else if (act === 'tellerStart') tellerStart();
-    else if (act === 'tellerStop') tellerStop();
+    else if (act === 'tileEdit') { tileEdit = !tileEdit; if (!tileEdit) toast('Volgorde opgeslagen ✓'); viewHome(); }
+    else if (act === 'tileMove') {
+      var mid = b.getAttribute('data-id'), dir = +b.getAttribute('data-dir');
+      var ids = tileOrderIds(), i = ids.indexOf(mid), j = i + dir;
+      if (i >= 0 && j >= 0 && j < ids.length) { var tmp = ids[i]; ids[i] = ids[j]; ids[j] = tmp; prog.tileOrder = ids; save(prog); viewHome(); }
+    }
+    else if (act === 'tellerToggle') tellerToggle();
+    else if (act === 'tellerReset') tellerReset();
+    else if (act === 'tellerSpeed') tellerSetSpeed(parseFloat(b.getAttribute('data-sp')));
     else if (act === 'flashflip') { flashState.flipped = !flashState.flipped; b.classList.toggle('flip', flashState.flipped); }
     else if (act === 'flashnext') flashNext(b.getAttribute('data-k') === '1');
     else if (act === 'flashretry') viewFlash();
