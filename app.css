@@ -248,6 +248,116 @@ button{font-family:inherit}
   color:var(--gray);font-size:12.5px;line-height:1.55}
 .notecard a{color:var(--red);font-weight:600;text-decoration:none;border-bottom:1px solid var(--red)}
 
+/* ---------- Niveau-keuze (hero) ---------- */
+.hero .lvlsel{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:2px}
+.hero .lvlsel .ll{font-family:var(--font-cond);text-transform:uppercase;letter-spacing:.1em;font-size:11.5px;color:#98A2B3}
+.lvltoggle{display:inline-flex;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:4px}
+.lvltoggle button{border:0;background:none;color:#D0D5DD;font-family:var(--font-cond);font-weight:700;text-transform:uppercase;
+  letter-spacing:.03em;font-size:12.5px;padding:6px 14px;border-radius:999px;cursor:pointer;transition:background .15s}
+.lvltoggle button.on{background:var(--red);color:#fff}
+
+/* ---------- Term van de dag + quote ---------- */
+.trow.tod{margin-bottom:13px;border-left:4px solid var(--red)}
+.quotecard{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--blue);
+  border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);padding:15px 17px;margin-bottom:22px;
+  font-family:var(--font-cond);text-transform:none;font-weight:600;font-size:17px;line-height:1.32;color:var(--ink)}
+
+/* ---------- Dagdoel ---------- */
+.daily{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);
+  padding:16px 16px 8px;margin-bottom:26px}
+.daily-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.daystreak{font-family:var(--font-cond);font-weight:700;font-size:13px;color:var(--gray);background:#F2F4F7;border-radius:999px;padding:4px 11px}
+.daystreak.on{color:var(--red);background:#FDECEF}
+.goals{display:grid;gap:9px;padding-bottom:4px}
+.goal-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;
+  background:#F9FAFB;border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px 13px;transition:transform .12s}
+.goal-item:active{transform:scale(.99)}
+.goal-item .gck{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;color:#fff}
+.goal-item.done .gck{background:#12B76A;border-color:#12B76A}
+.goal-item .gck svg{width:15px;height:15px}
+.goal-item .gl{flex:1;font-weight:600;font-size:14.5px}
+.goal-item .gl small{display:block;color:var(--gray);font-weight:600;font-size:11.5px;margin-top:1px;text-transform:none}
+.goal-item.done .gl small{text-decoration:none}
+.askbadge{font-family:var(--font-cond);font-size:10px;text-transform:uppercase;letter-spacing:.05em;
+  background:#FDECEF;color:var(--red);padding:2px 7px;border-radius:999px;vertical-align:middle;margin-left:6px;white-space:nowrap}
+.goal-item.done .gl{color:var(--gray);text-decoration:line-through}
+.goal-item .dn{font-family:var(--font-cond);font-weight:700;color:var(--gray);font-size:13px}
+.goal-item .gchev{color:var(--gray);display:grid;place-items:center}
+.goal-item .gchev svg{width:18px;height:18px}
+.daily-done{color:#12B76A;font-weight:600;font-size:13px;padding:6px 2px 10px;text-align:center}
+
+/* ---------- Poomsae-video ---------- */
+.video{position:relative;margin-top:8px;border-radius:var(--radius-sm);overflow:hidden;background:#000;
+  aspect-ratio:16/9;cursor:pointer;border:1px solid var(--line)}
+.video img{width:100%;height:100%;object-fit:cover;opacity:.88}
+.video .playbtn{position:absolute;inset:0;margin:auto;width:58px;height:58px;border-radius:50%;
+  background:var(--red);box-shadow:0 8px 24px rgba(225,29,63,.5)}
+.video .playbtn::after{content:"";position:absolute;left:53%;top:50%;transform:translate(-50%,-50%);
+  border-style:solid;border-width:11px 0 11px 18px;border-color:transparent transparent transparent #fff}
+.video .vlabel{position:absolute;left:10px;bottom:9px;color:#fff;font-size:12px;font-weight:600;
+  background:rgba(0,0,0,.55);padding:4px 9px;border-radius:999px}
+.video.playing{cursor:default}
+.video iframe{width:100%;height:100%;border:0;display:block}
+
+/* ---------- Examenonderdelen ---------- */
+.examcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);
+  padding:17px;margin-bottom:14px}
+.examhd{display:flex;align-items:center;gap:13px;margin-bottom:10px}
+.examico{width:46px;height:46px;border-radius:12px;background:#FDECEF;color:var(--red);display:grid;place-items:center;flex:none}
+.examico svg{width:24px;height:24px}
+.examt{flex:1;min-width:0}
+.examt b{font-family:var(--font-cond);text-transform:uppercase;font-size:18px;display:block;line-height:1.1}
+.examt .kr{color:var(--gray);font-size:13px}
+.examhd .speak{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:#F9FAFB;
+  display:grid;place-items:center;flex:none;cursor:pointer;color:var(--ink)}
+.examhd .speak svg{width:19px;height:19px}
+.examb{color:var(--ink);font-size:14px;line-height:1.6;margin:0 0 6px}
+
+/* ---------- Teller (1–10) ---------- */
+.counter{background:var(--midnight);color:#fff;border-radius:var(--radius);padding:26px 22px 24px;text-align:center;margin-bottom:16px}
+.cnum{font-family:var(--font-poster);font-size:clamp(78px,26vw,104px);line-height:1;color:#fff;min-height:92px}
+.cko{font-family:var(--font-cond);text-transform:uppercase;letter-spacing:.05em;color:#FDA4AF;font-weight:700;
+  font-size:19px;margin-top:6px;min-height:24px}
+.cdots{display:flex;justify-content:center;gap:7px;margin-top:16px;flex-wrap:wrap}
+.cdots span{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.18);transition:transform .15s, background .15s}
+.cdots span.on{background:var(--red);transform:scale(1.3)}
+.cctrl{display:flex;gap:10px;margin-bottom:12px}
+.cctrl .btn{flex:1}
+.cloop{display:flex;align-items:center;gap:9px;color:var(--gray);font-size:14px;font-weight:600;padding:4px 2px 0}
+.cloop input{width:18px;height:18px;accent-color:var(--red)}
+
+/* ---------- Flashcards ---------- */
+.flashbar{height:8px;border-radius:999px;background:#EAECF0;overflow:hidden;margin-bottom:16px}
+.flashbar i{display:block;height:100%;background:var(--red);transition:width .3s}
+.flashcard{perspective:1200px;cursor:pointer;margin-bottom:16px}
+.fc-in{position:relative;transform-style:preserve-3d;transition:transform .5s;min-height:210px}
+.flashcard.flip .fc-in{transform:rotateY(180deg)}
+.fc-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.fc-front{background:var(--surface)}
+.fc-front .ko{font-size:44px;font-weight:700;line-height:1.15}
+.fc-front .speak{position:absolute;top:14px;right:14px;width:44px;height:44px;border-radius:12px;border:1px solid var(--line);
+  background:#F9FAFB;display:grid;place-items:center;cursor:pointer;color:var(--ink)}
+.fc-front .speak svg{width:20px;height:20px}
+.fc-front .hint{position:absolute;bottom:14px;left:0;right:0;color:var(--gray);font-size:12.5px}
+.fc-back{background:var(--midnight);color:#fff;transform:rotateY(180deg)}
+.fc-back .ro{font-family:var(--font-cond);text-transform:uppercase;font-size:26px;font-weight:700;color:#fff}
+.fc-back .nl{color:#D0D5DD;font-size:18px;margin-top:6px}
+.flashctrl{display:flex;gap:10px}
+.flashctrl .btn{flex:1}
+
+/* ---------- Stand-illustraties ---------- */
+.stancelegend{display:flex;align-items:center;flex-wrap:wrap;gap:5px;color:var(--gray);font-size:12.5px;margin-bottom:11px}
+.stancelegend svg{height:22px;width:auto;flex:none}
+.stancelegend .dotr{width:11px;height:11px;border-radius:50%;background:var(--red);display:inline-block}
+.stance .sdhd{display:flex;align-items:center;gap:9px}
+.stance .sdhd b{display:inline-block}
+.speak.sm{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:#F9FAFB;
+  display:grid;place-items:center;cursor:pointer;color:var(--ink);flex:none;padding:0}
+.speak.sm svg{width:17px;height:17px}
+.qhint{font-size:12.5px;color:var(--gray)}
+
 @media(min-width:560px){
   .tiles{grid-template-columns:repeat(3,1fr)}
 }

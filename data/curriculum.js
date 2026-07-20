@@ -13,10 +13,34 @@ window.CURRICULUM = {
     bijgewerkt: "2026"
   },
 
+  /* -------------------- NIVEAUS (poom) -------------------- */
+  levels: {
+    "1": { naam: "1e poom", vorm: "Koryo", vormId: "koryo",
+      omschrijving: "Je kent alle Taegeuk 1–8 uit je hoofd en leert je eerste zwarteband-vorm: Koryo." },
+    "2": { naam: "2e poom", vorm: "Keumgang", vormId: "keumgang",
+      omschrijving: "Bovenop Taegeuk 1–8 en Koryo komt de tweede zwarteband-vorm: Keumgang." }
+  },
+
+  /* -------------------- MINDSET-QUOTES -------------------- */
+  quotes: [
+    "Vallen mag. Opstaan is taekwondo.",
+    "Een zwarte band is een witte band die nooit stopte.",
+    "Discipline is doen wat moet, ook als niemand kijkt.",
+    "Langzaam is soepel, en soepel wordt snel.",
+    "Respect begint bij de buiging.",
+    "Kracht zonder controle is geen taekwondo.",
+    "Elke meester was ooit een beginner.",
+    "Adem in, blijf rustig, en richt zuiver.",
+    "Je grootste tegenstander ben jij van gisteren.",
+    "Herhaling maakt de meester.",
+    "Moed is doorgaan als het moeilijk wordt.",
+    "Een rustige geest draagt een sterke stand."
+  ],
+
   /* -------------------- POOMSAE: Taegeuk 1–8 -------------------- */
   poomsae: [
     {
-      id: "il", nr: 1, korean: "Taegeuk Il Jang", hangul: "태극 1장",
+      id: "il", nr: 1, sino: "Il", video: "esocvXAtf-E", level: 0, korean: "Taegeuk Il Jang", hangul: "태극 1장",
       trigram: "☰", trigramNaam: "Keon", trigramHangul: "건",
       element: "Hemel", kup: "8e kup", band: "Geel", bewegingen: 18,
       betekenis: "Keon staat voor de hemel en het licht — het begin van alles. De eerste vorm legt de basis: rechte standen en de meest voorkomende technieken.",
@@ -30,7 +54,7 @@ window.CURRICULUM = {
       standen: ["Ap seogi", "Ap kubi"]
     },
     {
-      id: "i", nr: 2, korean: "Taegeuk I Jang", hangul: "태극 2장",
+      id: "i", nr: 2, sino: "I", video: "YvjZaW6Qm7Y", level: 0, korean: "Taegeuk I Jang", hangul: "태극 2장",
       trigram: "☱", trigramNaam: "Tae", trigramHangul: "태",
       element: "Meer", kup: "7e kup", band: "Geel-groen", bewegingen: 18,
       betekenis: "Tae is het meer: vreugde en innerlijke stevigheid. De vorm voegt hoge blokken toe en meer trappen.",
@@ -42,7 +66,7 @@ window.CURRICULUM = {
       standen: ["Ap seogi", "Ap kubi"]
     },
     {
-      id: "sam", nr: 3, korean: "Taegeuk Sam Jang", hangul: "태극 3장",
+      id: "sam", nr: 3, sino: "Sam", video: "r7gI13Nl380", level: 0, korean: "Taegeuk Sam Jang", hangul: "태극 3장",
       trigram: "☲", trigramNaam: "Ri", trigramHangul: "리",
       element: "Vuur", kup: "6e kup", band: "Groen", bewegingen: 20,
       betekenis: "Ri is het vuur: warmte en enthousiasme. Hier komt de achterstand en de meshand erbij.",
@@ -54,7 +78,7 @@ window.CURRICULUM = {
       standen: ["Ap seogi", "Ap kubi", "Dwit kubi"]
     },
     {
-      id: "sa", nr: 4, korean: "Taegeuk Sa Jang", hangul: "태극 4장",
+      id: "sa", nr: 4, sino: "Sa", video: "FWmRMg9ZYuw", level: 0, korean: "Taegeuk Sa Jang", hangul: "태극 4장",
       trigram: "☳", trigramNaam: "Jin", trigramHangul: "진",
       element: "Donder", kup: "5e kup", band: "Groen-blauw", bewegingen: 20,
       betekenis: "Jin is de donder: kracht en moed, maar met beheersing. Deze vorm heeft de meeste nieuwe technieken.",
@@ -69,7 +93,7 @@ window.CURRICULUM = {
       standen: ["Ap kubi", "Dwit kubi"]
     },
     {
-      id: "o", nr: 5, korean: "Taegeuk O Jang", hangul: "태극 5장",
+      id: "o", nr: 5, sino: "O", video: "RyB9u3F70No", level: 0, korean: "Taegeuk O Jang", hangul: "태극 5장",
       trigram: "☴", trigramNaam: "Seon", trigramHangul: "손",
       element: "Wind", kup: "4e kup", band: "Blauw", bewegingen: 20,
       betekenis: "Seon is de wind: zacht maar soms machtig. Hamervuist en elleboog geven de vorm pit.",
@@ -82,7 +106,7 @@ window.CURRICULUM = {
       standen: ["Ap kubi", "Dwit kubi", "Juchum seogi"]
     },
     {
-      id: "yuk", nr: 6, korean: "Taegeuk Yuk Jang", hangul: "태극 6장",
+      id: "yuk", nr: 6, sino: "Yuk", video: "WZcE8Yhsasc", level: 0, korean: "Taegeuk Yuk Jang", hangul: "태극 6장",
       trigram: "☵", trigramNaam: "Gam", trigramHangul: "감",
       element: "Water", kup: "3e kup", band: "Blauw-rood", bewegingen: 19,
       betekenis: "Gam is het water: het stroomt om obstakels heen. Hier verschijnt de draaitrap.",
@@ -95,7 +119,7 @@ window.CURRICULUM = {
       standen: ["Ap seogi", "Ap kubi", "Juchum seogi"]
     },
     {
-      id: "chil", nr: 7, korean: "Taegeuk Chil Jang", hangul: "태극 7장",
+      id: "chil", nr: 7, sino: "Chil", video: "9_4HQkM4f3o", level: 0, korean: "Taegeuk Chil Jang", hangul: "태극 7장",
       trigram: "☶", trigramNaam: "Gan", trigramHangul: "간",
       element: "Berg", kup: "2e kup", band: "Rood", bewegingen: 25,
       betekenis: "Gan is de berg: stevig en standvastig. Veel korte, krachtige technieken en de kniestoot.",
@@ -109,7 +133,7 @@ window.CURRICULUM = {
       standen: ["Ap seogi", "Beom seogi", "Juchum seogi"]
     },
     {
-      id: "pal", nr: 8, korean: "Taegeuk Pal Jang", hangul: "태극 8장",
+      id: "pal", nr: 8, sino: "Pal", video: "1pYia9d5tUY", level: 0, korean: "Taegeuk Pal Jang", hangul: "태극 8장",
       trigram: "☷", trigramNaam: "Gon", trigramHangul: "곤",
       element: "Aarde", kup: "1e kup", band: "Rood-zwart", bewegingen: 27,
       betekenis: "Gon is de aarde: de basis waarop alles rust. De laatste kleurbandvorm — daarna volgt de eerste poom.",
@@ -120,6 +144,36 @@ window.CURRICULUM = {
         { ko: "팔굽 돌려치기", roman: "Palkup dollyo chigi", nl: "Draaiende elleboogslag" }
       ],
       standen: ["Ap kubi", "Dwit kubi", "Juchum seogi"]
+    },
+    {
+      id: "koryo", nr: 9, sino: "", video: "", level: 1, korean: "Koryo", hangul: "고려",
+      trigram: "士", trigramNaam: "Seonbi", trigramHangul: "선비",
+      element: "De geleerde", kup: "1e poom / 1e dan", band: "Zwart (poom)", bewegingen: 30,
+      betekenis: "Koryo is vernoemd naar de Goryeo-dynastie — waar het woord 'Korea' vandaan komt. Het teken 士 staat voor de seonbi: een geleerde, sterke geest die niet buigt voor onrecht. Dit is je eerste zwarteband-vorm.",
+      focus: ["Zijtrap (yeop chagi) en blok scherp koppelen", "Bewuste, volwassen kracht — geen haast", "Sonnal-technieken met een duidelijke stop"],
+      nieuw: [
+        { ko: "칼재비", roman: "Kaljaebi", nl: "Duim-keelgreep / -stoot" },
+        { ko: "한손날 바깥막기", roman: "Han sonnal bakkat makgi", nl: "Enkele meshand buitenblok" },
+        { ko: "무릎 꺾기", roman: "Mureup kkeokki", nl: "Kniebreuk-techniek" },
+        { ko: "바탕손 눌러막기", roman: "Batangson nullo makgi", nl: "Handpalm drukblok" },
+        { ko: "옆차기", roman: "Yeop chagi", nl: "Zijtrap (herhaald, krachtig)" }
+      ],
+      standen: ["Ap kubi", "Dwit kubi", "Juchum seogi"]
+    },
+    {
+      id: "keumgang", nr: 10, sino: "", video: "", level: 2, korean: "Keumgang", hangul: "금강",
+      trigram: "山", trigramNaam: "Berg / diamant", trigramHangul: "산",
+      element: "Onbreekbare kracht", kup: "2e poom / 2e dan", band: "Zwart (poom)", bewegingen: 27,
+      betekenis: "Keumgang betekent 'diamant' — te hard om te breken — en verwijst naar de Keumgang-berg en de Keumgang-krijger die het kwaad verjaagt. De vorm is langzaam, machtig en vol balans.",
+      focus: ["Kraanstand (hakdari seogi): stil en in balans op één been", "Langzame, zware bewegingen met ademhaling", "Berg- en diamantblok breed en stevig"],
+      nieuw: [
+        { ko: "금강막기", roman: "Keumgang makgi", nl: "Diamantblok (hoog + laag samen)" },
+        { ko: "산틀막기", roman: "Santeul makgi", nl: "Bergblok" },
+        { ko: "학다리서기", roman: "Hakdari seogi", nl: "Kraanstand (op één been)" },
+        { ko: "큰돌쩌귀", roman: "Keun doljjeogwi", nl: "Grote scharnier-beweging" },
+        { ko: "바탕손 턱치기", roman: "Batangson teok chigi", nl: "Handpalm-slag naar de kin" }
+      ],
+      standen: ["Ap kubi", "Juchum seogi", "Hakdari seogi"]
     }
   ],
 
@@ -223,6 +277,26 @@ window.CURRICULUM = {
       "Taekwondo rust op vijf waarden: <b>hoffelijkheid</b> (ye-ui), <b>integriteit</b>, <b>doorzettingsvermogen</b>, <b>zelfbeheersing</b> en een <b>onbuigzame geest</b>. Deze horen niet alleen in de zaal, maar ook op school en thuis." }
   ],
 
+  /* -------------------- EXAMENONDERDELEN -------------------- */
+  onderdelen: [
+    { ko: "일보 대련", roman: "Ilbo Taeryon", nl: "Eén-stap sparren",
+      icon: "step",
+      uitleg: "Afgesproken oefening met een partner. Je partner doet één stap naar voren met een stoot; jij blokt en counters met een nette, gecontroleerde techniek. Het traint afstand, timing en zuivere technieken zonder echt gevecht.",
+      tips: ["Begin op de juiste afstand en groet je partner", "Blok eerst, dan pas de counter", "Stop de techniek met controle — raak niet vol"] },
+    { ko: "호신술", roman: "Hosinsul", nl: "Zelfverdediging",
+      icon: "shield",
+      uitleg: "Praktische verdediging tegen grepen en omklemmingen: losmaken uit een polsgreep, een omklemming of een greep bij de kleding, en jezelf veilig bevrijden. Techniek en rust gaan boven kracht.",
+      tips: ["Blijf rustig en houd balans", "Gebruik het zwakke punt van een greep (de duim)", "Maak jezelf los en creëer afstand"] },
+    { ko: "겨루기", roman: "Gyeorugi", nl: "Sparren (vrij gevecht)",
+      icon: "spar",
+      uitleg: "Vrij sparren met een partner, mét bescherming (hogu, helm). Je scoort met gecontroleerde trappen en stoten op romp en hoofd. Respect en controle staan altijd voorop.",
+      tips: ["Draag altijd je beschermers", "Blijf bewegen op je voorvoeten", "Controle boven hard raken"] },
+    { ko: "격파", roman: "Gyeokpa", nl: "Breektest",
+      icon: "break",
+      uitleg: "Het breken van een plank (of testplank) met een trap of slag om kracht, precisie en focus te tonen. Kinderen gebruiken vaak herbruikbare kunststof-planken. Alleen onder begeleiding van je trainer.",
+      tips: ["Richt je kracht dóór de plank heen", "Adem uit en kiai op het moment van raken", "Alleen doen met toestemming van je trainer"] }
+  ],
+
   /* -------------------- QUIZ -------------------- */
   quiz: [
     { v: "Wat betekent 'do' in taekwondo?", o: ["De weg", "De vuist", "De voet", "De meester"], a: 0 },
@@ -239,6 +313,27 @@ window.CURRICULUM = {
     { v: "Wat betekent 'charyeot'?", o: ["Groeten", "Stop", "Houding aannemen", "Omdraaien"], a: 2 },
     { v: "Welke trap gaat recht naar beneden?", o: ["Naeryo chagi", "Ap chagi", "Yeop chagi", "Dwit chagi"], a: 0 },
     { v: "'Sonnal' is welk deel van het lichaam?", o: ["Vuist", "Knie", "Meshand", "Voet"], a: 2 },
-    { v: "Welke vorm is de laatste kleurbandvorm?", o: ["Taegeuk 6", "Taegeuk 7", "Taegeuk 8", "Taegeuk 5"], a: 2 }
+    { v: "Welke vorm is de laatste kleurbandvorm?", o: ["Taegeuk 6", "Taegeuk 7", "Taegeuk 8", "Taegeuk 5"], a: 2 },
+    { v: "Welke vorm is de eerste zwarteband-vorm (1e poom)?", o: ["Keumgang", "Koryo", "Taegeuk 8", "Taebaek"], a: 1 },
+    { v: "Wat betekent 'Koryo'?", o: ["Diamant", "De geleerde (Goryeo)", "De berg", "Het water"], a: 1 },
+    { v: "Welke vorm hoort bij de 2e poom?", o: ["Koryo", "Keumgang", "Taegeuk 7", "Pyongwon"], a: 1 },
+    { v: "Wat betekent 'Keumgang'?", o: ["Diamant / onbreekbaar", "Hemel", "Wind", "Meer"], a: 0 },
+    { v: "Welke stand balanceert op één been (in Keumgang)?", o: ["Juchum seogi", "Hakdari seogi", "Ap kubi", "Moa seogi"], a: 1 },
+    { v: "Wat is 'ilbo taeryon'?", o: ["Zelfverdediging", "Eén-stap sparren", "Breektest", "Vrij sparren"], a: 1 },
+    { v: "Wat betekent 'hosinsul'?", o: ["Sparren", "Zelfverdediging", "Breken", "Groeten"], a: 1 },
+    { v: "Hoe heet vrij sparren?", o: ["Gyeorugi", "Gyeokpa", "Poomsae", "Hosinsul"], a: 0 },
+    { v: "Wat is 'gyeokpa'?", o: ["Breektest", "Vormen", "Sparren", "Tellen"], a: 0 },
+    { v: "Hoe tel je '5' in het Koreaans?", o: ["Net", "Daseot", "Yeoseot", "Set"], a: 1 },
+    { v: "Hoe tel je '10' in het Koreaans?", o: ["Ahop", "Yeodeol", "Yeol", "Ilgop"], a: 2 },
+    { v: "Wat betekent 'kihap'?", o: ["Groeten", "Strijdkreet", "Stop", "Klaarstaan"], a: 1 },
+    { v: "Welke stand is de verdedigingsstand (gewicht achter)?", o: ["Ap kubi", "Dwit kubi", "Juchum seogi", "Moa seogi"], a: 1 },
+    { v: "Wat is 'ap chagi'?", o: ["Zijtrap", "Draaitrap", "Voorwaartse trap", "Achtertrap"], a: 2 },
+    { v: "Welk trigram hoort bij Taegeuk 8?", o: ["Keon (hemel)", "Gon (aarde)", "Gam (water)", "Ri (vuur)"], a: 1 },
+    { v: "Wat betekent 'dojang'?", o: ["Trainingspak", "Oefenzaal", "Band", "Leraar"], a: 1 },
+    { v: "Wat betekent 'sabeomnim'?", o: ["Leerling", "Leraar / master", "Band", "Groet"], a: 1 },
+    { v: "Hoeveel bewegingen heeft Taegeuk 8?", o: ["18", "20", "25", "27"], a: 3 },
+    { v: "Welk element hoort bij Taegeuk 6 (Gam)?", o: ["Vuur", "Water", "Wind", "Donder"], a: 1 },
+    { v: "Wat betekent 'poom'?", o: ["Volwassen zwarte band", "Junior zwarte band", "Gele band", "Meester"], a: 1 },
+    { v: "Welke trap is 'yeop chagi'?", o: ["Voortrap", "Zijtrap", "Draaitrap", "Bijltrap"], a: 1 }
   ]
 };
