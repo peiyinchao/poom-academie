@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mijn Poom Academie — Visuele Identiteit</title>
+<meta name="theme-color" content="#101828">
+<link rel="icon" href="icon-taeguk-dark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fonts/poster.css">
+<style>
+  :root{
+    --midnight:#101828;
+    --off:#F7F8FA;
+    --red:#E11D3F;
+    --blue:#2440B8;
+    --gray:#667085;
+    --white:#FFFFFF;
+    --ink:#101828;
+    --line:#E4E7EC;
+    --line-2:#D5DAE2;
+    --muted:#667085;
+    --surface:#FFFFFF;
+    --page:#F7F8FA;
+    --radius:18px;
+    --radius-sm:12px;
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 12px 32px -12px rgba(16,24,40,.18);
+    --maxw:1080px;
+    --font-display:'Big Shoulders Display', 'Sora', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    --font-text:'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    --font-poster:'Saira Stencil One', system-ui, sans-serif;
+    --font-cond:'Big Shoulders Display', 'Sora', system-ui, sans-serif;
+    --step:1;
+  }
+  *{box-sizing:border-box}
+  html{font-size:calc(100% * var(--step))}
+  body{
+    margin:0;background:var(--page);color:var(--ink);
+    font-family:var(--font-text);font-size:17px;line-height:1.7;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  h1,h2,h3,h4{font-family:var(--font-display);line-height:1.15;margin:0;letter-spacing:-.01em}
+  p{margin:0 0 1em}
+  a{color:inherit}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .eyebrow{font-family:var(--font-text);font-weight:600;font-size:12px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--gray)}
+  .accent{color:var(--red)}
+
+  /* ---------- Top bar ---------- */
+  .topbar{position:sticky;top:0;z-index:20;background:rgba(16,24,40,.92);
+    backdrop-filter:saturate(1.2) blur(8px);color:var(--off);border-bottom:1px solid rgba(255,255,255,.08)}
+  .topbar .wrap{display:flex;align-items:center;gap:16px;height:60px}
+  .brandmini{display:flex;align-items:center;gap:10px;font-family:var(--font-display);
+    font-weight:700;letter-spacing:-.01em}
+  .brandmini img{width:30px;height:30px;display:block}
+  .brandmini .accent{color:var(--red)}
+  .topnav{margin-left:auto;display:flex;gap:22px;font-size:14px;font-weight:500;color:#C7CEDA}
+  .topnav a{text-decoration:none;opacity:.9}
+  .topnav a:hover{opacity:1;color:#fff}
+  .a11y{display:flex;align-items:center;gap:8px;margin-left:18px}
+  .a11y button{font-family:var(--font-text);cursor:pointer;border:1px solid rgba(255,255,255,.18);
+    background:transparent;color:#C7CEDA;border-radius:8px;padding:5px 9px;font-size:12.5px;font-weight:600;line-height:1}
+  .a11y button:hover{color:#fff;border-color:rgba(255,255,255,.4)}
+  .a11y button[aria-pressed=true]{background:var(--red);border-color:var(--red);color:#fff}
+  @media(max-width:720px){.topnav{display:none}}
+
+  /* ---------- Hero / cover ---------- */
+  .hero{background:
+      radial-gradient(120% 90% at 50% -10%, #1a2540 0%, rgba(26,37,64,0) 55%),
+      radial-gradient(80% 70% at 85% 120%, rgba(225,29,63,.16) 0%, rgba(225,29,63,0) 60%),
+      var(--midnight);
+    color:var(--off);text-align:center;padding:72px 0 84px;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;inset:auto 0 0 0;height:1px;
+    background:linear-gradient(90deg,transparent, rgba(255,255,255,.18), transparent)}
+  .hero .emblem{width:132px;height:132px;margin:0 auto 22px;display:block;
+    filter:drop-shadow(0 18px 40px rgba(0,0,0,.5))}
+  .hero .kicker{letter-spacing:.34em;font-size:12.5px;color:#98A2B3;text-transform:uppercase;
+    font-weight:600;margin-bottom:16px}
+  .hero h1{font-family:var(--font-poster);font-weight:400;font-size:clamp(46px,9vw,104px);letter-spacing:.01em;line-height:.9;margin:0 0 6px;text-transform:uppercase;transform:skewX(-8deg)}
+  .hero h1 .dot{color:var(--red)}
+  .hero .myline{font-family:var(--font-cond);font-weight:600;font-size:clamp(15px,2.4vw,22px);letter-spacing:.24em;
+    color:#98A2B3;text-transform:uppercase;margin-bottom:8px}
+  .hero .rule{width:56px;height:4px;background:var(--red);border-radius:3px;margin:22px auto}
+  .hero .tag{max-width:640px;margin:0 auto;color:#D0D5DD;font-size:clamp(16px,2vw,20px);line-height:1.6}
+  .hero .belts{display:flex;gap:6px;justify-content:center;margin-top:26px}
+  .hero .belts i{width:26px;height:6px;border-radius:3px;background:#2C3B60}
+  .hero .belts i:last-child{background:var(--red)}
+  .poster{font-family:var(--font-poster);font-weight:400;text-transform:uppercase;letter-spacing:.01em}
+  .sk{display:inline-block;transform:skewX(-8deg)}
+  .cond{font-family:var(--font-cond);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+  .trigrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .trigrow .tg{display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:12px;padding:9px 13px;background:#fff}
+  .trigrow .tg .g{font-size:22px;line-height:1;color:var(--ink)}
+  .trigrow .tg b{font-family:var(--font-cond);font-weight:700;text-transform:uppercase;letter-spacing:.03em;font-size:14px;display:block}
+  .trigrow .tg small{color:var(--gray);font-size:12px;display:block}
+
+  /* ---------- Section scaffold ---------- */
+  section.block{padding:64px 0}
+  .block > .wrap > header{max-width:680px;margin-bottom:34px}
+  .block h2{font-family:var(--font-cond);font-weight:700;text-transform:uppercase;letter-spacing:.02em;font-size:clamp(26px,3.6vw,38px);margin-bottom:10px}
+  .block header p{color:var(--gray);font-size:17px;margin:0}
+  .secnum{font-family:var(--font-cond);font-weight:700;color:var(--red);font-size:15px;
+    letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;display:block}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow)}
+  .alt{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+
+  /* ---------- Mascot ---------- */
+  .lions{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+  .lion{padding:26px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .lion .stage{width:100%;aspect-ratio:1/1;max-width:180px;border-radius:14px;display:grid;place-items:center;margin-bottom:14px}
+  .lion .stage img{width:74%;height:74%}
+  .stage.light{background:var(--off);border:1px solid var(--line)}
+  .stage.dark{background:var(--midnight)}
+  .stage.plain{background:repeating-conic-gradient(#F0F2F5 0% 25%, #fff 0% 50%) 50% / 22px 22px}
+  .lion h4{font-size:16px;font-weight:700}
+  .lion small{color:var(--gray);font-size:13px;line-height:1.5}
+  .lion .role{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--red)}
+  .charshow{display:grid;grid-template-columns:minmax(200px,290px) 1fr;gap:30px;align-items:center;margin-top:30px;border-top:1px solid var(--line);padding-top:32px}
+  .charstage{background:var(--midnight);border-radius:20px;padding:24px 18px;display:grid;place-items:center}
+  .charstage img{width:100%;max-width:250px;height:auto;display:block}
+  .chartext h3{font-size:21px;font-weight:700;margin:8px 0 10px;letter-spacing:-.01em}
+  .chartext p{color:var(--ink);font-size:15px;line-height:1.65;margin:0}
+  .charlist{list-style:none;margin:16px 0 12px;padding:0;display:flex;flex-direction:column;gap:8px}
+  .charlist li{font-size:14px;line-height:1.5;color:var(--ink);padding-left:22px;position:relative}
+  .charlist li::before{content:"";position:absolute;left:0;top:7px;width:9px;height:9px;border-radius:50%;background:var(--red)}
+  .chartext small{color:var(--gray);font-size:13px}
+  @media(max-width:640px){.charshow{grid-template-columns:1fr;text-align:center}.charlist li{text-align:left}}
+  .iconrow{display:flex;align-items:center;gap:16px;justify-content:center;margin-top:6px}
+  .iconrow img{display:block}
+
+  /* ---------- Colour ---------- */
+  .swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+  .sw{border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);background:#fff}
+  .sw .chip{height:104px;display:flex;align-items:flex-end;justify-content:space-between;padding:12px 14px}
+  .sw .meta{padding:12px 14px 14px}
+  .sw .meta b{font-family:var(--font-display);font-weight:700;font-size:15px}
+  .sw .meta .hex{font-family:var(--font-text);font-weight:600;font-size:13px;color:var(--gray);
+    letter-spacing:.02em;margin-top:2px}
+  .sw .meta .role{font-size:12.5px;color:var(--gray);margin-top:8px;line-height:1.5}
+  .sw .pill{font-size:11px;font-weight:700;background:rgba(255,255,255,.85);color:#101828;
+    padding:3px 8px;border-radius:999px;letter-spacing:.02em}
+  .tintrow{display:flex;margin-top:8px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  .tintrow span{flex:1;height:34px}
+
+  .contrast{margin-top:26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .ctile{border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+  .ctile .demo{border-radius:10px;padding:14px 16px;font-weight:600;font-size:15px}
+  .ctile .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .ctile .ratio{font-family:var(--font-display);font-weight:700;font-size:20px}
+  .badge{font-size:11px;font-weight:700;letter-spacing:.04em;padding:3px 8px;border-radius:999px}
+  .badge.pass{background:#E7F6EC;color:#137a3a}
+  .badge.aaa{background:#E6F0FF;color:#1b56c4}
+  .badge.fail{background:#FDECEC;color:#c02626}
+  .ctile small{color:var(--gray);font-size:12px}
+
+  /* ---------- Typography ---------- */
+  .type-wrap{display:grid;grid-template-columns:1.3fr .9fr;gap:22px}
+  @media(max-width:820px){.type-wrap{grid-template-columns:1fr}}
+  .specimen{padding:30px 32px}
+  .specimen .line{padding:16px 0;border-bottom:1px solid var(--line)}
+  .specimen .line:last-child{border-bottom:0}
+  .specimen .lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gray);
+    font-weight:600;margin-bottom:8px;display:flex;gap:10px;flex-wrap:wrap}
+  .specimen .lbl b{color:var(--ink);font-weight:600}
+  .t-cover{font-family:var(--font-poster);font-weight:400;font-size:54px;letter-spacing:.01em;line-height:1;text-transform:uppercase}
+  .t-chap{font-family:var(--font-cond);font-weight:700;font-size:34px;letter-spacing:.01em;text-transform:uppercase}
+  .t-sec{font-family:var(--font-cond);font-weight:600;font-size:24px;letter-spacing:.02em;text-transform:uppercase}
+  .t-kor{font-family:var(--font-text);font-weight:600;font-size:19px;letter-spacing:.01em}
+  .t-body{font-family:var(--font-text);font-weight:400;font-size:17px;line-height:1.7;color:#101828}
+  .t-cap{font-family:var(--font-text);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gray)}
+  .scale-note{padding:26px 26px}
+  .scale-note h4{font-family:var(--font-display);font-weight:700;font-size:16px;margin-bottom:12px}
+  .scale-note ul{margin:0;padding-left:18px;color:var(--gray);font-size:14.5px;line-height:1.9}
+  .scale-note li b{color:var(--ink);font-weight:600}
+  .fontchips{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .fontchip{border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px}
+  .fontchip b{font-family:var(--font-display);font-weight:700}
+
+  /* ---------- Components ---------- */
+  .comp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+  @media(max-width:820px){.comp-grid{grid-template-columns:1fr}}
+  .comp{padding:0;overflow:hidden}
+  .comp .cap{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line);
+    font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray)}
+  .comp .body{padding:22px 24px}
+
+  /* chapter opener */
+  .chapopen{background:var(--midnight);color:var(--off)}
+  .chapopen .num{font-family:var(--font-display);font-weight:700;font-size:56px;color:var(--red);line-height:1;letter-spacing:.01em}
+  .chapopen .eyebrow{color:#98A2B3}
+  .chapopen h3{color:#fff;font-size:30px;font-weight:700;margin:6px 0 16px}
+  .chapopen .learn{border-top:1px solid rgba(255,255,255,.12);padding-top:14px;margin-top:6px}
+  .chapopen .learn .t-cap{color:#98A2B3;margin-bottom:10px}
+  .chapopen ul{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+  .chapopen li{display:flex;gap:10px;align-items:flex-start;color:#D0D5DD;font-size:15px}
+  .chapopen li::before{content:"";width:7px;height:7px;border-radius:2px;background:var(--red);margin-top:8px;flex:none;transform:rotate(45deg)}
+  .chapopen img{position:absolute;right:-26px;bottom:-30px;width:216px;opacity:.07;pointer-events:none}
+  .chapopen .body{position:relative;overflow:hidden}
+
+  /* onthoud dit */
+  .callout{border-left:4px solid var(--red);background:#fff;border-radius:12px;padding:18px 20px;
+    box-shadow:inset 0 0 0 1px var(--line)}
+  .callout .h{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:700;font-size:16px;margin-bottom:6px}
+  .callout .h .dot{width:22px;height:22px;border-radius:7px;background:rgba(225,29,63,.12);color:var(--red);
+    display:grid;place-items:center;font-size:13px}
+  .callout p{margin:0;color:#344054;font-size:15px}
+
+  /* korean terms */
+  .terms{display:grid;gap:10px}
+  .term{display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+  .term .spk{flex:none;width:42px;height:42px;border-radius:11px;border:1px solid var(--line-2);background:var(--off);
+    color:var(--midnight);display:grid;place-items:center;cursor:pointer;transition:.15s}
+  .term .spk:hover{background:var(--red);border-color:var(--red);color:#fff}
+  .term .spk svg{width:18px;height:18px}
+  .term .tx{min-width:0}
+  .term .rom{font-family:var(--font-display);font-weight:700;font-size:16px}
+  .term .han{font-weight:600;color:var(--midnight)}
+  .term .tr{color:var(--gray);font-size:13.5px}
+  .term .han{font-size:14px}
+
+  /* quiz */
+  .quiz .q{font-family:var(--font-display);font-weight:700;font-size:18px;margin-bottom:14px}
+  .quiz .opts{display:grid;gap:10px}
+  .quiz button{font-family:var(--font-text);text-align:left;border:1px solid var(--line-2);background:#fff;
+    border-radius:11px;padding:12px 14px;font-size:15px;font-weight:500;cursor:pointer;transition:.14s;display:flex;
+    align-items:center;gap:10px}
+  .quiz button:hover{border-color:var(--midnight)}
+  .quiz button .k{width:22px;height:22px;border-radius:6px;background:var(--off);border:1px solid var(--line-2);
+    display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--gray);flex:none}
+  .quiz button.correct{border-color:#137a3a;background:#E7F6EC}
+  .quiz button.correct .k{background:#137a3a;border-color:#137a3a;color:#fff}
+  .quiz button.wrong{border-color:#c02626;background:#FDECEC}
+  .quiz button.wrong .k{background:#c02626;border-color:#c02626;color:#fff}
+  .quiz .fb{margin-top:12px;font-size:14px;font-weight:600;min-height:20px}
+
+  /* progress */
+  .prog h4{font-family:var(--font-display);font-weight:700;font-size:16px;margin-bottom:2px}
+  .prog .sub{color:var(--gray);font-size:13px;margin-bottom:16px}
+  .prog .bar{height:12px;border-radius:999px;background:var(--off);border:1px solid var(--line);overflow:hidden}
+  .prog .bar > i{display:block;height:100%;background:linear-gradient(90deg,#E11D3F,#f0506b);border-radius:999px}
+  .prog .rows{display:grid;gap:14px;margin-top:18px}
+  .prog .r .top{display:flex;justify-content:space-between;font-size:13.5px;font-weight:600;margin-bottom:6px}
+  .prog .r .top span:last-child{color:var(--gray)}
+
+  /* stance */
+  .stance{display:flex;gap:18px;align-items:center}
+  .stance .diagram{flex:none;width:120px;height:120px;border:1px solid var(--line);border-radius:14px;background:var(--off);display:grid;place-items:center}
+  .stance h4{font-family:var(--font-display);font-weight:700;font-size:16px;margin-bottom:4px}
+  .stance .kr{font-size:13px;color:var(--gray);margin-bottom:10px}
+  .stance .chk{display:flex;align-items:center;gap:9px;font-size:13.5px;color:#344054;
+    border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
+  .stance .box{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--line-2)}
+
+  footer{background:var(--midnight);color:#98A2B3;padding:40px 0;font-size:13.5px}
+  footer .wrap{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;justify-content:space-between}
+  footer b{color:#E4E7EC;font-family:var(--font-display)}
+  footer .note{max-width:560px;line-height:1.6}
+  footer .brandmini img{width:26px;height:26px}
+
+  /* high contrast */
+  body.hc{--page:#fff;--gray:#3a4250;--line:#98A2B3;--line-2:#667085;--muted:#3a4250}
+  body.hc .card,body.hc .term,body.hc .quiz button{border-width:2px}
+  body.hc .hero{background:#000}
+  body.hc .chapopen,body.hc .topbar{background:#000}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="wrap">
+    <span class="brandmini"><img src="mark-taeguk.svg" alt=""> Mijn Poom<span class="accent">.</span>Academie</span>
+    <nav class="topnav">
+      <a href="#merk">Merk</a><a href="#kleur">Kleur</a><a href="#type">Typografie</a><a href="#comp">Componenten</a>
+    </nav>
+    <div class="a11y" role="group" aria-label="Toegankelijkheid">
+      <button id="tminus" title="Kleinere tekst">A−</button>
+      <button id="tplus" title="Grotere tekst">A+</button>
+      <button id="hc" aria-pressed="false" title="Hoog contrast">Contrast</button>
+    </div>
+  </div>
+</div>
+
+<header class="hero">
+  <img class="emblem" src="mark-taeguk-tilt.svg" alt="Taegeuk-merk van Mijn Poom Academie">
+  <div class="kicker">Taekwondo · Eerste &amp; Tweede Poom</div>
+  <div class="myline">Mijn</div>
+  <h1>Poom<span class="dot">.</span>Academie</h1>
+  <div class="rule"></div>
+  <p class="tag">De weg naar de zwarte band — <strong style="color:#fff">sterk, rustig en zelfverzekerd</strong>. Serieus genoeg voor het examen, toegankelijk genoeg om zelfstandig mee te leren.</p>
+  <div class="belts" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+</header>
+
+<!-- MERK -->
+<section class="block" id="merk">
+  <div class="wrap">
+    <header>
+      <span class="secnum">01 — Merk</span>
+      <h2>De taegeuk als beeldmerk</h2>
+      <p>Een abstract merk uit de <strong>Koreaanse vlag</strong>: de taegeuk-cirkel (eum &amp; yang) staat voor <strong>evenwicht</strong> — de kern van taekwondo. Schaalbaar, tijdloos en volwassen; geen mascotte nodig.</p>
+    </header>
+    <div class="lions">
+      <div class="lion card">
+        <div class="stage light"><img src="mark-taeguk.svg" alt="Taegeuk-merk in rood en kobalt"></div>
+        <span class="role">Hoofdmerk</span>
+        <h4>Rood + Kobalt</h4>
+        <small>Levendig en meteen Koreaans. De standaard.</small>
+      </div>
+      <div class="lion card">
+        <div class="stage light"><img src="mark-taeguk-mid.svg" alt="Taegeuk-merk in rood en midnight"></div>
+        <span class="role">Ingetogen</span>
+        <h4>Rood + Midnight</h4>
+        <small>Rustiger variant die aansluit op het UI-palet.</small>
+      </div>
+      <div class="lion card">
+        <div class="stage dark"><img src="mark-taeguk-tilt.svg" alt="Gekanteld taegeuk-merk"></div>
+        <span class="role">Dynamisch</span>
+        <h4>Gekanteld</h4>
+        <small>Lichte kanteling voor beweging en energie.</small>
+      </div>
+      <div class="lion card">
+        <div class="stage light"><img src="mark-taeguk-line.svg" alt="Taegeuk in lijnvorm"></div>
+        <span class="role">Redactioneel</span>
+        <h4>Lijn / mono</h4>
+        <small>Eén kleur, voor klein en rustig gebruik.</small>
+      </div>
+    </div>
+    <div class="charshow">
+      <div class="charstage" style="background:#EEF1F5"><img src="icon-taeguk-dark.svg" alt="App-icoon: taegeuk met de vier trigrammen op een donker afgerond vierkant" style="max-width:200px"></div>
+      <div class="chartext">
+        <span class="role" style="color:var(--red);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase">App-icoon</span>
+        <h3>De taegeuk + vier trigrammen</h3>
+        <p>Voor het app-icoon staat de taegeuk tussen de <strong>vier trigrammen</strong> (kwae) van de Koreaanse vlag. Ze passen perfect bij deze app: de kleurbanden die deze kinderen leren heten immers <strong>Taegeuk poomsae 1–8</strong>, elk verbonden aan een trigram.</p>
+        <div class="trigrow">
+          <div class="tg"><span class="g">☰</span><span><b>Geon</b><small>hemel · 건</small></span></div>
+          <div class="tg"><span class="g">☲</span><span><b>Ri</b><small>vuur · 리</small></span></div>
+          <div class="tg"><span class="g">☵</span><span><b>Gam</b><small>water · 감</small></span></div>
+          <div class="tg"><span class="g">☷</span><span><b>Gon</b><small>aarde · 곤</small></span></div>
+        </div>
+      </div>
+    </div>
+    <p style="color:var(--gray);font-size:13.5px;margin-top:18px">
+      Schaaltest — het app-icoon blijft herkenbaar tot navigatiegrootte:
+      <span class="iconrow" style="display:inline-flex;vertical-align:middle;margin-left:10px">
+        <img src="icon-taeguk-dark.svg" width="48" height="48" alt=""><img src="icon-taeguk-dark.svg" width="32" height="32" alt=""><img src="icon-taeguk-dark.svg" width="22" height="22" alt="">
+      </span>
+    </p>
+  </div>
+</section>
+
+<!-- KLEUR -->
+<section class="block alt" id="kleur">
+  <div class="wrap">
+    <header>
+      <span class="secnum">02 — Kleurenpalet</span>
+      <h2>Het kleurenpalet</h2>
+      <p>Een compact, rustig palet met twee vlag-kleuren. Rood verwijst naar de poomband en het accent; kobalt is de merkkleur uit de taegeuk. Rood beslaat nooit meer dan ±10% van een pagina.</p>
+    </header>
+    <div class="swatches">
+      <div class="sw">
+        <div class="chip" style="background:#101828"><span class="pill">Aa 17.8</span></div>
+        <div class="meta"><b>Midnight</b><div class="hex">#101828</div>
+          <div class="role">Hoofdkleur — omslagen, koppen, donkere vlakken, leestekst.</div></div>
+      </div>
+      <div class="sw">
+        <div class="chip" style="background:#F7F8FA;border-bottom:1px solid var(--line)"><span class="pill" style="background:#101828;color:#fff">bg</span></div>
+        <div class="meta"><b>Gebroken wit</b><div class="hex">#F7F8FA</div>
+          <div class="role">Achtergrond — rustige, lichte basis voor alle leestekst.</div></div>
+      </div>
+      <div class="sw">
+        <div class="chip" style="background:#E11D3F"><span class="pill">accent</span></div>
+        <div class="meta"><b>Signal Red</b><div class="hex">#E11D3F</div>
+          <div class="role">Accent — hoofdstuknummers, knoppen, voortgang, kleine labels.</div>
+          <div class="tintrow" aria-hidden="true">
+            <span style="background:#FDECEF"></span><span style="background:#F6A8B8"></span><span style="background:#E11D3F"></span><span style="background:#B01430"></span><span style="background:#7C0E22"></span>
+          </div></div>
+      </div>
+      <div class="sw">
+        <div class="chip" style="background:#667085"><span class="pill">neutraal</span></div>
+        <div class="meta"><b>Cool Gray</b><div class="hex">#667085</div>
+          <div class="role">Neutraal — bijschriften, lijnen, secundaire tekst en iconen.</div></div>
+      </div>
+      <div class="sw">
+        <div class="chip" style="background:#2440B8"><span class="pill">merk</span></div>
+        <div class="meta"><b>Kobalt</b><div class="hex">#2440B8</div>
+          <div class="role">Merkblauw uit de taegeuk — voor het beeldmerk en merkvlakken, spaarzaam in de UI.</div></div>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--font-display);font-size:17px;margin:30px 0 4px">Contrast — gemeten volgens WCAG&nbsp;2.1</h3>
+    <p style="color:var(--gray);font-size:13.5px;margin:0">Ratio&#39;s worden live in de pagina berekend. Doel: gewone leestekst blijft altijd donker op licht.</p>
+    <div class="contrast" id="contrast"></div>
+  </div>
+</section>
+
+<!-- TYPOGRAFIE -->
+<section class="block" id="type">
+  <div class="wrap">
+    <header>
+      <span class="secnum">03 — Typografie</span>
+      <h2>Stencil-poster + heldere tekst</h2>
+      <p>Een atletische <strong>stencil-display</strong> voor titels — in de stijl van martial-arts-posters — en een rustige, zeer leesbare tekstletter. Krachtig maar volwassen, nooit kinderachtig.</p>
+    </header>
+    <div class="type-wrap">
+      <div class="specimen card">
+        <div class="line">
+          <div class="lbl"><b>Saira Stencil One</b> · poster / cover</div>
+          <div class="t-cover"><span class="sk">Poom<span style="color:var(--red)">.</span>Academie</span></div>
+        </div>
+        <div class="line">
+          <div class="lbl"><b>Big Shoulders</b> · 700 · hoofdstuktitel</div>
+          <div class="t-chap">Basisstanden &amp; balans</div>
+        </div>
+        <div class="line">
+          <div class="lbl"><b>Big Shoulders</b> · 600 · tussenkop</div>
+          <div class="t-sec">Wat ga je leren?</div>
+        </div>
+        <div class="line">
+          <div class="lbl"><b>Inter</b> · 600 · Koreaanse term / label</div>
+          <div class="t-kor">Ap&nbsp;Koobi&nbsp;Seogi · 앞굽이&nbsp;서기</div>
+        </div>
+        <div class="line">
+          <div class="lbl"><b>Inter</b> · 400 · leestekst</div>
+          <div class="t-body">In deze stand staat je voorste knie boven je voet en ligt ongeveer zeventig procent van je gewicht naar voren. Houd je rug recht en je blik vooruit.</div>
+        </div>
+        <div class="line">
+          <div class="lbl"><b>Inter</b> · 600 · bijschrift / caps</div>
+          <div class="t-cap">Controle door mijn trainer</div>
+        </div>
+      </div>
+      <div class="scale-note card">
+        <div class="scale-note" style="padding:0">
+          <h4>Principes</h4>
+          <ul>
+            <li><b>Stencil-display</b> alleen voor korte, krachtige titels — nooit voor lopende tekst.</li>
+            <li><b>Hiërarchie</b> door grootte en gewicht, niet door kleur.</li>
+            <li><b>Korte regels</b> en royale regelafstand (1,7).</li>
+            <li><b>Terughoudend</b> gebruik van vet en accentrood.</li>
+            <li><b>Vaste uitlijning</b> links, consistente kopgroottes.</li>
+          </ul>
+          <div class="fontchips">
+            <div class="fontchip"><b>Saira Stencil One</b><br><span style="color:var(--gray);font-size:12px">Poster · titels</span></div>
+            <div class="fontchip"><b>Big Shoulders</b><br><span style="color:var(--gray);font-size:12px">Koppen · 6/7</span></div>
+            <div class="fontchip"><b>Inter</b><br><span style="color:var(--gray);font-size:12px">Tekst · 4/5/6/7</span></div>
+          </div>
+          <p style="color:var(--gray);font-size:12.5px;margin-top:14px;margin-bottom:0">Alle drie gratis, vrij te gebruiken (SIL OFL) en lokaal meegeleverd — werkt ook offline.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPONENTEN -->
+<section class="block alt" id="comp">
+  <div class="wrap">
+    <header>
+      <span class="secnum">04 — Componenten</span>
+      <h2>De vaste bouwstenen</h2>
+      <p>De terugkerende elementen uit de leerboeken en de digitale omgeving, in één consistente stijl. Probeer de uitspraakknoppen en de miniquiz.</p>
+    </header>
+    <div class="comp-grid">
+
+      <!-- Chapter opener -->
+      <div class="comp card chapopen">
+        <div class="cap" style="color:#98A2B3;border-color:rgba(255,255,255,.12)">Hoofdstukopening</div>
+        <div class="body">
+          <div class="eyebrow">Hoofdstuk</div>
+          <div class="num">03</div>
+          <h3>Basisstanden</h3>
+          <div class="learn">
+            <div class="t-cap">Wat ga je leren?</div>
+            <ul>
+              <li>De tien basisstanden herkennen en benoemen</li>
+              <li>Je voeten juist plaatsen en richten</li>
+              <li>Je gewicht rustig en gecontroleerd verdelen</li>
+            </ul>
+          </div>
+          <img src="mark-taeguk.svg" alt="" aria-hidden="true">
+        </div>
+      </div>
+
+      <!-- Right column stacked -->
+      <div style="display:grid;gap:20px">
+        <!-- Onthoud dit -->
+        <div class="comp card">
+          <div class="cap">Onthoud dit</div>
+          <div class="body">
+            <div class="callout">
+              <div class="h"><span class="dot">★</span> Onthoud dit</div>
+              <p>In <strong>Ap&nbsp;Koobi&nbsp;Seogi</strong> ligt ±70% van je gewicht op je voorste been. Rug recht, blik vooruit, achterste been gestrekt.</p>
+            </div>
+          </div>
+        </div>
+        <!-- Progress -->
+        <div class="comp card">
+          <div class="cap">Mijn voortgang</div>
+          <div class="body prog">
+            <h4>Eerste Poom</h4>
+            <div class="sub">Jouw route naar het examen</div>
+            <div class="bar"><i style="width:62%"></i></div>
+            <div class="rows">
+              <div class="r"><div class="top"><span>Terminologie</span><span>80%</span></div><div class="bar"><i style="width:80%"></i></div></div>
+              <div class="r"><div class="top"><span>Taegeuk 1–8</span><span>55%</span></div><div class="bar"><i style="width:55%"></i></div></div>
+              <div class="r"><div class="top"><span>Standen</span><span>70%</span></div><div class="bar"><i style="width:70%"></i></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Korean terms -->
+      <div class="comp card">
+        <div class="cap">Koreaanse termen · uitspraak</div>
+        <div class="body">
+          <div class="terms" id="terms"></div>
+          <p style="color:var(--gray);font-size:12px;margin:12px 0 0">🔊 Gebruikt de Koreaanse stem van je apparaat (Web Speech API).</p>
+        </div>
+      </div>
+
+      <!-- Quiz + stance -->
+      <div style="display:grid;gap:20px">
+        <div class="comp card">
+          <div class="cap">Miniquiz</div>
+          <div class="body quiz" id="quiz">
+            <div class="q">Wat betekent <em>Charyeot</em> (차렷)?</div>
+            <div class="opts">
+              <button data-correct="true"><span class="k">A</span> Geef acht / kom in de houding</button>
+              <button><span class="k">B</span> Buigen voor de trainer</button>
+              <button><span class="k">C</span> Beginnen met de oefening</button>
+            </div>
+            <div class="fb" id="fb"></div>
+          </div>
+        </div>
+        <div class="comp card">
+          <div class="cap">Standenkaart</div>
+          <div class="body">
+            <div class="stance">
+              <div class="diagram">
+                <svg width="92" height="92" viewBox="0 0 92 92" aria-hidden="true">
+                  <rect x="1" y="1" width="90" height="90" rx="10" fill="none" stroke="#E4E7EC"/>
+                  <line x1="46" y1="10" x2="46" y2="82" stroke="#E4E7EC" stroke-dasharray="3 4"/>
+                  <defs>
+                    <g id="foot" fill="currentColor">
+                      <path d="M -6.5 -11 C -8.2 -7 -8.2 -1 -6.6 4 C -6.1 9 -5 13 -3.4 15.2 C -1.4 17.4 1.4 17.4 3.4 15.2 C 5 13 6.1 9 6.6 4 C 8.2 -1 8.2 -7 6.5 -11 C 4 -13.5 -4 -13.5 -6.5 -11 Z"/>
+                      <ellipse cx="-4.6" cy="-15" rx="3.1" ry="3.5"/>
+                      <ellipse cx="-1" cy="-17.2" rx="2.6" ry="2.9"/>
+                      <ellipse cx="2" cy="-17.6" rx="2.3" ry="2.6"/>
+                      <ellipse cx="4.6" cy="-16.4" rx="2" ry="2.3"/>
+                      <ellipse cx="6.6" cy="-14.4" rx="1.7" ry="2"/>
+                    </g>
+                  </defs>
+                  <!-- back foot -->
+                  <use href="#foot" transform="translate(34 56) rotate(-8) scale(-1,1)" color="#667085"/>
+                  <!-- front foot -->
+                  <use href="#foot" transform="translate(58 40) rotate(8)" color="#E11D3F"/>
+                  <text x="15" y="50" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#667085" text-anchor="middle">30%</text>
+                  <text x="80" y="34" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#E11D3F" text-anchor="middle">70%</text>
+                </svg>
+              </div>
+              <div>
+                <h4>Ap Seogi</h4>
+                <div class="kr">앞 서기 · voorwaartse loopstand</div>
+                <div class="chk"><span class="box"></span> Controle door mijn trainer</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="brandmini" style="color:#E4E7EC"><img src="mark-taeguk.svg" alt=""> Mijn Poom<span class="accent">.</span>Academie</span>
+    <p class="note"><b>Over deze pagina.</b> Een levende visuele-identiteitsgids: het taegeuk-beeldmerk, palet, typografie en componenten in één systeem. Alle merkonderdelen zijn schaalbare vectoren (SVG). <br><br>
+    <b>Eerlijke kanttekening:</b> het merk is bewust <b>abstract</b> — een taegeuk uit de Koreaanse vlag in plaats van een mascotte. Puur vector, dus scherp op elk formaat en zonder beeldmodel te ogen.</p>
+    <p class="note" style="margin-top:18px"><a href="concept.html" style="color:#fff;font-weight:600;text-decoration:none;border-bottom:2px solid var(--red);padding-bottom:1px">Bekijk het concept-bord →</a> <span style="color:#98A2B3">— de richting op één scherm.</span></p>
+  </div>
+</footer>
+
+<script>
+  // ---- Accessibility: text scale + high contrast ----
+  var step = 1;
+  function setStep(s){ step = Math.min(1.4, Math.max(.9, s)); document.documentElement.style.setProperty('--step', step.toFixed(2)); }
+  document.getElementById('tplus').onclick = function(){ setStep(step + .1); };
+  document.getElementById('tminus').onclick = function(){ setStep(step - .1); };
+  var hcBtn = document.getElementById('hc');
+  hcBtn.onclick = function(){ var on = document.body.classList.toggle('hc'); hcBtn.setAttribute('aria-pressed', on); };
+
+  // ---- WCAG contrast ----
+  function lum(hex){
+    var c = hex.replace('#','').match(/.{2}/g).map(function(h){
+      var v = parseInt(h,16)/255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4);
+    });
+    return .2126*c[0] + .7152*c[1] + .0722*c[2];
+  }
+  function ratio(a,b){ var l1=lum(a), l2=lum(b); var hi=Math.max(l1,l2), lo=Math.min(l1,l2); return (hi+.05)/(lo+.05); }
+  var pairs = [
+    {name:'Tekst op achtergrond', fg:'#101828', bg:'#F7F8FA'},
+    {name:'Tekst op donker vlak',  fg:'#F7F8FA', bg:'#101828'},
+    {name:'Accent op wit',         fg:'#E11D3F', bg:'#FFFFFF'},
+    {name:'Wit op accentknop',     fg:'#FFFFFF', bg:'#E11D3F'},
+    {name:'Grijs bijschrift op wit',fg:'#667085', bg:'#FFFFFF'},
+    {name:'Accent op donker',      fg:'#E11D3F', bg:'#101828'}
+  ];
+  var box = document.getElementById('contrast');
+  pairs.forEach(function(p){
+    var r = ratio(p.fg,p.bg), rr = Math.round(r*10)/10;
+    var cls='fail', txt='onder AA';
+    if(r>=7){cls='aaa';txt='AAA';} else if(r>=4.5){cls='pass';txt='AA';} else if(r>=3){cls='pass';txt='AA groot';}
+    var el = document.createElement('div');
+    el.className='ctile';
+    el.innerHTML =
+      '<div class="demo" style="background:'+p.bg+';color:'+p.fg+';border:1px solid var(--line)">Taekwondo · 태권도</div>'+
+      '<div class="row"><span class="ratio">'+rr.toFixed(1)+':1</span><span class="badge '+cls+'">'+txt+'</span></div>'+
+      '<small>'+p.name+'</small>';
+    box.appendChild(el);
+  });
+
+  // ---- Korean terms + pronunciation ----
+  var terms = [
+    {rom:'Taekwondo', han:'태권도', tr:'de weg van hand en voet'},
+    {rom:'Charyeot',  han:'차렷',   tr:'kom in de houding'},
+    {rom:'Ap Chagi',  han:'앞차기', tr:'voorwaartse trap'},
+    {rom:'Ap Koobi Seogi', han:'앞굽이 서기', tr:'voorwaartse stand'}
+  ];
+  var spk = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+  var tbox = document.getElementById('terms');
+  function speak(text){
+    if(!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang='ko-KR'; u.rate=.9;
+    var ko = speechSynthesis.getVoices().find(function(v){return v.lang && v.lang.toLowerCase().indexOf('ko')===0;});
+    if(ko) u.voice = ko;
+    speechSynthesis.speak(u);
+  }
+  terms.forEach(function(t){
+    var el = document.createElement('div');
+    el.className='term';
+    el.innerHTML = '<button class="spk" aria-label="Spreek '+t.rom+' uit">'+spk+'</button>'+
+      '<div class="tx"><div class="rom">'+t.rom+'</div>'+
+      '<div class="tr"><span class="han">'+t.han+'</span> · '+t.tr+'</div></div>';
+    el.querySelector('.spk').onclick = function(){ speak(t.han); };
+    tbox.appendChild(el);
+  });
+  if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged = function(){}; }
+
+  // ---- Quiz ----
+  var quiz = document.getElementById('quiz'), fb = document.getElementById('fb');
+  quiz.querySelectorAll('button').forEach(function(b){
+    b.onclick = function(){
+      if(quiz.dataset.done) return;
+      quiz.dataset.done = '1';
+      quiz.querySelectorAll('button').forEach(function(x){
+        if(x.dataset.correct) x.classList.add('correct');
+      });
+      if(b.dataset.correct){ fb.textContent='Correct! 차렷 betekent “kom in de houding”.'; fb.style.color='#137a3a'; }
+      else{ b.classList.add('wrong'); fb.textContent='Bijna — het juiste antwoord staat gemarkeerd.'; fb.style.color='#c02626'; }
+    };
+  });
+</script>
+</body>
+</html>

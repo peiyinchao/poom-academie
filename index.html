@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mijn Poom Academie</title>
+<meta name="description" content="Leer alles voor je eerste en tweede poom: Taegeuk 1–8, standen, technieken, Koreaanse termen en oefenquizzen. Werkt offline.">
+<meta name="theme-color" content="#101828">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-taeguk-dark.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Poom Academie">
+
+<link rel="stylesheet" href="fonts/inter.css">
+<link rel="stylesheet" href="fonts/poster.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<header class="appbar">
+  <span class="brand"><img src="mark-taeguk.svg" alt="">Poom<span class="dot">.</span>Academie</span>
+  <span class="streak" id="streak" title="Onderdelen afgerond">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="2" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 22.3 6.8 19.2l1-5.8L3.5 9.2l5.9-.9z"/></svg>
+    <b id="streakN">0</b>
+  </span>
+</header>
+
+<main id="view"><!-- routed content --></main>
+
+<nav class="bottomnav" id="nav">
+  <a href="#/home" data-r="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M6 10v10h12V10"/></svg>
+    Home</a>
+  <a href="#/poomsae" data-r="poomsae">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 0 0 9 4.5 4.5 0 0 1 0 9" stroke-linecap="round"/></svg>
+    Poomsae</a>
+  <a href="#/techniek" data-r="techniek">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 13h6l-1 8 9-11h-6z"/></svg>
+    Techniek</a>
+  <a href="#/termen" data-r="termen">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11h-9l-4 4v-4H4z"/></svg>
+    Termen</a>
+  <a href="#/quiz" data-r="quiz">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6a2 2 0 0 1 2 2v14l-5-3-5 3V6a2 2 0 0 1 2-2z"/><path d="M9.5 9.5l1.8 1.8 3.2-3.4"/></svg>
+    Quiz</a>
+</nav>
+
+<div class="installbar" id="installbar">
+  <img src="icon-taeguk-dark.svg" alt="">
+  <div class="it"><b>App installeren</b><br>Zet Poom.Academie op je startscherm — werkt offline.</div>
+  <button class="yes" id="installYes">Installeer</button>
+  <button class="no" id="installNo">Later</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="data/curriculum.js"></script>
+<script src="app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').catch(function(e){ console.warn('SW mislukt', e); });
+    });
+  }
+</script>
+</body>
+</html>

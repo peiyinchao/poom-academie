@@ -1,0 +1,8 @@
+.DS_Store
+**/.DS_Store
+_wrap_*.html
+_diag*.html
+_shot.html
+node_modules/
+.venv/
+*.log
