@@ -19,12 +19,14 @@
   if (!prog.poomsae) prog.poomsae = {};
   if (typeof prog.quizBest !== 'number') prog.quizBest = 0;
   if (prog.level !== '1' && prog.level !== '2') prog.level = '1';
+  if (!prog.exam) prog.exam = {};
 
   /* ---------- Niveau (1e / 2e poom) ---------- */
   function curLevel() { return prog.level === '2' ? 2 : 1; }
   function visPoomsae() { var L = curLevel(); return C.poomsae.filter(function (p) { return (p.level || 0) === 0 || p.level <= L; }); }
   function foundationPoomsae() { return C.poomsae.filter(function (p) { return (p.level || 0) === 0; }); }
   function examPoomsae() { var L = curLevel(); return C.poomsae.filter(function (p) { return p.level >= 1 && p.level <= L; }); }
+  function examChecks() { prog.exam[prog.level] = prog.exam[prog.level] || {}; return prog.exam[prog.level]; }
 
   function poomDone() { return visPoomsae().filter(function (p) { return prog.poomsae[p.id]; }).length; }
   function refreshStreak() { document.getElementById('streakN').textContent = poomDone(); }
@@ -108,7 +110,7 @@
   }
 
   /* ---------- Router ---------- */
-  var routes = ['home', 'poomsae', 'techniek', 'termen', 'quiz', 'theorie', 'standen', 'examen', 'teller', 'flash'];
+  var routes = ['home', 'poomsae', 'techniek', 'termen', 'quiz', 'theorie', 'standen', 'examen', 'examenkaart', 'teller', 'flash'];
   function parse() {
     var h = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
     if (!h.length) h = ['home'];
@@ -129,10 +131,11 @@
     else if (r === 'quiz') viewQuiz();
     else if (r === 'theorie') viewTheorie();
     else if (r === 'examen') viewExamen();
+    else if (r === 'examenkaart') viewExamenkaart();
     else if (r === 'teller') viewTeller();
     else if (r === 'flash') viewFlash();
     // nav active state
-    var navMap = { standen: 'techniek', examen: 'theorie', teller: 'termen', flash: 'termen' };
+    var navMap = { standen: 'techniek', examen: 'theorie', examenkaart: 'home', teller: 'termen', flash: 'termen' };
     var navR = navMap[r] || r;
     [].forEach.call(nav.querySelectorAll('a'), function (a) {
       a.classList.toggle('on', a.getAttribute('data-r') === navR);
@@ -163,6 +166,16 @@
     }).join('');
     var streak = prog.streakDays || 0;
     var allDone = dailyAllDone();
+
+    var ek = C.examenkaart[prog.level], ekChecks = prog.exam[prog.level] || {};
+    var ekDone = ek.onderdelen.filter(function (o) { return ekChecks[o.id]; }).length;
+    var ekTotal = ek.onderdelen.length;
+    var examCTA = '<a class="examcta" href="#/examenkaart">' +
+      '<span class="examcta-ic">' + svgCard() + '</span>' +
+      '<span class="examcta-tx"><b>Examenkaart · ' + esc(C.levels[prog.level].naam) + '</b>' +
+      '<small>Alles wat je moet laten zien — ' + ekDone + '/' + ekTotal + ' afgevinkt</small></span>' +
+      '<span class="examcta-bar"><i style="width:' + Math.round(ekDone / ekTotal * 100) + '%"></i></span>' +
+      '<span class="examcta-chev">' + ICON_CHEV + '</span></a>';
 
     var tiles = [
       ['#/poomsae', 'Poomsae', 'De Taegeuk-vormen', svgCircle()],
@@ -203,6 +216,8 @@
           '<div class="goals">' + goalHtml + '</div>' +
           (allDone ? '<div class="daily-done">Alle dagdoelen gehaald! Top gedaan. 🎉</div>' : '') +
         '</div>' +
+
+        examCTA +
 
         '<span class="secnum">Ontdek</span>' +
         '<div class="tiles">' + tiles + '</div>' +
@@ -449,6 +464,44 @@
       '</div></div>';
   }
 
+  /* ---------- View: Examenkaart ("Jouw examen in één beeld") ---------- */
+  function viewExamenkaart() {
+    var L = prog.level, kaart = C.examenkaart[L], checks = examChecks();
+    var total = kaart.onderdelen.length;
+    var doneN = kaart.onderdelen.filter(function (o) { return checks[o.id]; }).length;
+    var pct = Math.round(doneN / total * 100);
+
+    var toggle = '<div class="lvltoggle light">' + ['1', '2'].map(function (l) {
+      return '<button data-act="lvl" data-l="' + l + '" class="' + (L === l ? 'on' : '') + '">' + esc(C.levels[l].naam) + '</button>';
+    }).join('') + '</div>';
+
+    var rows = kaart.onderdelen.map(function (o) {
+      var on = !!checks[o.id];
+      var spk = o.ko ? '<button class="speak" data-act="speak" data-ko="' + esc(o.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' : '';
+      var kr = (o.ko ? esc(o.ko) + ' · ' : '') + esc(o.roman);
+      var link = o.link ? '<a class="btn ghost sm" href="' + o.link + '">' + esc(o.linkLabel || 'Oefen') + '</a>' : '';
+      return '<div class="exrow' + (on ? ' on' : '') + '">' +
+        '<button class="exchk" data-act="examchk" data-id="' + o.id + '" aria-label="Afvinken">' + (on ? ICON_CHECK : '') + '</button>' +
+        '<div class="exmain">' +
+          '<div class="exhd"><b>' + esc(o.nl) + '</b><span class="kr">' + kr + '</span>' + spk + '</div>' +
+          '<p class="exeis">' + esc(o.eis) + '</p>' +
+          (link ? '<div class="exact">' + link + '</div>' : '') +
+        '</div></div>';
+    }).join('');
+
+    view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<span class="secnum">Examenkaart</span>' +
+      '<h1 class="screen-title">Jouw examen in één beeld</h1>' +
+      '<p class="screen-sub">Alles wat je laat zien voor je poom. Vink af wat al goed gaat — of laat je trainer aftekenen.</p>' +
+      toggle +
+      '<div class="exprog"><div class="quizbar"><i style="width:' + pct + '%"></i></div>' +
+        '<span>' + doneN + ' / ' + total + ' onderdelen afgevinkt</span></div>' +
+      '<div class="exlist">' + rows + '</div>' +
+      '<div class="notecard"><b>Slagen voor theorie:</b> ' + esc(kaart.slagen) + '.</div>' +
+      '<div class="notecard">De eisen vertellen <b>wát</b> je laat zien. Je trainer leert je <b>hoe</b> je dit veilig en technisch goed doet — deze kaart vervangt geen les.</div>' +
+      '</div></div>';
+  }
+
   /* ---------- View: Teller (Koreaans 1–10) ---------- */
   function tellCounts() { var g = C.termen.filter(function (x) { return /Tellen/.test(x.groep); })[0]; return g ? g.items : []; }
   function tellSet(numTxt, c, activeIdx) {
@@ -585,6 +638,7 @@
   function feetMini() { return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.249 3.224a.75.75 0 0 0-.774-.724.75.75 0 0 0-.725.776zM5.114 18.53l-.738.13zM3.77 6.512a.75.75 0 0 0-.868-.608.75.75 0 0 0-.61.87zm2.298-1.369a.75.75 0 0 0-.868-.607.75.75 0 0 0-.61.87zM4.753 6.338l.13.738 1.477-.262-.13-.738zM8.446 4.24a.75.75 0 0 0-.868-.608.75.75 0 0 0-.609.87zM7.133 5.435l.13.739 1.476-.262-.13-.739zM10.5 3.25l-.75.026v.008l.013.464c.008.296.017.71.023 1.183a53 53 0 0 1-.035 3.032L10.5 8l.748.037c.05-.965.049-2.172.037-3.128a96 96 0 0 0-.035-1.651v-.032l-.001-.002zm0 4.75-.75-.037c-.04.808-.362 1.526-.709 2.585-.33 1.011-.619 2.198-.363 3.656l.738-.13.739-.131c-.194-1.106.012-2.016.311-2.93.284-.867.728-1.904.782-2.976zm-1.084 6.073-.738.131c.18 1.033.413 1.6.63 2.083.2.446.349.747.453 1.344l.739-.131.738-.13c-.14-.803-.365-1.259-.562-1.699-.18-.403-.367-.85-.521-1.728zM10.5 17.5l-.739.13a2.24 2.24 0 0 1-.283 1.562c-.275.44-.756.82-1.542.96l.13.738.13.739c1.183-.21 2.042-.826 2.553-1.644.5-.802.64-1.754.49-2.616zm-2.434 3.39-.13-.739c-.664.118-1.124-.141-1.473-.542-.376-.43-.57-.978-.61-1.21l-.739.13-.738.132c.082.467.38 1.274.956 1.936.604.692 1.559 1.263 2.863 1.032zm-2.952-2.36.739-.131-1.594-9.09-.739.13-.738.132 1.594 9.09zM3.52 9.44l.739-.131-.49-2.797-.739.131-.738.131.49 2.797zm1.808-4.166-.738.131.163.933.739-.131.738-.131-.163-.933zm2.38-.902-.739.13.164.933.738-.131.739-.131-.164-.932zm5.043-1.124a.75.75 0 1 1 1.5.002zm6.115 15.292.739.13zm1.36-12.029a.75.75 0 0 1 1.477.26zm-2.298-1.367a.75.75 0 1 1 1.477.26zm1.313 1.193-.13.739-1.477-.26.13-.74zm-3.692-2.094a.75.75 0 1 1 1.477.26zm1.312 1.194-.13.738-1.477-.26.13-.739zm-3.36-2.188.75.001V8h-1.5V3.248zm0 4.75h.75c0 .781.31 1.491.664 2.548.337 1.006.65 2.201.39 3.669l-.738-.13-.739-.131c.194-1.1-.026-2.008-.336-2.932-.293-.876-.742-1.925-.742-3.023zm1.066 6.086.739.13c-.182 1.031-.41 1.594-.62 2.072-.195.442-.341.742-.447 1.343l-.739-.13-.739-.13c.141-.8.36-1.25.552-1.688.177-.4.36-.845.515-1.727zM13.5 17.5l.739.13c-.096.542-.006 1.117.275 1.577.27.442.745.823 1.527.96l-.13.74-.13.738c-1.189-.21-2.043-.832-2.547-1.655-.493-.807-.624-1.761-.473-2.62zm2.41 3.407.13-.74c.665.118 1.126-.142 1.476-.544.376-.431.57-.98.612-1.212l.738.13.739.13c-.082.467-.381 1.276-.959 1.938-.605.694-1.56 1.266-2.866 1.036zm2.956-2.366-.738-.13 1.604-9.1.739.13.738.131-1.604 9.1zm1.605-9.1-.739-.13.494-2.799.738.13.739.13-.494 2.8zm-1.804-4.166.738.13-.164.933-.739-.13-.738-.13.164-.933zm-2.38-.9.739.13-.165.933-.738-.13-.739-.13.165-.934z"/></svg>'; }
   function svgExam() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9.5 12l2 2 3.5-4"/></svg>'; }
   function svgTimer() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6"/><path d="M12 8v6l4 2"/><circle cx="12" cy="14" r="8"/></svg>'; }
+  function svgCard() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h4M7 13h7"/><path d="M15.5 8.5l1.4 1.4 2.6-2.8"/></svg>'; }
 
   /* ---------- Event-delegatie ---------- */
   view.addEventListener('click', function (e) {
@@ -596,7 +650,13 @@
     else if (act === 'seg') { location.hash = '#/techniek/' + b.getAttribute('data-k'); }
     else if (act === 'lvl') {
       var l = b.getAttribute('data-l');
-      if (prog.level !== l) { prog.level = l; save(prog); toast('Niveau: ' + C.levels[l].naam); viewHome(); refreshStreak(); }
+      if (prog.level !== l) { prog.level = l; save(prog); toast('Niveau: ' + C.levels[l].naam); go(); }
+    }
+    else if (act === 'examchk') {
+      var eid = b.getAttribute('data-id'), ch = examChecks();
+      ch[eid] = !ch[eid]; save(prog);
+      toast(ch[eid] ? 'Afgevinkt ✓' : 'Vinkje gewist');
+      viewExamenkaart();
     }
     else if (act === 'goal') {
       var g = b.getAttribute('data-g');

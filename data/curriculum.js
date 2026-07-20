@@ -297,6 +297,49 @@ window.CURRICULUM = {
       tips: ["Richt je kracht dóór de plank heen", "Adem uit en kiai op het moment van raken", "Alleen doen met toestemming van je trainer"] }
   ],
 
+  /* -------------------- EXAMENKAART (per poom) -------------------- */
+  /* "Jouw examen in één beeld" — exacte TBN-eisen per onderdeel, per poom. */
+  examenkaart: {
+    "1": {
+      slagen: "9 van de 15 theorievragen goed (60%)",
+      onderdelen: [
+        { id: "poomsae", ko: "품새", roman: "Poomsae", nl: "Poomsae (vormen)",
+          eis: "Taegeuk Pal Jang (verplicht) + één eigen keuze uit Taegeuk 4–7 + één verrassingsvorm van de commissie uit Taegeuk 1–7.",
+          link: "#/poomsae", linkLabel: "Bekijk vormen" },
+        { id: "ilbo", ko: "일보 대련", roman: "Ilbo Taeryon", nl: "Eén-stap sparren",
+          eis: "15 stuks: 5 afwerkingen met een handtechniek en 10 met een voettechniek, waarvan minstens 3 gesprongen." },
+        { id: "hosinsul", ko: "호신술", roman: "Hosinsul", nl: "Zelfverdediging",
+          eis: "12 verdedigingen tegen vasthouden, beetpakken en klemmen — met je eigen partner." },
+        { id: "gyeorugi", ko: "겨루기", roman: "Gyeo-rugi", nl: "Sparren",
+          eis: "1× 1,5 minuut sparren met volledige bescherming en verschillende taekwondotechnieken." },
+        { id: "gyepa", ko: "격파", roman: "Gye Pa", nl: "Breektest",
+          eis: "3 categorie-A breektesten: 2 eigen keuzes (min. 1 voettechniek) + 1 aangewezen Yeop-, Dollyeo- of Dwit-chagi." },
+        { id: "theorie", roman: "Theorie", nl: "Theorie",
+          eis: "±15 meerkeuzevragen over termen, standen en technieken t/m Taegeuk 8. Vanaf 9 goed is voldoende.",
+          link: "#/quiz", linkLabel: "Doe de quiz" }
+      ]
+    },
+    "2": {
+      slagen: "15 van de 25 theorievragen goed (60%)",
+      onderdelen: [
+        { id: "poomsae", ko: "품새", roman: "Poomsae", nl: "Poomsae (vormen)",
+          eis: "Koryo (verplicht) + één eigen keuze uit Taegeuk 5–8 + één verrassingsvorm van de commissie uit Taegeuk 1–8.",
+          link: "#/poomsae", linkLabel: "Bekijk vormen" },
+        { id: "ilbo", ko: "일보 대련", roman: "Ilbo Taeryon", nl: "Eén-stap sparren",
+          eis: "15 stuks, waarvan minstens 5 aanvallen ánders dan een gewone stoot. 5 hand- en 10 voetafwerkingen, min. 3 gesprongen." },
+        { id: "hosinsul", ko: "호신술", roman: "Hosinsul", nl: "Zelfverdediging",
+          eis: "12 verdedigingen tegen verschillende stokaanvallen (oefenstok 50–80 cm) — alleen veilig en door de trainer goedgekeurd." },
+        { id: "pyojeok", ko: "표적 차기", roman: "Pyojeok Chagi + Gyeo-rugi", nl: "Targetwerk + sparren",
+          eis: "1 minuut combinaties op 1–2 targets, direct gevolgd door 1 minuut sparren; volledige wedstrijdbescherming." },
+        { id: "gyepa", ko: "격파", roman: "Gye Pa", nl: "Breektest",
+          eis: "2 categorie-A breektesten in één sprong, zonder tussentijds te landen; minstens 1 voettechniek." },
+        { id: "theorie", roman: "Theorie", nl: "Theorie",
+          eis: "±25 meerkeuzevragen over termen, standen en technieken t/m Koryo. Vanaf 15 goed is voldoende.",
+          link: "#/quiz", linkLabel: "Doe de quiz" }
+      ]
+    }
+  },
+
   /* -------------------- QUIZ -------------------- */
   quiz: [
     { v: "Wat betekent 'do' in taekwondo?", o: ["De weg", "De vuist", "De voet", "De meester"], a: 0 },
