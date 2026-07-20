@@ -232,7 +232,8 @@
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<span class="secnum">01 — De vormen</span>' +
       '<h1 class="screen-title">Poomsae</h1>' +
-      '<p class="screen-sub">De acht Taegeuk-vormen zijn je basis. Daarboven komt de zwarteband-vorm voor jouw poom. Tik op een vorm voor de betekenis, het trigram en de nieuwe technieken.</p>' +
+      '<p class="screen-sub">De acht Taegeuk-vormen zijn je basis. Wat je daarboven nodig hebt, hangt af van je poom. Tik op een vorm voor de betekenis, het trigram en de nieuwe technieken.</p>' +
+      '<div class="notecard">' + esc(C.levels[prog.level].omschrijving) + '</div>' +
       '<div class="grouphd">Taegeuk 1–8 · il i sam sa o yuk chil pal</div>' +
       '<div class="poomlist">' + foundation + '</div>' +
       examHtml +
@@ -348,7 +349,9 @@
   var flashState = null;
   function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function viewQuiz() {
-    var picked = shuffle(C.quiz).slice(0, Math.min(10, C.quiz.length)).map(function (q) {
+    var L = curLevel();
+    var pool = C.quiz.filter(function (q) { return !q.lvl || q.lvl <= L; });
+    var picked = shuffle(pool).slice(0, Math.min(10, pool.length)).map(function (q) {
       var idx = shuffle(q.o.map(function (_, i) { return i; }));
       return { v: q.v, o: idx.map(function (i) { return q.o[i]; }), a: idx.indexOf(q.a) };
     });

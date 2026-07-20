@@ -15,10 +15,10 @@ window.CURRICULUM = {
 
   /* -------------------- NIVEAUS (poom) -------------------- */
   levels: {
-    "1": { naam: "1e poom", vorm: "Koryo", vormId: "koryo",
-      omschrijving: "Je kent alle Taegeuk 1–8 uit je hoofd en leert je eerste zwarteband-vorm: Koryo." },
-    "2": { naam: "2e poom", vorm: "Keumgang", vormId: "keumgang",
-      omschrijving: "Bovenop Taegeuk 1–8 en Koryo komt de tweede zwarteband-vorm: Keumgang." }
+    "1": { naam: "1e poom", vorm: "Taegeuk Pal Jang", vormId: "pal",
+      omschrijving: "Voor je 1e poom beheers je alle Taegeuk 1–8. Verplicht op het examen is Taegeuk 8 (Pal Jang); daarnaast een eigen keuze uit Taegeuk 4–7 en een verrassingsvorm uit 1–7. Koryo heb je hier nog niet nodig." },
+    "2": { naam: "2e poom", vorm: "Koryo", vormId: "koryo",
+      omschrijving: "Voor je 2e poom komt bovenop alle Taegeuk 1–8 je eerste zwarteband-vorm: Koryo — de verplichte poomsae van dit examen. Je theorie loopt nu tot en met Koryo." }
   },
 
   /* -------------------- MINDSET-QUOTES -------------------- */
@@ -146,10 +146,10 @@ window.CURRICULUM = {
       standen: ["Ap kubi", "Dwit kubi", "Juchum seogi"]
     },
     {
-      id: "koryo", nr: 9, sino: "", video: "", level: 1, korean: "Koryo", hangul: "고려",
+      id: "koryo", nr: 9, sino: "", video: "", level: 2, korean: "Koryo", hangul: "고려",
       trigram: "士", trigramNaam: "Seonbi", trigramHangul: "선비",
-      element: "De geleerde", kup: "1e poom / 1e dan", band: "Zwart (poom)", bewegingen: 30,
-      betekenis: "Koryo is vernoemd naar de Goryeo-dynastie — waar het woord 'Korea' vandaan komt. Het teken 士 staat voor de seonbi: een geleerde, sterke geest die niet buigt voor onrecht. Dit is je eerste zwarteband-vorm.",
+      element: "De geleerde", kup: "2e poom", band: "Zwart (poom)", bewegingen: 30,
+      betekenis: "Koryo is vernoemd naar de Goryeo-dynastie — waar het woord 'Korea' vandaan komt. Het teken 士 staat voor de seonbi: een geleerde, sterke geest die niet buigt voor onrecht. Dit is je eerste zwarteband-vorm en de verplichte poomsae voor je 2e poom-examen.",
       focus: ["Zijtrap (yeop chagi) en blok scherp koppelen", "Bewuste, volwassen kracht — geen haast", "Sonnal-technieken met een duidelijke stop"],
       nieuw: [
         { ko: "칼재비", roman: "Kaljaebi", nl: "Duim-keelgreep / -stoot" },
@@ -161,10 +161,10 @@ window.CURRICULUM = {
       standen: ["Ap kubi", "Dwit kubi", "Juchum seogi"]
     },
     {
-      id: "keumgang", nr: 10, sino: "", video: "", level: 2, korean: "Keumgang", hangul: "금강",
+      id: "keumgang", nr: 10, sino: "", video: "", level: 3, korean: "Keumgang", hangul: "금강",
       trigram: "山", trigramNaam: "Berg / diamant", trigramHangul: "산",
-      element: "Onbreekbare kracht", kup: "2e poom / 2e dan", band: "Zwart (poom)", bewegingen: 27,
-      betekenis: "Keumgang betekent 'diamant' — te hard om te breken — en verwijst naar de Keumgang-berg en de Keumgang-krijger die het kwaad verjaagt. De vorm is langzaam, machtig en vol balans.",
+      element: "Onbreekbare kracht", kup: "3e poom", band: "Zwart (poom)", bewegingen: 27,
+      betekenis: "Keumgang betekent 'diamant' — te hard om te breken — en verwijst naar de Keumgang-berg en de Keumgang-krijger die het kwaad verjaagt. De vorm is langzaam, machtig en vol balans. Keumgang hoort pas bij je 3e poom, ná Koryo — dus buiten de eisen van deze app.",
       focus: ["Kraanstand (hakdari seogi): stil en in balans op één been", "Langzame, zware bewegingen met ademhaling", "Berg- en diamantblok breed en stevig"],
       nieuw: [
         { ko: "금강막기", roman: "Keumgang makgi", nl: "Diamantblok (hoog + laag samen)" },
@@ -314,11 +314,10 @@ window.CURRICULUM = {
     { v: "Welke trap gaat recht naar beneden?", o: ["Naeryo chagi", "Ap chagi", "Yeop chagi", "Dwit chagi"], a: 0 },
     { v: "'Sonnal' is welk deel van het lichaam?", o: ["Vuist", "Knie", "Meshand", "Voet"], a: 2 },
     { v: "Welke vorm is de laatste kleurbandvorm?", o: ["Taegeuk 6", "Taegeuk 7", "Taegeuk 8", "Taegeuk 5"], a: 2 },
-    { v: "Welke vorm is de eerste zwarteband-vorm (1e poom)?", o: ["Keumgang", "Koryo", "Taegeuk 8", "Taebaek"], a: 1 },
-    { v: "Wat betekent 'Koryo'?", o: ["Diamant", "De geleerde (Goryeo)", "De berg", "Het water"], a: 1 },
-    { v: "Welke vorm hoort bij de 2e poom?", o: ["Koryo", "Keumgang", "Taegeuk 7", "Pyongwon"], a: 1 },
-    { v: "Wat betekent 'Keumgang'?", o: ["Diamant / onbreekbaar", "Hemel", "Wind", "Meer"], a: 0 },
-    { v: "Welke stand balanceert op één been (in Keumgang)?", o: ["Juchum seogi", "Hakdari seogi", "Ap kubi", "Moa seogi"], a: 1 },
+    { v: "Welke poomsae is verplicht op het 1e poom-examen?", o: ["Koryo", "Taegeuk Pal Jang", "Keumgang", "Taegeuk Sa Jang"], a: 1 },
+    { v: "Welke poomsae is verplicht op het 2e poom-examen?", o: ["Taegeuk Pal Jang", "Keumgang", "Koryo", "Taebaek"], a: 2, lvl: 2 },
+    { v: "Wat betekent 'Koryo'?", o: ["Diamant", "De geleerde (seonbi/Goryeo)", "De berg", "Het water"], a: 1, lvl: 2 },
+    { v: "Waar komt de naam 'Koryo' vandaan?", o: ["De Goryeo-dynastie — waar 'Korea' vandaan komt", "Een berg in Korea", "Een oude meester", "Het woord voor diamant"], a: 0, lvl: 2 },
     { v: "Wat is 'ilbo taeryon'?", o: ["Zelfverdediging", "Eén-stap sparren", "Breektest", "Vrij sparren"], a: 1 },
     { v: "Wat betekent 'hosinsul'?", o: ["Sparren", "Zelfverdediging", "Breken", "Groeten"], a: 1 },
     { v: "Hoe heet vrij sparren?", o: ["Gyeorugi", "Gyeokpa", "Poomsae", "Hosinsul"], a: 0 },
