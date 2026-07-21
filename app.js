@@ -439,7 +439,8 @@
   var quizState = null;
   var tileEdit = false;
   var tellerTimer = null, tellerIdx = 0, tellerSpeed = 1, tellerRunning = false, tellerLoop = false;
-  var SPEEDS = [1, 1.5, 2, 0.5];
+  var SPEEDS = [0.25, 0.5, 1, 1.5, 2];
+  function fmtSpeed(v) { return String(v).replace('.', ',') + '×'; }
   function nativeRoman(c) { return String(c.roman || '').split('/')[0].trim(); }
   var flashState = null;
   function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
@@ -668,10 +669,17 @@
   function tellerReset() {
     tellerPause(); tellerIdx = 0; tellSet('', null, -1); tellSetPlaying(false);
   }
-  function tellerCycleSpeed() {
-    var i = SPEEDS.indexOf(tellerSpeed);
-    tellerSpeed = SPEEDS[(i + 1) % SPEEDS.length];
-    var b = document.getElementById('cspeed'); if (b) b.textContent = tellerSpeed + '×';
+  function tellerSetSpeed(v) {
+    tellerSpeed = v;
+    var seg = document.getElementById('cspeed');
+    if (seg) {
+      var btns = seg.querySelectorAll('.segbtn');
+      for (var i = 0; i < btns.length; i++) {
+        var on = parseFloat(btns[i].getAttribute('data-v')) === v;
+        btns[i].classList.toggle('on', on);
+        btns[i].setAttribute('aria-pressed', on);
+      }
+    }
     if (tellerRunning) tellArm();
   }
   function tellerToggleLoop() {
@@ -691,9 +699,16 @@
         '<div class="cdots" id="cdots">' + dots + '</div>' +
         '<span class="cplay" id="cstart" aria-hidden="true"></span>' +
       '</button>' +
+      '<div class="tp-speed" id="cspeed" role="group" aria-label="Tempo">' +
+        '<span class="tp-speed-lab">Tempo</span>' +
+        '<div class="segwrap">' +
+        SPEEDS.map(function (v) {
+          return '<button class="segbtn' + (v === tellerSpeed ? ' on' : '') + '" data-act="tellerSpeed" data-v="' + v + '" aria-pressed="' + (v === tellerSpeed) + '">' + fmtSpeed(v) + '</button>';
+        }).join('') +
+        '</div>' +
+      '</div>' +
       '<div class="tp-ctrl">' +
         '<button class="tpbtn" data-act="tellerReset" aria-label="Opnieuw"><span class="tpi">↺</span><span>Reset</span></button>' +
-        '<button class="tpbtn" id="cspeed" data-act="tellerCycleSpeed" aria-label="Tempo">' + tellerSpeed + '×</button>' +
         '<button class="tpbtn" id="cloopbtn" data-act="tellerLoop" aria-pressed="false" aria-label="Blijf herhalen"><span class="tpi">🔁</span><span>Herhaal</span></button>' +
       '</div>' +
       '</div></div>';
@@ -834,7 +849,7 @@
     }
     else if (act === 'tellerToggle') tellerToggle();
     else if (act === 'tellerReset') tellerReset();
-    else if (act === 'tellerCycleSpeed') tellerCycleSpeed();
+    else if (act === 'tellerSpeed') tellerSetSpeed(parseFloat(b.getAttribute('data-v')));
     else if (act === 'tellerLoop') tellerToggleLoop();
     else if (act === 'backupCopy') doBackupCopy();
     else if (act === 'backupRestore') doBackupRestore();

@@ -453,7 +453,13 @@ button{font-family:inherit}
   font-family:var(--font-cond);font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:14px;color:var(--ink)}
 .tpbtn .tpi{font-size:19px;line-height:1}
 .tpbtn.on{background:#FFFAEB;border-color:#FEC84B;color:#B54708}
-#cspeed{font-size:22px;font-family:var(--font-poster)}
+.tp-speed{display:flex;flex-direction:column;gap:7px}
+.tp-speed-lab{font-family:var(--font-cond);font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+  font-size:12px;color:var(--muted);text-align:center}
+.segwrap{flex:1;display:flex;gap:4px;padding:4px;background:#F2F4F7;border:1px solid var(--line);border-radius:14px}
+.segbtn{flex:1;padding:9px 2px;border:0;background:transparent;border-radius:10px;cursor:pointer;
+  font-family:var(--font-poster);font-size:15px;color:var(--ink);transition:background .12s,color .12s,box-shadow .12s}
+.segbtn.on{background:var(--red);color:#fff;box-shadow:0 2px 8px -2px rgba(225,29,63,.6)}
 
 /* ---------- Bronnen & back-up ---------- */
 .cctrl{display:flex;gap:10px;margin:6px 0 12px}
