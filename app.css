@@ -297,6 +297,51 @@ button{font-family:inherit}
 .goal-item .gchev svg{width:18px;height:18px}
 .daily-done{color:#12B76A;font-weight:600;font-size:13px;padding:6px 2px 10px;text-align:center}
 
+/* ---------- Home hero: dagdoel-variant ---------- */
+.hero-daily{padding-bottom:20px}
+.hdaily-hd{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:20px;position:relative;z-index:1}
+.hdaily-hd .hd-l{display:flex;flex-direction:column;gap:3px}
+.hd-label{font-family:var(--font-cond);font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--red);font-size:13px}
+.hd-date{color:#D0D5DD;font-size:13.5px;font-weight:600}
+.hero-daily .hgoals{display:grid;gap:8px;margin-top:12px;position:relative;z-index:1}
+.hero-daily .goal-item{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14)}
+.hero-daily .goal-item .gl{color:#fff}
+.hero-daily .goal-item .gl small{color:#98A2B3}
+.hero-daily .goal-item.done .gl{color:#98A2B3}
+.hero-daily .goal-item .gck{border-color:rgba(255,255,255,.32)}
+.hero-daily .goal-item .dn{color:#D0D5DD}
+.hero-daily .goal-item .gchev{color:#98A2B3}
+.hero-daily .daily-done{color:#32D583;padding:12px 2px 0}
+.hprog{display:flex;align-items:center;gap:11px;margin-top:15px;position:relative;z-index:1;
+  font-family:var(--font-cond);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:#98A2B3}
+.hprog .bar{flex:1;height:7px;background:rgba(255,255,255,.14)}
+
+/* ---------- Poomsae-detail: beeld & focus ---------- */
+.focusbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);
+  box-shadow:var(--shadow-sm);padding:12px 14px;margin-bottom:12px;display:grid;gap:8px}
+.focusbox .fb-beeld,.focusbox .fb-focus{display:flex;align-items:baseline;gap:9px;font-size:14.5px;line-height:1.4}
+.focusbox .fb-beeld{font-weight:700;color:var(--ink)}
+.focusbox .fb-focus{color:var(--gray);font-weight:600}
+.fb-tag{font-family:var(--font-cond);font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  font-size:11px;color:var(--red);flex:none;width:46px}
+
+/* ---------- Termen: tabs & moeilijk ---------- */
+.termtabs{display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  padding:2px 0 12px;margin-bottom:6px;scrollbar-width:none}
+.termtabs::-webkit-scrollbar{display:none}
+.termtabs button{flex:none;font-family:var(--font-cond);font-weight:700;font-size:13.5px;
+  text-transform:uppercase;letter-spacing:.04em;color:var(--gray);background:#EAECF0;
+  border:0;border-radius:999px;padding:8px 15px;cursor:pointer;white-space:nowrap}
+.termtabs button.on{background:var(--midnight);color:#fff}
+.gcount{font-family:var(--font-cond);font-weight:700;color:var(--gray);font-size:12px;
+  background:#F2F4F7;border-radius:999px;padding:1px 8px;margin-left:4px}
+.hardbtn{width:38px;height:38px;flex:none;border:1px solid var(--line);border-radius:11px;background:#F9FAFB;
+  font-size:19px;line-height:1;color:#98A2B3;cursor:pointer;display:grid;place-items:center}
+.hardbtn.on{color:#F79009;border-color:#FEC84B;background:#FFFAEB}
+.trow.hard{border-color:#FEC84B;background:#FFFCF5}
+.termempty{color:var(--gray);font-size:14px;background:var(--surface);border:1px dashed var(--line);
+  border-radius:var(--radius-sm);padding:18px 15px;text-align:center}
+
 /* ---------- Examenkaart CTA (home) ---------- */
 .examcta{display:flex;align-items:center;gap:13px;text-decoration:none;margin-bottom:26px;
   background:linear-gradient(135deg,#101828,#1D2B4D);color:#fff;border-radius:var(--radius);

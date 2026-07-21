@@ -44,6 +44,7 @@ window.CURRICULUM = {
       trigram: "☰", trigramNaam: "Keon", trigramHangul: "건",
       element: "Hemel", kup: "8e kup", band: "Geel", bewegingen: 18,
       betekenis: "Keon staat voor de hemel en het licht — het begin van alles. De eerste vorm legt de basis: rechte standen en de meest voorkomende technieken.",
+      beeld: "Hemel en licht", kernpunt: "Sterke, duidelijke basis. Rustig beginnen en netjes eindigen.",
       focus: ["Rechte lijnen in de diagram (het pad vormt een + )", "Rustig en groot bewegen", "Kihap op de laatste beweging"],
       nieuw: [
         { ko: "아래 막기", roman: "Arae makgi", nl: "Lage blok" },
@@ -58,6 +59,7 @@ window.CURRICULUM = {
       trigram: "☱", trigramNaam: "Tae", trigramHangul: "태",
       element: "Meer", kup: "7e kup", band: "Geel-groen", bewegingen: 18,
       betekenis: "Tae is het meer: vreugde en innerlijke stevigheid. De vorm voegt hoge blokken toe en meer trappen.",
+      beeld: "Meer en kalmte", kernpunt: "Adem beheersen en ontspannen kracht gebruiken.",
       focus: ["Hoge blok (eolgul makgi) zuiver plaatsen", "Trap en stoot vloeiend koppelen", "Blik altijd eerst in de richting"],
       nieuw: [
         { ko: "얼굴 막기", roman: "Eolgul makgi", nl: "Hoge / gezichtsblok" },
@@ -70,6 +72,7 @@ window.CURRICULUM = {
       trigram: "☲", trigramNaam: "Ri", trigramHangul: "리",
       element: "Vuur", kup: "6e kup", band: "Groen", bewegingen: 20,
       betekenis: "Ri is het vuur: warmte en enthousiasme. Hier komt de achterstand en de meshand erbij.",
+      beeld: "Vuur", kernpunt: "Energie, ritme en duidelijke richtingswisselingen.",
       focus: ["Dwit kubi (achterstand) laag en stabiel", "Meshand-slag met scherpe stop", "Ritme: snel–langzaam afwisselen"],
       nieuw: [
         { ko: "손날 막기", roman: "Sonnal makgi", nl: "Meshand-blok (in achterstand)" },
@@ -82,6 +85,7 @@ window.CURRICULUM = {
       trigram: "☳", trigramNaam: "Jin", trigramHangul: "진",
       element: "Donder", kup: "5e kup", band: "Groen-blauw", bewegingen: 20,
       betekenis: "Jin is de donder: kracht en moed, maar met beheersing. Deze vorm heeft de meeste nieuwe technieken.",
+      beeld: "Donder", kernpunt: "Krachtig reageren en toch beheerst blijven.",
       focus: ["Speerhand en zwaluw-slag netjes richten", "Zijtrap (yeop chagi) met de mesvoet", "Stevig blijven na de donderende technieken"],
       nieuw: [
         { ko: "손날 몸통 막기", roman: "Sonnal momtong makgi", nl: "Dubbele meshand middenblok" },
@@ -97,6 +101,7 @@ window.CURRICULUM = {
       trigram: "☴", trigramNaam: "Seon", trigramHangul: "손",
       element: "Wind", kup: "4e kup", band: "Blauw", bewegingen: 20,
       betekenis: "Seon is de wind: zacht maar soms machtig. Hamervuist en elleboog geven de vorm pit.",
+      beeld: "Wind", kernpunt: "Soms zacht en soepel, soms plotseling krachtig.",
       focus: ["Juchum seogi (paardrijstand) breed en laag", "Elleboogslag draait vanuit de heup", "Hamervuist ontspannen, dan hard"],
       nieuw: [
         { ko: "메주먹 내려치기", roman: "Me jumeok naeryo chigi", nl: "Hamervuist neerwaarts" },
@@ -110,6 +115,7 @@ window.CURRICULUM = {
       trigram: "☵", trigramNaam: "Gam", trigramHangul: "감",
       element: "Water", kup: "3e kup", band: "Blauw-rood", bewegingen: 19,
       betekenis: "Gam is het water: het stroomt om obstakels heen. Hier verschijnt de draaitrap.",
+      beeld: "Water", kernpunt: "Meebewegen, omleiden en weer doorgaan.",
       focus: ["Dollyo chagi (draaitrap) met de wreef", "Handpalm-blok soepel", "Vloeiend blijven, zoals water"],
       nieuw: [
         { ko: "돌려차기", roman: "Dollyo chagi", nl: "Draaitrap (roundhouse)" },
@@ -123,6 +129,7 @@ window.CURRICULUM = {
       trigram: "☶", trigramNaam: "Gan", trigramHangul: "간",
       element: "Berg", kup: "2e kup", band: "Rood", bewegingen: 25,
       betekenis: "Gan is de berg: stevig en standvastig. Veel korte, krachtige technieken en de kniestoot.",
+      beeld: "Berg", kernpunt: "Stabiel staan, goede balans en stevige houdingen.",
       focus: ["Beom seogi (tijgerstand) licht op de voorvoet", "Schaarblok met beide armen tegelijk", "Kniestoot met een greep ervoor"],
       nieuw: [
         { ko: "손날 아래막기", roman: "Sonnal arae makgi", nl: "Meshand lage blok" },
@@ -137,6 +144,7 @@ window.CURRICULUM = {
       trigram: "☷", trigramNaam: "Gon", trigramHangul: "곤",
       element: "Aarde", kup: "1e kup", band: "Rood-zwart", bewegingen: 27,
       betekenis: "Gon is de aarde: de basis waarop alles rust. De laatste kleurbandvorm — daarna volgt de eerste poom.",
+      beeld: "Aarde", kernpunt: "Alles uit de vorige vormen verbinden en volwassen uitvoeren.",
       focus: ["Sprongtrap (dubbele voortrap) met hoogte", "Alles wat je leerde samenbrengen", "Kracht, controle én ademhaling"],
       nieuw: [
         { ko: "두발 당성 앞차기", roman: "Dubal dangseong ap chagi", nl: "Springende dubbele voortrap" },
@@ -221,48 +229,89 @@ window.CURRICULUM = {
 
   /* -------------------- TERMINOLOGIE -------------------- */
   termen: [
+    { groep: "Algemeen", items: [
+      { ko: "태권도", roman: "Taekwondo", nl: "De weg/manier van voet en vuist" },
+      { ko: "도복", roman: "Dobok", nl: "Taekwondopak" },
+      { ko: "도장", roman: "Dojang", nl: "Trainingsruimte" },
+      { ko: "기합", roman: "Kiap", nl: "Krachtkreet" },
+      { ko: "품새", roman: "Poomsae", nl: "Stijlvorm (vormen)" }
+    ]},
     { groep: "Commando's", items: [
-      { ko: "차렷", roman: "Charyeot", nl: "Houding aannemen / attentie" },
-      { ko: "경례", roman: "Kyeongnye", nl: "Groeten (buigen)" },
-      { ko: "준비", roman: "Junbi", nl: "Klaarstaan / gereed" },
-      { ko: "시작", roman: "Sijak", nl: "Begin" },
-      { ko: "그만", roman: "Geuman", nl: "Stop" },
-      { ko: "바로", roman: "Baro", nl: "Terug naar de uitgangspositie" },
-      { ko: "쉬어", roman: "Swieo", nl: "Op de plaats rust" },
-      { ko: "뒤로 돌아", roman: "Dwiro dora", nl: "Omdraaien" },
-      { ko: "기합", roman: "Kihap", nl: "Strijdkreet" }
+      { ko: "차렷", roman: "Charyot", nl: "In de houding staan" },
+      { ko: "경례", roman: "Gyeong-rye", nl: "Groeten (buigen)" },
+      { ko: "준비", roman: "Junbi", nl: "Klaarstaan" },
+      { ko: "시작", roman: "Sijak", nl: "Start" },
+      { ko: "그만", roman: "Geuman", nl: "Stop of einde" },
+      { ko: "갈려", roman: "Gallyeo", nl: "Onderbreek (uit elkaar)" }
+    ]},
+    { groep: "Richtingen", items: [
+      { ko: "왼", roman: "Oen", nl: "Links" },
+      { ko: "오른", roman: "Oreun", nl: "Rechts" },
+      { ko: "앞", roman: "Ap", nl: "Voorwaarts" },
+      { ko: "뒤", roman: "Dwit", nl: "Achterwaarts" },
+      { ko: "옆", roman: "Yeop", nl: "Zijwaarts" },
+      { ko: "내려", roman: "Naeryo", nl: "Neerwaarts" },
+      { ko: "올려", roman: "Ollyeo", nl: "Opwaarts" },
+      { ko: "안", roman: "An", nl: "Binnenwaarts" },
+      { ko: "바깥", roman: "Bakat", nl: "Buitenwaarts" },
+      { ko: "세워", roman: "Seweo", nl: "Verticaal" },
+      { ko: "젖혀", roman: "Jeochyo", nl: "Omgekeerd; handpalm naar boven" },
+      { ko: "당겨", roman: "Dangyo", nl: "Trekkend of omgekeerd opwaarts" },
+      { ko: "반대", roman: "Bandae", nl: "Tegengesteld gericht" },
+      { ko: "바로", roman: "Baro", nl: "Gelijkgericht" },
+      { ko: "눌러", roman: "Nooleo", nl: "Drukkend of duwend" },
+      { ko: "돌려", roman: "Dollyeo", nl: "Draaiend of cirkelend" },
+      { ko: "몸돌려", roman: "Momdollyeo", nl: "Draaien via de rug om de lichaamsas" },
+      { ko: "뛰어", roman: "Twieo", nl: "Gesprongen" }
+    ]},
+    { groep: "Lichaamsdelen", items: [
+      { ko: "몸", roman: "Mom", nl: "Lichaam" },
+      { ko: "얼굴", roman: "Eolgool", nl: "Hoog (boven de sleutelbeenderen)" },
+      { ko: "몸통", roman: "Momtong", nl: "Midden (romp)" },
+      { ko: "아래", roman: "Arae", nl: "Laag (onder de navel)" },
+      { ko: "턱", roman: "Teok", nl: "Kaak of kin" },
+      { ko: "목", roman: "Mok", nl: "Hals of nek" },
+      { ko: "등", roman: "Deung", nl: "Rug" },
+      { ko: "팔굽", roman: "Palkoop", nl: "Elleboog" },
+      { ko: "팔목", roman: "Palmok", nl: "Onderarm" },
+      { ko: "안팔목", roman: "An Palmok", nl: "Binnenkant van de onderarm" },
+      { ko: "바깥팔목", roman: "Bakat Palmok", nl: "Buitenkant van de onderarm" },
+      { ko: "주먹", roman: "Joomeok", nl: "Vuist" },
+      { ko: "메주먹", roman: "Me-Joomeok", nl: "Hamervuist" },
+      { ko: "등주먹", roman: "Deung-Joomeok", nl: "Vuistrug" },
+      { ko: "손", roman: "Son", nl: "Hand" },
+      { ko: "손날", roman: "Sonnal", nl: "Meshand" },
+      { ko: "손끝", roman: "Sonkeut", nl: "Vingertoppen" },
+      { ko: "편손끝", roman: "Pyonsonkeut", nl: "Speerhand" },
+      { ko: "무릎", roman: "Mooreup", nl: "Knie" },
+      { ko: "발", roman: "Bal", nl: "Voet" },
+      { ko: "발날", roman: "Balnal", nl: "Mesvoet" },
+      { ko: "발등", roman: "Baldeung", nl: "Wreef" },
+      { ko: "앞축", roman: "Apchook", nl: "Bal van de voet" },
+      { ko: "뒤축", roman: "Dwichook", nl: "Hieldeel van de voet" }
+    ]},
+    { groep: "Materiaal", items: [
+      { ko: "호구", roman: "Hogu", nl: "Rompbeschermer" }
+    ]},
+    { groep: "Examen onderdelen", items: [
+      { ko: "일보 대련", roman: "Ilbo Taeryon", nl: "Eénstapssparring" },
+      { ko: "이보 대련", roman: "Ibo Taeryon", nl: "Tweestapssparring" },
+      { ko: "삼보 대련", roman: "Sambo Taeryon", nl: "Driestapssparring" },
+      { ko: "겨루기", roman: "Gyeo-rugi", nl: "Sparren" },
+      { ko: "격파", roman: "Gye Pa", nl: "Breektest" },
+      { ko: "호신술", roman: "Hosinsul", nl: "Zelfverdediging" }
     ]},
     { groep: "Tellen (1–10)", items: [
-      { ko: "하나", roman: "Hana", nl: "1" },
-      { ko: "둘", roman: "Dul", nl: "2" },
-      { ko: "셋", roman: "Set", nl: "3" },
-      { ko: "넷", roman: "Net", nl: "4" },
-      { ko: "다섯", roman: "Daseot", nl: "5" },
-      { ko: "여섯", roman: "Yeoseot", nl: "6" },
-      { ko: "일곱", roman: "Ilgop", nl: "7" },
-      { ko: "여덟", roman: "Yeodeol", nl: "8" },
-      { ko: "아홉", roman: "Ahop", nl: "9" },
-      { ko: "열", roman: "Yeol", nl: "10" }
-    ]},
-    { groep: "Doelgebieden & lichaam", items: [
-      { ko: "얼굴", roman: "Eolgul", nl: "Hoog / gezicht" },
-      { ko: "몸통", roman: "Momtong", nl: "Midden / romp" },
-      { ko: "아래", roman: "Arae", nl: "Laag" },
-      { ko: "주먹", roman: "Jumeok", nl: "Vuist" },
-      { ko: "손날", roman: "Sonnal", nl: "Meshand" },
-      { ko: "팔목", roman: "Palmok", nl: "Onderarm / pols" },
-      { ko: "발", roman: "Bal", nl: "Voet" },
-      { ko: "무릎", roman: "Mureup", nl: "Knie" }
-    ]},
-    { groep: "Algemeen", items: [
-      { ko: "태권도", roman: "Taekwondo", nl: "De weg van hand en voet" },
-      { ko: "도장", roman: "Dojang", nl: "Oefenzaal" },
-      { ko: "도복", roman: "Dobok", nl: "Trainingspak" },
-      { ko: "띠", roman: "Ti", nl: "Band / riem" },
-      { ko: "사범님", roman: "Sabeomnim", nl: "Leraar / master" },
-      { ko: "품새", roman: "Poomsae", nl: "Vormen" },
-      { ko: "겨루기", roman: "Kyorugi", nl: "Sparren" },
-      { ko: "품", roman: "Poom", nl: "Junior zwarte band-graad" }
+      { ko: "하나", roman: "Hana / Il", nl: "een" },
+      { ko: "둘", roman: "Dul / I", nl: "twee" },
+      { ko: "셋", roman: "Set / Sam", nl: "drie" },
+      { ko: "넷", roman: "Net / Sa", nl: "vier" },
+      { ko: "다섯", roman: "Tasot / O", nl: "vijf" },
+      { ko: "여섯", roman: "Yosot / Yuk", nl: "zes" },
+      { ko: "일곱", roman: "Ilgop / Chil", nl: "zeven" },
+      { ko: "여덟", roman: "Yodol / Pal", nl: "acht" },
+      { ko: "아홉", roman: "Ahop / Ku", nl: "negen" },
+      { ko: "열", roman: "Yul / Sip", nl: "tien" }
     ]}
   ],
 

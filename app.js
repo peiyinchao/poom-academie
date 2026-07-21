@@ -17,12 +17,24 @@
   function save(p) { try { localStorage.setItem(KEY, JSON.stringify(p)); } catch (e) {} }
   var prog = load();
   if (!prog.poomsae) prog.poomsae = {};
-  if (typeof prog.quizBest !== 'number') prog.quizBest = 0;
+  if (prog.quizBest == null || typeof prog.quizBest === 'number') prog.quizBest = {};
   if (prog.level !== '1' && prog.level !== '2') prog.level = '1';
   if (!prog.exam) prog.exam = {};
+  if (!prog.hardTerms) prog.hardTerms = {};
 
   /* ---------- Niveau (1e / 2e poom) ---------- */
   function curLevel() { return prog.level === '2' ? 2 : 1; }
+  function examCount() { return curLevel() >= 2 ? 25 : 15; }
+  function bestScore() { return prog.quizBest[prog.level] || 0; }
+  function setBest(v) { prog.quizBest[prog.level] = v; save(prog); }
+  /* ---------- Moeilijke termen ---------- */
+  function termKey(t) { return t.roman; }
+  function isHard(t) { return !!prog.hardTerms[termKey(t)]; }
+  function toggleHard(k) {
+    if (prog.hardTerms[k]) delete prog.hardTerms[k]; else prog.hardTerms[k] = 1;
+    save(prog); return !!prog.hardTerms[k];
+  }
+  function hardTermList() { return allTerms().filter(isHard); }
   function visPoomsae() { var L = curLevel(); return C.poomsae.filter(function (p) { return (p.level || 0) === 0 || p.level <= L; }); }
   function foundationPoomsae() { return C.poomsae.filter(function (p) { return (p.level || 0) === 0; }); }
   function examPoomsae() { var L = curLevel(); return C.poomsae.filter(function (p) { return p.level >= 1 && p.level <= L; }); }
@@ -154,9 +166,15 @@
   function viewHome() {
     var vis = visPoomsae(), done = poomDone(), pct = Math.round(done / vis.length * 100);
     var idx = new Date().getDate() + new Date().getMonth();
-    var all = []; C.termen.forEach(function (g) { g.items.forEach(function (i) { all.push(i); }); });
-    var tod = all[idx % all.length];
+    var all = allTerms();
+    var todPool = hardTermList(); var todHard = todPool.length > 0; if (!todHard) todPool = all;
+    var tod = todPool[idx % todPool.length];
+    var todLabel = todHard ? 'Moeilijke term van de dag' : 'Term van de dag';
     var quote = C.quotes[idx % C.quotes.length];
+    var WD = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
+    var MO = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
+    var nowD = new Date();
+    var dateStr = WD[nowD.getDay()] + ' ' + nowD.getDate() + ' ' + MO[nowD.getMonth()] + ' ' + nowD.getFullYear();
 
     var lvlToggle = '<div class="lvltoggle">' + ['1', '2'].map(function (l) {
       return '<button data-act="lvl" data-l="' + l + '" class="' + (prog.level === l ? 'on' : '') + '">' + esc(C.levels[l].naam) + '</button>';
@@ -209,29 +227,25 @@
 
     view.innerHTML =
       '<div class="view active"><div class="screen">' +
-        '<div class="hero">' +
+        '<div class="hero hero-daily">' +
           '<div class="myline">Mijn</div>' +
           '<h1>Poom<span class="dot">.</span>Academy</h1>' +
           '<div class="lvlsel"><span class="ll">Ik oefen voor</span>' + lvlToggle + '</div>' +
-          '<div class="prog-wrap">' +
-            '<div class="ring" style="--p:' + pct + '"><span>' + pct + '%</span></div>' +
-            '<div class="pl">Poomsae geoefend<b>' + done + ' / ' + vis.length + '</b>' +
-              (done === vis.length ? 'Alles gehad — knap werk! 🥋' : 'Ga zo door!') + '</div>' +
+          '<div class="hdaily-hd">' +
+            '<div class="hd-l"><span class="hd-label">Dagdoel</span>' +
+              '<span class="hd-date">' + esc(dateStr) + '</span></div>' +
+            '<span class="daystreak' + (streak ? ' on' : '') + '">🔥 ' + streak + ' dag' + (streak === 1 ? '' : 'en') + '</span>' +
           '</div>' +
+          '<div class="hgoals">' + goalHtml + '</div>' +
+          (allDone ? '<div class="daily-done">Alle dagdoelen gehaald! Top gedaan. 🎉</div>' : '') +
+          '<div class="hprog"><span>Poomsae ' + done + '/' + vis.length + '</span><span class="bar"><i style="width:' + pct + '%"></i></span></div>' +
           '<img class="wm" src="mark-taeguk.svg" alt="">' +
         '</div>' +
 
         '<div class="trow tod"><button class="speak" data-act="speak" data-ko="' + esc(tod.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' +
-          '<div class="tx"><div class="ko">' + esc(tod.ko) + '</div><div class="ro">' + esc(tod.roman) + '</div><div class="nl">Term van de dag · ' + esc(tod.nl) + '</div></div></div>' +
+          '<div class="tx"><div class="ko">' + esc(tod.ko) + '</div><div class="ro">' + esc(tod.roman) + '</div><div class="nl">' + esc(todLabel) + ' · ' + esc(tod.nl) + '</div></div></div>' +
 
         '<div class="quotecard">“' + esc(quote) + '”</div>' +
-
-        '<div class="daily">' +
-          '<div class="daily-hd"><span class="secnum" style="margin:0">Dagdoel</span>' +
-            '<span class="daystreak' + (streak ? ' on' : '') + '">🔥 ' + streak + ' dag' + (streak === 1 ? '' : 'en') + '</span></div>' +
-          '<div class="goals">' + goalHtml + '</div>' +
-          (allDone ? '<div class="daily-done">Alle dagdoelen gehaald! Top gedaan. 🎉</div>' : '') +
-        '</div>' +
 
         examCTA +
 
@@ -283,6 +297,11 @@
         '<div class="tx"><div class="ko">' + esc(t.ko) + '</div><div class="ro">' + esc(t.roman) + '</div><div class="nl">' + esc(t.nl) + '</div></div></div>';
     }).join('');
     var focus = p.focus.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('');
+    var beeldBox = (p.beeld || p.kernpunt) ?
+      '<div class="focusbox">' +
+        (p.beeld ? '<div class="fb-beeld"><span class="fb-tag">Beeld</span>' + esc(p.beeld) + '</div>' : '') +
+        (p.kernpunt ? '<div class="fb-focus"><span class="fb-tag">Focus</span>' + esc(p.kernpunt) + '</div>' : '') +
+      '</div>' : '';
     var standen = p.standen.map(function (s) { return '<span class="tag" style="color:var(--blue);font-size:13px">' + esc(s) + '</span>'; }).join(' · ');
     var videoHtml = p.video
       ? '<div class="sect"><h4>Instructievideo</h4></div>' +
@@ -298,10 +317,10 @@
       '<div class="detail-head"><span class="tg">' + p.trigram + '</span>' +
         '<div><h2>' + esc(p.korean) + '</h2><div class="kr">' + esc(p.hangul) + ' · ' + esc(p.trigramNaam) + ' (' + esc(p.trigramHangul) + ')</div></div></div>' +
       '<div class="factrow">' +
-        fact('Element', p.element) + fact('Graad', p.kup) + fact('Band', p.band) + fact('Bewegingen', p.bewegingen) +
+        fact('Element', p.element) + fact('Graad', p.kup) + fact('Band', p.band) + fact('Stappen', p.bewegingen) +
       '</div>' +
       '<div class="blurb">' + esc(p.betekenis) + '</div>' +
-      '<div class="sect"><h4>Waar let je op</h4></div><ul class="ul">' + focus + '</ul>' +
+      '<div class="sect"><h4>Waar let je op</h4></div>' + beeldBox + '<ul class="ul">' + focus + '</ul>' +
       '<div class="sect"><h4>Nieuwe technieken</h4></div><div class="rows">' + nieuw + '</div>' +
       '<div class="sect"><h4>Standen in deze vorm</h4></div><p style="color:var(--gray);font-size:14px">' + standen + '</p>' +
       videoHtml +
@@ -351,28 +370,44 @@
   }
 
   /* ---------- View: Termen ---------- */
+  var termTab = null;
+  function termTabs() {
+    var tabs = C.termen.map(function (g) { return { k: g.groep, label: g.groep }; });
+    if (hardTermList().length) tabs.push({ k: 'hard', label: '★ Moeilijk' });
+    return tabs;
+  }
   function viewTermen() {
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<span class="secnum">03 — Woordenschat</span>' +
       '<h1 class="screen-title">Koreaanse termen</h1>' +
-      '<p class="screen-sub">Commando\'s, tellen en begrippen. Zoek of blader, en luister naar de uitspraak.</p>' +
-      '<input id="termsearch" class="opt" style="width:100%;font-family:inherit;font-size:15px" placeholder="Zoek een term of betekenis…" autocomplete="off">' +
-      '<div id="termbody" style="margin-top:14px"></div>' +
+      '<p class="screen-sub">Kies een categorie en luister naar de uitspraak. Tik op ☆ om een term als moeilijk te markeren — die komt vaker terug in je dagterm en flashcards.</p>' +
+      '<div class="termtabs" id="termtabs"></div>' +
+      '<div id="termbody"></div>' +
       '</div></div>';
-    renderTerms('');
-    var inp = document.getElementById('termsearch');
-    inp.addEventListener('input', function () { renderTerms(inp.value.toLowerCase().trim()); });
+    renderTermTabs();
+    renderTermTab();
   }
-  function renderTerms(q) {
-    var out = '';
-    C.termen.forEach(function (g) {
-      var items = g.items.filter(function (i) {
-        return !q || i.roman.toLowerCase().indexOf(q) >= 0 || i.nl.toLowerCase().indexOf(q) >= 0 || i.ko.indexOf(q) >= 0;
-      });
-      if (!items.length) return;
-      out += '<div class="grouphd">' + esc(g.groep) + '</div><div class="rows">' + items.map(termRow).join('') + '</div>';
-    });
-    document.getElementById('termbody').innerHTML = out || '<p style="color:var(--gray)">Niets gevonden.</p>';
+  function renderTermTabs() {
+    var tabs = termTabs();
+    if (!termTab || !tabs.some(function (t) { return t.k === termTab; })) termTab = tabs[0].k;
+    document.getElementById('termtabs').innerHTML = tabs.map(function (t) {
+      return '<button class="' + (t.k === termTab ? 'on' : '') + '" data-act="termtab" data-k="' + esc(t.k) + '">' + esc(t.label) + '</button>';
+    }).join('');
+  }
+  function termRowH(t) {
+    var hard = isHard(t);
+    return '<div class="trow' + (hard ? ' hard' : '') + '"><button class="speak" data-act="speak" data-ko="' + esc(t.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' +
+      '<div class="tx"><div class="ko">' + esc(t.ko) + '</div><div class="ro">' + esc(t.roman) + '</div><div class="nl">' + esc(t.nl) + '</div></div>' +
+      '<button class="hardbtn' + (hard ? ' on' : '') + '" data-act="hardterm" data-k="' + esc(termKey(t)) + '" aria-pressed="' + hard + '" aria-label="Markeer als moeilijk" title="Moeilijk">' + (hard ? '★' : '☆') + '</button></div>';
+  }
+  function renderTermTab() {
+    var items, hd;
+    if (termTab === 'hard') { items = hardTermList(); hd = 'Moeilijke termen'; }
+    else { var g = C.termen.filter(function (x) { return x.groep === termTab; })[0]; items = g ? g.items : []; hd = g ? g.groep : ''; }
+    var body = items.length
+      ? '<div class="grouphd">' + esc(hd) + ' <span class="gcount">' + items.length + '</span></div><div class="rows">' + items.map(termRowH).join('') + '</div>'
+      : '<p class="termempty">Nog geen moeilijke termen. Tik op ☆ bij een term om die vaker te oefenen.</p>';
+    document.getElementById('termbody').innerHTML = body;
   }
 
   /* ---------- View: Quiz ---------- */
@@ -384,7 +419,7 @@
   function viewQuiz() {
     var L = curLevel();
     var pool = C.quiz.filter(function (q) { return !q.lvl || q.lvl <= L; });
-    var picked = shuffle(pool).slice(0, Math.min(10, pool.length)).map(function (q) {
+    var picked = shuffle(pool).slice(0, Math.min(examCount(), pool.length)).map(function (q) {
       var idx = shuffle(q.o.map(function (_, i) { return i; }));
       return { v: q.v, o: idx.map(function (i) { return q.o[i]; }), a: idx.indexOf(q.a) };
     });
@@ -401,7 +436,7 @@
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<span class="secnum">04 — Oefenen</span>' +
       '<h1 class="screen-title">Quiz</h1>' +
-      '<p class="screen-sub">Vraag ' + (s.i + 1) + ' van ' + n + ' · beste score: ' + prog.quizBest + '/' + n + '</p>' +
+      '<p class="screen-sub">Vraag ' + (s.i + 1) + ' van ' + n + ' · beste score: ' + bestScore() + '/' + n + '</p>' +
       '<div class="quizbar"><i style="width:' + (s.i / n * 100) + '%"></i></div>' +
       '<div class="quizcard"><div class="qnum">Vraag ' + (s.i + 1) + '</div>' +
         '<div class="q">' + esc(q.v) + '</div><div class="opts">' + opts + '</div>' +
@@ -425,14 +460,14 @@
   }
   function renderQuizDone() {
     var s = quizState, n = s.qs.length;
-    if (s.score > prog.quizBest) { prog.quizBest = s.score; save(prog); }
+    if (s.score > bestScore()) setBest(s.score);
     var d = daily(); if (!d.quiz) { d.quiz = true; save(prog); checkDaily(); }
     var msg = s.score === n ? 'Perfect! Meesterlijk. 🥋' : s.score >= n * 0.7 ? 'Sterk gedaan!' : 'Goed geoefend — probeer het nog eens.';
     view.innerHTML = '<div class="view active"><div class="screen"><div class="quizcard quizdone">' +
       '<div class="score">' + s.score + '/' + n + '</div>' +
       '<h2 style="margin:10px 0 4px">' + msg + '</h2>' +
-      '<p>Beste score tot nu: ' + prog.quizBest + '/' + n + '</p>' +
-      '<p class="qhint">Elke ronde krijg je nieuwe, willekeurige vragen.</p>' +
+      '<p>Beste score tot nu: ' + bestScore() + '/' + n + '</p>' +
+      '<p class="qhint">Zoveel vragen krijg je ook op je echte ' + esc(C.levels[prog.level].naam) + '-examen. Elke ronde is willekeurig.</p>' +
       '<button class="btn primary" data-act="qretry" style="margin-top:14px">Opnieuw</button> ' +
       '<a class="btn ghost" href="#/home" style="margin-top:14px;display:inline-block;text-decoration:none">Naar home</a>' +
       '</div></div></div>';
@@ -595,7 +630,9 @@
   /* ---------- View: Flashcards (termen) ---------- */
   function allTerms() { var a = []; C.termen.forEach(function (g) { g.items.forEach(function (i) { a.push(i); }); }); return a; }
   function viewFlash() {
-    flashState = { cards: shuffle(allTerms()).slice(0, 10), i: 0, flipped: false, knew: 0 };
+    var hard = shuffle(hardTermList());
+    var rest = shuffle(allTerms().filter(function (t) { return !isHard(t); }));
+    flashState = { cards: hard.concat(rest).slice(0, 10), i: 0, flipped: false, knew: 0 };
     renderFlash();
   }
   function renderFlash() {
@@ -732,6 +769,12 @@
     else if (act === 'qopt') answerQuiz(+b.getAttribute('data-i'));
     else if (act === 'qnext') { quizState.i++; quizState.answered = false; renderQuiz(); }
     else if (act === 'qretry') viewQuiz();
+    else if (act === 'termtab') { termTab = b.getAttribute('data-k'); renderTermTabs(); renderTermTab(); }
+    else if (act === 'hardterm') {
+      var on = toggleHard(b.getAttribute('data-k'));
+      toast(on ? 'Gemarkeerd als moeilijk ★' : 'Markering gewist');
+      renderTermTabs(); renderTermTab();
+    }
   });
 
   /* ---------- Segmented control zonder route-herlaad (soepeler) ---------- */
