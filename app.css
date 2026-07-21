@@ -38,7 +38,7 @@ button{font-family:inherit}
 .appbar .brand{display:flex;align-items:center;gap:8px;font-family:var(--font-cond);
   font-weight:700;text-transform:uppercase;letter-spacing:-.01em;font-size:19px}
 .appbar .brand img{width:30px;height:30px}
-.appbar .brand .dot{color:var(--red);margin:0 -.06em}
+.appbar .brand .dot{color:var(--red);margin:0 -.22em;position:relative;top:-.34em;font-size:.7em}
 .appbar .streak{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
 .appbar .streak .flame{font-size:14px;line-height:1}
@@ -85,8 +85,8 @@ button{font-family:inherit}
 .hero .myline{font-family:var(--font-cond);font-weight:600;letter-spacing:.22em;
   text-transform:uppercase;color:#98A2B3;font-size:12px;margin-bottom:6px}
 .hero h1{font-family:var(--font-poster);font-weight:400;text-transform:uppercase;
-  font-size:clamp(30px,9vw,44px);line-height:.92;transform:skewX(-8deg);margin-bottom:14px;letter-spacing:-.03em}
-.hero h1 .dot{color:var(--red);margin:0 -.1em}
+  font-size:clamp(30px,9vw,44px);line-height:.92;transform:skewX(-8deg);margin-bottom:14px}
+.hero h1 .dot{color:var(--red)}
 .hero .goal{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:7px 13px;font-size:13px}
 .hero .goal b{color:#fff}
@@ -386,6 +386,19 @@ button{font-family:inherit}
 .exeis{color:var(--gray);font-size:13.5px;line-height:1.5;margin-top:5px}
 .exact{margin-top:9px}
 .btn.sm{padding:7px 13px;font-size:13px}
+.exdet{margin-top:9px;border-top:1px solid var(--line)}
+.exdet summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+  gap:8px;padding:9px 0 3px;font-family:var(--font-cond);font-weight:700;text-transform:uppercase;
+  letter-spacing:.03em;font-size:12.5px;color:var(--blue)}
+.exdet summary::-webkit-details-marker{display:none}
+.exdet summary .pl{color:var(--blue);font-size:18px;transition:transform .2s}
+.exdet[open] summary .pl{transform:rotate(45deg)}
+.exdet-b{padding:4px 0 2px}
+.exdet-b p{color:var(--ink);font-size:13.5px;line-height:1.6;margin:0 0 8px}
+.qbadge{display:inline-block;font-family:var(--font-cond);font-weight:700;text-transform:uppercase;
+  letter-spacing:.05em;font-size:13px;padding:4px 12px;border-radius:999px;margin-top:8px}
+.qbadge.pass{background:#DCFAE6;color:#067647}
+.qbadge.fail{background:#FEE4E2;color:#B42318}
 
 /* ---------- Poomsae-video ---------- */
 .video{position:relative;margin-top:8px;border-radius:var(--radius-sm);overflow:hidden;background:#000;

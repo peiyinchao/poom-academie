@@ -331,19 +331,19 @@ window.CURRICULUM = {
 
   /* -------------------- EXAMENONDERDELEN -------------------- */
   onderdelen: [
-    { ko: "일보 대련", roman: "Ilbo Taeryon", nl: "Eén-stap sparren",
+    { id: "ilbo", ko: "일보 대련", roman: "Ilbo Taeryon", nl: "Eén-stap sparren",
       icon: "step",
       uitleg: "Afgesproken oefening met een partner. Je partner doet één stap naar voren met een stoot; jij blokt en counters met een nette, gecontroleerde techniek. Het traint afstand, timing en zuivere technieken zonder echt gevecht.",
       tips: ["Begin op de juiste afstand en groet je partner", "Blok eerst, dan pas de counter", "Stop de techniek met controle — raak niet vol"] },
-    { ko: "호신술", roman: "Hosinsul", nl: "Zelfverdediging",
+    { id: "hosinsul", ko: "호신술", roman: "Hosinsul", nl: "Zelfverdediging",
       icon: "shield",
       uitleg: "Praktische verdediging tegen grepen en omklemmingen: losmaken uit een polsgreep, een omklemming of een greep bij de kleding, en jezelf veilig bevrijden. Techniek en rust gaan boven kracht.",
       tips: ["Blijf rustig en houd balans", "Gebruik het zwakke punt van een greep (de duim)", "Maak jezelf los en creëer afstand"] },
-    { ko: "겨루기", roman: "Gyeorugi", nl: "Sparren (vrij gevecht)",
+    { id: "gyeorugi", ko: "겨루기", roman: "Gyeorugi", nl: "Sparren (vrij gevecht)",
       icon: "spar",
       uitleg: "Vrij sparren met een partner, mét bescherming (hogu, helm). Je scoort met gecontroleerde trappen en stoten op romp en hoofd. Respect en controle staan altijd voorop.",
       tips: ["Draag altijd je beschermers", "Blijf bewegen op je voorvoeten", "Controle boven hard raken"] },
-    { ko: "격파", roman: "Gyeokpa", nl: "Breektest",
+    { id: "gyepa", ko: "격파", roman: "Gyeokpa", nl: "Breektest",
       icon: "break",
       uitleg: "Het breken van een plank (of testplank) met een trap of slag om kracht, precisie en focus te tonen. Kinderen gebruiken vaak herbruikbare kunststof-planken. Alleen onder begeleiding van je trainer.",
       tips: ["Richt je kracht dóór de plank heen", "Adem uit en kiai op het moment van raken", "Alleen doen met toestemming van je trainer"] }

@@ -77,7 +77,7 @@
   function foundationPoomsae() { return C.poomsae.filter(function (p) { return (p.level || 0) === 0; }); }
   function examPoomsae() { var L = curLevel(); return C.poomsae.filter(function (p) { return p.level >= 1 && p.level <= L; }); }
   function examChecks() { prog.exam[prog.level] = prog.exam[prog.level] || {}; return prog.exam[prog.level]; }
-  var TILE_IDS = ['poomsae', 'techniek', 'termen', 'quiz', 'standen', 'examen', 'theorie'];
+  var TILE_IDS = ['standen', 'examen', 'theorie'];
   function tileOrderIds() {
     var saved = (prog.tileOrder || []).filter(function (id) { return TILE_IDS.indexOf(id) >= 0; });
     TILE_IDS.forEach(function (id) { if (saved.indexOf(id) < 0) saved.push(id); });
@@ -230,23 +230,9 @@
     var streak = prog.streakDays || 0;
     var allDone = dailyAllDone();
 
-    var ek = C.examenkaart[prog.level], ekChecks = prog.exam[prog.level] || {};
-    var ekDone = ek.onderdelen.filter(function (o) { return ekChecks[o.id]; }).length;
-    var ekTotal = ek.onderdelen.length;
-    var examCTA = '<a class="examcta" href="#/examenkaart">' +
-      '<span class="examcta-ic">' + svgCard() + '</span>' +
-      '<span class="examcta-tx"><b>Examenkaart · ' + esc(C.levels[prog.level].naam) + '</b>' +
-      '<small>Alles wat je moet laten zien — ' + ekDone + '/' + ekTotal + ' afgevinkt</small></span>' +
-      '<span class="examcta-bar"><i style="width:' + Math.round(ekDone / ekTotal * 100) + '%"></i></span>' +
-      '<span class="examcta-chev">' + ICON_CHEV + '</span></a>';
-
     var tileDefs = {
-      poomsae: ['#/poomsae', 'Poomsae', 'De Taegeuk-vormen', svgCircle()],
-      techniek: ['#/techniek', 'Techniek', 'Standen, blokken, trappen', svgBolt()],
-      termen: ['#/termen', 'Termen', 'Koreaans met uitspraak', svgChat()],
-      quiz: ['#/quiz', 'Quiz', 'Test wat je weet', svgQuiz()],
       standen: ['#/standen', 'Standen', 'Standen met voetdiagram', feetMini()],
-      examen: ['#/examen', 'Examen', 'Sparren, breken, zelfverdediging', svgExam()],
+      examen: ['#/examenkaart', 'Examen', 'Onderdelen & aftekenlijst', svgExam()],
       theorie: ['#/theorie', 'Theorie', 'Achtergrond & etiquette', svgBook()]
     };
     var order = tileOrderIds();
@@ -287,8 +273,6 @@
         '<div class="ontdek-hd"><span class="secnum" style="margin:0">Ontdek</span>' +
           '<button class="editlink" data-act="tileEdit">' + (tileEdit ? 'Klaar' : 'Aanpassen') + '</button></div>' +
         '<div class="tiles' + (tileEdit ? ' editing' : '') + '">' + tiles + '</div>' +
-
-        examCTA +
 
         '<div class="notecard">' + esc(C.meta.bron) + ' Bekijk de <a href="#/bronnen">bronnen &amp; verantwoording</a>.</div>' +
       '</div></div>';
@@ -469,6 +453,7 @@
     quizState = { qs: picked, i: 0, score: 0, answered: false };
     renderQuiz();
   }
+  function quizPass(n) { return Math.ceil(n * 0.6); }
   function renderQuiz() {
     var s = quizState, n = s.qs.length;
     if (s.i >= n) return renderQuizDone();
@@ -478,8 +463,8 @@
     }).join('');
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<span class="secnum">04 — Oefenen</span>' +
-      '<h1 class="screen-title">Quiz</h1>' +
-      '<p class="screen-sub">Vraag ' + (s.i + 1) + ' van ' + n + ' · beste score: ' + bestScore() + '/' + n + '</p>' +
+      '<h1 class="screen-title">Examenquiz</h1>' +
+      '<p class="screen-sub">Vraag ' + (s.i + 1) + ' van ' + n + ' · net als op je ' + esc(C.levels[prog.level].naam) + '-examen. Geslaagd vanaf ' + quizPass(n) + ' goed.</p>' +
       '<div class="quizbar"><i style="width:' + (s.i / n * 100) + '%"></i></div>' +
       '<div class="quizcard"><div class="qnum">Vraag ' + (s.i + 1) + '</div>' +
         '<div class="q">' + esc(q.v) + '</div><div class="opts">' + opts + '</div>' +
@@ -505,12 +490,14 @@
     var s = quizState, n = s.qs.length;
     if (s.score > bestScore()) setBest(s.score);
     var d = daily(); if (!d.quiz) { d.quiz = true; save(prog); checkDaily(); }
-    var msg = s.score === n ? 'Perfect! Meesterlijk. 🥋' : s.score >= n * 0.7 ? 'Sterk gedaan!' : 'Goed geoefend — probeer het nog eens.';
+    var need = quizPass(n), passed = s.score >= need;
+    var msg = s.score === n ? 'Perfect! Meesterlijk. 🥋' : passed ? 'Geslaagd! Dit was genoeg geweest. ✅' : 'Nog niet gehaald — blijf oefenen.';
     view.innerHTML = '<div class="view active"><div class="screen"><div class="quizcard quizdone">' +
       '<div class="score">' + s.score + '/' + n + '</div>' +
+      '<div class="qbadge ' + (passed ? 'pass' : 'fail') + '">' + (passed ? 'Geslaagd' : 'Nog niet geslaagd') + '</div>' +
       '<h2 style="margin:10px 0 4px">' + msg + '</h2>' +
-      '<p>Beste score tot nu: ' + bestScore() + '/' + n + '</p>' +
-      '<p class="qhint">Zoveel vragen krijg je ook op je echte ' + esc(C.levels[prog.level].naam) + '-examen. Elke ronde is willekeurig.</p>' +
+      '<p>Je hebt <b>' + need + ' van de ' + n + '</b> goed nodig om te slagen (60%).</p>' +
+      '<p class="qhint">Beste score tot nu: ' + bestScore() + '/' + n + '. Zoveel vragen krijg je ook op je echte ' + esc(C.levels[prog.level].naam) + '-examen — elke ronde is willekeurig.</p>' +
       '<button class="btn primary" data-act="qretry" style="margin-top:14px">Opnieuw</button> ' +
       '<a class="btn ghost" href="#/home" style="margin-top:14px;display:inline-block;text-decoration:none">Naar home</a>' +
       '</div></div></div>';
@@ -560,7 +547,12 @@
       '</div></div>';
   }
 
-  /* ---------- View: Examenkaart ("Jouw examen in één beeld") ---------- */
+  /* ---------- View: Examen (examenkaart + onderdeel-detail, samengevoegd) ---------- */
+  function onderByRow(id) {
+    var map = { pyojeok: 'gyeorugi' };
+    var key = map[id] || id;
+    return C.onderdelen.filter(function (o) { return o.id === key; })[0];
+  }
   function viewExamenkaart() {
     var L = prog.level, kaart = C.examenkaart[L], checks = examChecks();
     var total = kaart.onderdelen.length;
@@ -576,25 +568,33 @@
       var spk = o.ko ? '<button class="speak" data-act="speak" data-ko="' + esc(o.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' : '';
       var kr = (o.ko ? esc(o.ko) + ' · ' : '') + esc(o.roman);
       var link = o.link ? '<a class="btn ghost sm" href="' + o.link + '">' + esc(o.linkLabel || 'Oefen') + '</a>' : '';
+      var det = onderByRow(o.id);
+      var detail = '';
+      if (det) {
+        var tips = det.tips.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
+        detail = '<details class="exdet"><summary>Wat is dit &amp; waar let je op<span class="pl">+</span></summary>' +
+          '<div class="exdet-b"><p>' + esc(det.uitleg) + '</p><ul class="ul">' + tips + '</ul></div></details>';
+      }
       return '<div class="exrow' + (on ? ' on' : '') + '">' +
         '<button class="exchk" data-act="examchk" data-id="' + o.id + '" aria-label="Afvinken">' + (on ? ICON_CHECK : '') + '</button>' +
         '<div class="exmain">' +
           '<div class="exhd"><b>' + esc(o.nl) + '</b><span class="kr">' + kr + '</span>' + spk + '</div>' +
           '<p class="exeis">' + esc(o.eis) + '</p>' +
+          detail +
           (link ? '<div class="exact">' + link + '</div>' : '') +
         '</div></div>';
     }).join('');
 
     view.innerHTML = '<div class="view active"><div class="screen">' +
-      '<span class="secnum">Examenkaart</span>' +
+      '<span class="secnum">Examen</span>' +
       '<h1 class="screen-title">Jouw examen in één beeld</h1>' +
-      '<p class="screen-sub">Alles wat je laat zien voor je poom. Vink af wat al goed gaat — of laat je trainer aftekenen.</p>' +
+      '<p class="screen-sub">Alle onderdelen die je laat zien voor je poom. Tik een onderdeel open voor uitleg, of vink af wat al goed gaat.</p>' +
       toggle +
       '<div class="exprog"><div class="quizbar"><i style="width:' + pct + '%"></i></div>' +
         '<span>' + doneN + ' / ' + total + ' onderdelen afgevinkt</span></div>' +
       '<div class="exlist">' + rows + '</div>' +
       '<div class="notecard"><b>Slagen voor theorie:</b> ' + esc(kaart.slagen) + '.</div>' +
-      '<div class="notecard">De eisen vertellen <b>wát</b> je laat zien. Je trainer leert je <b>hoe</b> je dit veilig en technisch goed doet — deze kaart vervangt geen les.</div>' +
+      '<div class="notecard">Oefen sparren, zelfverdediging en breektesten <b>altijd onder begeleiding</b> van je trainer. Deze kaart vertelt <b>wát</b> je laat zien — je trainer leert je <b>hoe</b>.</div>' +
       '</div></div>';
   }
 
