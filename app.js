@@ -15,12 +15,39 @@
     catch (e) { return {}; }
   }
   function save(p) { try { localStorage.setItem(KEY, JSON.stringify(p)); } catch (e) {} }
+  function doBackupCopy() {
+    var code = JSON.stringify(prog);
+    var box = document.getElementById('backupbox');
+    if (box) box.value = code;
+    var done = function () { toast('Back-up gekopieerd — bewaar hem veilig'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(done, function () {
+        if (box) { box.focus(); box.select(); } toast('Back-up staat in het tekstvak — kopieer hem zelf');
+      });
+    } else if (box) { box.focus(); box.select(); toast('Back-up staat in het tekstvak — kopieer hem zelf'); }
+  }
+  function doBackupRestore() {
+    var box = document.getElementById('backupbox');
+    var raw = box ? box.value.trim() : '';
+    if (!raw) { toast('Plak eerst je back-upcode in het vak'); return; }
+    var data;
+    try { data = JSON.parse(raw); } catch (e) { toast('Deze back-upcode is niet leesbaar'); return; }
+    if (!data || typeof data !== 'object') { toast('Deze back-upcode is niet leesbaar'); return; }
+    prog = data; save(prog);
+    normalizeProg();
+    refreshStreak();
+    toast('Voortgang hersteld ✓');
+    go();
+  }
   var prog = load();
-  if (!prog.poomsae) prog.poomsae = {};
-  if (prog.quizBest == null || typeof prog.quizBest === 'number') prog.quizBest = {};
-  if (prog.level !== '1' && prog.level !== '2') prog.level = '1';
-  if (!prog.exam) prog.exam = {};
-  if (!prog.hardTerms) prog.hardTerms = {};
+  function normalizeProg() {
+    if (!prog.poomsae) prog.poomsae = {};
+    if (prog.quizBest == null || typeof prog.quizBest === 'number') prog.quizBest = {};
+    if (prog.level !== '1' && prog.level !== '2') prog.level = '1';
+    if (!prog.exam) prog.exam = {};
+    if (!prog.hardTerms) prog.hardTerms = {};
+  }
+  normalizeProg();
 
   /* ---------- Niveau (1e / 2e poom) ---------- */
   function curLevel() { return prog.level === '2' ? 2 : 1; }
@@ -34,12 +61,23 @@
     if (prog.hardTerms[k]) delete prog.hardTerms[k]; else prog.hardTerms[k] = 1;
     save(prog); return !!prog.hardTerms[k];
   }
-  function hardTermList() { return allTerms().filter(isHard); }
+  function allStudyItems() {
+    var a = allTerms();
+    C.technieken.forEach(function (g) { g.items.forEach(function (i) { a.push(i); }); });
+    C.standen.forEach(function (s) { a.push(s); });
+    return a;
+  }
+  function hardTermList() { return allStudyItems().filter(isHard); }
+  function hardBtn(t, sm) {
+    var h = isHard(t);
+    return '<button class="hardbtn' + (sm ? ' sm' : '') + (h ? ' on' : '') + '" data-act="hardterm" data-k="' + esc(termKey(t)) +
+      '" aria-pressed="' + h + '" aria-label="Markeer als moeilijk" title="Moeilijk">' + (h ? '★' : '☆') + '</button>';
+  }
   function visPoomsae() { var L = curLevel(); return C.poomsae.filter(function (p) { return (p.level || 0) === 0 || p.level <= L; }); }
   function foundationPoomsae() { return C.poomsae.filter(function (p) { return (p.level || 0) === 0; }); }
   function examPoomsae() { var L = curLevel(); return C.poomsae.filter(function (p) { return p.level >= 1 && p.level <= L; }); }
   function examChecks() { prog.exam[prog.level] = prog.exam[prog.level] || {}; return prog.exam[prog.level]; }
-  var TILE_IDS = ['poomsae', 'techniek', 'termen', 'quiz', 'standen', 'examen', 'theorie', 'teller'];
+  var TILE_IDS = ['poomsae', 'techniek', 'termen', 'quiz', 'standen', 'examen', 'theorie'];
   function tileOrderIds() {
     var saved = (prog.tileOrder || []).filter(function (id) { return TILE_IDS.indexOf(id) >= 0; });
     TILE_IDS.forEach(function (id) { if (saved.indexOf(id) < 0) saved.push(id); });
@@ -47,7 +85,7 @@
   }
 
   function poomDone() { return visPoomsae().filter(function (p) { return prog.poomsae[p.id]; }).length; }
-  function refreshStreak() { document.getElementById('streakN').textContent = poomDone(); }
+  function refreshStreak() { document.getElementById('streakN').textContent = prog.streakDays || 0; }
 
   /* ---------- Dagelijkse uitdagingen ---------- */
   function dkey(d) { d = d || new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
@@ -128,7 +166,7 @@
   }
 
   /* ---------- Router ---------- */
-  var routes = ['home', 'poomsae', 'techniek', 'termen', 'quiz', 'theorie', 'standen', 'examen', 'examenkaart', 'teller', 'flash'];
+  var routes = ['home', 'poomsae', 'techniek', 'termen', 'quiz', 'theorie', 'standen', 'examen', 'examenkaart', 'teller', 'flash', 'bronnen'];
   function parse() {
     var h = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
     if (!h.length) h = ['home'];
@@ -152,8 +190,9 @@
     else if (r === 'examenkaart') viewExamenkaart();
     else if (r === 'teller') viewTeller();
     else if (r === 'flash') viewFlash();
+    else if (r === 'bronnen') viewBronnen();
     // nav active state
-    var navMap = { standen: 'techniek', examen: 'theorie', examenkaart: 'home', teller: 'termen', flash: 'termen' };
+    var navMap = { standen: 'techniek', examen: 'theorie', examenkaart: 'home', bronnen: 'home', flash: 'termen' };
     var navR = navMap[r] || r;
     [].forEach.call(nav.querySelectorAll('a'), function (a) {
       a.classList.toggle('on', a.getAttribute('data-r') === navR);
@@ -208,8 +247,7 @@
       quiz: ['#/quiz', 'Quiz', 'Test wat je weet', svgQuiz()],
       standen: ['#/standen', 'Standen', 'Standen met voetdiagram', feetMini()],
       examen: ['#/examen', 'Examen', 'Sparren, breken, zelfverdediging', svgExam()],
-      theorie: ['#/theorie', 'Theorie', 'Achtergrond & etiquette', svgBook()],
-      teller: ['#/teller', 'Teller', 'Koreaans tellen 1–10', svgTimer()]
+      theorie: ['#/theorie', 'Theorie', 'Achtergrond & etiquette', svgBook()]
     };
     var order = tileOrderIds();
     var tiles = order.map(function (id, idx) {
@@ -238,7 +276,6 @@
           '</div>' +
           '<div class="hgoals">' + goalHtml + '</div>' +
           (allDone ? '<div class="daily-done">Alle dagdoelen gehaald! Top gedaan. 🎉</div>' : '') +
-          '<div class="hprog"><span>Poomsae ' + done + '/' + vis.length + '</span><span class="bar"><i style="width:' + pct + '%"></i></span></div>' +
           '<img class="wm" src="mark-taeguk.svg" alt="">' +
         '</div>' +
 
@@ -247,12 +284,13 @@
 
         '<div class="quotecard">“' + esc(quote) + '”</div>' +
 
-        examCTA +
-
         '<div class="ontdek-hd"><span class="secnum" style="margin:0">Ontdek</span>' +
           '<button class="editlink" data-act="tileEdit">' + (tileEdit ? 'Klaar' : 'Aanpassen') + '</button></div>' +
         '<div class="tiles' + (tileEdit ? ' editing' : '') + '">' + tiles + '</div>' +
-        '<div class="notecard">' + esc(C.meta.bron) + ' Bekijk ook de <a href="styleguide.html">merk- &amp; stijlgids</a>.</div>' +
+
+        examCTA +
+
+        '<div class="notecard">' + esc(C.meta.bron) + ' Bekijk de <a href="#/bronnen">bronnen &amp; verantwoording</a>.</div>' +
       '</div></div>';
   }
 
@@ -344,15 +382,18 @@
     if (sub === 'standen') {
       body = '<div class="stancelegend">' + legFoot('red') + ' gewicht &nbsp;·&nbsp; ' + legFoot('ink') + ' 50/50 &nbsp;·&nbsp; ' + legFoot('out') + ' lichte voet &nbsp;·&nbsp; <b class="facear">↑</b> voorkant</div>' +
         '<div class="rows">' + C.standen.map(function (s) {
-        return '<div class="stance"><span class="feet">' + stanceSVG(s.roman) + '</span>' +
+        var hard = isHard(s);
+        return '<div class="stance' + (hard ? ' hard' : '') + '"><span class="feet">' + stanceSVG(s.roman) + '</span>' +
           '<div class="sd"><div class="sdhd"><b>' + esc(s.roman) + '</b>' +
-          '<button class="speak sm" data-act="speak" data-ko="' + esc(s.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>' +
+          '<button class="speak sm" data-act="speak" data-ko="' + esc(s.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' +
+          hardBtn(s, true) + '</div>' +
           '<span class="ko">' + esc(s.ko) + ' · ' + esc(s.nl) + '</span>' +
-          '<small>' + esc(s.uitleg) + '</small></div><span class="wt">' + esc(s.gewicht) + '</span></div>';
+          '<small>' + esc(s.uitleg) + '</small>' +
+          '<span class="wt">' + esc(s.gewicht) + '</span></div></div>';
       }).join('') + '</div>';
     } else {
       var g = C.technieken[+sub.slice(1)];
-      body = '<div class="grouphd">' + esc(g.cat) + '</div><div class="rows">' + g.items.map(termRow).join('') + '</div>';
+      body = '<div class="grouphd">' + esc(g.cat) + '</div><div class="rows">' + g.items.map(termRowH).join('') + '</div>';
     }
 
     view.innerHTML = '<div class="view active"><div class="screen">' +
@@ -398,7 +439,7 @@
     var hard = isHard(t);
     return '<div class="trow' + (hard ? ' hard' : '') + '"><button class="speak" data-act="speak" data-ko="' + esc(t.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' +
       '<div class="tx"><div class="ko">' + esc(t.ko) + '</div><div class="ro">' + esc(t.roman) + '</div><div class="nl">' + esc(t.nl) + '</div></div>' +
-      '<button class="hardbtn' + (hard ? ' on' : '') + '" data-act="hardterm" data-k="' + esc(termKey(t)) + '" aria-pressed="' + hard + '" aria-label="Markeer als moeilijk" title="Moeilijk">' + (hard ? '★' : '☆') + '</button></div>';
+      hardBtn(t) + '</div>';
   }
   function renderTermTab() {
     var items, hd;
@@ -413,7 +454,9 @@
   /* ---------- View: Quiz ---------- */
   var quizState = null;
   var tileEdit = false;
-  var tellerTimer = null, tellerIdx = 0, tellerSpeed = 1, tellerRunning = false;
+  var tellerTimer = null, tellerIdx = 0, tellerSpeed = 1, tellerRunning = false, tellerLoop = false;
+  var SPEEDS = [1, 1.5, 2, 0.5];
+  function nativeRoman(c) { return String(c.roman || '').split('/')[0].trim(); }
   var flashState = null;
   function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function viewQuiz() {
@@ -555,22 +598,52 @@
       '</div></div>';
   }
 
+  /* ---------- View: Bronnen & back-up ---------- */
+  function viewBronnen() {
+    var b = C.bronnen || { items: [] };
+    var rows = (b.items || []).map(function (s) {
+      return '<div class="srccard">' +
+        '<div class="src-hd"><b>' + esc(s.titel) + '</b>' + (s.org ? '<span class="src-org">' + esc(s.org) + '</span>' : '') + '</div>' +
+        '<p class="src-wat">' + esc(s.wat) + '</p>' +
+        (s.url ? '<a class="src-link" href="' + esc(s.url) + '" target="_blank" rel="noopener">Open officiële bron ↗</a>' : '') +
+        '</div>';
+    }).join('');
+    view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<span class="secnum">Bronnen</span>' +
+      '<h1 class="screen-title">Bronnen &amp; verantwoording</h1>' +
+      '<p class="screen-sub">' + esc(b.gecontroleerd || '') + ' ' + esc(b.disclaimer || '') + '</p>' +
+      '<div class="srclist">' + rows + '</div>' +
+      '<div class="sect"><h4>Back-up &amp; herstel</h4></div>' +
+      '<div class="notecard">Je voortgang (streak, dagdoelen, moeilijke termen) staat alleen op dit toestel. ' +
+        'Maak af en toe een back-up — handig als je de app opnieuw op je beginscherm zet.</div>' +
+      '<div class="cctrl">' +
+        '<button class="btn primary" data-act="backupCopy">Back-up kopiëren</button>' +
+        '<button class="btn ghost" data-act="backupRestore">Herstellen</button>' +
+      '</div>' +
+      '<textarea class="backupbox" id="backupbox" placeholder="Plak hier je back-upcode om te herstellen…" spellcheck="false"></textarea>' +
+      '</div></div>';
+  }
+
   /* ---------- View: Teller (Koreaans 1–10) ---------- */
   function tellCounts() { var g = C.termen.filter(function (x) { return /Tellen/.test(x.groep); })[0]; return g ? g.items : []; }
   function tellSet(numTxt, c, activeIdx) {
     var n = document.getElementById('cnum'), k = document.getElementById('cko');
     if (n) n.textContent = numTxt;
-    if (k) k.textContent = c ? (c.roman + (c.nl ? ' · ' + c.nl : '')) : '';
+    if (k) k.textContent = c ? (c.msg ? c.msg : nativeRoman(c)) : '';
     var dots = document.querySelectorAll('#cdots span');
     [].forEach.call(dots, function (d, i) { d.classList.toggle('on', i === activeIdx); });
   }
-  function tellLabel(t) { var b = document.getElementById('cstart'); if (b) b.textContent = t; }
+  function tellSetPlaying(on) {
+    var b = document.getElementById('cstart');
+    if (b) { b.classList.toggle('playing', on); b.setAttribute('aria-label', on ? 'Pauze' : 'Start'); }
+    var card = document.getElementById('ccard');
+    if (card) card.classList.toggle('running', on);
+  }
   function tellStep() {
     var counts = tellCounts(); if (!counts.length) return;
-    var loop = !!(document.getElementById('cloop') && document.getElementById('cloop').checked);
     if (tellerIdx >= counts.length) {
-      if (loop) { tellerIdx = 0; }
-      else { tellerPause(); tellSet('', { roman: 'Klaar! Goed geteld 🎉', nl: '' }, -1); tellerIdx = 0; tellLabel('Start'); return; }
+      if (tellerLoop) { tellerIdx = 0; }
+      else { tellerPause(); tellSet('✓', { msg: 'Klaar!' }, -1); tellerIdx = 0; tellSetPlaying(false); return; }
     }
     var c = counts[tellerIdx];
     tellSet(String(tellerIdx + 1), c, tellerIdx);
@@ -588,43 +661,43 @@
   }
   function tellerToggle() {
     if (!tellCounts().length) return;
-    if (tellerRunning) { tellerPause(); tellLabel(tellerIdx > 0 ? 'Ga door' : 'Start'); return; }
-    tellerRunning = true; tellLabel('Pauze');
+    if (tellerRunning) { tellerPause(); tellSetPlaying(false); return; }
+    tellerRunning = true; tellSetPlaying(true);
     tellStep(); tellArm();
   }
   function tellerReset() {
-    tellerPause(); tellerIdx = 0; tellSet('', null, -1); tellLabel('Start');
+    tellerPause(); tellerIdx = 0; tellSet('', null, -1); tellSetPlaying(false);
   }
-  function tellerSetSpeed(sp) {
-    tellerSpeed = sp;
-    var btns = document.querySelectorAll('#cspeed button');
-    [].forEach.call(btns, function (b) { b.classList.toggle('on', parseFloat(b.getAttribute('data-sp')) === sp); });
+  function tellerCycleSpeed() {
+    var i = SPEEDS.indexOf(tellerSpeed);
+    tellerSpeed = SPEEDS[(i + 1) % SPEEDS.length];
+    var b = document.getElementById('cspeed'); if (b) b.textContent = tellerSpeed + '×';
     if (tellerRunning) tellArm();
+  }
+  function tellerToggleLoop() {
+    tellerLoop = !tellerLoop;
+    var b = document.getElementById('cloopbtn');
+    if (b) { b.classList.toggle('on', tellerLoop); b.setAttribute('aria-pressed', tellerLoop); }
   }
   function viewTeller() {
     tellerIdx = 0; tellerRunning = false;
     var counts = tellCounts();
     var dots = counts.map(function (_, i) { return '<span data-i="' + i + '"></span>'; }).join('');
-    var speeds = [0.5, 1, 1.5, 2].map(function (sp) {
-      return '<button data-act="tellerSpeed" data-sp="' + sp + '"' + (sp === tellerSpeed ? ' class="on"' : '') + '>' + sp + '×</button>';
-    }).join('');
-    view.innerHTML = '<div class="view active"><div class="screen">' +
-      '<span class="secnum">Tellen</span>' +
-      '<h1 class="screen-title">Koreaans tellen</h1>' +
-      '<p class="screen-sub">Voor je 10-herhalingen: de app telt hardop mee in het Koreaans. Kies je tempo en tik op de rode knop.</p>' +
-      '<div class="counter">' +
+    view.innerHTML = '<div class="view active"><div class="tellerpage">' +
+      '<div class="tp-top"><span class="tp-kicker">Tel mee 1–10</span></div>' +
+      '<button class="ccard" id="ccard" data-act="tellerToggle" aria-label="Start">' +
         '<div class="cnum" id="cnum"></div>' +
-        '<div class="cko" id="cko"></div>' +
+        '<div class="cko" id="cko">Tik om te starten</div>' +
         '<div class="cdots" id="cdots">' + dots + '</div>' +
+        '<span class="cplay" id="cstart" aria-hidden="true"></span>' +
+      '</button>' +
+      '<div class="tp-ctrl">' +
+        '<button class="tpbtn" data-act="tellerReset" aria-label="Opnieuw"><span class="tpi">↺</span><span>Reset</span></button>' +
+        '<button class="tpbtn" id="cspeed" data-act="tellerCycleSpeed" aria-label="Tempo">' + tellerSpeed + '×</button>' +
+        '<button class="tpbtn" id="cloopbtn" data-act="tellerLoop" aria-pressed="false" aria-label="Blijf herhalen"><span class="tpi">🔁</span><span>Herhaal</span></button>' +
       '</div>' +
-      '<div class="cspeed-wrap"><span class="csl">Tempo</span><div class="cspeed" id="cspeed">' + speeds + '</div></div>' +
-      '<div class="cctrl">' +
-        '<button class="btn primary" id="cstart" data-act="tellerToggle">Start</button>' +
-        '<button class="btn ghost" id="creset" data-act="tellerReset">Reset</button>' +
-      '</div>' +
-      '<label class="cloop"><input type="checkbox" id="cloop"> <span>Blijf herhalen</span></label>' +
-      '<div class="notecard">Tip: zet je toestel op de standaard, tel hardop mee en beweeg op de tel. Zo leer je de telwoorden vanzelf. Heb je geluid nodig? Zet je iPhone uit stil-stand.</div>' +
       '</div></div>';
+    tellSetPlaying(false);
   }
 
   /* ---------- View: Flashcards (termen) ---------- */
@@ -761,7 +834,10 @@
     }
     else if (act === 'tellerToggle') tellerToggle();
     else if (act === 'tellerReset') tellerReset();
-    else if (act === 'tellerSpeed') tellerSetSpeed(parseFloat(b.getAttribute('data-sp')));
+    else if (act === 'tellerCycleSpeed') tellerCycleSpeed();
+    else if (act === 'tellerLoop') tellerToggleLoop();
+    else if (act === 'backupCopy') doBackupCopy();
+    else if (act === 'backupRestore') doBackupRestore();
     else if (act === 'flashflip') { flashState.flipped = !flashState.flipped; b.classList.toggle('flip', flashState.flipped); }
     else if (act === 'flashnext') flashNext(b.getAttribute('data-k') === '1');
     else if (act === 'flashretry') viewFlash();
@@ -773,7 +849,14 @@
     else if (act === 'hardterm') {
       var on = toggleHard(b.getAttribute('data-k'));
       toast(on ? 'Gemarkeerd als moeilijk ★' : 'Markering gewist');
-      renderTermTabs(); renderTermTab();
+      if (document.getElementById('termtabs')) { renderTermTabs(); renderTermTab(); }
+      else {
+        b.classList.toggle('on', on);
+        b.textContent = on ? '★' : '☆';
+        b.setAttribute('aria-pressed', on);
+        var row = b.closest('.trow, .stance');
+        if (row) row.classList.toggle('hard', on);
+      }
     }
   });
 

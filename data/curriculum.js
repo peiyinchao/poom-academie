@@ -392,6 +392,28 @@ window.CURRICULUM = {
     }
   },
 
+  /* -------------------- BRONNEN -------------------- */
+  bronnen: {
+    gecontroleerd: "Bronnen gecontroleerd op 19 juli 2026.",
+    disclaimer: "Dit is een onafhankelijke, kindvriendelijke leerhulp. De officiële documenten en aanwijzingen van de examencommissie gaan altijd voor.",
+    items: [
+      { titel: "TBN — Dan- en poomreglement (maart 2023)", org: "Taekwondo Bond Nederland",
+        wat: "Technische eisen, wachttijden, beoordeling, partners en breekmateriaal.", url: "https://www.taekwondobond.nl" },
+      { titel: "TBN — Koreaanse benamingen voor danexamens (maart 2026)", org: "Taekwondo Bond Nederland",
+        wat: "Terminologie voor het theorieonderdeel.", url: "https://www.taekwondobond.nl" },
+      { titel: "TBN — Dan- en Poom exameneisen", org: "Taekwondo Bond Nederland",
+        wat: "Actuele aandachtspunten voor inschrijving, partner en registratie.", url: "https://www.taekwondobond.nl" },
+      { titel: "TBN — Uitschrijving Nationaal danexamen (13 juni 2026)", org: "Taekwondo Bond Nederland",
+        wat: "Bevestigt toepassing van het reglement van 29 maart 2023 en praktische voorwaarden.", url: "https://www.taekwondobond.nl" },
+      { titel: "World Taekwondo — Competition Rules (per 1 juni 2026)", org: "World Taekwondo",
+        wat: "Puntentelling en verboden handelingen bij kyorugi.", url: "https://www.worldtaekwondo.org" },
+      { titel: "Kukkiwon — History & Poomsae information", org: "Kukkiwon",
+        wat: "Achtergrond van modern Taekwondo en de betekenis van poomsae.", url: "https://www.kukkiwon.or.kr" },
+      { titel: "Olympics — Sydney 2000 Taekwondo results", org: "International Olympic Committee",
+        wat: "Taekwondo als medaillesport op de Olympische Spelen van Sydney 2000.", url: "https://www.olympics.com" }
+    ]
+  },
+
   /* -------------------- QUIZ -------------------- */
   quiz: [
     { v: "Wat betekent 'do' in taekwondo?", o: ["De weg", "De vuist", "De voet", "De meester"], a: 0 },
