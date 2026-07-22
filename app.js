@@ -194,6 +194,8 @@
   var ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
   var ICON_CHEV = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
   var ICON_BOOKMARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg>';
+  var ICON_RESET = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>';
+  var ICON_REPEAT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>';
   function feetSVG() {
     return '<svg viewBox="0 0 40 40" fill="#AEB6C2"><g><ellipse cx="13" cy="24" rx="5" ry="8.5"/><circle cx="9.6" cy="13.5" r="1.7"/><circle cx="13" cy="12.2" r="1.9"/><circle cx="16.4" cy="13.5" r="1.7"/></g><g><ellipse cx="27" cy="24" rx="5" ry="8.5"/><circle cx="23.6" cy="13.5" r="1.7"/><circle cx="27" cy="12.2" r="1.9"/><circle cx="30.4" cy="13.5" r="1.7"/></g></svg>';
   }
@@ -477,7 +479,7 @@
 
   /* ---------- View: Quiz ---------- */
   var quizState = null;
-  var tellerTimer = null, tellerIdx = 0, tellerSpeed = 1, tellerRunning = false, tellerLoop = false;
+  var tellerTimer = null, tellerIdx = 0, tellerSpeed = 1, tellerRunning = false, tellerLoop = false, tellerPrep = null;
   var SPEEDS = [0.25, 0.5, 1, 1.5, 2];
   function fmtSpeed(v) { return String(v).replace('.', ',') + '×'; }
   function nativeRoman(c) { return String(c.roman || '').split('/')[0].trim(); }
@@ -701,13 +703,32 @@
   function tellerPause() {
     tellerRunning = false;
     if (tellerTimer) { clearInterval(tellerTimer); tellerTimer = null; }
+    if (tellerPrep) { clearInterval(tellerPrep); tellerPrep = null; }
+    var card = document.getElementById('ccard'); if (card) card.classList.remove('prep');
     if ('speechSynthesis' in window) speechSynthesis.cancel();
+  }
+  function tellerStartCountdown() {
+    var n = 3;
+    tellSetPlaying(true);
+    var card = document.getElementById('ccard'); if (card) card.classList.add('prep');
+    tellSet(String(n), { msg: 'Klaarstaan…' }, -1);
+    var iv = Math.min(Math.round(1000 / tellerSpeed), 850);
+    tellerPrep = setInterval(function () {
+      n--;
+      if (n <= 0) {
+        clearInterval(tellerPrep); tellerPrep = null;
+        if (card) card.classList.remove('prep');
+        tellStep(); tellArm();
+      } else {
+        tellSet(String(n), { msg: 'Klaarstaan…' }, -1);
+      }
+    }, iv);
   }
   function tellerToggle() {
     if (!tellCounts().length) return;
     if (tellerRunning) { tellerPause(); tellSetPlaying(false); return; }
-    tellerRunning = true; tellSetPlaying(true);
-    tellStep(); tellArm();
+    tellerRunning = true;
+    tellerStartCountdown();
   }
   function tellerReset() {
     tellerPause(); tellerIdx = 0; tellSet('', null, -1); tellSetPlaying(false);
@@ -735,7 +756,6 @@
     var counts = tellCounts();
     var dots = counts.map(function (_, i) { return '<span data-i="' + i + '"></span>'; }).join('');
     view.innerHTML = '<div class="view active"><div class="tellerpage">' +
-      '<div class="tp-top"><span class="tp-kicker">Tel mee 1–10</span></div>' +
       '<button class="ccard" id="ccard" data-act="tellerToggle" aria-label="Start">' +
         '<div class="cnum" id="cnum"></div>' +
         '<div class="cko" id="cko">Tik om te starten</div>' +
@@ -751,8 +771,8 @@
         '</div>' +
       '</div>' +
       '<div class="tp-ctrl">' +
-        '<button class="tpbtn" data-act="tellerReset" aria-label="Opnieuw"><span class="tpi">↺</span><span>Reset</span></button>' +
-        '<button class="tpbtn" id="cloopbtn" data-act="tellerLoop" aria-pressed="false" aria-label="Blijf herhalen"><span class="tpi">🔁</span><span>Herhaal</span></button>' +
+        '<button class="tpbtn" data-act="tellerReset" aria-label="Opnieuw" title="Opnieuw">' + ICON_RESET + '</button>' +
+        '<button class="tpbtn" id="cloopbtn" data-act="tellerLoop" aria-pressed="false" aria-label="Blijf herhalen" title="Blijf herhalen">' + ICON_REPEAT + '</button>' +
       '</div>' +
       '</div></div>';
     tellSetPlaying(false);
