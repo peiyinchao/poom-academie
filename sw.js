@@ -2,7 +2,7 @@
    Mijn Poom Academie — Service Worker (offline-first)
    Verhoog CACHE bij elke inhoud-/codewijziging om te verversen.
    ============================================================ */
-var CACHE = 'poom-v46';
+var CACHE = 'poom-v47';
 
 /* Kern-schil die vooraf wordt gecachet (rest volgt tijdens gebruik). */
 var PRECACHE = [
@@ -18,7 +18,18 @@ var PRECACHE = [
   './fonts/poster.css',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/icon-maskable-512.png'
+  './icons/icon-maskable-512.png',
+  './img/stances/moa.png',
+  './img/stances/naranhi.png',
+  './img/stances/ap-seogi.png',
+  './img/stances/ap-kubi.png',
+  './img/stances/dwit-kubi.png',
+  './img/stances/juchum.png',
+  './img/stances/beom.png',
+  './img/stances/oreun.png',
+  './img/stances/wen.png',
+  './img/stances/ap-koa.png',
+  './img/stances/hakdari.png'
 ];
 
 self.addEventListener('install', function (e) {

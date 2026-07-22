@@ -446,10 +446,12 @@
 
     var body, legendHtml = '';
     if (sub === 'standen') {
-      legendHtml = '<div class="stancelegend">' + legFoot('red') + ' gewicht &nbsp;·&nbsp; ' + legFoot('ink') + ' 50/50 &nbsp;·&nbsp; ' + legFoot('out') + ' lichte voet &nbsp;·&nbsp; <b class="facear">↑</b> voorkant</div>';
-      body = '<div class="rows">' + C.standen.map(function (s) {
+      var wleg = [['#4D000D', '100'], ['#99001A', '90'], ['#DB0025', '70'], ['#000000', '50'], ['#9E9E9E', '30'], ['#D6D6D6', '10']]
+        .map(function (w) { return '<span class="wchip"><i class="wdot" style="background:' + w[0] + '"></i>' + w[1] + '</span>'; }).join('');
+      legendHtml = '<div class="stancelegend"><span class="leglabel">Gewicht per voet (%)</span>' + wleg + '</div>';
+      body = '<div class="rows">' + C.standen.filter(function (s) { return stanceImg(s.roman); }).map(function (s) {
         var hard = isHard(s);
-        return '<div class="stance' + (hard ? ' hard' : '') + '"><span class="feet">' + stanceSVG(s.roman) + '</span>' +
+        return '<div class="stance' + (hard ? ' hard' : '') + '"><span class="feet"><img src="' + stanceImg(s.roman) + '" alt="Voetdiagram ' + esc(s.roman) + '" loading="lazy"></span>' +
           '<div class="sd"><div class="sdhd"><b>' + esc(s.roman) + '</b>' +
           hardBtn(s, true) +
           '<button class="speak sm" data-act="speak" data-ko="' + esc(s.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>' +
@@ -996,43 +998,18 @@
       '</div></div></div>';
   }
 
-  /* ---------- Stand-illustraties (top-down voetafdrukken) ----------
-     Ingekleurde voet = daar draag je gewicht, lijnvoet = lichte voet.
-     kind: 'red' = hoofdgewicht · 'ink' = draagt gewicht (50/50) · 'out' = licht. */
-  var SOLE = 'M -3.6 -6.5 C -4.2 -10.5 -2.8 -14 0 -14 C 2.8 -14 4.2 -10.5 3.6 -6.5 C 3.3 -3.5 3.2 -0.5 2.7 3 C 2.3 7.5 1.8 12 0.9 13.2 C 0.35 13.9 -0.35 13.9 -0.9 13.2 C -1.8 12 -2.3 7.5 -2.7 3 C -3.2 -0.5 -3.3 -3.5 -3.6 -6.5 Z';
-  function sfoot(x, y, a, mir, kind) {
-    var g = '<g transform="translate(' + x + ' ' + y + ') rotate(' + a + ') scale(' + (mir ? -1 : 1) + ' 1)">';
-    if (kind === 'out') {
-      return g + '<path d="' + SOLE + '" fill="none" stroke="#9AA4B2" stroke-width="1.6"/>' +
-        '<g fill="none" stroke="#9AA4B2" stroke-width="1.2"><circle cx="-1.3" cy="-14" r=".9"/><circle cx="0.3" cy="-14.4" r="1"/><circle cx="1.8" cy="-13.8" r=".9"/></g></g>';
-    }
-    var col = kind === 'red' ? '#E11D3F' : '#37415A';
-    return g + '<path d="' + SOLE + '" fill="' + col + '"/>' +
-      '<g fill="' + col + '"><circle cx="-1.9" cy="-13.7" r=".95"/><circle cx="-0.4" cy="-14.4" r="1.05"/><circle cx="1.2" cy="-14.3" r="1.05"/><circle cx="2.5" cy="-13.4" r=".9"/></g></g>';
-  }
-  function legFoot(kind) {
-    return '<svg viewBox="0 0 12 34" width="10" height="28" aria-hidden="true">' + sfoot(6, 17, 0, false, kind) + '</svg>';
-  }
-  var GUIDE = '<line x1="32" y1="7" x2="32" y2="57" stroke="#CFD6E0" stroke-width="1.4" stroke-linecap="round"/>';
-  function stanceSVG(roman) {
-    var r = String(roman).toLowerCase(), s;
-    if (r.indexOf('moa') >= 0) s = sfoot(30, 33, 0, false, 'ink') + sfoot(34, 33, 0, true, 'ink');
-    else if (r.indexOf('naranhi') >= 0) s = sfoot(24, 33, 0, false, 'ink') + sfoot(40, 33, 0, true, 'ink');
-    else if (r.indexOf('juchum') >= 0) s = sfoot(22, 33, 0, false, 'ink') + sfoot(42, 33, 0, true, 'ink');
-    else if (r.indexOf('ap kubi') >= 0) s = sfoot(24, 47, -28, false, 'ink') + sfoot(32, 19, 0, true, 'red');
-    else if (r.indexOf('dwit kubi') >= 0) s = sfoot(30, 46, 90, false, 'red') + sfoot(33, 20, 0, true, 'ink');
-    else if (r.indexOf('beom') >= 0) s = sfoot(31, 46, 22, false, 'red') + sfoot(33, 28, 0, true, 'out');
-    else if (r.indexOf('koa') >= 0) {
-      if (r.indexOf('dwit') >= 0) s = sfoot(33, 30, 0, false, 'red') + sfoot(30, 44, 42, true, 'out');
-      else s = sfoot(31, 43, 0, false, 'red') + sfoot(35, 30, 42, true, 'out');
-    }
-    else if (r.indexOf('hakdari') >= 0 || r.indexOf('haktari') >= 0) s = sfoot(32, 47, 0, false, 'red') + sfoot(36, 32, 90, true, 'out');
-    else if (r.indexOf('kyot') >= 0) s = sfoot(32, 44, 0, false, 'red') + sfoot(33, 27, 0, true, 'out');
-    else if (r.indexOf('oreun') >= 0) s = sfoot(26, 46, 0, false, 'ink') + sfoot(34, 22, 0, true, 'ink');
-    else if (r.indexOf('wen') >= 0) s = sfoot(30, 22, 0, false, 'ink') + sfoot(38, 46, 0, true, 'ink');
-    else if (r.indexOf('ap seogi') >= 0) s = sfoot(26, 46, 0, false, 'ink') + sfoot(32, 22, 0, true, 'ink');
-    else s = sfoot(30, 33, 0, false, 'ink') + sfoot(34, 33, 0, true, 'ink');
-    return '<svg viewBox="0 0 64 64" width="58" height="58" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#EEF1F6"/>' + GUIDE + s + '</svg>';
+  /* ---------- Stand-illustraties (getekende 1:2 voetdiagrammen) ----------
+     Eén PNG per stand (met ingebouwde looplijn, hoek en gewichtskleuren).
+     Standen zonder tekening (Dwit koa, Kyotdari) tonen we voorlopig niet. */
+  var STANCE_IMG = {
+    'Moa seogi': 'moa', 'Naranhi seogi': 'naranhi', 'Ap seogi': 'ap-seogi',
+    'Ap kubi': 'ap-kubi', 'Dwit kubi': 'dwit-kubi', 'Juchum seogi': 'juchum',
+    'Beom seogi': 'beom', 'Oreun seogi': 'oreun', 'Wen seogi': 'wen',
+    'Ap koa seogi': 'ap-koa', 'Hakdari seogi': 'hakdari'
+  };
+  function stanceImg(roman) {
+    var slug = STANCE_IMG[roman];
+    return slug ? 'img/stances/' + slug + '.png' : null;
   }
 
 
