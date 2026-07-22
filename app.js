@@ -699,6 +699,21 @@
 
   /* ---------- View: Teller (Koreaans 1–10) ---------- */
   function tellCounts() { var g = C.termen.filter(function (x) { return /Tellen/.test(x.groep); })[0]; return g ? g.items : []; }
+  var tellAudio = null;
+  function beep(freq, dur) {
+    try {
+      if (!tellAudio) tellAudio = new (window.AudioContext || window.webkitAudioContext)();
+      if (tellAudio.state === 'suspended') tellAudio.resume();
+      var t = tellAudio.currentTime, d = dur || 0.12;
+      var o = tellAudio.createOscillator(), g = tellAudio.createGain();
+      o.type = 'sine'; o.frequency.value = freq || 620;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.22, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      o.connect(g); g.connect(tellAudio.destination);
+      o.start(t); o.stop(t + d + 0.02);
+    } catch (e) {}
+  }
   function tellSet(numTxt, c, activeIdx) {
     var n = document.getElementById('cnum'), k = document.getElementById('cko');
     if (n) n.textContent = numTxt;
@@ -737,15 +752,18 @@
     tellSetPlaying(true);
     var card = document.getElementById('ccard'); if (card) card.classList.add('prep');
     tellSet(String(n), { msg: 'Junbi / Klaarstaan' }, -1);
+    beep(620, 0.12);
     var iv = Math.min(Math.round(1000 / tellerSpeed), 850);
     tellerPrep = setInterval(function () {
       n--;
       if (n <= 0) {
         clearInterval(tellerPrep); tellerPrep = null;
         if (card) card.classList.remove('prep');
+        beep(920, 0.16);
         tellStep(); tellArm();
       } else {
         tellSet(String(n), { msg: 'Junbi / Klaarstaan' }, -1);
+        beep(620, 0.12);
       }
     }, iv);
   }
@@ -756,13 +774,17 @@
     tellerStartCountdown();
   }
   function tellerReset() {
-    tellerPause(); tellerIdx = 0; tellSet('', null, -1); tellSetPlaying(false);
+    tellerPause(); tellerIdx = 0;
+    var n = document.getElementById('cnum'), k = document.getElementById('cko');
+    if (n) n.textContent = '';
+    if (k) k.textContent = 'Tik om te starten';
+    tellSetPlaying(false);
   }
   function tellerSetSpeed(v) {
     tellerSpeed = v;
     var seg = document.getElementById('cspeed');
     if (seg) {
-      var btns = seg.querySelectorAll('.termtabs button');
+      var btns = seg.querySelectorAll('button');
       for (var i = 0; i < btns.length; i++) {
         var on = parseFloat(btns[i].getAttribute('data-v')) === v;
         btns[i].classList.toggle('on', on);
@@ -785,7 +807,7 @@
       '</button>' +
       '<div class="tp-speed" id="cspeed" role="group" aria-label="Tempo">' +
         '<span class="tp-speed-lab">Tempo</span>' +
-        '<div class="termtabs">' +
+        '<div class="segctrl">' +
         SPEEDS.map(function (v) {
           return '<button class="' + (v === tellerSpeed ? 'on' : '') + '" data-act="tellerSpeed" data-v="' + v + '" aria-pressed="' + (v === tellerSpeed) + '">' + fmtSpeed(v) + '</button>';
         }).join('') +
