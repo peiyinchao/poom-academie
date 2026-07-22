@@ -673,12 +673,12 @@
 
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<span class="secnum">Naslag</span>' +
-      '<h1 class="screen-title">' + esc(o.nl) + '</h1>' +
+      '<h1 class="screen-title">' + esc(o.roman) + '</h1>' +
       '<p class="screen-sub">' + esc(o.intro) + ' Wissel hieronder tussen ' + esc(C.levels['1'].naam) + ' en ' + esc(C.levels['2'].naam) + ' — de eisen verschillen.</p>' +
       toggle +
       '<div class="examcard">' +
         '<div class="examhd"><span class="examico">' + onderIcon(o.icon) + '</span>' +
-          '<div class="examt"><b>' + esc(o.nl) + '</b><span class="kr">' + esc(o.ko) + ' · ' + esc(o.roman) + '</span></div>' +
+          '<div class="examt"><b>' + esc(o.roman) + '</b><span class="kr">' + esc(o.ko) + ' · ' + esc(o.nl) + '</span></div>' +
           '<button class="speak" data-act="speak" data-ko="' + esc(o.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>' +
         '<div class="eisbox"><span class="eislabel">Wat je laat zien · ' + esc(C.levels[L].naam) + '</span>' +
           '<p>' + esc(n.eis) + '</p></div>' +
