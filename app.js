@@ -725,6 +725,21 @@
     var card = document.getElementById('ccard');
     if (card) card.classList.toggle('running', on);
   }
+  function tellSpeak(c) {
+    if (!c || !('speechSynthesis' in window)) return;
+    try {
+      speechSynthesis.cancel();
+      var u;
+      if (koVoice) { u = new SpeechSynthesisUtterance(c.ko); u.lang = 'ko-KR'; u.voice = koVoice; }
+      else { u = new SpeechSynthesisUtterance(nativeRoman(c)); u.lang = 'nl-NL'; }
+      u.rate = 0.95; u.pitch = 1;
+      speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+  function primeSpeech() {
+    if (!('speechSynthesis' in window)) return;
+    try { var u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) {}
+  }
   function tellStep() {
     var counts = tellCounts(); if (!counts.length) return;
     if (tellerIdx >= counts.length) {
@@ -733,7 +748,7 @@
     }
     var c = counts[tellerIdx];
     tellSet(String(tellerIdx + 1), c, tellerIdx);
-    speak(c.ko);
+    tellSpeak(c);
     tellerIdx++;
   }
   function tellArm() {
@@ -753,7 +768,7 @@
     var card = document.getElementById('ccard'); if (card) card.classList.add('prep');
     tellSet(String(n), { msg: 'Junbi / Klaarstaan' }, -1);
     beep(620, 0.12);
-    var iv = Math.min(Math.round(1000 / tellerSpeed), 850);
+    var iv = 1000;
     tellerPrep = setInterval(function () {
       n--;
       if (n <= 0) {
@@ -771,6 +786,7 @@
     if (!tellCounts().length) return;
     if (tellerRunning) { tellerPause(); tellSetPlaying(false); return; }
     tellerRunning = true;
+    primeSpeech();
     tellerStartCountdown();
   }
   function tellerReset() {
@@ -783,12 +799,17 @@
   function tellerSetSpeed(v) {
     tellerSpeed = v;
     var seg = document.getElementById('cspeed');
+    var segc = document.getElementById('cseg');
     if (seg) {
-      var btns = seg.querySelectorAll('button');
+      var btns = seg.querySelectorAll('.segctrl button');
       for (var i = 0; i < btns.length; i++) {
         var on = parseFloat(btns[i].getAttribute('data-v')) === v;
         btns[i].classList.toggle('on', on);
         btns[i].setAttribute('aria-pressed', on);
+        if (on && segc) {
+          segc.style.setProperty('--i', i);
+          if (!prefersReduce()) { btns[i].classList.remove('pick'); void btns[i].offsetWidth; btns[i].classList.add('pick'); }
+        }
       }
     }
     if (tellerRunning) tellArm();
@@ -807,7 +828,8 @@
       '</button>' +
       '<div class="tp-speed" id="cspeed" role="group" aria-label="Tempo">' +
         '<span class="tp-speed-lab">Tempo</span>' +
-        '<div class="segctrl">' +
+        '<div class="segctrl" id="cseg" style="--n:' + SPEEDS.length + ';--i:' + Math.max(0, SPEEDS.indexOf(tellerSpeed)) + '">' +
+        '<span class="segthumb" aria-hidden="true"></span>' +
         SPEEDS.map(function (v) {
           return '<button class="' + (v === tellerSpeed ? 'on' : '') + '" data-act="tellerSpeed" data-v="' + v + '" aria-pressed="' + (v === tellerSpeed) + '">' + fmtSpeed(v) + '</button>';
         }).join('') +
