@@ -444,11 +444,8 @@
       return '<button class="' + (s.k === sub ? 'on' : '') + '" data-act="seg" data-k="' + s.k + '">' + esc(s.label) + '</button>';
     }).join('');
 
-    var body, legendHtml = '';
+    var body;
     if (sub === 'standen') {
-      var wleg = [['#4D000D', '100'], ['#99001A', '90'], ['#DB0025', '70'], ['#000000', '50'], ['#9E9E9E', '30'], ['#D6D6D6', '10']]
-        .map(function (w) { return '<span class="wchip"><i class="wdot" style="background:' + w[0] + '"></i>' + w[1] + '</span>'; }).join('');
-      legendHtml = '<div class="stancelegend"><span class="leglabel">Gewicht per voet (%)</span>' + wleg + '</div>';
       body = '<div class="rows">' + C.standen.filter(function (s) { return stanceImg(s.roman); }).map(function (s) {
         var hard = isHard(s);
         return '<div class="stance' + (hard ? ' hard' : '') + '"><span class="feet"><img src="' + stanceImg(s.roman) + '" alt="Voetdiagram ' + esc(s.roman) + '" loading="lazy"></span>' +
@@ -470,7 +467,6 @@
       '<h1 class="screen-title">Standen &amp; technieken</h1>' +
       '<p class="screen-sub">De bouwstenen van elke vorm. Tik op de luidspreker ' + iic(ICON_SPEAK) + ' om de Koreaanse naam te horen.</p>' +
       '<div class="termtabs">' + segHtml + '</div>' +
-      legendHtml +
       '</div>' +
       '<div id="techbody">' + body + '</div>' +
       '</div></div>';

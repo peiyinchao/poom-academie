@@ -184,7 +184,7 @@ button{font-family:inherit}
 .stance{display:flex;align-items:center;gap:15px;padding:15px;background:var(--surface);
   border:1px solid var(--line);border-radius:var(--radius-sm);box-shadow:var(--shadow-sm)}
 .stance.hard{border-color:#FECDD3;box-shadow:0 0 0 1px #FECDD3 inset}
-.stance .feet{width:62px;height:124px;flex:none;border-radius:12px;background:#fff;border:1px solid var(--line);overflow:hidden;display:grid;place-items:center}
+.stance .feet{width:96px;height:192px;flex:none;overflow:hidden;display:grid;place-items:center}
 .stance .feet img{width:100%;height:100%;object-fit:contain;display:block}
 .stance .sd{flex:1;min-width:0}
 .stance .sd .ko{display:block;font-size:16px;font-weight:600;line-height:1.3}
@@ -560,10 +560,6 @@ button{font-family:inherit}
 .flashback:active{color:var(--ink)}
 
 /* ---------- Stand-illustraties ---------- */
-.stancelegend{display:flex;align-items:center;flex-wrap:wrap;gap:9px;color:var(--gray);font-size:12.5px;margin-bottom:11px}
-.stancelegend .leglabel{font-weight:600;color:var(--ink)}
-.stancelegend .wchip{display:inline-flex;align-items:center;gap:4px}
-.stancelegend .wdot{width:12px;height:12px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.14)}
 .stance .sdhd{display:flex;align-items:center;gap:9px}
 .stance .sdhd b{display:inline-block}
 .stance .sdhd .speak.sm{margin-left:auto}
