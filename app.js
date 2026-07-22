@@ -110,9 +110,9 @@
     var pDone = d.suggest.filter(function (id) { return d.practiced[id]; }).length;
     var names = d.suggest.map(function (id) { var p = C.poomsae.filter(function (x) { return x.id === id; })[0]; return p ? (p.sino || ('T' + p.nr)) : id; });
     return [
-      { id: 'quiz', label: 'Doe een quiz', done: !!d.quiz, n: d.quiz ? 1 : 0, need: 1 },
       { id: 'poomsae', label: 'Oefen 3 poomsae', sub: names.join(' · '), done: pDone >= 3, n: pDone, need: 3 },
-      { id: 'flash', label: 'Flashcards: 5 termen', done: (d.flash || 0) >= 5, n: d.flash || 0, need: 5 }
+      { id: 'flash', label: 'Flashcards: 5 termen', done: (d.flash || 0) >= 5, n: d.flash || 0, need: 5 },
+      { id: 'quiz', label: 'Doe een quiz', done: !!d.quiz, n: d.quiz ? 1 : 0, need: 1 }
     ];
   }
   function dailyAllDone() { return dailyGoals().every(function (g) { return g.done; }); }
@@ -204,6 +204,17 @@
   var ICON_IDEA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18h5"/><path d="M10 21.5h4"/><path d="M12 2.5a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1V18h6v-1.8c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 2.5z"/></svg>';
   function feetSVG() {
     return '<svg viewBox="0 0 40 40" fill="#AEB6C2"><g><ellipse cx="13" cy="24" rx="5" ry="8.5"/><circle cx="9.6" cy="13.5" r="1.7"/><circle cx="13" cy="12.2" r="1.9"/><circle cx="16.4" cy="13.5" r="1.7"/></g><g><ellipse cx="27" cy="24" rx="5" ry="8.5"/><circle cx="23.6" cy="13.5" r="1.7"/><circle cx="27" cy="12.2" r="1.9"/><circle cx="30.4" cy="13.5" r="1.7"/></g></svg>';
+  }
+  function trigramSVG(ch) {
+    var code = (ch.codePointAt(0) - 0x2630) & 7;
+    var bars = '';
+    for (var k = 0; k < 3; k++) {
+      var y = 6 + k * 6, broken = (code >> k) & 1;
+      bars += broken
+        ? '<rect x="3" y="' + (y - 1.4) + '" width="7.4" height="2.8" rx="1.4"/><rect x="13.6" y="' + (y - 1.4) + '" width="7.4" height="2.8" rx="1.4"/>'
+        : '<rect x="3" y="' + (y - 1.4) + '" width="18" height="2.8" rx="1.4"/>';
+    }
+    return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' + bars + '</svg>';
   }
 
   /* ---------- Router ---------- */
@@ -335,7 +346,7 @@
     var title = p.level >= 1 ? esc(p.korean) : 'Taegeuk ' + p.nr + (p.sino ? ' · ' + esc(p.sino) : '');
     var ask = (p.level || 0) === 0 && !done && daily().suggest.indexOf(p.id) >= 0;
     return '<button class="poomrow" data-act="poom" data-id="' + p.id + '">' +
-      '<span class="tg' + (done ? ' done' : '') + '">' + p.trigram + '</span>' +
+      '<span class="tg' + (done ? ' done' : '') + '">' + trigramSVG(p.trigram) + '</span>' +
       '<span class="pm"><b>' + title + (ask ? ' <span class="askbadge">vandaag</span>' : '') + '</b>' +
       '<small>' + esc(p.trigramNaam) + ' · ' + esc(p.element) + ' · ' + esc(p.kup) + '</small></span>' +
       '<span class="meta"><span class="mv">' + p.bewegingen + '</span><small>bew.</small></span>' +
@@ -389,7 +400,7 @@
 
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<button class="backlink" data-act="back">‹ Alle poomsae</button>' +
-      '<div class="detail-head"><span class="tg">' + p.trigram + '</span>' +
+      '<div class="detail-head"><span class="tg">' + trigramSVG(p.trigram) + '</span>' +
         '<div><h2>' + esc(p.korean) + '</h2><div class="kr">' + esc(p.hangul) + ' · ' + esc(p.trigramNaam) + ' (' + esc(p.trigramHangul) + ')</div></div></div>' +
       '<div class="factrow">' +
         fact('Element', p.element) + fact('Graad', p.kup) + fact('Band', p.band) + fact('Stappen', p.bewegingen) +
@@ -1000,6 +1011,14 @@
   })();
 
   /* ---------- Start ---------- */
+  function setAppbarH() {
+    var ab = document.querySelector('.appbar');
+    if (ab) document.documentElement.style.setProperty('--appbar-h', Math.round(ab.getBoundingClientRect().height) + 'px');
+  }
+  setAppbarH();
+  window.addEventListener('resize', setAppbarH);
+  window.addEventListener('load', setAppbarH);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(setAppbarH);
   window.addEventListener('hashchange', go);
   if (!location.hash) location.replace('#/home');
   go();
