@@ -288,7 +288,7 @@ button{font-family:inherit}
 .quotecard{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--blue);
   border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);padding:15px 17px;margin-bottom:22px;
   font-family:var(--font-cond);text-transform:none;font-weight:600;font-size:17px;line-height:1.32;color:var(--ink)}
-.quotecard .qt{font-style:italic}
+.quotecard .qt{font-style:italic;font-weight:800}
 
 /* ---------- Dagdoel ---------- */
 .daily{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);
