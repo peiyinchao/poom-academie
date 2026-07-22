@@ -195,7 +195,9 @@
   var ICON_CHEV = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
   var ICON_BOOKMARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg>';
   var ICON_RESET = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>';
-  var ICON_REPEAT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>';
+  var ICON_REPEAT = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="M8 10 4.8 7.6c-.4-.3-.4-.9 0-1.2L8 4m8 10 3.2 2.4c.4.3.4.9 0 1.2L16 20"/><path stroke="currentColor" stroke-width="1.5" d="M4.5 7H16a5 5 0 0 1 4.387 7.4M19 17H8a5 5 0 0 1-5-5c0-.84.207-1.647.574-2.353"/></svg>';
+  var ICON_TURTLE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.2 14.8c0-3.4 3-5.9 6.8-5.9s6.8 2.5 6.8 5.9c0 .4-.3.6-.6.6H4.8c-.3 0-.6-.2-.6-.6z"/><circle cx="2.4" cy="11.4" r="1.7"/><rect x="5.9" y="14.9" width="2.1" height="3.1" rx="1.05"/><rect x="13.4" y="14.9" width="2.1" height="3.1" rx="1.05"/><path d="M17.7 13.9c1.1 0 1.9.5 2.1 1.5-.8.3-1.6.1-2.1-.4z"/></svg>';
+  var ICON_RABBIT = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="9.7" cy="6.4" rx="1.5" ry="3.8"/><ellipse cx="13.9" cy="6.2" rx="1.5" ry="3.8"/><circle cx="12" cy="13.2" r="4.3"/><ellipse cx="7.3" cy="16.4" rx="3.1" ry="2.5"/><circle cx="4.7" cy="16.2" r="1.05"/></svg>';
   // Klein icoon dat middenin een zin past, zodat kinderen de knop herkennen.
   function iic(svg) { return '<span class="iic" aria-hidden="true">' + svg + '</span>'; }
   var ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5l13 7.5-13 7.5z"/></svg>';
@@ -400,9 +402,11 @@
       : '';
 
     view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<div class="stickyhd">' +
       '<button class="backlink" data-act="back">‹ Alle poomsae</button>' +
       '<div class="detail-head"><span class="tg">' + trigramSVG(p.trigram) + '</span>' +
         '<div><h2>' + esc(p.korean) + '</h2><div class="kr">' + esc(p.hangul) + ' · ' + esc(p.trigramNaam) + ' (' + esc(p.trigramHangul) + ')</div></div></div>' +
+      '</div>' +
       '<div class="factrow">' +
         fact('Element', p.element) + fact('Graad', p.kup) + fact('Band', p.band) + fact('Stappen', p.bewegingen) +
       '</div>' +
@@ -844,11 +848,11 @@
       '<div class="tp-speed" id="cspeed" role="group" aria-label="Tempo">' +
         '<div class="segctrl" id="cseg">' +
         '<span class="segthumb" aria-hidden="true"></span>' +
-        '<span class="segend" aria-hidden="true">🐢</span>' +
+        '<span class="segend seg-slow" aria-hidden="true">' + ICON_TURTLE + '</span>' +
         SPEEDS.map(function (v) {
           return '<button class="' + (v === tellerSpeed ? 'on' : '') + '" data-act="tellerSpeed" data-v="' + v + '" aria-pressed="' + (v === tellerSpeed) + '">' + fmtSpeed(v) + '</button>';
         }).join('') +
-        '<span class="segend" aria-hidden="true">🐰</span>' +
+        '<span class="segend seg-fast" aria-hidden="true">' + ICON_RABBIT + '</span>' +
         '</div>' +
       '</div>' +
       '<div class="transport">' +
