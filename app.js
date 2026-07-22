@@ -379,8 +379,9 @@
     if (!p) { location.hash = '#/poomsae'; return; }
     var done = isPracticedToday(p.id);
     var nieuw = p.nieuw.map(function (t) {
-      return '<div class="trow"><button class="speak" data-act="speak" data-ko="' + esc(t.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' +
-        '<div class="tx"><div class="ko">' + esc(t.ko) + '</div><div class="ro">' + esc(t.roman) + '</div><div class="nl">' + esc(t.nl) + '</div></div></div>';
+      return '<div class="trow">' +
+        '<div class="tx"><div class="ko">' + esc(t.ko) + '</div><div class="ro">' + esc(t.roman) + '</div><div class="nl">' + esc(t.nl) + '</div></div>' +
+        '<button class="speak" data-act="speak" data-ko="' + esc(t.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>';
     }).join('');
     var focus = p.focus.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('');
     var beeldBox = (p.beeld || p.kernpunt) ?
@@ -388,7 +389,7 @@
         (p.beeld ? '<div class="fb-beeld"><span class="fb-tag">Beeld</span>' + esc(p.beeld) + '</div>' : '') +
         (p.kernpunt ? '<div class="fb-focus"><span class="fb-tag">Focus</span>' + esc(p.kernpunt) + '</div>' : '') +
       '</div>' : '';
-    var standen = p.standen.map(function (s) { return '<span class="tag" style="color:var(--blue);font-size:13px">' + esc(s) + '</span>'; }).join(' · ');
+    var standen = p.standen.map(function (s) { return '<span class="stnd">' + esc(s) + '</span>'; }).join('<span class="stsep">·</span>');
     var videoHtml = p.video
       ? '<div class="sect"><h4>Instructievideo</h4></div>' +
         '<div class="video" data-act="video" data-v="' + p.video + '">' +
@@ -408,7 +409,7 @@
       '<div class="blurb">' + esc(p.betekenis) + '</div>' +
       '<div class="sect"><h4>Waar let je op</h4></div>' + beeldBox + '<ul class="ul">' + focus + '</ul>' +
       '<div class="sect"><h4>Nieuwe technieken</h4></div><div class="rows">' + nieuw + '</div>' +
-      '<div class="sect"><h4>Standen in deze vorm</h4></div><p style="color:var(--gray);font-size:14px">' + standen + '</p>' +
+      '<div class="sect"><h4>Standen in deze vorm</h4></div><p class="stlist">' + standen + '</p>' +
       videoHtml +
       '<button class="btn ' + (done ? 'ghost donebtn' : 'primary') + '" style="width:100%;margin-top:22px" data-act="togglepoom" data-id="' + p.id + '">' +
         (done ? '<span class="ck">' + ICON_CHECK + '</span>Geoefend — tik om te wissen' : 'Markeer als geoefend') + '</button>' +

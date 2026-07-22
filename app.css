@@ -146,15 +146,16 @@ button{font-family:inherit}
 .detail-head .tg svg{width:40px;height:40px}
 .detail-head h2{font-size:26px;font-weight:800}
 .detail-head .kr{color:var(--gray);font-size:14px}
-.factrow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
-.fact{flex:1;min-width:90px;background:var(--surface);border:1px solid var(--line);
-  border-radius:var(--radius-sm);padding:12px 14px;box-shadow:var(--shadow-sm)}
+.factrow{display:flex;gap:14px 26px;flex-wrap:wrap;margin:2px 0 20px;padding-bottom:18px;
+  border-bottom:1px solid var(--line)}
+.fact{flex:0 0 auto;display:flex;flex-direction:column;gap:2px;background:none;border:0;
+  border-radius:0;padding:0;box-shadow:none}
 .fact .fl{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
-.fact .fv{font-family:var(--font-cond);font-weight:700;font-size:20px;text-transform:uppercase}
+.fact .fv{font-family:var(--font-cond);font-weight:700;font-size:19px;text-transform:uppercase}
 .sect{margin:22px 0 10px}
 .sect h4{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:2px}
-.blurb{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--red);
-  border-radius:var(--radius-sm);padding:15px 17px;box-shadow:var(--shadow-sm)}
+.blurb{background:none;border:0;border-radius:0;padding:0;box-shadow:none;
+  color:var(--ink);font-size:16px;line-height:1.5;margin-bottom:2px}
 .ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
 .ul li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px}
 .ul li::before{content:"";width:7px;height:7px;border-radius:2px;background:var(--red);
@@ -342,13 +343,16 @@ button{font-family:inherit}
 .hprog .bar{flex:1;height:7px;background:rgba(255,255,255,.14)}
 
 /* ---------- Poomsae-detail: beeld & focus ---------- */
-.focusbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);
-  box-shadow:var(--shadow-sm);padding:12px 14px;margin-bottom:12px;display:grid;gap:8px}
+.focusbox{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--red);
+  border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);padding:12px 14px 12px 15px;margin-bottom:12px;display:grid;gap:8px}
 .focusbox .fb-beeld,.focusbox .fb-focus{display:flex;align-items:baseline;gap:9px;font-size:14.5px;line-height:1.4}
 .focusbox .fb-beeld{font-weight:700;color:var(--ink)}
 .focusbox .fb-focus{color:var(--gray);font-weight:600}
 .fb-tag{font-family:var(--font-cond);font-weight:700;text-transform:uppercase;letter-spacing:.07em;
   font-size:11px;color:var(--red);flex:none;width:46px}
+.stlist{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0}
+.stlist .stnd{color:var(--ink);font-size:14px;font-weight:600}
+.stlist .stsep{color:var(--line-strong,#C9CED6)}
 
 /* ---------- Termen: tabs & moeilijk ---------- */
 .termtabs{display:flex;flex-wrap:wrap;gap:7px;

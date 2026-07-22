@@ -42,7 +42,7 @@ window.CURRICULUM = {
     {
       id: "il", nr: 1, sino: "Il", video: "esocvXAtf-E", level: 0, korean: "Taegeuk Il Jang", hangul: "태극 1장",
       trigram: "☰", trigramNaam: "Keon", trigramHangul: "건",
-      element: "Hemel", kup: "8e kup", band: "Geel", bewegingen: 18,
+      element: "Hemel", kup: "8e geup", band: "Geel", bewegingen: 18,
       betekenis: "Keon staat voor de hemel en het licht — het begin van alles. De eerste vorm legt de basis: rechte standen en de meest voorkomende technieken.",
       beeld: "Hemel en licht", kernpunt: "Sterke, duidelijke basis. Rustig beginnen en netjes eindigen.",
       focus: ["Rechte lijnen in de diagram (het pad vormt een + )", "Rustig en groot bewegen", "Kihap op de laatste beweging"],
@@ -57,7 +57,7 @@ window.CURRICULUM = {
     {
       id: "i", nr: 2, sino: "I", video: "YvjZaW6Qm7Y", level: 0, korean: "Taegeuk I Jang", hangul: "태극 2장",
       trigram: "☱", trigramNaam: "Tae", trigramHangul: "태",
-      element: "Meer", kup: "7e kup", band: "Geel-groen", bewegingen: 18,
+      element: "Meer", kup: "7e geup", band: "Geel-groen", bewegingen: 18,
       betekenis: "Tae is het meer: vreugde en innerlijke stevigheid. De vorm voegt hoge blokken toe en meer trappen.",
       beeld: "Meer en kalmte", kernpunt: "Adem beheersen en ontspannen kracht gebruiken.",
       focus: ["Hoge blok (eolgul makgi) zuiver plaatsen", "Trap en stoot vloeiend koppelen", "Blik altijd eerst in de richting"],
@@ -70,7 +70,7 @@ window.CURRICULUM = {
     {
       id: "sam", nr: 3, sino: "Sam", video: "r7gI13Nl380", level: 0, korean: "Taegeuk Sam Jang", hangul: "태극 3장",
       trigram: "☲", trigramNaam: "Ri", trigramHangul: "리",
-      element: "Vuur", kup: "6e kup", band: "Groen", bewegingen: 20,
+      element: "Vuur", kup: "6e geup", band: "Groen", bewegingen: 20,
       betekenis: "Ri is het vuur: warmte en enthousiasme. Hier komt de achterstand en de meshand erbij.",
       beeld: "Vuur", kernpunt: "Energie, ritme en duidelijke richtingswisselingen.",
       focus: ["Dwit kubi (achterstand) laag en stabiel", "Meshand-slag met scherpe stop", "Ritme: snel–langzaam afwisselen"],
@@ -83,7 +83,7 @@ window.CURRICULUM = {
     {
       id: "sa", nr: 4, sino: "Sa", video: "FWmRMg9ZYuw", level: 0, korean: "Taegeuk Sa Jang", hangul: "태극 4장",
       trigram: "☳", trigramNaam: "Jin", trigramHangul: "진",
-      element: "Donder", kup: "5e kup", band: "Groen-blauw", bewegingen: 20,
+      element: "Donder", kup: "5e geup", band: "Groen-blauw", bewegingen: 20,
       betekenis: "Jin is de donder: kracht en moed, maar met beheersing. Deze vorm heeft de meeste nieuwe technieken.",
       beeld: "Donder", kernpunt: "Krachtig reageren en toch beheerst blijven.",
       focus: ["Speerhand en zwaluw-slag netjes richten", "Zijtrap (yeop chagi) met de mesvoet", "Stevig blijven na de donderende technieken"],
@@ -99,7 +99,7 @@ window.CURRICULUM = {
     {
       id: "o", nr: 5, sino: "O", video: "RyB9u3F70No", level: 0, korean: "Taegeuk O Jang", hangul: "태극 5장",
       trigram: "☴", trigramNaam: "Seon", trigramHangul: "손",
-      element: "Wind", kup: "4e kup", band: "Blauw", bewegingen: 20,
+      element: "Wind", kup: "4e geup", band: "Blauw", bewegingen: 20,
       betekenis: "Seon is de wind: zacht maar soms machtig. Hamervuist en elleboog geven de vorm pit.",
       beeld: "Wind", kernpunt: "Soms zacht en soepel, soms plotseling krachtig.",
       focus: ["Juchum seogi (paardrijstand) breed en laag", "Elleboogslag draait vanuit de heup", "Hamervuist ontspannen, dan hard"],
@@ -113,7 +113,7 @@ window.CURRICULUM = {
     {
       id: "yuk", nr: 6, sino: "Yuk", video: "WZcE8Yhsasc", level: 0, korean: "Taegeuk Yuk Jang", hangul: "태극 6장",
       trigram: "☵", trigramNaam: "Gam", trigramHangul: "감",
-      element: "Water", kup: "3e kup", band: "Blauw-rood", bewegingen: 19,
+      element: "Water", kup: "3e geup", band: "Blauw-rood", bewegingen: 19,
       betekenis: "Gam is het water: het stroomt om obstakels heen. Hier verschijnt de draaitrap.",
       beeld: "Water", kernpunt: "Meebewegen, omleiden en weer doorgaan.",
       focus: ["Dollyo chagi (draaitrap) met de wreef", "Handpalm-blok soepel", "Vloeiend blijven, zoals water"],
@@ -127,7 +127,7 @@ window.CURRICULUM = {
     {
       id: "chil", nr: 7, sino: "Chil", video: "9_4HQkM4f3o", level: 0, korean: "Taegeuk Chil Jang", hangul: "태극 7장",
       trigram: "☶", trigramNaam: "Gan", trigramHangul: "간",
-      element: "Berg", kup: "2e kup", band: "Rood", bewegingen: 25,
+      element: "Berg", kup: "2e geup", band: "Rood", bewegingen: 25,
       betekenis: "Gan is de berg: stevig en standvastig. Veel korte, krachtige technieken en de kniestoot.",
       beeld: "Berg", kernpunt: "Stabiel staan, goede balans en stevige houdingen.",
       focus: ["Beom seogi (tijgerstand) licht op de voorvoet", "Schaarblok met beide armen tegelijk", "Kniestoot met een greep ervoor"],
@@ -142,7 +142,7 @@ window.CURRICULUM = {
     {
       id: "pal", nr: 8, sino: "Pal", video: "1pYia9d5tUY", level: 0, korean: "Taegeuk Pal Jang", hangul: "태극 8장",
       trigram: "☷", trigramNaam: "Gon", trigramHangul: "곤",
-      element: "Aarde", kup: "1e kup", band: "Rood-zwart", bewegingen: 27,
+      element: "Aarde", kup: "1e geup", band: "Rood-zwart", bewegingen: 27,
       betekenis: "Gon is de aarde: de basis waarop alles rust. De laatste kleurbandvorm — daarna volgt de eerste poom.",
       beeld: "Aarde", kernpunt: "Alles uit de vorige vormen verbinden en volwassen uitvoeren.",
       focus: ["Sprongtrap (dubbele voortrap) met hoogte", "Alles wat je leerde samenbrengen", "Kracht, controle én ademhaling"],
