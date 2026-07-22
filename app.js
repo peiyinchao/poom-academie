@@ -666,7 +666,7 @@
     if (n.categorieen) {
       breakdown = '<div class="sect"><h4>Verdeel je 12 technieken</h4></div>' +
         '<div class="catgrid">' + n.categorieen.map(function (c) {
-          return '<div class="catchip"><b>×' + c.n + '</b><span>' + esc(c.t) + '</span></div>';
+          return '<div class="catchip"><b>' + c.n + '×</b><span>' + esc(c.t) + '</span></div>';
         }).join('') + '</div>';
     } else if (n.check) {
       breakdown = '<div class="sect"><h4>Je serie klopt</h4></div>' +
@@ -676,7 +676,7 @@
     }
 
     var videoHtml = o.video
-      ? '<div class="sect"><h4>Video van je school</h4></div>' +
+      ? '<div class="sect"><h4>Taekwondo Kawarmala Holland</h4></div>' +
         '<a class="reelcard" href="' + esc(o.video.url) + '" target="_blank" rel="noopener">' +
           '<img src="' + o.video.poster + '" alt="" loading="lazy">' +
           '<span class="reelfb">' + ICON_FB + ' Facebook</span>' +
