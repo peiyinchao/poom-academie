@@ -391,7 +391,15 @@
         (p.beeld ? '<div class="fb-beeld"><span class="fb-tag">Beeld</span>' + esc(p.beeld) + '</div>' : '') +
         (p.kernpunt ? '<div class="fb-focus"><span class="fb-tag">Focus</span>' + esc(p.kernpunt) + '</div>' : '') +
       '</div>' : '';
-    var standen = p.standen.map(function (s) { return '<span class="stnd">' + esc(s) + '</span>'; }).join('<span class="stsep">·</span>');
+    var standen = p.standen.map(function (s) {
+      var st = C.standen.filter(function (x) { return x.roman === s; })[0];
+      if (!st) return '<div class="trow"><div class="tx"><div class="ro">' + esc(s) + '</div></div></div>';
+      return '<div class="trow">' +
+        '<div class="tx"><div class="ko">' + esc(st.ko) + '</div><div class="ro">' + esc(st.roman) + '</div>' +
+        '<div class="nl">' + esc(st.nl) + '</div>' +
+        '<div class="stdesc">' + esc(st.uitleg) + '</div></div>' +
+        '<button class="speak" data-act="speak" data-ko="' + esc(st.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>';
+    }).join('');
     var videoHtml = p.video
       ? '<div class="sect"><h4>Instructievideo</h4></div>' +
         '<div class="video" data-act="video" data-v="' + p.video + '">' +
@@ -413,7 +421,7 @@
       '<div class="blurb">' + esc(p.betekenis) + '</div>' +
       '<div class="sect"><h4>Waar let je op</h4></div>' + beeldBox + '<ul class="ul">' + focus + '</ul>' +
       '<div class="sect"><h4>Nieuwe technieken</h4></div><div class="rows">' + nieuw + '</div>' +
-      '<div class="sect"><h4>Standen in deze vorm</h4></div><p class="stlist">' + standen + '</p>' +
+      '<div class="sect"><h4>Standen in deze vorm</h4></div><div class="rows">' + standen + '</div>' +
       videoHtml +
       '<button class="btn ' + (done ? 'ghost donebtn' : 'primary') + '" style="width:100%;margin-top:22px" data-act="togglepoom" data-id="' + p.id + '">' +
         (done ? '<span class="ck">' + ICON_CHECK + '</span>Geoefend — tik om te wissen' : 'Markeer als geoefend') + '</button>' +

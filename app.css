@@ -173,6 +173,7 @@ button{font-family:inherit}
 .trow .tx .ko{font-size:18px;font-weight:600;letter-spacing:.01em}
 .trow .tx .ro{color:var(--ink);font-weight:600;font-size:14.5px}
 .trow .tx .nl{color:var(--gray);font-size:13px}
+.trow .tx .stdesc{color:var(--gray);font-size:12.5px;line-height:1.45;margin-top:4px}
 .trow .tag{font-family:var(--font-cond);font-weight:700;font-size:15px;color:var(--red);
   text-transform:uppercase;flex:none}
 .grouphd{font-family:var(--font-cond);font-weight:700;text-transform:uppercase;letter-spacing:.06em;
