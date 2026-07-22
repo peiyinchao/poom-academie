@@ -61,6 +61,15 @@ button{font-family:inherit}
 .iic svg{width:100%;height:100%}
 .secnum{font-family:var(--font-cond);font-weight:700;color:var(--red);
   font-size:13px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:6px}
+.hdrow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.infobtn{flex:none;width:34px;height:34px;margin-top:1px;border-radius:50%;border:1.5px solid var(--line);
+  background:var(--surface);color:var(--gray);display:grid;place-items:center;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;transition:background .15s,color .15s,border-color .15s,transform .12s}
+.infobtn svg{width:19px;height:19px}
+.infobtn:active{transform:scale(.9)}
+.infobtn[aria-expanded="true"]{background:var(--midnight);color:#fff;border-color:var(--midnight)}
+.infopanel{margin:0 0 16px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);
+  border-radius:12px;box-shadow:var(--shadow-sm);color:var(--gray);font-size:14px;line-height:1.55}
 
 /* ---------- Cards & tiles ---------- */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
@@ -491,20 +500,19 @@ button{font-family:inherit}
 @keyframes telldoneglow{0%{box-shadow:0 0 0 0 rgba(74,222,128,.5)}100%{box-shadow:0 0 0 3px rgba(74,222,128,0) inset,0 18px 40px -18px rgba(74,222,128,.4)}}
 @media (prefers-reduced-motion: reduce){.ccard.done .cnum{animation:none}.ccard.done{animation:none}}
 .transport{display:flex;align-items:center;justify-content:center;gap:30px;
-  margin-bottom:22px}
+  margin-top:10px;margin-bottom:34px}
 .tbtn{width:56px;height:56px;flex:none;display:grid;place-items:center;border:0;background:none;
   border-radius:50%;cursor:pointer;color:var(--ink);-webkit-tap-highlight-color:transparent;
   transition:opacity .12s,transform .12s,color .12s}
 .tbtn svg{width:27px;height:27px}
 .tbtn:active{opacity:.5;transform:scale(.92)}
-.tbtn.play{width:78px;height:78px;background:var(--midnight);color:#fff;
-  box-shadow:0 12px 26px -10px rgba(16,24,40,.55)}
-.tbtn.play svg{width:34px;height:34px}
+.tbtn.play{width:64px;height:64px;color:var(--midnight)}
+.tbtn.play svg{width:40px;height:40px}
 .tbtn.on{color:var(--red)}
 .tp-speed{display:flex;flex-direction:column;align-items:center;gap:8px}
-.segctrl{position:relative;display:flex;align-items:stretch;width:100%;background:#E9ECF1;border-radius:14px;padding:3px}
-.segstep{flex:none;width:34px;align-self:stretch;display:grid;place-items:center;border:0;background:none;
-  color:var(--gray);font-family:var(--font-cond);font-weight:700;font-size:23px;line-height:1;
+.segctrl{position:relative;display:flex;align-items:stretch;width:100%;max-width:300px;margin:0 auto;background:#EDEFF3;border-radius:14px;padding:3px}
+.segstep{flex:none;width:36px;align-self:stretch;display:grid;place-items:center;border:0;background:none;
+  color:var(--gray);font-family:var(--font-cond);font-weight:700;font-size:28px;line-height:1;
   border-radius:11px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .2s,transform .12s}
 .segstep:active{transform:scale(.88)}
 .segstep:disabled{opacity:.32;cursor:default}

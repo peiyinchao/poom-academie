@@ -202,6 +202,7 @@
   var ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1.3"/><rect x="14" y="4.5" width="4" height="15" rx="1.3"/></svg>';
   var ICON_TERM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg>';
   var ICON_IDEA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18h5"/><path d="M10 21.5h4"/><path d="M12 2.5a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1V18h6v-1.8c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 2.5z"/></svg>';
+  var ICON_INFO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11.25v4.75"/><path d="M12 7.75h.01"/></svg>';
   function feetSVG() {
     return '<svg viewBox="0 0 40 40" fill="#AEB6C2"><g><ellipse cx="13" cy="24" rx="5" ry="8.5"/><circle cx="9.6" cy="13.5" r="1.7"/><circle cx="13" cy="12.2" r="1.9"/><circle cx="16.4" cy="13.5" r="1.7"/></g><g><ellipse cx="27" cy="24" rx="5" ry="8.5"/><circle cx="23.6" cy="13.5" r="1.7"/><circle cx="27" cy="12.2" r="1.9"/><circle cx="30.4" cy="13.5" r="1.7"/></g></svg>';
   }
@@ -461,9 +462,11 @@
 
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<div class="stickyhd">' +
+      '<div class="hdrow"><div class="hdtitle">' +
       '<span class="secnum">Techniek</span>' +
-      '<h1 class="screen-title">Standen &amp; technieken</h1>' +
-      '<p class="screen-sub">De bouwstenen van elke vorm. Tik op de luidspreker ' + iic(ICON_SPEAK) + ' om de Koreaanse naam te horen.</p>' +
+      '<h1 class="screen-title">Standen &amp; technieken</h1></div>' +
+      '<button class="infobtn" data-act="toggleinfo" aria-label="Uitleg tonen" aria-expanded="false">' + ICON_INFO + '</button></div>' +
+      '<p class="screen-sub infopanel" hidden>De bouwstenen van elke vorm. Tik op de luidspreker ' + iic(ICON_SPEAK) + ' om de Koreaanse naam te horen.</p>' +
       '<div class="termtabs">' + segHtml + '</div>' +
       '</div>' +
       '<div id="techbody">' + body + '</div>' +
@@ -494,9 +497,11 @@
   function viewTermen() {
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<div class="stickyhd">' +
+      '<div class="hdrow"><div class="hdtitle">' +
       '<span class="secnum">Woordenschat</span>' +
-      '<h1 class="screen-title">Koreaanse termen</h1>' +
-      '<p class="screen-sub">Kies een categorie en luister naar de uitspraak ' + iic(ICON_SPEAK) + '. Tik op de bladwijzer ' + iic(ICON_BOOKMARK) + ' om een term als moeilijk te bewaren — die komt vaker terug in je dagterm en flashcards.</p>' +
+      '<h1 class="screen-title">Koreaanse termen</h1></div>' +
+      '<button class="infobtn" data-act="toggleinfo" aria-label="Uitleg tonen" aria-expanded="false">' + ICON_INFO + '</button></div>' +
+      '<p class="screen-sub infopanel" hidden>Kies een categorie en luister naar de uitspraak ' + iic(ICON_SPEAK) + '. Tik op de bladwijzer ' + iic(ICON_BOOKMARK) + ' om een term als moeilijk te bewaren — die komt vaker terug in je dagterm en flashcards.</p>' +
       '<div class="termtabs" id="termtabs"></div>' +
       '</div>' +
       '<div id="termbody"></div>' +
@@ -1069,6 +1074,10 @@
     else if (act === 'tellerReset') tellerReset();
     else if (act === 'tellerSpeed') tellerSetSpeed(parseFloat(b.getAttribute('data-v')));
     else if (act === 'tellerStep') tellerStep(parseInt(b.getAttribute('data-d'), 10));
+    else if (act === 'toggleinfo') {
+      var ip = document.querySelector('.infopanel');
+      if (ip) { var willOpen = ip.hasAttribute('hidden'); ip.toggleAttribute('hidden'); b.setAttribute('aria-expanded', willOpen ? 'true' : 'false'); }
+    }
     else if (act === 'tellerLoop') tellerToggleLoop();
     else if (act === 'backupCopy') doBackupCopy();
     else if (act === 'backupRestore') doBackupRestore();
