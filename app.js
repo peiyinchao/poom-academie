@@ -71,7 +71,7 @@
   function hardBtn(t, sm) {
     var h = isHard(t);
     return '<button class="hardbtn' + (sm ? ' sm' : '') + (h ? ' on' : '') + '" data-act="hardterm" data-k="' + esc(termKey(t)) +
-      '" aria-pressed="' + h + '" aria-label="Markeer als moeilijk" title="Moeilijk">' + (h ? '★' : '☆') + '</button>';
+      '" aria-pressed="' + h + '" aria-label="Markeer als moeilijk" title="Moeilijk">' + ICON_BOOKMARK + '</button>';
   }
   function visPoomsae() { var L = curLevel(); return C.poomsae.filter(function (p) { return (p.level || 0) === 0 || p.level <= L; }); }
   function foundationPoomsae() { return C.poomsae.filter(function (p) { return (p.level || 0) === 0; }); }
@@ -193,6 +193,7 @@
   var ICON_SPEAK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a4 4 0 0 1 0 7"/><path d="M18.5 6a7 7 0 0 1 0 12"/></svg>';
   var ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
   var ICON_CHEV = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+  var ICON_BOOKMARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg>';
   function feetSVG() {
     return '<svg viewBox="0 0 40 40" fill="#AEB6C2"><g><ellipse cx="13" cy="24" rx="5" ry="8.5"/><circle cx="9.6" cy="13.5" r="1.7"/><circle cx="13" cy="12.2" r="1.9"/><circle cx="16.4" cy="13.5" r="1.7"/></g><g><ellipse cx="27" cy="24" rx="5" ry="8.5"/><circle cx="23.6" cy="13.5" r="1.7"/><circle cx="27" cy="12.2" r="1.9"/><circle cx="30.4" cy="13.5" r="1.7"/></g></svg>';
   }
@@ -241,7 +242,7 @@
     var a = nav.querySelector('a.on');
     if (!a) { pill.classList.remove('show'); return; }
     var w = a.offsetWidth, x = a.offsetLeft;
-    var pw = Math.min(w - 14, 60);
+    var pw = Math.min(w - 8, 74);
     pill.style.width = pw + 'px';
     pill.style.transform = 'translateX(' + (x + (w - pw) / 2) + 'px)';
     pill.classList.add('show');
@@ -437,14 +438,14 @@
   var termTab = null;
   function termTabs() {
     var tabs = C.termen.map(function (g) { return { k: g.groep, label: g.groep }; });
-    if (hardTermList().length) tabs.push({ k: 'hard', label: '★ Moeilijk' });
+    if (hardTermList().length) tabs.push({ k: 'hard', label: 'Moeilijk' });
     return tabs;
   }
   function viewTermen() {
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<span class="secnum">03 — Woordenschat</span>' +
       '<h1 class="screen-title">Koreaanse termen</h1>' +
-      '<p class="screen-sub">Kies een categorie en luister naar de uitspraak. Tik op ☆ om een term als moeilijk te markeren — die komt vaker terug in je dagterm en flashcards.</p>' +
+      '<p class="screen-sub">Kies een categorie en luister naar de uitspraak. Tik op de bladwijzer om een term als moeilijk te bewaren — die komt vaker terug in je dagterm en flashcards.</p>' +
       '<div class="termtabs" id="termtabs"></div>' +
       '<div id="termbody"></div>' +
       '</div></div>';
@@ -470,7 +471,7 @@
     else { var g = C.termen.filter(function (x) { return x.groep === termTab; })[0]; items = g ? g.items : []; hd = g ? g.groep : ''; }
     var body = items.length
       ? '<div class="grouphd">' + esc(hd) + ' <span class="gcount">' + items.length + '</span></div><div class="rows">' + items.map(termRowH).join('') + '</div>'
-      : '<p class="termempty">Nog geen moeilijke termen. Tik op ☆ bij een term om die vaker te oefenen.</p>';
+      : '<p class="termempty">Nog geen moeilijke termen. Tik op de bladwijzer bij een term om die vaker te oefenen.</p>';
     document.getElementById('termbody').innerHTML = body;
   }
 
@@ -914,12 +915,11 @@
     else if (act === 'hardterm') {
       var hk = b.getAttribute('data-k');
       var on = toggleHard(hk);
-      toast(on ? 'Gemarkeerd als moeilijk ★' : 'Markering gewist');
+      toast(on ? 'Bewaard als moeilijk' : 'Markering verwijderd');
       var inTermen = !!document.getElementById('termtabs');
       if (inTermen && termTab === 'hard') { renderTermTabs(); renderTermTab(); }
       else {
         b.classList.toggle('on', on);
-        b.textContent = on ? '★' : '☆';
         b.setAttribute('aria-pressed', on);
         var row = b.closest('.trow, .stance'); if (row) row.classList.toggle('hard', on);
         if (inTermen) renderTermTabs();

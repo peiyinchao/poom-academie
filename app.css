@@ -49,8 +49,8 @@ button{font-family:inherit}
 .view.active{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .screen{max-width:760px;margin:0 auto;padding:20px 18px 30px}
-.screen-title{font-size:clamp(26px,7vw,34px);font-weight:800;margin-bottom:4px}
-.screen-sub{color:var(--gray);font-size:14.5px;margin-bottom:20px}
+.screen-title{font-size:clamp(26px,7vw,34px);font-weight:800;margin-bottom:10px;line-height:1.15}
+.screen-sub{color:var(--gray);font-size:14.5px;line-height:1.55;margin-bottom:22px}
 .secnum{font-family:var(--font-cond);font-weight:700;color:var(--red);
   font-size:13px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:6px}
 
@@ -176,7 +176,7 @@ button{font-family:inherit}
 /* ---------- Stances ---------- */
 .stance{display:flex;align-items:flex-start;gap:15px;padding:15px;background:var(--surface);
   border:1px solid var(--line);border-radius:var(--radius-sm);box-shadow:var(--shadow-sm)}
-.stance.hard{border-color:#FBBF24;box-shadow:0 0 0 1px #FBBF24 inset}
+.stance.hard{border-color:#FECDD3;box-shadow:0 0 0 1px #FECDD3 inset}
 .stance .feet{width:66px;height:66px;flex:none;border-radius:12px;background:#EEF1F5;display:grid;place-items:center}
 .stance .feet svg{width:44px;height:44px}
 .stance .sd{flex:1;min-width:0}
@@ -244,7 +244,7 @@ button{font-family:inherit}
 .bottomnav a.on{color:var(--red)}
 .bottomnav a.on .ni{animation:navbounce .42s cubic-bezier(.34,1.56,.64,1)}
 @keyframes navbounce{0%{transform:scale(.7)}55%{transform:scale(1.18)}100%{transform:scale(1)}}
-.navpill{position:absolute;top:9px;left:0;height:calc(var(--nav-h) - 18px);width:48px;z-index:0;border-radius:15px;
+.navpill{position:absolute;top:7px;left:0;height:calc(var(--nav-h) - 14px);width:48px;z-index:0;border-radius:16px;
   background:rgba(225,29,63,.12);box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 6px 14px rgba(225,29,63,.14);
   opacity:0;transform:translateX(0);
   transition:transform .42s cubic-bezier(.34,1.4,.5,1),width .3s cubic-bezier(.34,1.4,.5,1),opacity .25s}
@@ -349,11 +349,14 @@ button{font-family:inherit}
 .termtabs button.on{background:var(--midnight);color:#fff}
 .gcount{font-family:var(--font-cond);font-weight:700;color:var(--gray);font-size:12px;
   background:#F2F4F7;border-radius:999px;padding:1px 8px;margin-left:4px}
-.hardbtn{width:38px;height:38px;flex:none;border:1px solid var(--line);border-radius:11px;background:#F9FAFB;
-  font-size:19px;line-height:1;color:#98A2B3;cursor:pointer;display:grid;place-items:center}
-.hardbtn.on{color:#F79009;border-color:#FEC84B;background:#FFFAEB}
-.hardbtn.sm{width:30px;height:30px;border-radius:9px;font-size:16px}
-.trow.hard{border-color:#FEC84B;background:#FFFCF5}
+.hardbtn{width:34px;height:34px;flex:none;border:0;border-radius:10px;background:transparent;
+  color:#B4BCC8;cursor:pointer;display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
+.hardbtn svg{width:18px;height:18px}
+.hardbtn.on{color:var(--red)}
+.hardbtn.on svg{fill:currentColor}
+.hardbtn.sm{width:30px;height:30px}
+.hardbtn.sm svg{width:16px;height:16px}
+.trow.hard{border-color:#FECDD3;background:#FFF5F6}
 .termempty{color:var(--gray);font-size:14px;background:var(--surface);border:1px dashed var(--line);
   border-radius:var(--radius-sm);padding:18px 15px;text-align:center}
 
