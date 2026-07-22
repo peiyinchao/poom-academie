@@ -230,9 +230,24 @@
     [].forEach.call(nav.querySelectorAll('a'), function (a) {
       a.classList.toggle('on', a.getAttribute('data-r') === navR);
     });
+    moveNavPill();
     window.scrollTo(0, 0);
     refreshStreak();
   }
+
+  function moveNavPill() {
+    var pill = document.getElementById('navpill');
+    if (!pill) return;
+    var a = nav.querySelector('a.on');
+    if (!a) { pill.classList.remove('show'); return; }
+    var w = a.offsetWidth, x = a.offsetLeft;
+    var pw = Math.min(w - 14, 60);
+    pill.style.width = pw + 'px';
+    pill.style.transform = 'translateX(' + (x + (w - pw) / 2) + 'px)';
+    pill.classList.add('show');
+  }
+  window.addEventListener('resize', moveNavPill);
+  window.addEventListener('orientationchange', function(){ setTimeout(moveNavPill, 120); });
 
   /* ---------- View: Home ---------- */
   function viewHome() {
@@ -489,11 +504,13 @@
       '<span class="secnum">04 — Oefenen</span>' +
       '<h1 class="screen-title">Examenquiz</h1>' +
       '<p class="screen-sub">Vraag ' + (s.i + 1) + ' van ' + n + ' · net als op je ' + esc(C.levels[prog.level].naam) + '-examen. Geslaagd vanaf ' + quizPass(n) + ' goed.</p>' +
-      '<div class="quizbar"><i style="width:' + (s.i / n * 100) + '%"></i></div>' +
+      '<div class="quizbar"><i id="qbar" style="width:' + (s.prevPct || 0) + '%"></i></div>' +
       '<div class="quizcard"><div class="qnum">Vraag ' + (s.i + 1) + '</div>' +
         '<div class="q">' + esc(q.v) + '</div><div class="opts">' + opts + '</div>' +
         '<div class="qfoot" id="qfoot"></div>' +
       '</div></div></div>';
+    var qpct = s.i / n * 100; s.prevPct = qpct;
+    requestAnimationFrame(function () { var el = document.getElementById('qbar'); if (el) el.style.width = qpct + '%'; });
   }
   function answerQuiz(i) {
     var s = quizState; if (s.answered) return;
@@ -525,6 +542,7 @@
       '<button class="btn primary" data-act="qretry" style="margin-top:14px">Opnieuw</button> ' +
       '<a class="btn ghost" href="#/home" style="margin-top:14px;display:inline-block;text-decoration:none">Naar home</a>' +
       '</div></div></div>';
+    if (passed) celebrate();
   }
 
   /* ---------- View: Theorie ---------- */
@@ -614,12 +632,13 @@
       '<h1 class="screen-title">Jouw examen in één beeld</h1>' +
       '<p class="screen-sub">Alle onderdelen die je laat zien voor je poom. Tik een onderdeel open voor uitleg, of vink af wat al goed gaat.</p>' +
       toggle +
-      '<div class="exprog"><div class="quizbar"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="exprog"><div class="quizbar"><i id="exbar" style="width:0%"></i></div>' +
         '<span>' + doneN + ' / ' + total + ' onderdelen afgevinkt</span></div>' +
       '<div class="exlist">' + rows + '</div>' +
       '<div class="notecard"><b>Slagen voor theorie:</b> ' + esc(kaart.slagen) + '.</div>' +
       '<div class="notecard">Oefen sparren, zelfverdediging en breektesten <b>altijd onder begeleiding</b> van je trainer. Deze kaart vertelt <b>wát</b> je laat zien — je trainer leert je <b>hoe</b>.</div>' +
       '</div></div>';
+    requestAnimationFrame(function () { var el = document.getElementById('exbar'); if (el) el.style.width = pct + '%'; });
   }
 
   /* ---------- View: Bronnen & back-up ---------- */
@@ -755,7 +774,7 @@
       '<span class="secnum">Flashcards</span>' +
       '<h1 class="screen-title">Termen oefenen</h1>' +
       '<p class="screen-sub">Kaart ' + (s.i + 1) + ' van ' + s.cards.length + ' · dagdoel ' + Math.min(d.flash || 0, 5) + '/5</p>' +
-      '<div class="flashbar"><i style="width:' + (s.i / s.cards.length * 100) + '%"></i></div>' +
+      '<div class="flashbar"><i id="fbar" style="width:' + (s.prevPct || 0) + '%"></i></div>' +
       '<div class="flashcard' + (s.flipped ? ' flip' : '') + '" data-act="flashflip">' +
         '<div class="fc-in">' +
           '<div class="fc-face fc-front"><button class="speak" data-act="speak" data-ko="' + esc(c.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' +
@@ -767,6 +786,8 @@
         '<button class="btn primary" data-act="flashnext" data-k="1">Wist ik ✓</button>' +
       '</div>' +
       '</div></div>';
+    var fpct = s.i / s.cards.length * 100; s.prevPct = fpct;
+    requestAnimationFrame(function () { var el = document.getElementById('fbar'); if (el) el.style.width = fpct + '%'; });
   }
   function flashNext(knew) {
     var s = flashState; if (knew) s.knew++;
@@ -876,7 +897,14 @@
     else if (act === 'backupCopy') doBackupCopy();
     else if (act === 'backupRestore') doBackupRestore();
     else if (act === 'flashflip') { flashState.flipped = !flashState.flipped; b.classList.toggle('flip', flashState.flipped); }
-    else if (act === 'flashnext') flashNext(b.getAttribute('data-k') === '1');
+    else if (act === 'flashnext') {
+      var knewC = b.getAttribute('data-k') === '1';
+      if (knewC && !prefersReduce()) {
+        var fc = view.querySelector('.flashcard');
+        if (fc) { pop(fc, 'knew'); setTimeout(function () { flashNext(true); }, 230); return; }
+      }
+      flashNext(knewC);
+    }
     else if (act === 'flashretry') viewFlash();
     else if (act === 'flashexit') location.hash = '#/home';
     else if (act === 'qopt') answerQuiz(+b.getAttribute('data-i'));

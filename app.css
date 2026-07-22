@@ -206,7 +206,7 @@ button{font-family:inherit}
 .opt.wrong .lt{background:var(--red);color:#fff}
 .opt:disabled{cursor:default}
 .quizbar{height:8px;border-radius:999px;background:#EAECF0;overflow:hidden;margin-bottom:18px}
-.quizbar i{display:block;height:100%;background:var(--red);transition:width .3s}
+.quizbar i{display:block;height:100%;background:var(--red);transition:width .5s cubic-bezier(.22,1,.36,1)}
 .qfoot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:12px}
 .btn{font-family:var(--font-cond);font-weight:700;text-transform:uppercase;letter-spacing:.04em;
   border:0;border-radius:12px;padding:13px 20px;font-size:15px;cursor:pointer}
@@ -234,11 +234,22 @@ button{font-family:inherit}
   padding-bottom:env(safe-area-inset-bottom);
   background:rgba(255,255,255,.92);backdrop-filter:saturate(1.6) blur(12px);
   border-top:1px solid var(--line);display:flex}
-.bottomnav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+.bottomnav a{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
   text-decoration:none;color:var(--gray);font-family:var(--font-cond);font-weight:600;
   text-transform:uppercase;letter-spacing:.04em;font-size:10.5px}
-.bottomnav a svg{width:23px;height:23px}
+.bottomnav a .ni{display:grid;place-items:center;width:23px;height:23px}
+.bottomnav a .ni svg{grid-area:1/1;width:23px;height:23px}
+.bottomnav a .ni-fill{display:none}
 .bottomnav a.on{color:var(--red)}
+.bottomnav a.on .ni-out{display:none}
+.bottomnav a.on .ni-fill{display:block}
+.bottomnav a.on .ni{animation:navbounce .42s cubic-bezier(.34,1.56,.64,1)}
+@keyframes navbounce{0%{transform:scale(.7)}55%{transform:scale(1.18)}100%{transform:scale(1)}}
+.navpill{position:absolute;top:9px;left:0;height:calc(var(--nav-h) - 18px);width:48px;z-index:0;border-radius:15px;
+  background:rgba(225,29,63,.12);box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 6px 14px rgba(225,29,63,.14);
+  opacity:0;transform:translateX(0);
+  transition:transform .42s cubic-bezier(.34,1.4,.5,1),width .3s cubic-bezier(.34,1.4,.5,1),opacity .25s}
+.navpill.show{opacity:1}
 
 /* ---------- Install / toast ---------- */
 .installbar{position:fixed;left:12px;right:12px;bottom:calc(var(--nav-h) + 12px + env(safe-area-inset-bottom));
@@ -480,9 +491,9 @@ button{font-family:inherit}
 
 /* ---------- Flashcards ---------- */
 .flashbar{height:8px;border-radius:999px;background:#EAECF0;overflow:hidden;margin-bottom:16px}
-.flashbar i{display:block;height:100%;background:var(--red);transition:width .3s}
+.flashbar i{display:block;height:100%;background:var(--red);transition:width .5s cubic-bezier(.22,1,.36,1)}
 .flashcard{perspective:1200px;cursor:pointer;margin-bottom:16px}
-.fc-in{position:relative;transform-style:preserve-3d;transition:transform .5s;min-height:210px}
+.fc-in{position:relative;transform-style:preserve-3d;transition:transform .62s cubic-bezier(.34,1.35,.5,1);min-height:210px}
 .flashcard.flip .fc-in{transform:rotateY(180deg)}
 .fc-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
   border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow);
@@ -553,5 +564,18 @@ button{font-family:inherit}
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden}
 .confetti i{position:absolute;top:-16px;width:9px;height:14px;border-radius:2px;opacity:.95;animation:confall linear forwards}
 @keyframes confall{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--x,0),106vh) rotate(560deg);opacity:.85}}
+
+/* wave 2: quiz feedback */
+.opt.correct{animation:optpop .45s ease}
+@keyframes optpop{0%{transform:scale(1)}40%{transform:scale(1.035)}70%{transform:scale(.99)}100%{transform:scale(1)}}
+.opt.wrong{animation:optshake .4s ease}
+@keyframes optshake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
+
+/* wave 2: flashcard flourish */
+.flashcard{animation:cardin .42s cubic-bezier(.22,1,.36,1) both}
+@keyframes cardin{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.flashcard.knew{animation:knewpop .3s ease}
+@keyframes knewpop{0%{transform:scale(1)}45%{transform:scale(1.035)}100%{transform:scale(1)}}
+.flashcard.knew .fc-face{box-shadow:0 0 0 3px rgba(18,183,106,.5),var(--shadow)}
 
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
