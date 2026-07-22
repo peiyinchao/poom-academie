@@ -406,9 +406,9 @@
       '<button class="backlink" data-act="back">‹ Alle poomsae</button>' +
       '<div class="detail-head"><span class="tg">' + trigramSVG(p.trigram) + '</span>' +
         '<div><h2>' + esc(p.korean) + '</h2><div class="kr">' + esc(p.hangul) + ' · ' + esc(p.trigramNaam) + ' (' + esc(p.trigramHangul) + ')</div></div></div>' +
-      '</div>' +
       '<div class="factrow">' +
         fact('Element', p.element) + fact('Graad', p.kup) + fact('Band', p.band) + fact('Stappen', p.bewegingen) +
+      '</div>' +
       '</div>' +
       '<div class="blurb">' + esc(p.betekenis) + '</div>' +
       '<div class="sect"><h4>Waar let je op</h4></div>' + beeldBox + '<ul class="ul">' + focus + '</ul>' +
@@ -879,7 +879,7 @@
   function viewFlash() {
     var hard = shuffle(hardTermList());
     var rest = shuffle(allTerms().filter(function (t) { return !isHard(t); }));
-    flashState = { cards: hard.concat(rest).slice(0, 10), i: 0, flipped: false, knew: 0 };
+    flashState = { cards: hard.concat(rest).slice(0, 10), i: 0, flipped: false, answers: [] };
     renderFlash();
   }
   function renderFlash() {
@@ -902,21 +902,30 @@
         '<button class="btn ghost" data-act="flashnext" data-k="0">Nog niet</button>' +
         '<button class="btn primary" data-act="flashnext" data-k="1">Wist ik ✓</button>' +
       '</div>' +
+      (s.i > 0 ? '<button class="flashback" data-act="flashprev">‹ Vorige kaart</button>' : '') +
       '</div></div>';
     var fpct = s.i / s.cards.length * 100; s.prevPct = fpct;
     requestAnimationFrame(function () { var el = document.getElementById('fbar'); if (el) el.style.width = fpct + '%'; });
   }
   function flashNext(knew) {
-    var s = flashState; if (knew) s.knew++;
-    var d = daily(); d.flash = (d.flash || 0) + 1; save(prog); checkDaily();
+    var s = flashState;
+    var firstTime = s.answers[s.i] === undefined;
+    s.answers[s.i] = knew ? 1 : 0;
+    if (firstTime) { var d = daily(); d.flash = (d.flash || 0) + 1; save(prog); checkDaily(); }
     s.i++; s.flipped = false; renderFlash();
+  }
+  function flashPrev() {
+    var s = flashState;
+    if (s.i <= 0) return;
+    s.i--; s.flipped = false; renderFlash();
   }
   function renderFlashDone() {
     var s = flashState;
+    var knew = s.answers.filter(function (a) { return a === 1; }).length;
     view.innerHTML = '<div class="view active"><div class="screen"><div class="quizcard quizdone">' +
-      '<div class="score">' + s.knew + '/' + s.cards.length + '</div>' +
+      '<div class="score">' + knew + '/' + s.cards.length + '</div>' +
       '<h2 style="margin:10px 0 4px">Sterk geoefend! 🧠</h2>' +
-      '<p>Je wist ' + s.knew + ' van de ' + s.cards.length + ' termen.</p>' +
+      '<p>Je wist ' + knew + ' van de ' + s.cards.length + ' termen.</p>' +
       '<button class="btn primary" data-act="flashretry" style="margin-top:14px">Nog een set</button> ' +
       '<a class="btn ghost" href="#/home" style="margin-top:14px;display:inline-block;text-decoration:none">Naar home</a>' +
       '</div></div></div>';
@@ -1023,6 +1032,7 @@
       flashNext(knewC);
     }
     else if (act === 'flashretry') viewFlash();
+    else if (act === 'flashprev') flashPrev();
     else if (act === 'flashexit') location.hash = '#/home';
     else if (act === 'qopt') answerQuiz(+b.getAttribute('data-i'));
     else if (act === 'qnext') { quizState.i++; quizState.answered = false; renderQuiz(); }
