@@ -125,6 +125,7 @@
       prog.lastDone = dkey();
       save(prog);
       toast('Dagdoel gehaald! 🔥 ' + prog.streakDays + ' dag' + (prog.streakDays === 1 ? '' : 'en'));
+      celebrate(); flareStreak();
       if (location.hash.indexOf('home') >= 0 || location.hash === '' || location.hash === '#/') viewHome();
     } else save(prog);
   }
@@ -149,12 +150,43 @@
     pickVoice();
     speechSynthesis.onvoiceschanged = pickVoice;
   }
-  function speak(text) {
+  var speakingBtn = null;
+  function clearSpeaking() { if (speakingBtn) { speakingBtn.classList.remove('speaking'); speakingBtn = null; } }
+  function speak(text, btn) {
     if (!('speechSynthesis' in window)) { toast('Uitspraak niet ondersteund'); return; }
     speechSynthesis.cancel();
+    clearSpeaking();
     var u = new SpeechSynthesisUtterance(text);
     u.lang = 'ko-KR'; if (koVoice) u.voice = koVoice; u.rate = .9; u.pitch = 1;
+    if (btn) {
+      speakingBtn = btn; btn.classList.add('speaking');
+      u.onend = u.onerror = function () { if (speakingBtn === btn) clearSpeaking(); };
+    }
     speechSynthesis.speak(u);
+  }
+  function prefersReduce() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function pop(el, cls) { if (!el || prefersReduce()) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+  function celebrate() {
+    if (prefersReduce()) return;
+    var wrap = document.createElement('div'); wrap.className = 'confetti';
+    var colors = ['#E11D3F', '#2440B8', '#F79009', '#ffffff', '#12B76A'];
+    for (var i = 0; i < 44; i++) {
+      var p = document.createElement('i');
+      p.style.left = Math.random() * 100 + '%';
+      p.style.background = colors[i % colors.length];
+      p.style.setProperty('--x', (Math.random() * 180 - 90) + 'px');
+      p.style.animationDelay = (Math.random() * .25) + 's';
+      p.style.animationDuration = (1.1 + Math.random() * .8) + 's';
+      wrap.appendChild(p);
+    }
+    document.body.appendChild(wrap);
+    setTimeout(function () { wrap.remove(); }, 2300);
+  }
+  function flareStreak() {
+    var s = document.getElementById('streak');
+    if (!s || prefersReduce()) return;
+    s.classList.remove('flare'); void s.offsetWidth; s.classList.add('flare');
+    setTimeout(function () { s.classList.remove('flare'); }, 900);
   }
 
   /* ---------- Kleine SVG's ---------- */
@@ -178,6 +210,7 @@
     if (routes.indexOf(r) < 0) r = 'home';
     if (tellerTimer) { clearInterval(tellerTimer); tellerTimer = null; } tellerRunning = false;
     if ('speechSynthesis' in window) speechSynthesis.cancel();
+    clearSpeaking();
     view.innerHTML = '';
     if (r === 'home') viewHome();
     else if (r === 'poomsae') { seg[1] ? viewPoomDetail(seg[1]) : viewPoomList(); }
@@ -337,8 +370,8 @@
       '<div class="sect"><h4>Nieuwe technieken</h4></div><div class="rows">' + nieuw + '</div>' +
       '<div class="sect"><h4>Standen in deze vorm</h4></div><p style="color:var(--gray);font-size:14px">' + standen + '</p>' +
       videoHtml +
-      '<button class="btn ' + (done ? 'ghost' : 'primary') + '" style="width:100%;margin-top:22px" data-act="togglepoom" data-id="' + p.id + '">' +
-        (done ? '✓ Geoefend — tik om te wissen' : 'Markeer als geoefend') + '</button>' +
+      '<button class="btn ' + (done ? 'ghost donebtn' : 'primary') + '" style="width:100%;margin-top:22px" data-act="togglepoom" data-id="' + p.id + '">' +
+        (done ? '<span class="ck">' + ICON_CHECK + '</span>Geoefend — tik om te wissen' : 'Markeer als geoefend') + '</button>' +
       '</div></div>';
   }
   function fact(l, v) { return '<div class="fact"><div class="fl">' + esc(l) + '</div><div class="fv">' + esc(v) + '</div></div>'; }
@@ -799,7 +832,7 @@
   view.addEventListener('click', function (e) {
     var b = e.target.closest('[data-act]'); if (!b) return;
     var act = b.getAttribute('data-act');
-    if (act === 'speak') speak(b.getAttribute('data-ko'));
+    if (act === 'speak') speak(b.getAttribute('data-ko'), b);
     else if (act === 'poom') location.hash = '#/poomsae/' + b.getAttribute('data-id');
     else if (act === 'back') location.hash = '#/poomsae';
     else if (act === 'seg') { location.hash = '#/techniek/' + b.getAttribute('data-k'); }
@@ -820,11 +853,16 @@
     else if (act === 'togglepoom') {
       var id = b.getAttribute('data-id');
       var dd = daily();
-      if (dd.practiced[id]) delete dd.practiced[id]; else dd.practiced[id] = true;
+      var nowOn = !dd.practiced[id];
+      if (nowOn) dd.practiced[id] = true; else delete dd.practiced[id];
       save(prog);
-      toast(dd.practiced[id] ? 'Gemarkeerd als geoefend ✓' : 'Markering gewist');
-      if (dd.practiced[id]) checkDaily();
+      toast(nowOn ? 'Gemarkeerd als geoefend ✓' : 'Markering gewist');
+      if (nowOn) checkDaily();
       viewPoomDetail(id); refreshStreak();
+      if (nowOn && !prefersReduce()) {
+        var mb = view.querySelector('[data-act="togglepoom"]'); if (mb) mb.classList.add('justdone');
+        var tg = view.querySelector('.detail-head .tg'); if (tg) tg.classList.add('tgpop');
+      }
     }
     else if (act === 'video') {
       var v = b.getAttribute('data-v');
@@ -846,15 +884,18 @@
     else if (act === 'qretry') viewQuiz();
     else if (act === 'termtab') { termTab = b.getAttribute('data-k'); renderTermTabs(); renderTermTab(); }
     else if (act === 'hardterm') {
-      var on = toggleHard(b.getAttribute('data-k'));
+      var hk = b.getAttribute('data-k');
+      var on = toggleHard(hk);
       toast(on ? 'Gemarkeerd als moeilijk ★' : 'Markering gewist');
-      if (document.getElementById('termtabs')) { renderTermTabs(); renderTermTab(); }
+      var inTermen = !!document.getElementById('termtabs');
+      if (inTermen && termTab === 'hard') { renderTermTabs(); renderTermTab(); }
       else {
         b.classList.toggle('on', on);
         b.textContent = on ? '★' : '☆';
         b.setAttribute('aria-pressed', on);
-        var row = b.closest('.trow, .stance');
-        if (row) row.classList.toggle('hard', on);
+        var row = b.closest('.trow, .stance'); if (row) row.classList.toggle('hard', on);
+        if (inTermen) renderTermTabs();
+        if (on) pop(b, 'pop');
       }
     }
   });
