@@ -426,7 +426,7 @@
       '<span class="secnum">02 — Techniek</span>' +
       '<h1 class="screen-title">Standen &amp; technieken</h1>' +
       '<p class="screen-sub">De bouwstenen van elke vorm. Tik op de luidspreker om de Koreaanse naam te horen.</p>' +
-      '<div class="seg">' + segHtml + '</div>' +
+      '<div class="termtabs">' + segHtml + '</div>' +
       '<div id="techbody">' + body + '</div>' +
       '</div></div>';
   }
@@ -737,7 +737,7 @@
     tellerSpeed = v;
     var seg = document.getElementById('cspeed');
     if (seg) {
-      var btns = seg.querySelectorAll('.segbtn');
+      var btns = seg.querySelectorAll('.termtabs button');
       for (var i = 0; i < btns.length; i++) {
         var on = parseFloat(btns[i].getAttribute('data-v')) === v;
         btns[i].classList.toggle('on', on);
@@ -764,9 +764,9 @@
       '</button>' +
       '<div class="tp-speed" id="cspeed" role="group" aria-label="Tempo">' +
         '<span class="tp-speed-lab">Tempo</span>' +
-        '<div class="segwrap">' +
+        '<div class="termtabs">' +
         SPEEDS.map(function (v) {
-          return '<button class="segbtn' + (v === tellerSpeed ? ' on' : '') + '" data-act="tellerSpeed" data-v="' + v + '" aria-pressed="' + (v === tellerSpeed) + '">' + fmtSpeed(v) + '</button>';
+          return '<button class="' + (v === tellerSpeed ? 'on' : '') + '" data-act="tellerSpeed" data-v="' + v + '" aria-pressed="' + (v === tellerSpeed) + '">' + fmtSpeed(v) + '</button>';
         }).join('') +
         '</div>' +
       '</div>' +
