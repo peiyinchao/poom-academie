@@ -248,7 +248,7 @@ window.CURRICULUM = {
       { ko: "그만", roman: "Geuman", nl: "Stop of einde" },
       { ko: "갈려", roman: "Gallyeo", nl: "Onderbreek (uit elkaar)" }
     ]},
-    { groep: "Richtingen 1", items: [
+    { groep: "Basisrichtingen", items: [
       { ko: "왼", roman: "Oen", nl: "Links" },
       { ko: "오른", roman: "Oreun", nl: "Rechts" },
       { ko: "앞", roman: "Ap", nl: "Voorwaarts" },
@@ -259,7 +259,7 @@ window.CURRICULUM = {
       { ko: "안", roman: "An", nl: "Binnenwaarts" },
       { ko: "바깥", roman: "Bakat", nl: "Buitenwaarts" }
     ]},
-    { groep: "Richtingen 2", items: [
+    { groep: "Beweging & draaien", items: [
       { ko: "세워", roman: "Seweo", nl: "Verticaal" },
       { ko: "젖혀", roman: "Jeochyo", nl: "Omgekeerd; handpalm naar boven" },
       { ko: "당겨", roman: "Dangyo", nl: "Trekkend of omgekeerd opwaarts" },
@@ -270,27 +270,29 @@ window.CURRICULUM = {
       { ko: "몸돌려", roman: "Momdollyeo", nl: "Draaien via de rug om de lichaamsas" },
       { ko: "뛰어", roman: "Twieo", nl: "Gesprongen" }
     ]},
-    { groep: "Lichaamsdelen 1", items: [
+    { groep: "Doelzones", items: [
       { ko: "몸", roman: "Mom", nl: "Lichaam" },
       { ko: "얼굴", roman: "Eolgool", nl: "Hoog (boven de sleutelbeenderen)" },
       { ko: "몸통", roman: "Momtong", nl: "Midden (romp)" },
       { ko: "아래", roman: "Arae", nl: "Laag (onder de navel)" },
       { ko: "턱", roman: "Teok", nl: "Kaak of kin" },
       { ko: "목", roman: "Mok", nl: "Hals of nek" },
-      { ko: "등", roman: "Deung", nl: "Rug" },
+      { ko: "등", roman: "Deung", nl: "Rug" }
+    ]},
+    { groep: "Armen & handen", items: [
       { ko: "팔굽", roman: "Palkoop", nl: "Elleboog" },
       { ko: "팔목", roman: "Palmok", nl: "Onderarm" },
       { ko: "안팔목", roman: "An Palmok", nl: "Binnenkant van de onderarm" },
       { ko: "바깥팔목", roman: "Bakat Palmok", nl: "Buitenkant van de onderarm" },
-      { ko: "주먹", roman: "Joomeok", nl: "Vuist" }
-    ]},
-    { groep: "Lichaamsdelen 2", items: [
+      { ko: "주먹", roman: "Joomeok", nl: "Vuist" },
       { ko: "메주먹", roman: "Me-Joomeok", nl: "Hamervuist" },
       { ko: "등주먹", roman: "Deung-Joomeok", nl: "Vuistrug" },
       { ko: "손", roman: "Son", nl: "Hand" },
       { ko: "손날", roman: "Sonnal", nl: "Meshand" },
       { ko: "손끝", roman: "Sonkeut", nl: "Vingertoppen" },
-      { ko: "편손끝", roman: "Pyonsonkeut", nl: "Speerhand" },
+      { ko: "편손끝", roman: "Pyonsonkeut", nl: "Speerhand" }
+    ]},
+    { groep: "Benen & voeten", items: [
       { ko: "무릎", roman: "Mooreup", nl: "Knie" },
       { ko: "발", roman: "Bal", nl: "Voet" },
       { ko: "발날", roman: "Balnal", nl: "Mesvoet" },
@@ -385,7 +387,8 @@ window.CURRICULUM = {
           missie: "Markeer in je set welke vijf aanvallen géén gewone stoot zijn."
         }
       },
-      veilig: "Wacht tot de aanval echt is gestart. Houd tegenaanvallen op veilige afstand of met gecontroleerd contact, en spreek vooraf een duidelijk stopteken af."
+      veilig: "Wacht tot de aanval echt is gestart. Houd tegenaanvallen op veilige afstand of met gecontroleerd contact, en spreek vooraf een duidelijk stopteken af.",
+      video: { url: "https://www.facebook.com/reel/347532419750423", poster: "./img/video/ilbo.jpg", titel: "5 Ilbo Taeryon", bron: "Van je leraar" }
     },
     hosinsul: {
       id: "hosinsul", ko: "호신술", roman: "Hosinsul", nl: "Zelfverdediging", icon: "shield",
@@ -422,7 +425,8 @@ window.CURRICULUM = {
           missie: "Teken voor elk van je 12 technieken de richting van de aanval met één pijl."
         }
       },
-      veilig: "Geen rukken aan vingers of gewrichten. Je partner kan altijd aftikken of ‘stop’ zeggen. Oefen dit onderdeel alleen onder begeleiding van je trainer."
+      veilig: "Geen rukken aan vingers of gewrichten. Je partner kan altijd aftikken of ‘stop’ zeggen. Oefen dit onderdeel alleen onder begeleiding van je trainer.",
+      video: { url: "https://www.facebook.com/reel/663327380932748", poster: "./img/video/hosinsul.jpg", titel: "3 Hosinsul", bron: "Onze school" }
     }
   },
 

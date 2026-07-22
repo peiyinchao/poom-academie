@@ -199,6 +199,7 @@
   // Klein icoon dat middenin een zin past, zodat kinderen de knop herkennen.
   function iic(svg) { return '<span class="iic" aria-hidden="true">' + svg + '</span>'; }
   var ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5l13 7.5-13 7.5z"/></svg>';
+  var ICON_FB = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>';
   var ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1.3"/><rect x="14" y="4.5" width="4" height="15" rx="1.3"/></svg>';
   var ICON_TERM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg>';
   var ICON_IDEA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18h5"/><path d="M10 21.5h4"/><path d="M12 2.5a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1V18h6v-1.8c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 2.5z"/></svg>';
@@ -674,9 +675,17 @@
         }).join('') + '</ul>';
     }
 
+    var videoHtml = o.video
+      ? '<div class="sect"><h4>Video van je school</h4></div>' +
+        '<a class="reelcard" href="' + esc(o.video.url) + '" target="_blank" rel="noopener">' +
+          '<img src="' + o.video.poster + '" alt="" loading="lazy">' +
+          '<span class="reelfb">' + ICON_FB + ' Facebook</span>' +
+          '<span class="playbtn" aria-hidden="true"></span>' +
+          '<span class="reelmeta"><b>' + esc(o.video.titel) + '</b><span>' + esc(o.video.bron) + '</span></span>' +
+        '</a>'
+      : '';
+
     view.innerHTML = '<div class="view active"><div class="screen">' +
-      '<span class="secnum">Naslag</span>' +
-      '<h1 class="screen-title">' + esc(o.roman) + '</h1>' +
       '<p class="screen-sub">' + esc(o.intro) + ' Wissel hieronder tussen ' + esc(C.levels['1'].naam) + ' en ' + esc(C.levels['2'].naam) + ' — de eisen verschillen.</p>' +
       toggle +
       '<div class="examcard">' +
@@ -689,6 +698,7 @@
         breakdown +
       '</div>' +
       '<div class="notecard"><b>Veilig oefenen:</b> ' + esc(o.veilig) + '</div>' +
+      videoHtml +
       '<a class="btn ghost" href="#/examenkaart" style="margin-top:16px;display:inline-block;text-decoration:none">Bekijk je hele examenkaart</a>' +
       '</div></div>';
   }
