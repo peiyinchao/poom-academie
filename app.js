@@ -397,7 +397,8 @@
       return '<div class="trow">' +
         '<div class="tx"><div class="ko">' + esc(st.ko) + '</div><div class="ro">' + esc(st.roman) + '</div>' +
         '<div class="nl">' + esc(st.nl) + '</div>' +
-        '<div class="stdesc">' + esc(st.uitleg) + '</div></div>' +
+        '<div class="stdesc">' + esc(st.uitleg) + '</div>' +
+        (st.gewicht ? '<span class="wt">Gewicht ' + esc(st.gewicht) + '</span>' : '') + '</div>' +
         '<button class="speak" data-act="speak" data-ko="' + esc(st.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>';
     }).join('');
     var videoHtml = p.video
