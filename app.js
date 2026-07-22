@@ -506,7 +506,7 @@
 
   /* ---------- View: Quiz ---------- */
   var quizState = null;
-  var tellerTimer = null, tellerIdx = 0, tellerSpeed = 1, tellerRunning = false, tellerLoop = false, tellerPrep = null;
+  var tellerTimer = null, tellerIdx = 0, tellerSpeed = 1, tellerRunning = false, tellerLoop = false, tellerPrep = null, tellerDoneTimer = null;
   var SPEEDS = [0.25, 0.5, 1, 1.5, 2];
   function fmtSpeed(v) { return String(v).replace('.', ',') + '×'; }
   function nativeRoman(c) { return String(c.roman || '').split('/')[0].trim(); }
@@ -744,7 +744,12 @@
     var counts = tellCounts(); if (!counts.length) return;
     if (tellerIdx >= counts.length) {
       if (tellerLoop) { tellerIdx = 0; }
-      else { tellerPause(); tellSet('✓', { msg: 'Klaar!' }, -1); tellerIdx = 0; tellSetPlaying(false); return; }
+      else {
+        tellerPause(); tellSet('✓', { msg: 'Klaar!' }, -1); tellerIdx = 0; tellSetPlaying(false);
+        if (tellerDoneTimer) clearTimeout(tellerDoneTimer);
+        tellerDoneTimer = setTimeout(function () { tellerDoneTimer = null; if (!tellerRunning) tellerReset(); }, 3000);
+        return;
+      }
     }
     var c = counts[tellerIdx];
     tellSet(String(tellerIdx + 1), c, tellerIdx);
@@ -784,33 +789,42 @@
   }
   function tellerToggle() {
     if (!tellCounts().length) return;
+    if (tellerDoneTimer) { clearTimeout(tellerDoneTimer); tellerDoneTimer = null; }
     if (tellerRunning) { tellerPause(); tellSetPlaying(false); return; }
     tellerRunning = true;
     primeSpeech();
-    tellerStartCountdown();
+    if (tellerIdx > 0) { tellSetPlaying(true); tellStep(); tellArm(); }
+    else tellerStartCountdown();
   }
   function tellerReset() {
+    if (tellerDoneTimer) { clearTimeout(tellerDoneTimer); tellerDoneTimer = null; }
     tellerPause(); tellerIdx = 0;
     var n = document.getElementById('cnum'), k = document.getElementById('cko');
     if (n) n.textContent = '';
     if (k) k.textContent = 'Tik om te starten';
     tellSetPlaying(false);
   }
+  function positionSegThumb(instant) {
+    var seg = document.getElementById('cseg'); if (!seg) return;
+    var thumb = seg.querySelector('.segthumb'); if (!thumb) return;
+    var on = seg.querySelector('button.on'); if (!on) return;
+    if (instant) thumb.style.transition = 'none';
+    thumb.style.width = on.offsetWidth + 'px';
+    thumb.style.transform = 'translateX(' + on.offsetLeft + 'px)';
+    if (instant) { void thumb.offsetWidth; thumb.style.transition = ''; }
+  }
   function tellerSetSpeed(v) {
     tellerSpeed = v;
     var seg = document.getElementById('cspeed');
-    var segc = document.getElementById('cseg');
     if (seg) {
       var btns = seg.querySelectorAll('.segctrl button');
       for (var i = 0; i < btns.length; i++) {
         var on = parseFloat(btns[i].getAttribute('data-v')) === v;
         btns[i].classList.toggle('on', on);
         btns[i].setAttribute('aria-pressed', on);
-        if (on && segc) {
-          segc.style.setProperty('--i', i);
-          if (!prefersReduce()) { btns[i].classList.remove('pick'); void btns[i].offsetWidth; btns[i].classList.add('pick'); }
-        }
+        if (on && !prefersReduce()) { btns[i].classList.remove('pick'); void btns[i].offsetWidth; btns[i].classList.add('pick'); }
       }
+      positionSegThumb(false);
     }
     if (tellerRunning) tellArm();
   }
@@ -827,12 +841,13 @@
         '<div class="cko" id="cko">Tik om te starten</div>' +
       '</button>' +
       '<div class="tp-speed" id="cspeed" role="group" aria-label="Tempo">' +
-        '<span class="tp-speed-lab">Tempo</span>' +
-        '<div class="segctrl" id="cseg" style="--n:' + SPEEDS.length + ';--i:' + Math.max(0, SPEEDS.indexOf(tellerSpeed)) + '">' +
+        '<div class="segctrl" id="cseg">' +
         '<span class="segthumb" aria-hidden="true"></span>' +
+        '<span class="segend" aria-hidden="true">🐢</span>' +
         SPEEDS.map(function (v) {
           return '<button class="' + (v === tellerSpeed ? 'on' : '') + '" data-act="tellerSpeed" data-v="' + v + '" aria-pressed="' + (v === tellerSpeed) + '">' + fmtSpeed(v) + '</button>';
         }).join('') +
+        '<span class="segend" aria-hidden="true">🐰</span>' +
         '</div>' +
       '</div>' +
       '<div class="transport">' +
@@ -842,6 +857,7 @@
       '</div>' +
       '</div></div>';
     tellSetPlaying(false);
+    requestAnimationFrame(function () { positionSegThumb(true); });
   }
 
   /* ---------- View: Flashcards (termen) ---------- */
