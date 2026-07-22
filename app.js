@@ -77,7 +77,7 @@
   function foundationPoomsae() { return C.poomsae.filter(function (p) { return (p.level || 0) === 0; }); }
   function examPoomsae() { var L = curLevel(); return C.poomsae.filter(function (p) { return p.level >= 1 && p.level <= L; }); }
   function examChecks() { prog.exam[prog.level] = prog.exam[prog.level] || {}; return prog.exam[prog.level]; }
-  var TILE_IDS = ['theorie', 'standen', 'examen'];
+  var TILE_IDS = ['standen', 'theorie', 'ilbo', 'hosinsul', 'examen'];
   function tileOrderIds() {
     var saved = (prog.tileOrder || []).filter(function (id) { return TILE_IDS.indexOf(id) >= 0; });
     TILE_IDS.forEach(function (id) { if (saved.indexOf(id) < 0) saved.push(id); });
@@ -220,7 +220,7 @@
   }
 
   /* ---------- Router ---------- */
-  var routes = ['home', 'poomsae', 'techniek', 'termen', 'quiz', 'theorie', 'standen', 'examen', 'examenkaart', 'teller', 'flash', 'bronnen'];
+  var routes = ['home', 'poomsae', 'techniek', 'termen', 'quiz', 'theorie', 'standen', 'examen', 'examenkaart', 'ilbo', 'hosinsul', 'teller', 'flash', 'bronnen'];
   function parse() {
     var h = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
     if (!h.length) h = ['home'];
@@ -243,11 +243,13 @@
     else if (r === 'theorie') viewTheorie();
     else if (r === 'examen') viewExamen();
     else if (r === 'examenkaart') viewExamenkaart();
+    else if (r === 'ilbo') viewNaslag('ilbo');
+    else if (r === 'hosinsul') viewNaslag('hosinsul');
     else if (r === 'teller') viewTeller();
     else if (r === 'flash') viewFlash();
     else if (r === 'bronnen') viewBronnen();
     // nav active state
-    var navMap = { standen: 'techniek', examen: 'theorie', examenkaart: 'home', bronnen: 'home', flash: 'termen' };
+    var navMap = { standen: 'techniek', examen: 'theorie', examenkaart: 'home', ilbo: 'home', hosinsul: 'home', bronnen: 'home', flash: 'termen' };
     var navR = navMap[r] || r;
     [].forEach.call(nav.querySelectorAll('a'), function (a) {
       a.classList.toggle('on', a.getAttribute('data-r') === navR);
@@ -302,7 +304,9 @@
     var tileDefs = {
       standen: ['#/standen', 'Standen', 'Standen met voetdiagram', feetMini()],
       examen: ['#/examenkaart', 'Examen', 'Onderdelen & aftekenlijst', svgExam()],
-      theorie: ['#/theorie', 'Theorie', 'Achtergrond & etiquette', svgBook()]
+      theorie: ['#/theorie', 'Theorie', 'Achtergrond & etiquette', svgBook()],
+      ilbo: ['#/ilbo', 'Ilbo Taeryon', 'Eén-stap sparren', onderIcon('step')],
+      hosinsul: ['#/hosinsul', 'Zelfverdediging', 'Hosinsul · veilig loskomen', onderIcon('shield')]
     };
     var order = TILE_IDS.slice();
     var tiles = order.map(function (id) {
@@ -639,6 +643,54 @@
       '<p class="screen-sub">Op je poom-examen laat je meer zien dan alleen poomsae. Tik op de luidspreker ' + iic(ICON_SPEAK) + ' voor de Koreaanse uitspraak.</p>' +
       cards +
       '<div class="notecard">Oefen sparren, zelfverdediging en breektesten <b>altijd onder begeleiding</b> van je trainer.</div>' +
+      '</div></div>';
+  }
+
+  /* ---------- View: Naslag-onderdeel (Ilbo Taeryon / Hosinsul, poom-bewust) ---------- */
+  function viewNaslag(id) {
+    var o = (C.naslag || {})[id];
+    if (!o) { location.hash = '#/home'; return; }
+    var L = prog.level, n = o.niveau[L] || o.niveau['1'];
+
+    var toggle = '<div class="lvltoggle light">' + ['1', '2'].map(function (l) {
+      return '<button data-act="lvl" data-l="' + l + '" class="' + (L === l ? 'on' : '') + '">' + esc(C.levels[l].naam) + '</button>';
+    }).join('') + '</div>';
+
+    var secties = n.secties.map(function (s) {
+      return '<div class="sect"><h4>' + esc(s.h) + '</h4></div><p class="examb">' + esc(s.b) + '</p>';
+    }).join('');
+
+    var breakdown = '';
+    if (n.categorieen) {
+      breakdown = '<div class="sect"><h4>Verdeel je 12 technieken</h4></div>' +
+        '<div class="catgrid">' + n.categorieen.map(function (c) {
+          return '<div class="catchip"><b>×' + c.n + '</b><span>' + esc(c.t) + '</span></div>';
+        }).join('') + '</div>';
+    } else if (n.check) {
+      breakdown = '<div class="sect"><h4>Je serie klopt</h4></div>' +
+        '<ul class="checklist">' + n.check.map(function (c) {
+          return '<li>' + iic(ICON_CHECK) + '<span>' + esc(c) + '</span></li>';
+        }).join('') + '</ul>';
+    }
+
+    view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<span class="secnum">Naslag</span>' +
+      '<h1 class="screen-title">' + esc(o.nl) + '</h1>' +
+      '<p class="screen-sub">' + esc(o.intro) + ' Wissel hieronder tussen ' + esc(C.levels['1'].naam) + ' en ' + esc(C.levels['2'].naam) + ' — de eisen verschillen.</p>' +
+      toggle +
+      '<div class="examcard">' +
+        '<div class="examhd"><span class="examico">' + onderIcon(o.icon) + '</span>' +
+          '<div class="examt"><b>' + esc(o.nl) + '</b><span class="kr">' + esc(o.ko) + ' · ' + esc(o.roman) + '</span></div>' +
+          '<button class="speak" data-act="speak" data-ko="' + esc(o.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>' +
+        '<div class="eisbox"><span class="eislabel">Wat je laat zien · ' + esc(C.levels[L].naam) + '</span>' +
+          '<p>' + esc(n.eis) + '</p></div>' +
+        secties +
+        breakdown +
+      '</div>' +
+      '<div class="misscard"><div class="cardkick"><span class="dk-ic">' + ICON_IDEA + '</span>Leeuwenmissie</div>' +
+        '<p>' + esc(n.missie) + '</p></div>' +
+      '<div class="notecard"><b>Veilig oefenen:</b> ' + esc(o.veilig) + '</div>' +
+      '<a class="btn ghost" href="#/examenkaart" style="margin-top:16px;display:inline-block;text-decoration:none">Bekijk je hele examenkaart</a>' +
       '</div></div>';
   }
 

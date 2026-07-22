@@ -353,6 +353,75 @@ window.CURRICULUM = {
       tips: ["Richt je kracht dóór de plank heen", "Adem uit en kiai op het moment van raken", "Alleen doen met toestemming van je trainer"] }
   ],
 
+  /* -------------------- NASLAG: ILBO & HOSINSUL (poom-bewust) -------------------- */
+  /* Verdiepende naslagpagina's. Per niveau verschillen de eisen, dus alles is per poom. */
+  naslag: {
+    ilbo: {
+      id: "ilbo", ko: "일보 대련", roman: "Ilbo Taeryon", nl: "Eén-stap sparren", icon: "step",
+      intro: "Afgesproken oefening met een partner. Je wacht op één duidelijke aanval, verdedigt pas nádat die is gestart en werkt netjes en gecontroleerd af. Het traint afstand, timing en zuivere technieken zonder echt gevecht.",
+      niveau: {
+        "1": {
+          eis: "15 stuks: 5 afwerkingen met een handtechniek en 10 met een voettechniek, waarvan minstens 3 gesprongen.",
+          secties: [
+            { h: "De aanval", b: "Je partner start links voor in een lange stand en stoot met rechts, eindigend rechts voor in een lange stand. Steeds dezelfde, duidelijke rechtse vuistaanval." },
+            { h: "Je set van 15", b: "Maak samen met je trainer een serie van 15 antwoorden: vijf handafwerkingen en tien voetafwerkingen. Minstens drie voetafwerkingen zijn gesprongen." },
+            { h: "Waar het om draait", b: "Afstand, timing, doelgerichtheid en controle zijn belangrijker dan een ingewikkelde truc. Je counter is duidelijk zichtbaar, maar raakt je partner niet hard." }
+          ],
+          check: ["5 handafwerkingen", "10 voetafwerkingen", "minstens 3 gesprongen"],
+          missie: "Nummer je set 1–15 en schrijf bij elk nummer op: aanval, blok of ontwijking, en afwerking."
+        },
+        "2": {
+          eis: "15 stuks, waarvan minstens 5 aanvallen ánders dan een gewone stoot. Nog steeds 5 hand- en 10 voetafwerkingen, min. 3 gesprongen.",
+          secties: [
+            { h: "Gevarieerde aanvallen", b: "De 15 aanvallen bestaan niet meer alleen uit rechte stoten. Minstens vijf aanvallen zijn trappen, slagen of combinaties." },
+            { h: "Startpositie", b: "Alle aanvallen starten met het linkerbeen voor. Bij een armtechniek gaat de aanvaller van links voor naar rechts voor in een lange stand." },
+            { h: "Afwerking", b: "Ook nu vijf handafwerkingen en tien voetafwerkingen, waarvan minstens drie gesprongen. Houd elke aanval realistisch, afgesproken en veilig." }
+          ],
+          check: ["5 aanvallen anders dan een stoot", "5 handafwerkingen", "10 voetafwerkingen", "min. 3 gesprongen"],
+          missie: "Markeer in je set welke vijf aanvallen géén gewone stoot zijn."
+        }
+      },
+      veilig: "Wacht tot de aanval echt is gestart. Houd tegenaanvallen op veilige afstand of met gecontroleerd contact, en spreek vooraf een duidelijk stopteken af."
+    },
+    hosinsul: {
+      id: "hosinsul", ko: "호신술", roman: "Hosinsul", nl: "Zelfverdediging", icon: "shield",
+      intro: "Praktische verdediging waarbij je jezelf veilig bevrijdt en ruimte maakt. Techniek en rust gaan boven kracht: eenvoudig, zichtbaar en beheerst is beter dan ingewikkeld.",
+      niveau: {
+        "1": {
+          eis: "12 verdedigingen tegen vasthouden, beetpakken en klemmen — met je eigen partner.",
+          secties: [
+            { h: "Eerst veilig staan", b: "Blijf in balans, bescherm je hoofd en maak ruimte. Werk eenvoudig; ingewikkeld is niet automatisch beter." },
+            { h: "Duidelijk en beheerst", b: "Een bevrijding of klem moet zichtbaar werken, maar je oefent langzaam en zonder geweld. Je partner kan altijd aftikken of ‘stop’ zeggen." },
+            { h: "Trainerkeuze", b: "De precieze 12 technieken verschillen per vereniging. Laat elke techniek door je trainer goedkeuren." }
+          ],
+          categorieen: [
+            { t: "Pols of arm", n: 3 },
+            { t: "Kleding / romp", n: 3 },
+            { t: "Van achteren", n: 3 },
+            { t: "Klem / omarming", n: 3 }
+          ],
+          missie: "Verdeel je 12 technieken netjes over pols/arm, kleding/romp, van achteren en klemmen."
+        },
+        "2": {
+          eis: "12 verdedigingen tegen verschillende stokaanvallen (oefenstok 50–80 cm) — alleen veilig en door de trainer goedgekeurd.",
+          secties: [
+            { h: "Veilig materiaal", b: "Gebruik een zachte oefenstok of ander door je trainer goedgekeurd materiaal. De TBN noemt voor examenmateriaal een lengte van 50–80 cm." },
+            { h: "Uit de aanvalslijn", b: "Beweeg weg van de baan van de stok. Blijf niet onder het wapen staan en houd controle over de arm van de aanvaller." },
+            { h: "Ontwapenen", b: "De precieze techniek komt van je trainer. Werk beheerst, leg de stok na ontwapenen buiten bereik en gebruik hem niet als tegenaanval." }
+          ],
+          categorieen: [
+            { t: "Van boven", n: 3 },
+            { t: "Van opzij", n: 3 },
+            { t: "Recht vooruit", n: 3 },
+            { t: "Schuin / combinatie", n: 3 }
+          ],
+          missie: "Teken voor elk van je 12 technieken de richting van de aanval met één pijl."
+        }
+      },
+      veilig: "Geen rukken aan vingers of gewrichten. Je partner kan altijd aftikken of ‘stop’ zeggen. Oefen dit onderdeel alleen onder begeleiding van je trainer."
+    }
+  },
+
   /* -------------------- EXAMENKAART (per poom) -------------------- */
   /* "Jouw examen in één beeld" — exacte TBN-eisen per onderdeel, per poom. */
   examenkaart: {

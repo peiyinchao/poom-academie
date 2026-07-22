@@ -456,6 +456,23 @@ button{font-family:inherit}
 .examhd .speak svg{width:19px;height:19px}
 .examb{color:var(--ink);font-size:14px;line-height:1.6;margin:0 0 6px}
 
+/* ---------- Naslag (Ilbo / Hosinsul) ---------- */
+.eisbox{background:#FDECEF;border:1px solid #F7CDD6;border-radius:12px;padding:12px 14px;margin:2px 0 6px}
+.eislabel{display:block;font-family:var(--font-cond);font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;font-size:12px;color:var(--red);margin-bottom:3px}
+.eisbox p{margin:0;font-size:14px;line-height:1.55;color:var(--ink)}
+.catgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:4px}
+.catchip{display:flex;align-items:center;gap:10px;background:#F2F4F7;border:1px solid var(--line);
+  border-radius:11px;padding:10px 12px}
+.catchip b{font-family:var(--font-cond);font-size:17px;color:var(--red);flex:none}
+.catchip span{font-size:13px;line-height:1.25;color:var(--ink)}
+.checklist{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.checklist li{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink)}
+.checklist li svg{width:18px;height:18px;color:var(--red);flex:none}
+.misscard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);padding:15px 16px;margin-bottom:14px}
+.misscard p{margin:6px 0 0;font-size:14px;line-height:1.55;color:var(--ink)}
+
 /* ---------- Teller (1–10) — fullscreen ---------- */
 .tellerpage{display:flex;flex-direction:column;min-height:calc(100vh - var(--appbar-h) - var(--nav-h) - env(safe-area-inset-bottom));
   gap:16px;padding:0 18px 0}
