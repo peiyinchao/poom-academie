@@ -340,9 +340,8 @@ button{font-family:inherit}
   font-size:11px;color:var(--red);flex:none;width:46px}
 
 /* ---------- Termen: tabs & moeilijk ---------- */
-.termtabs{display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;
-  padding:2px 0 12px;margin-bottom:6px;scrollbar-width:none}
-.termtabs::-webkit-scrollbar{display:none}
+.termtabs{display:flex;flex-wrap:wrap;gap:7px;
+  padding:2px 0 12px;margin-bottom:6px}
 .termtabs button{flex:none;font-family:var(--font-cond);font-weight:700;font-size:13.5px;
   text-transform:uppercase;letter-spacing:.04em;color:var(--gray);background:#EAECF0;
   border:0;border-radius:999px;padding:8px 15px;cursor:pointer;white-space:nowrap}
