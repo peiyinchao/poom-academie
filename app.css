@@ -261,6 +261,7 @@ button{font-family:inherit}
 .notecard{margin-top:22px;padding:15px 16px;background:#EEF1F5;border-radius:var(--radius-sm);
   color:var(--gray);font-size:12.5px;line-height:1.55}
 .notecard a{color:var(--red);font-weight:600;text-decoration:none;border-bottom:1px solid var(--red)}
+.notecard.srcnote{margin-top:34px}
 
 /* ---------- Niveau-keuze (hero) ---------- */
 .hero .lvlsel{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:2px}
@@ -505,7 +506,7 @@ button{font-family:inherit}
 .stancelegend .facear{color:#8A93A2;font-size:15px;line-height:1;font-weight:700}
 .stance .sdhd{display:flex;align-items:center;gap:9px}
 .stance .sdhd b{display:inline-block}
-.stance .sdhd .hardbtn{margin-left:auto}
+.stance .sdhd .speak.sm{margin-left:auto}
 .speak.sm{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:#F9FAFB;
   display:grid;place-items:center;cursor:pointer;color:var(--ink);flex:none;padding:0}
 .speak.sm svg{width:17px;height:17px}

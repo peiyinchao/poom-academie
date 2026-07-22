@@ -84,7 +84,7 @@
     return saved;
   }
 
-  function poomDone() { return visPoomsae().filter(function (p) { return prog.poomsae[p.id]; }).length; }
+  function isPracticedToday(id) { return !!daily().practiced[id]; }
   function refreshStreak() { document.getElementById('streakN').textContent = prog.streakDays || 0; }
 
   /* ---------- Dagelijkse uitdagingen ---------- */
@@ -176,7 +176,7 @@
     var seg = parse();
     var r = seg[0];
     if (routes.indexOf(r) < 0) r = 'home';
-    if (tellerTimer) { clearInterval(tellerTimer); tellerTimer = null; } tellerRunning = false; tileEdit = false;
+    if (tellerTimer) { clearInterval(tellerTimer); tellerTimer = null; } tellerRunning = false;
     if ('speechSynthesis' in window) speechSynthesis.cancel();
     view.innerHTML = '';
     if (r === 'home') viewHome();
@@ -203,7 +203,6 @@
 
   /* ---------- View: Home ---------- */
   function viewHome() {
-    var vis = visPoomsae(), done = poomDone(), pct = Math.round(done / vis.length * 100);
     var idx = new Date().getDate() + new Date().getMonth();
     var all = allTerms();
     var todPool = hardTermList(); var todHard = todPool.length > 0; if (!todHard) todPool = all;
@@ -236,15 +235,8 @@
       theorie: ['#/theorie', 'Theorie', 'Achtergrond & etiquette', svgBook()]
     };
     var order = tileOrderIds();
-    var tiles = order.map(function (id, idx) {
+    var tiles = order.map(function (id) {
       var t = tileDefs[id]; if (!t) return '';
-      if (tileEdit) {
-        var up = idx > 0 ? '<button class="tmove" data-act="tileMove" data-id="' + id + '" data-dir="-1" aria-label="Omhoog">↑</button>' : '<span class="tmove ph"></span>';
-        var dn = idx < order.length - 1 ? '<button class="tmove" data-act="tileMove" data-id="' + id + '" data-dir="1" aria-label="Omlaag">↓</button>' : '<span class="tmove ph"></span>';
-        return '<div class="tile edit"><span class="ti">' + t[3] + '</span>' +
-          '<h3>' + t[1] + '</h3><small>' + t[2] + '</small>' +
-          '<div class="tmoves">' + up + dn + '</div></div>';
-      }
       return '<a class="tile" href="' + t[0] + '"><span class="ti">' + t[3] + '</span>' +
         '<h3>' + t[1] + '</h3><small>' + t[2] + '</small></a>';
     }).join('');
@@ -270,17 +262,16 @@
 
         '<div class="quotecard">“' + esc(quote) + '”</div>' +
 
-        '<div class="ontdek-hd"><span class="secnum" style="margin:0">Ontdek</span>' +
-          '<button class="editlink" data-act="tileEdit">' + (tileEdit ? 'Klaar' : 'Aanpassen') + '</button></div>' +
-        '<div class="tiles' + (tileEdit ? ' editing' : '') + '">' + tiles + '</div>' +
+        '<span class="secnum">Naslag</span>' +
+        '<div class="tiles">' + tiles + '</div>' +
 
-        '<div class="notecard">' + esc(C.meta.bron) + ' Bekijk de <a href="#/bronnen">bronnen &amp; verantwoording</a>.</div>' +
+        '<div class="notecard srcnote">' + esc(C.meta.bron) + ' Bekijk de <a href="#/bronnen">bronnen &amp; verantwoording</a>.</div>' +
       '</div></div>';
   }
 
   /* ---------- View: Poomsae-lijst ---------- */
   function poomRow(p) {
-    var done = !!prog.poomsae[p.id];
+    var done = isPracticedToday(p.id);
     var title = p.level >= 1 ? esc(p.korean) : 'Taegeuk ' + p.nr + (p.sino ? ' · ' + esc(p.sino) : '');
     var ask = (p.level || 0) === 0 && !done && daily().suggest.indexOf(p.id) >= 0;
     return '<button class="poomrow" data-act="poom" data-id="' + p.id + '">' +
@@ -313,7 +304,7 @@
   function viewPoomDetail(id) {
     var p = C.poomsae.filter(function (x) { return x.id === id; })[0];
     if (!p) { location.hash = '#/poomsae'; return; }
-    var done = !!prog.poomsae[p.id];
+    var done = isPracticedToday(p.id);
     var nieuw = p.nieuw.map(function (t) {
       return '<div class="trow"><button class="speak" data-act="speak" data-ko="' + esc(t.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' +
         '<div class="tx"><div class="ko">' + esc(t.ko) + '</div><div class="ro">' + esc(t.roman) + '</div><div class="nl">' + esc(t.nl) + '</div></div></div>';
@@ -369,8 +360,8 @@
         var hard = isHard(s);
         return '<div class="stance' + (hard ? ' hard' : '') + '"><span class="feet">' + stanceSVG(s.roman) + '</span>' +
           '<div class="sd"><div class="sdhd"><b>' + esc(s.roman) + '</b>' +
-          '<button class="speak sm" data-act="speak" data-ko="' + esc(s.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' +
-          hardBtn(s, true) + '</div>' +
+          hardBtn(s, true) +
+          '<button class="speak sm" data-act="speak" data-ko="' + esc(s.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>' +
           '<span class="ko">' + esc(s.ko) + ' · ' + esc(s.nl) + '</span>' +
           '<small>' + esc(s.uitleg) + '</small>' +
           '<span class="wt">' + esc(s.gewicht) + '</span></div></div>';
@@ -421,9 +412,9 @@
   }
   function termRowH(t) {
     var hard = isHard(t);
-    return '<div class="trow' + (hard ? ' hard' : '') + '"><button class="speak" data-act="speak" data-ko="' + esc(t.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' +
+    return '<div class="trow' + (hard ? ' hard' : '') + '">' + hardBtn(t) +
       '<div class="tx"><div class="ko">' + esc(t.ko) + '</div><div class="ro">' + esc(t.roman) + '</div><div class="nl">' + esc(t.nl) + '</div></div>' +
-      hardBtn(t) + '</div>';
+      '<button class="speak" data-act="speak" data-ko="' + esc(t.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>';
   }
   function renderTermTab() {
     var items, hd;
@@ -437,7 +428,6 @@
 
   /* ---------- View: Quiz ---------- */
   var quizState = null;
-  var tileEdit = false;
   var tellerTimer = null, tellerIdx = 0, tellerSpeed = 1, tellerRunning = false, tellerLoop = false;
   var SPEEDS = [0.25, 0.5, 1, 1.5, 2];
   function fmtSpeed(v) { return String(v).replace('.', ',') + '×'; }
@@ -829,23 +819,17 @@
     }
     else if (act === 'togglepoom') {
       var id = b.getAttribute('data-id');
-      prog.poomsae[id] = !prog.poomsae[id];
-      if (prog.poomsae[id]) daily().practiced[id] = true;
+      var dd = daily();
+      if (dd.practiced[id]) delete dd.practiced[id]; else dd.practiced[id] = true;
       save(prog);
-      toast(prog.poomsae[id] ? 'Gemarkeerd als geoefend ✓' : 'Markering gewist');
-      if (prog.poomsae[id]) checkDaily();
+      toast(dd.practiced[id] ? 'Gemarkeerd als geoefend ✓' : 'Markering gewist');
+      if (dd.practiced[id]) checkDaily();
       viewPoomDetail(id); refreshStreak();
     }
     else if (act === 'video') {
       var v = b.getAttribute('data-v');
       b.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + v + '?rel=0&modestbranding=1&autoplay=1" title="Poomsae-video" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
       b.classList.add('playing'); b.removeAttribute('data-act');
-    }
-    else if (act === 'tileEdit') { tileEdit = !tileEdit; if (!tileEdit) toast('Volgorde opgeslagen ✓'); viewHome(); }
-    else if (act === 'tileMove') {
-      var mid = b.getAttribute('data-id'), dir = +b.getAttribute('data-dir');
-      var ids = tileOrderIds(), i = ids.indexOf(mid), j = i + dir;
-      if (i >= 0 && j >= 0 && j < ids.length) { var tmp = ids[i]; ids[i] = ids[j]; ids[j] = tmp; prog.tileOrder = ids; save(prog); viewHome(); }
     }
     else if (act === 'tellerToggle') tellerToggle();
     else if (act === 'tellerReset') tellerReset();
