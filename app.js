@@ -361,7 +361,7 @@
       : '';
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<div class="stickyhd">' +
-      '<span class="secnum">01 — De vormen</span>' +
+      '<span class="secnum">De vormen</span>' +
       '<h1 class="screen-title">Poomsae</h1>' +
       '</div>' +
       '<p class="screen-sub">De acht Taegeuk-vormen zijn je basis. Wat je daarboven nodig hebt, hangt af van je poom. Tik op een vorm voor de betekenis, het trigram en de nieuwe technieken.</p>' +
@@ -446,7 +446,7 @@
 
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<div class="stickyhd">' +
-      '<span class="secnum">02 — Techniek</span>' +
+      '<span class="secnum">Techniek</span>' +
       '<h1 class="screen-title">Standen &amp; technieken</h1>' +
       '<p class="screen-sub">De bouwstenen van elke vorm. Tik op de luidspreker ' + iic(ICON_SPEAK) + ' om de Koreaanse naam te horen.</p>' +
       '<div class="termtabs">' + segHtml + '</div>' +
@@ -471,7 +471,7 @@
   function viewTermen() {
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<div class="stickyhd">' +
-      '<span class="secnum">03 — Woordenschat</span>' +
+      '<span class="secnum">Woordenschat</span>' +
       '<h1 class="screen-title">Koreaanse termen</h1>' +
       '<p class="screen-sub">Kies een categorie en luister naar de uitspraak ' + iic(ICON_SPEAK) + '. Tik op de bladwijzer ' + iic(ICON_BOOKMARK) + ' om een term als moeilijk te bewaren — die komt vaker terug in je dagterm en flashcards.</p>' +
       '<div class="termtabs" id="termtabs"></div>' +
@@ -531,7 +531,7 @@
       return '<button class="opt" data-act="qopt" data-i="' + i + '"><span class="lt">' + 'ABCD'[i] + '</span>' + esc(o) + '</button>';
     }).join('');
     view.innerHTML = '<div class="view active"><div class="screen">' +
-      '<span class="secnum">04 — Oefenen</span>' +
+      '<span class="secnum">Oefenen</span>' +
       '<h1 class="screen-title">Examenquiz</h1>' +
       '<p class="screen-sub">Vraag ' + (s.i + 1) + ' van ' + n + ' · net als op je ' + esc(C.levels[prog.level].naam) + '-examen. Geslaagd vanaf ' + quizPass(n) + ' goed.</p>' +
       '<div class="quizbar"><i id="qbar" style="width:' + (s.prevPct || 0) + '%"></i></div>' +
@@ -582,7 +582,7 @@
         '<div class="body">' + t.body + '</div></details>';
     }).join('');
     view.innerHTML = '<div class="view active"><div class="screen">' +
-      '<span class="secnum">05 — Achtergrond</span>' +
+      '<span class="secnum">Achtergrond</span>' +
       '<h1 class="screen-title">Theorie</h1>' +
       '<p class="screen-sub">De verhalen achter de sport — vaak gevraagd op je examen.</p>' +
       '<div class="acc">' + acc + '</div>' +
@@ -611,7 +611,7 @@
         '</div>';
     }).join('');
     view.innerHTML = '<div class="view active"><div class="screen">' +
-      '<span class="secnum">06 — Examen</span>' +
+      '<span class="secnum">Examen</span>' +
       '<h1 class="screen-title">Examenonderdelen</h1>' +
       '<p class="screen-sub">Op je poom-examen laat je meer zien dan alleen poomsae. Tik op de luidspreker ' + iic(ICON_SPEAK) + ' voor de Koreaanse uitspraak.</p>' +
       cards +
