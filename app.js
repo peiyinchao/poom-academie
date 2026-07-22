@@ -196,6 +196,8 @@
   var ICON_BOOKMARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg>';
   var ICON_RESET = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>';
   var ICON_REPEAT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>';
+  // Klein icoon dat middenin een zin past, zodat kinderen de knop herkennen.
+  function iic(svg) { return '<span class="iic" aria-hidden="true">' + svg + '</span>'; }
   function feetSVG() {
     return '<svg viewBox="0 0 40 40" fill="#AEB6C2"><g><ellipse cx="13" cy="24" rx="5" ry="8.5"/><circle cx="9.6" cy="13.5" r="1.7"/><circle cx="13" cy="12.2" r="1.9"/><circle cx="16.4" cy="13.5" r="1.7"/></g><g><ellipse cx="27" cy="24" rx="5" ry="8.5"/><circle cx="23.6" cy="13.5" r="1.7"/><circle cx="27" cy="12.2" r="1.9"/><circle cx="30.4" cy="13.5" r="1.7"/></g></svg>';
   }
@@ -425,7 +427,7 @@
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<span class="secnum">02 — Techniek</span>' +
       '<h1 class="screen-title">Standen &amp; technieken</h1>' +
-      '<p class="screen-sub">De bouwstenen van elke vorm. Tik op de luidspreker om de Koreaanse naam te horen.</p>' +
+      '<p class="screen-sub">De bouwstenen van elke vorm. Tik op de luidspreker ' + iic(ICON_SPEAK) + ' om de Koreaanse naam te horen.</p>' +
       '<div class="termtabs">' + segHtml + '</div>' +
       '<div id="techbody">' + body + '</div>' +
       '</div></div>';
@@ -447,7 +449,7 @@
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<span class="secnum">03 — Woordenschat</span>' +
       '<h1 class="screen-title">Koreaanse termen</h1>' +
-      '<p class="screen-sub">Kies een categorie en luister naar de uitspraak. Tik op de bladwijzer om een term als moeilijk te bewaren — die komt vaker terug in je dagterm en flashcards.</p>' +
+      '<p class="screen-sub">Kies een categorie en luister naar de uitspraak ' + iic(ICON_SPEAK) + '. Tik op de bladwijzer ' + iic(ICON_BOOKMARK) + ' om een term als moeilijk te bewaren — die komt vaker terug in je dagterm en flashcards.</p>' +
       '<div class="termtabs" id="termtabs"></div>' +
       '<div id="termbody"></div>' +
       '</div></div>';
@@ -473,7 +475,7 @@
     else { var g = C.termen.filter(function (x) { return x.groep === termTab; })[0]; items = g ? g.items : []; hd = g ? g.groep : ''; }
     var body = items.length
       ? '<div class="grouphd">' + esc(hd) + ' <span class="gcount">' + items.length + '</span></div><div class="rows">' + items.map(termRowH).join('') + '</div>'
-      : '<p class="termempty">Nog geen moeilijke termen. Tik op de bladwijzer bij een term om die vaker te oefenen.</p>';
+      : '<p class="termempty">Nog geen moeilijke termen. Tik op de bladwijzer ' + iic(ICON_BOOKMARK) + ' bij een term om die vaker te oefenen.</p>';
     document.getElementById('termbody').innerHTML = body;
   }
 
@@ -586,7 +588,7 @@
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<span class="secnum">06 — Examen</span>' +
       '<h1 class="screen-title">Examenonderdelen</h1>' +
-      '<p class="screen-sub">Op je poom-examen laat je meer zien dan alleen poomsae. Tik op de luidspreker voor de Koreaanse uitspraak.</p>' +
+      '<p class="screen-sub">Op je poom-examen laat je meer zien dan alleen poomsae. Tik op de luidspreker ' + iic(ICON_SPEAK) + ' voor de Koreaanse uitspraak.</p>' +
       cards +
       '<div class="notecard">Oefen sparren, zelfverdediging en breektesten <b>altijd onder begeleiding</b> van je trainer.</div>' +
       '</div></div>';
@@ -633,7 +635,7 @@
     view.innerHTML = '<div class="view active"><div class="screen">' +
       '<span class="secnum">Examen</span>' +
       '<h1 class="screen-title">Jouw examen in één beeld</h1>' +
-      '<p class="screen-sub">Alle onderdelen die je laat zien voor je poom. Tik een onderdeel open voor uitleg, of vink af wat al goed gaat.</p>' +
+      '<p class="screen-sub">Alle onderdelen die je laat zien voor je poom. Tik een onderdeel open voor uitleg, of vink af ' + iic(ICON_CHECK) + ' wat al goed gaat.</p>' +
       toggle +
       '<div class="exprog"><div class="quizbar"><i id="exbar" style="width:0%"></i></div>' +
         '<span>' + doneN + ' / ' + total + ' onderdelen afgevinkt</span></div>' +
