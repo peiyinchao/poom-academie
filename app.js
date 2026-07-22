@@ -198,6 +198,8 @@
   var ICON_REPEAT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>';
   // Klein icoon dat middenin een zin past, zodat kinderen de knop herkennen.
   function iic(svg) { return '<span class="iic" aria-hidden="true">' + svg + '</span>'; }
+  var ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5l13 7.5-13 7.5z"/></svg>';
+  var ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1.3"/><rect x="14" y="4.5" width="4" height="15" rx="1.3"/></svg>';
   function feetSVG() {
     return '<svg viewBox="0 0 40 40" fill="#AEB6C2"><g><ellipse cx="13" cy="24" rx="5" ry="8.5"/><circle cx="9.6" cy="13.5" r="1.7"/><circle cx="13" cy="12.2" r="1.9"/><circle cx="16.4" cy="13.5" r="1.7"/></g><g><ellipse cx="27" cy="24" rx="5" ry="8.5"/><circle cx="23.6" cy="13.5" r="1.7"/><circle cx="27" cy="12.2" r="1.9"/><circle cx="30.4" cy="13.5" r="1.7"/></g></svg>';
   }
@@ -678,12 +680,10 @@
     var n = document.getElementById('cnum'), k = document.getElementById('cko');
     if (n) n.textContent = numTxt;
     if (k) k.textContent = c ? (c.msg ? c.msg : nativeRoman(c)) : '';
-    var dots = document.querySelectorAll('#cdots span');
-    [].forEach.call(dots, function (d, i) { d.classList.toggle('on', i === activeIdx); });
   }
   function tellSetPlaying(on) {
-    var b = document.getElementById('cstart');
-    if (b) { b.classList.toggle('playing', on); b.setAttribute('aria-label', on ? 'Pauze' : 'Start'); }
+    var b = document.getElementById('cplaybtn');
+    if (b) { b.innerHTML = on ? ICON_PAUSE : ICON_PLAY; b.setAttribute('aria-label', on ? 'Pauze' : 'Start'); }
     var card = document.getElementById('ccard');
     if (card) card.classList.toggle('running', on);
   }
@@ -713,7 +713,7 @@
     var n = 3;
     tellSetPlaying(true);
     var card = document.getElementById('ccard'); if (card) card.classList.add('prep');
-    tellSet(String(n), { msg: 'Klaarstaan…' }, -1);
+    tellSet(String(n), { msg: 'Junbi / Klaarstaan' }, -1);
     var iv = Math.min(Math.round(1000 / tellerSpeed), 850);
     tellerPrep = setInterval(function () {
       n--;
@@ -722,7 +722,7 @@
         if (card) card.classList.remove('prep');
         tellStep(); tellArm();
       } else {
-        tellSet(String(n), { msg: 'Klaarstaan…' }, -1);
+        tellSet(String(n), { msg: 'Junbi / Klaarstaan' }, -1);
       }
     }, iv);
   }
@@ -755,14 +755,10 @@
   }
   function viewTeller() {
     tellerIdx = 0; tellerRunning = false;
-    var counts = tellCounts();
-    var dots = counts.map(function (_, i) { return '<span data-i="' + i + '"></span>'; }).join('');
     view.innerHTML = '<div class="view active"><div class="tellerpage">' +
       '<button class="ccard" id="ccard" data-act="tellerToggle" aria-label="Start">' +
         '<div class="cnum" id="cnum"></div>' +
         '<div class="cko" id="cko">Tik om te starten</div>' +
-        '<div class="cdots" id="cdots">' + dots + '</div>' +
-        '<span class="cplay" id="cstart" aria-hidden="true"></span>' +
       '</button>' +
       '<div class="tp-speed" id="cspeed" role="group" aria-label="Tempo">' +
         '<span class="tp-speed-lab">Tempo</span>' +
@@ -772,9 +768,10 @@
         }).join('') +
         '</div>' +
       '</div>' +
-      '<div class="tp-ctrl">' +
-        '<button class="tpbtn" data-act="tellerReset" aria-label="Opnieuw" title="Opnieuw">' + ICON_RESET + '</button>' +
-        '<button class="tpbtn" id="cloopbtn" data-act="tellerLoop" aria-pressed="false" aria-label="Blijf herhalen" title="Blijf herhalen">' + ICON_REPEAT + '</button>' +
+      '<div class="transport">' +
+        '<button class="tbtn" data-act="tellerReset" aria-label="Opnieuw" title="Opnieuw">' + ICON_RESET + '</button>' +
+        '<button class="tbtn play" id="cplaybtn" data-act="tellerToggle" aria-label="Start">' + ICON_PLAY + '</button>' +
+        '<button class="tbtn" id="cloopbtn" data-act="tellerLoop" aria-pressed="false" aria-label="Blijf herhalen" title="Blijf herhalen">' + ICON_REPEAT + '</button>' +
       '</div>' +
       '</div></div>';
     tellSetPlaying(false);

@@ -450,21 +450,19 @@ button{font-family:inherit}
 .ccard.running{box-shadow:0 0 0 2px var(--red) inset,0 18px 40px -18px rgba(225,29,63,.5)}
 .ccard .cnum{font-family:var(--font-poster);font-size:clamp(120px,42vw,220px);line-height:.9;color:#fff}
 .ccard .cko{font-family:var(--font-cond);text-transform:uppercase;letter-spacing:.06em;color:#FDA4AF;
-  font-weight:700;font-size:clamp(22px,7vw,30px);min-height:30px}
-.ccard .cdots{display:flex;justify-content:center;gap:8px;margin-top:20px;flex-wrap:wrap;max-width:280px}
-.ccard .cdots span{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.18);transition:transform .15s,background .15s}
-.ccard .cdots span.on{background:var(--red);transform:scale(1.35)}
+  font-weight:700;font-size:clamp(22px,7vw,30px);min-height:30px;text-align:center;padding:0 16px}
 .ccard.prep .cnum{opacity:.5}
-.cplay{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);width:0;height:0;
-  border-style:solid;border-width:11px 0 11px 18px;border-color:transparent transparent transparent #fff;opacity:.7}
-.cplay.playing{border-width:0;width:16px;height:18px;border-left:5px solid #fff;border-right:5px solid #fff;background:transparent}
-.tp-ctrl{display:flex;gap:14px;justify-content:center;margin-bottom:calc(var(--nav-h) * 2)}
-.tpbtn{width:46px;height:46px;flex:none;display:grid;place-items:center;
-  border:1px solid var(--line);background:#F9FAFB;border-radius:12px;cursor:pointer;color:var(--ink);
-  -webkit-tap-highlight-color:transparent}
-.tpbtn svg{width:21px;height:21px}
-.tpbtn:active{background:#EEF1F5}
-.tpbtn.on{background:#FEF2F3;border-color:var(--red);color:var(--red)}
+.transport{display:flex;align-items:center;justify-content:center;gap:30px;
+  margin-bottom:calc(var(--nav-h) * 2)}
+.tbtn{width:56px;height:56px;flex:none;display:grid;place-items:center;border:0;background:none;
+  border-radius:50%;cursor:pointer;color:var(--ink);-webkit-tap-highlight-color:transparent;
+  transition:opacity .12s,transform .12s,color .12s}
+.tbtn svg{width:27px;height:27px}
+.tbtn:active{opacity:.5;transform:scale(.92)}
+.tbtn.play{width:78px;height:78px;background:var(--midnight);color:#fff;
+  box-shadow:0 12px 26px -10px rgba(16,24,40,.55)}
+.tbtn.play svg{width:34px;height:34px}
+.tbtn.on{color:var(--red)}
 .tp-speed{display:flex;flex-direction:column;gap:7px}
 .tp-speed-lab{font-family:var(--font-cond);font-weight:700;text-transform:uppercase;letter-spacing:.12em;
   font-size:12px;color:var(--muted)}
