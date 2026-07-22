@@ -77,8 +77,21 @@
 <script src="app.js"></script>
 <script>
   if ('serviceWorker' in navigator) {
+    // Onthoud of er al een actieve worker was: alleen dan is een
+    // controllerwissel een échte update (en geen eerste installatie).
+    var hadController = !!navigator.serviceWorker.controller;
+    var reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if (!hadController || reloaded) return;
+      reloaded = true; window.location.reload();
+    });
     window.addEventListener('load', function(){
-      navigator.serviceWorker.register('sw.js').catch(function(e){ console.warn('SW mislukt', e); });
+      navigator.serviceWorker.register('sw.js').then(function(reg){
+        // Controleer op updates bij terugkeer naar de app.
+        document.addEventListener('visibilitychange', function(){
+          if (document.visibilityState === 'visible') reg.update();
+        });
+      }).catch(function(e){ console.warn('SW mislukt', e); });
     });
   }
 </script>

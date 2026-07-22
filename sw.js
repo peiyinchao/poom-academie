@@ -2,7 +2,7 @@
    Mijn Poom Academie — Service Worker (offline-first)
    Verhoog CACHE bij elke inhoud-/codewijziging om te verversen.
    ============================================================ */
-var CACHE = 'poom-v22';
+var CACHE = 'poom-v23';
 
 /* Kern-schil die vooraf wordt gecachet (rest volgt tijdens gebruik). */
 var PRECACHE = [
@@ -46,17 +46,36 @@ self.addEventListener('fetch', function (e) {
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // alles is lokaal
 
-  // Navigaties: probeer netwerk, val terug op gecachte app-schil (offline).
+  // Navigaties: netwerk-eerst, val terug op gecachte app-schil (offline).
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req).catch(function () {
+      fetch(req).then(function (res) {
+        var copy = res.clone();
+        caches.open(CACHE).then(function (c) { c.put('./index.html', copy); });
+        return res;
+      }).catch(function () {
         return caches.match('./index.html');
       })
     );
     return;
   }
 
-  // Overig: cache-first, daarna netwerk (en runtime cachen).
+  // App-code (js/css/json): netwerk-eerst zodat een refresh altijd de
+  // nieuwste versie toont; val offline terug op de cache.
+  if (/\.(?:js|css|json)$/.test(url.pathname)) {
+    e.respondWith(
+      fetch(req).then(function (res) {
+        if (res && res.status === 200 && res.type === 'basic') {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (c) { c.put(req, copy); });
+        }
+        return res;
+      }).catch(function () { return caches.match(req); })
+    );
+    return;
+  }
+
+  // Overig (fonts, iconen, afbeeldingen): cache-eerst, daarna netwerk.
   e.respondWith(
     caches.match(req).then(function (hit) {
       return hit || fetch(req).then(function (res) {
