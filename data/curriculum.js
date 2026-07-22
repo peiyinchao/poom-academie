@@ -190,12 +190,16 @@ window.CURRICULUM = {
     { ko: "모아 서기", roman: "Moa seogi", nl: "Sluitstand", gewicht: "50 / 50", uitleg: "Voeten tegen elkaar, rechtop. De rustpositie voor en na een vorm." },
     { ko: "나란히 서기", roman: "Naranhi seogi", nl: "Parallelstand", gewicht: "50 / 50", uitleg: "Voeten op schouderbreedte, parallel. De basis-klaarstand (junbi)." },
     { ko: "앞 서기", roman: "Ap seogi", nl: "Korte loopstand", gewicht: "50 / 50", uitleg: "Natuurlijke stap vooruit, beide knieën licht. Gebruikt voor snelle technieken." },
-    { ko: "앞굽이", roman: "Ap kubi", nl: "Lange voorwaartse stand", gewicht: "70 voor / 30 achter", uitleg: "Voorste knie boven de voet gebogen, achterste been gestrekt. De sterke aanvalsstand." },
-    { ko: "뒷굽이", roman: "Dwit kubi", nl: "Achterwaartse stand", gewicht: "30 voor / 70 achter", uitleg: "Gewicht op het achterste been, voeten in een L-vorm. De verdedigingsstand." },
-    { ko: "주춤 서기", roman: "Juchum seogi", nl: "Paardrijstand", gewicht: "50 / 50", uitleg: "Breed en laag, alsof je op een paard zit. Voor kracht opzij." },
-    { ko: "범 서기", roman: "Beom seogi", nl: "Tijger-/katstand", gewicht: "10 voor / 90 achter", uitleg: "Bijna al je gewicht op het achterste been; alleen de bal van de voorste voet raakt licht de grond. Klaar om snel te trappen. Komt o.a. in Taegeuk 6–8." },
-    { ko: "꼬아 서기", roman: "Koa seogi", nl: "Kruisstand", gewicht: "op standbeen", uitleg: "Eén voet gekruist achter (of voor) de andere, benen dicht bij elkaar. Een overgang, vaak vóór een draai of zijwaartse trap." },
-    { ko: "학다리 서기", roman: "Hakdari seogi", nl: "Kraanvogelstand", gewicht: "100 op 1 been", uitleg: "Op één been in balans; de andere voet rust tegen de knie. Balansstand, o.a. in Koryo vóór de zijwaartse trap." }
+    { ko: "앞굽이", roman: "Ap kubi", nl: "Lange voorwaartse stand", gewicht: "70 voor / 30 achter", uitleg: "Voorste knie boven de voet gebogen, achterste been gestrekt en licht naar buiten (±30°). De sterke aanvalsstand." },
+    { ko: "뒷굽이", roman: "Dwit kubi", nl: "Achterwaartse stand", gewicht: "30 voor / 70 achter", uitleg: "Gewicht op het achterste been, voeten in een L-vorm. Achterste schouder, heup en knie op één verticale lijn. De verdedigingsstand." },
+    { ko: "주춤 서기", roman: "Juchum seogi", nl: "Paardrijstand", gewicht: "50 / 50", uitleg: "Breed en laag, alsof je op een paard zit. Knieën in lijn met heupen en voeten. Voor kracht opzij." },
+    { ko: "범 서기", roman: "Beom seogi", nl: "Tijger-/katstand", gewicht: "10 voor / 90 achter", uitleg: "Bijna al je gewicht op het achterste been; alleen de bal van de voorste voet raakt licht de grond. Knieën dicht bij elkaar. Komt o.a. in Taegeuk 6–8." },
+    { ko: "오른 서기", roman: "Oreun seogi", nl: "Rechterstand", gewicht: "50 / 50", uitleg: "Natuurlijke stand met de rechtervoet voor, benen gestrekt. Gewicht gelijk verdeeld." },
+    { ko: "왼 서기", roman: "Wen seogi", nl: "Linkerstand", gewicht: "50 / 50", uitleg: "Natuurlijke stand met de linkervoet voor, benen gestrekt. Gewicht gelijk verdeeld." },
+    { ko: "앞 꼬아 서기", roman: "Ap koa seogi", nl: "Voorwaartse kruisstand", gewicht: "90 op standbeen", uitleg: "De voorste voet kruist vóór het standbeen (30–45°) en draagt ±90% van het gewicht. Overgang vóór een draai of trap." },
+    { ko: "뒤 꼬아 서기", roman: "Dwit koa seogi", nl: "Achterwaartse kruisstand", gewicht: "90 op standbeen", uitleg: "De voet kruist áchter het standbeen (30–45°), dat ±90% draagt. Vaak vóór een zijwaartse trap of draai." },
+    { ko: "학다리 서기", roman: "Hakdari seogi", nl: "Kraanvogelstand", gewicht: "100 op 1 been", uitleg: "Op één been in balans; de andere voet rust in de holte van de knie, knie en voet naar voren. Steunknie gebogen. O.a. in Koryo vóór de zijwaartse trap." },
+    { ko: "곁다리 서기", roman: "Kyotdari seogi", nl: "Steunstand", gewicht: "90 voor / 10 achter", uitleg: "Op paardrijstand-hoogte. De voorste voet draagt ±90%; de bal van de achterste voet staat op één lijn met de holte van de voorvoet." }
   ],
 
   /* -------------------- TECHNIEKEN -------------------- */

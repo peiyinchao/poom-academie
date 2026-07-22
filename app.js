@@ -961,20 +961,26 @@
   function legFoot(kind) {
     return '<svg viewBox="0 0 12 34" width="10" height="28" aria-hidden="true">' + sfoot(6, 17, 0, false, kind) + '</svg>';
   }
-  var FACE = '<g stroke="#AEB6C2" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M32 4v9M28.6 7.4 32 4l3.4 3.4"/></g>';
+  var GUIDE = '<line x1="32" y1="7" x2="32" y2="57" stroke="#CFD6E0" stroke-width="1.4" stroke-linecap="round"/>';
   function stanceSVG(roman) {
-    var r = String(roman).toLowerCase(), s, face = true;
-    if (r.indexOf('moa') >= 0) { s = sfoot(27, 33, 0, false, 'ink') + sfoot(37, 33, 0, true, 'ink'); face = false; }
-    else if (r.indexOf('naranhi') >= 0) { s = sfoot(22, 33, 0, false, 'ink') + sfoot(42, 33, 0, true, 'ink'); face = false; }
-    else if (r.indexOf('ap seogi') >= 0) s = sfoot(25, 46, 0, false, 'ink') + sfoot(39, 22, 0, true, 'ink');
-    else if (r.indexOf('ap kubi') >= 0) s = sfoot(23, 47, 28, false, 'out') + sfoot(42, 18, 0, true, 'red');
-    else if (r.indexOf('dwit') >= 0) s = sfoot(38, 18, 0, false, 'out') + sfoot(28, 46, 90, true, 'red');
-    else if (r.indexOf('beom') >= 0) s = sfoot(30, 46, 0, false, 'red') + sfoot(34, 25, 0, true, 'out');
-    else if (r.indexOf('koa') >= 0) s = sfoot(29, 44, 0, false, 'red') + sfoot(36, 31, 64, true, 'out');
-    else if (r.indexOf('hakdari') >= 0 || r.indexOf('haktari') >= 0) s = sfoot(31, 47, 0, false, 'red') + sfoot(35, 29, 90, true, 'out');
-    else if (r.indexOf('juchum') >= 0) { s = sfoot(20, 33, 0, false, 'ink') + sfoot(44, 33, 0, true, 'ink'); face = false; }
-    else { s = sfoot(27, 33, 0, false, 'ink') + sfoot(37, 33, 0, true, 'ink'); face = false; }
-    return '<svg viewBox="0 0 64 64" width="58" height="58" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#EEF1F6"/>' + (face ? FACE : '') + s + '</svg>';
+    var r = String(roman).toLowerCase(), s;
+    if (r.indexOf('moa') >= 0) s = sfoot(30, 33, 0, false, 'ink') + sfoot(34, 33, 0, true, 'ink');
+    else if (r.indexOf('naranhi') >= 0) s = sfoot(24, 33, 0, false, 'ink') + sfoot(40, 33, 0, true, 'ink');
+    else if (r.indexOf('juchum') >= 0) s = sfoot(22, 33, 0, false, 'ink') + sfoot(42, 33, 0, true, 'ink');
+    else if (r.indexOf('ap kubi') >= 0) s = sfoot(24, 47, -28, false, 'ink') + sfoot(32, 19, 0, true, 'red');
+    else if (r.indexOf('dwit kubi') >= 0) s = sfoot(30, 46, 90, false, 'red') + sfoot(33, 20, 0, true, 'ink');
+    else if (r.indexOf('beom') >= 0) s = sfoot(31, 46, 22, false, 'red') + sfoot(33, 28, 0, true, 'out');
+    else if (r.indexOf('koa') >= 0) {
+      if (r.indexOf('dwit') >= 0) s = sfoot(33, 30, 0, false, 'red') + sfoot(30, 44, 42, true, 'out');
+      else s = sfoot(31, 43, 0, false, 'red') + sfoot(35, 30, 42, true, 'out');
+    }
+    else if (r.indexOf('hakdari') >= 0 || r.indexOf('haktari') >= 0) s = sfoot(32, 47, 0, false, 'red') + sfoot(36, 32, 90, true, 'out');
+    else if (r.indexOf('kyot') >= 0) s = sfoot(32, 44, 0, false, 'red') + sfoot(33, 27, 0, true, 'out');
+    else if (r.indexOf('oreun') >= 0) s = sfoot(26, 46, 0, false, 'ink') + sfoot(34, 22, 0, true, 'ink');
+    else if (r.indexOf('wen') >= 0) s = sfoot(30, 22, 0, false, 'ink') + sfoot(38, 46, 0, true, 'ink');
+    else if (r.indexOf('ap seogi') >= 0) s = sfoot(26, 46, 0, false, 'ink') + sfoot(32, 22, 0, true, 'ink');
+    else s = sfoot(30, 33, 0, false, 'ink') + sfoot(34, 33, 0, true, 'ink');
+    return '<svg viewBox="0 0 64 64" width="58" height="58" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#EEF1F6"/>' + GUIDE + s + '</svg>';
   }
 
 
