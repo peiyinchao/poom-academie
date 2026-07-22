@@ -200,6 +200,8 @@
   function iic(svg) { return '<span class="iic" aria-hidden="true">' + svg + '</span>'; }
   var ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5l13 7.5-13 7.5z"/></svg>';
   var ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1.3"/><rect x="14" y="4.5" width="4" height="15" rx="1.3"/></svg>';
+  var ICON_TERM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg>';
+  var ICON_IDEA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18h5"/><path d="M10 21.5h4"/><path d="M12 2.5a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1V18h6v-1.8c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 2.5z"/></svg>';
   function feetSVG() {
     return '<svg viewBox="0 0 40 40" fill="#AEB6C2"><g><ellipse cx="13" cy="24" rx="5" ry="8.5"/><circle cx="9.6" cy="13.5" r="1.7"/><circle cx="13" cy="12.2" r="1.9"/><circle cx="16.4" cy="13.5" r="1.7"/></g><g><ellipse cx="27" cy="24" rx="5" ry="8.5"/><circle cx="23.6" cy="13.5" r="1.7"/><circle cx="27" cy="12.2" r="1.9"/><circle cx="30.4" cy="13.5" r="1.7"/></g></svg>';
   }
@@ -312,12 +314,15 @@
           '<img class="wm" src="mark-taeguk.svg" alt="">' +
         '</div>' +
 
-        '<div class="trow tod"><button class="speak" data-act="speak" data-ko="' + esc(tod.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' +
-          '<div class="tx"><div class="ko">' + esc(tod.ko) + '</div><div class="ro">' + esc(tod.roman) + '</div><div class="nl">' + esc(todLabel) + ' · ' + esc(tod.nl) + '</div></div></div>' +
+        '<div class="daykick"><span class="dk-ic">' + ICON_TERM + '</span>' + esc(todLabel) + '</div>' +
+        '<div class="trow tod">' +
+          '<div class="tx"><div class="ko">' + esc(tod.ko) + '</div><div class="ro">' + esc(tod.roman) + '</div><div class="nl">' + esc(tod.nl) + '</div></div>' +
+          '<button class="speak" data-act="speak" data-ko="' + esc(tod.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>' +
 
+        '<div class="daykick"><span class="dk-ic">' + ICON_IDEA + '</span>Gedachte van de dag</div>' +
         '<div class="quotecard">“' + esc(quote) + '”</div>' +
 
-        '<span class="secnum">Naslag</span>' +
+        '<div class="grouphd">Naslag</div>' +
         '<div class="tiles">' + tiles + '</div>' +
 
         '<div class="notecard srcnote">' + esc(C.meta.bron) + ' Bekijk de <a href="#/bronnen">bronnen &amp; verantwoording</a>.</div>' +
