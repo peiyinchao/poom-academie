@@ -77,7 +77,7 @@
   function foundationPoomsae() { return C.poomsae.filter(function (p) { return (p.level || 0) === 0; }); }
   function examPoomsae() { var L = curLevel(); return C.poomsae.filter(function (p) { return p.level >= 1 && p.level <= L; }); }
   function examChecks() { prog.exam[prog.level] = prog.exam[prog.level] || {}; return prog.exam[prog.level]; }
-  var TILE_IDS = ['standen', 'examen', 'theorie'];
+  var TILE_IDS = ['theorie', 'standen', 'examen'];
   function tileOrderIds() {
     var saved = (prog.tileOrder || []).filter(function (id) { return TILE_IDS.indexOf(id) >= 0; });
     TILE_IDS.forEach(function (id) { if (saved.indexOf(id) < 0) saved.push(id); });
@@ -291,10 +291,10 @@
       examen: ['#/examenkaart', 'Examen', 'Onderdelen & aftekenlijst', svgExam()],
       theorie: ['#/theorie', 'Theorie', 'Achtergrond & etiquette', svgBook()]
     };
-    var order = tileOrderIds();
+    var order = TILE_IDS.slice();
     var tiles = order.map(function (id) {
       var t = tileDefs[id]; if (!t) return '';
-      return '<a class="tile" href="' + t[0] + '"><span class="ti">' + t[3] + '</span>' +
+      return '<a class="tile' + (id === 'examen' ? ' wide' : '') + '" href="' + t[0] + '"><span class="ti">' + t[3] + '</span>' +
         '<h3>' + t[1] + '</h3><small>' + t[2] + '</small></a>';
     }).join('');
 
@@ -316,7 +316,7 @@
 
         '<div class="trow tod">' +
           '<div class="tx"><div class="cardkick"><span class="dk-ic">' + ICON_TERM + '</span>' + esc(todLabel) + '</div>' +
-            '<div class="ko">' + esc(tod.ko) + '</div><div class="ro">' + esc(tod.roman) + '</div><div class="nl">' + esc(tod.nl) + '</div></div>' +
+            '<div class="ko">' + esc(tod.ko) + ' · ' + esc(tod.nl) + '</div><div class="ro">' + esc(tod.roman) + '</div></div>' +
           '<button class="speak" data-act="speak" data-ko="' + esc(tod.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>' +
 
         '<div class="quotecard"><div class="cardkick"><span class="dk-ic">' + ICON_IDEA + '</span>Gedachte van de dag</div>' +
@@ -349,8 +349,10 @@
       ? '<div class="grouphd">Examenpoomsae — ' + esc(C.levels[prog.level].naam) + '</div><div class="poomlist">' + exams.map(poomRow).join('') + '</div>'
       : '';
     view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<div class="stickyhd">' +
       '<span class="secnum">01 — De vormen</span>' +
       '<h1 class="screen-title">Poomsae</h1>' +
+      '</div>' +
       '<p class="screen-sub">De acht Taegeuk-vormen zijn je basis. Wat je daarboven nodig hebt, hangt af van je poom. Tik op een vorm voor de betekenis, het trigram en de nieuwe technieken.</p>' +
       '<p class="screen-sub">' + esc(C.levels[prog.level].omschrijving) + '</p>' +
       '<div class="grouphd">Taegeuk 1–8 · il i sam sa o yuk chil pal</div>' +
@@ -413,10 +415,10 @@
       return '<button class="' + (s.k === sub ? 'on' : '') + '" data-act="seg" data-k="' + s.k + '">' + esc(s.label) + '</button>';
     }).join('');
 
-    var body;
+    var body, legendHtml = '';
     if (sub === 'standen') {
-      body = '<div class="stancelegend">' + legFoot('red') + ' gewicht &nbsp;·&nbsp; ' + legFoot('ink') + ' 50/50 &nbsp;·&nbsp; ' + legFoot('out') + ' lichte voet &nbsp;·&nbsp; <b class="facear">↑</b> voorkant</div>' +
-        '<div class="rows">' + C.standen.map(function (s) {
+      legendHtml = '<div class="stancelegend">' + legFoot('red') + ' gewicht &nbsp;·&nbsp; ' + legFoot('ink') + ' 50/50 &nbsp;·&nbsp; ' + legFoot('out') + ' lichte voet &nbsp;·&nbsp; <b class="facear">↑</b> voorkant</div>';
+      body = '<div class="rows">' + C.standen.map(function (s) {
         var hard = isHard(s);
         return '<div class="stance' + (hard ? ' hard' : '') + '"><span class="feet">' + stanceSVG(s.roman) + '</span>' +
           '<div class="sd"><div class="sdhd"><b>' + esc(s.roman) + '</b>' +
@@ -432,10 +434,13 @@
     }
 
     view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<div class="stickyhd">' +
       '<span class="secnum">02 — Techniek</span>' +
       '<h1 class="screen-title">Standen &amp; technieken</h1>' +
       '<p class="screen-sub">De bouwstenen van elke vorm. Tik op de luidspreker ' + iic(ICON_SPEAK) + ' om de Koreaanse naam te horen.</p>' +
       '<div class="termtabs">' + segHtml + '</div>' +
+      legendHtml +
+      '</div>' +
       '<div id="techbody">' + body + '</div>' +
       '</div></div>';
   }
@@ -454,10 +459,12 @@
   }
   function viewTermen() {
     view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<div class="stickyhd">' +
       '<span class="secnum">03 — Woordenschat</span>' +
       '<h1 class="screen-title">Koreaanse termen</h1>' +
       '<p class="screen-sub">Kies een categorie en luister naar de uitspraak ' + iic(ICON_SPEAK) + '. Tik op de bladwijzer ' + iic(ICON_BOOKMARK) + ' om een term als moeilijk te bewaren — die komt vaker terug in je dagterm en flashcards.</p>' +
       '<div class="termtabs" id="termtabs"></div>' +
+      '</div>' +
       '<div id="termbody"></div>' +
       '</div></div>';
     renderTermTabs();
@@ -970,6 +977,27 @@
     bar.classList.remove('show'); localStorage.setItem('poom.install.dismissed', '1');
   });
   window.addEventListener('appinstalled', function () { bar.classList.remove('show'); toast('Geïnstalleerd 🥋'); });
+
+  /* ---------- Swipe tussen tabbladen ---------- */
+  (function () {
+    var TABS = ['home', 'poomsae', 'techniek', 'termen', 'teller'];
+    var sx = 0, sy = 0, tracking = false;
+    view.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) { tracking = false; return; }
+      tracking = true; sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    }, { passive: true });
+    view.addEventListener('touchend', function (e) {
+      if (!tracking) return; tracking = false;
+      var t = e.changedTouches[0]; var dx = t.clientX - sx, dy = t.clientY - sy;
+      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 2) return;
+      var seg = parse(); var r = seg[0];
+      var i = TABS.indexOf(r); if (i < 0) return;
+      if (r === 'poomsae' && seg.length > 1) return;
+      var j = dx < 0 ? i + 1 : i - 1;
+      if (j < 0 || j >= TABS.length) return;
+      location.hash = '#/' + TABS[j];
+    }, { passive: true });
+  })();
 
   /* ---------- Start ---------- */
   window.addEventListener('hashchange', go);
