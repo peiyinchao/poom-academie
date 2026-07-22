@@ -471,6 +471,11 @@ button{font-family:inherit}
 .ccard .cko{font-family:var(--font-cond);text-transform:uppercase;letter-spacing:.06em;color:#FDA4AF;
   font-weight:700;font-size:clamp(22px,7vw,30px);min-height:30px;text-align:center;padding:0 16px}
 .ccard.prep .cnum{opacity:.5}
+.ccard.done .cnum{color:#4ADE80;animation:telldone .55s cubic-bezier(.22,1.25,.36,1) both}
+.ccard.done{animation:telldoneglow .7s ease-out}
+@keyframes telldone{0%{transform:scale(.35);opacity:0}55%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@keyframes telldoneglow{0%{box-shadow:0 0 0 0 rgba(74,222,128,.5)}100%{box-shadow:0 0 0 3px rgba(74,222,128,0) inset,0 18px 40px -18px rgba(74,222,128,.4)}}
+@media (prefers-reduced-motion: reduce){.ccard.done .cnum{animation:none}.ccard.done{animation:none}}
 .transport{display:flex;align-items:center;justify-content:center;gap:30px;
   margin-bottom:22px}
 .tbtn{width:56px;height:56px;flex:none;display:grid;place-items:center;border:0;background:none;

@@ -196,8 +196,8 @@
   var ICON_BOOKMARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg>';
   var ICON_RESET = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="7" cy="8" r="1.5" fill="currentColor"/><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="M12.5 8h3.19a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-10"/><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="m14.5 5-2.47 2.47a.75.75 0 0 0 0 1.06L14.5 11"/></svg>';
   var ICON_REPEAT = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="M8 10 4.8 7.6c-.4-.3-.4-.9 0-1.2L8 4m8 10 3.2 2.4c.4.3.4.9 0 1.2L16 20"/><path stroke="currentColor" stroke-width="1.5" d="M4.5 7H16a5 5 0 0 1 4.387 7.4M19 17H8a5 5 0 0 1-5-5c0-.84.207-1.647.574-2.353"/></svg>';
-  var ICON_TURTLE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.2 14.8c0-3.4 3-5.9 6.8-5.9s6.8 2.5 6.8 5.9c0 .4-.3.6-.6.6H4.8c-.3 0-.6-.2-.6-.6z"/><circle cx="2.4" cy="11.4" r="1.7"/><rect x="5.9" y="14.9" width="2.1" height="3.1" rx="1.05"/><rect x="13.4" y="14.9" width="2.1" height="3.1" rx="1.05"/><path d="M17.7 13.9c1.1 0 1.9.5 2.1 1.5-.8.3-1.6.1-2.1-.4z"/></svg>';
-  var ICON_RABBIT = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="15.2" cy="6" rx="1.25" ry="3.7" transform="rotate(-13 15.2 6)"/><ellipse cx="17.5" cy="6.3" rx="1.25" ry="3.7" transform="rotate(-2 17.5 6.3)"/><ellipse cx="9.8" cy="14.4" rx="6.7" ry="3.9"/><circle cx="16.7" cy="12" r="3.15"/><ellipse cx="14.7" cy="17.7" rx="2.5" ry="1"/><ellipse cx="7" cy="17.9" rx="2.7" ry="1"/><circle cx="3.5" cy="13.6" r="1.35"/></svg>';
+  var ICON_TURTLE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 14.6 4.4 13.9 4.4 15.3Z"/><path d="M4 15.4a7 6 0 0 1 14 0Z"/><rect x="6.3" y="14.9" width="2.2" height="3" rx="1.1"/><rect x="13.5" y="14.9" width="2.2" height="3" rx="1.1"/><path d="M17.3 13.4c1.6-.5 3.4.2 4 1.6-.5 1.4-2.2 2-3.6 1.3-1-.5-1.3-1.7-.9-2.6a1 1 0 0 1 .5-.3Z"/></svg>';
+  var ICON_RABBIT = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="11" cy="12.5" rx="7" ry="3.2" transform="rotate(-17 11 12.5)"/><ellipse cx="5.4" cy="13.2" rx="3.5" ry="2.4" transform="rotate(-22 5.4 13.2)"/><ellipse cx="3.7" cy="16" rx="3.1" ry="1.05" transform="rotate(7 3.7 16)"/><circle cx="18.1" cy="9.6" r="2.6"/><ellipse cx="18.2" cy="13.7" rx="2.7" ry="1.05" transform="rotate(34 18.2 13.7)"/><ellipse cx="16.2" cy="5.6" rx="1.1" ry="3.3" transform="rotate(-24 16.2 5.6)"/><ellipse cx="18.3" cy="5.7" rx="1.05" ry="3.1" transform="rotate(-9 18.3 5.7)"/></svg>';
   // Klein icoon dat middenin een zin past, zodat kinderen de knop herkennen.
   function iic(svg) { return '<span class="iic" aria-hidden="true">' + svg + '</span>'; }
   var ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5l13 7.5-13 7.5z"/></svg>';
@@ -769,6 +769,8 @@
       if (tellerLoop) { tellerIdx = 0; }
       else {
         tellerPause(); tellSet('✓', { msg: 'Klaar!' }, -1); tellerIdx = 0; tellSetPlaying(false);
+        var dcard = document.getElementById('ccard');
+        if (dcard && !prefersReduce()) { dcard.classList.remove('done'); void dcard.offsetWidth; dcard.classList.add('done'); }
         if (tellerDoneTimer) clearTimeout(tellerDoneTimer);
         tellerDoneTimer = setTimeout(function () { tellerDoneTimer = null; if (!tellerRunning) tellerReset(); }, 3000);
         return;
@@ -814,6 +816,7 @@
     if (!tellCounts().length) return;
     if (tellerDoneTimer) { clearTimeout(tellerDoneTimer); tellerDoneTimer = null; }
     if (tellerRunning) { tellerPause(); tellSetPlaying(false); return; }
+    var tcard = document.getElementById('ccard'); if (tcard) tcard.classList.remove('done');
     tellerRunning = true;
     primeSpeech();
     if (tellerIdx > 0) { tellSetPlaying(true); tellStep(); tellArm(); }
@@ -822,6 +825,7 @@
   function tellerReset() {
     if (tellerDoneTimer) { clearTimeout(tellerDoneTimer); tellerDoneTimer = null; }
     tellerPause(); tellerIdx = 0;
+    var rcard = document.getElementById('ccard'); if (rcard) rcard.classList.remove('done');
     var n = document.getElementById('cnum'), k = document.getElementById('cko');
     if (n) n.textContent = '';
     if (k) k.textContent = 'Tik om te starten';
@@ -1046,7 +1050,7 @@
     else if (act === 'qopt') answerQuiz(+b.getAttribute('data-i'));
     else if (act === 'qnext') { quizState.i++; quizState.answered = false; renderQuiz(); }
     else if (act === 'qretry') viewQuiz();
-    else if (act === 'termtab') { termTab = b.getAttribute('data-k'); renderTermTabs(); renderTermTab(); }
+    else if (act === 'termtab') { termTab = b.getAttribute('data-k'); renderTermTabs(); renderTermTab(); window.scrollTo(0, 0); }
     else if (act === 'hardterm') {
       var hk = b.getAttribute('data-k');
       var on = toggleHard(hk);
