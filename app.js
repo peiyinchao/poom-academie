@@ -343,7 +343,7 @@
       '<span class="secnum">01 — De vormen</span>' +
       '<h1 class="screen-title">Poomsae</h1>' +
       '<p class="screen-sub">De acht Taegeuk-vormen zijn je basis. Wat je daarboven nodig hebt, hangt af van je poom. Tik op een vorm voor de betekenis, het trigram en de nieuwe technieken.</p>' +
-      '<div class="notecard">' + esc(C.levels[prog.level].omschrijving) + '</div>' +
+      '<p class="screen-sub">' + esc(C.levels[prog.level].omschrijving) + '</p>' +
       '<div class="grouphd">Taegeuk 1–8 · il i sam sa o yuk chil pal</div>' +
       '<div class="poomlist">' + foundation + '</div>' +
       examHtml +

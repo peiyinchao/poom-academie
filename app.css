@@ -49,7 +49,7 @@ button{font-family:inherit}
 .view.active{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .screen{max-width:760px;margin:0 auto;padding:20px 18px 30px}
-.screen-title{font-size:clamp(26px,7vw,34px);font-weight:800;margin-bottom:10px;line-height:1.15}
+.screen-title{font-size:clamp(26px,7vw,34px);font-weight:800;margin-bottom:20px;line-height:1.15}
 .screen-sub{color:var(--gray);font-size:14.5px;line-height:1.55;margin-bottom:22px}
 .secnum{font-family:var(--font-cond);font-weight:700;color:var(--red);
   font-size:13px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:6px}
