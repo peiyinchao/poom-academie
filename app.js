@@ -306,7 +306,7 @@
       examen: ['#/examenkaart', 'Examen', 'Onderdelen & aftekenlijst', svgExam()],
       theorie: ['#/theorie', 'Theorie', 'Achtergrond & etiquette', svgBook()],
       ilbo: ['#/ilbo', 'Ilbo Taeryon', 'Eén-stap sparren', onderIcon('step')],
-      hosinsul: ['#/hosinsul', 'Zelfverdediging', 'Hosinsul · veilig loskomen', onderIcon('shield')]
+      hosinsul: ['#/hosinsul', 'Hosinsul', 'Zelfverdediging · veilig loskomen', onderIcon('shield')]
     };
     var order = TILE_IDS.slice();
     var tiles = order.map(function (id) {
