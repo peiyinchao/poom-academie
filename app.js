@@ -196,8 +196,6 @@
   var ICON_BOOKMARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg>';
   var ICON_RESET = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="7" cy="8" r="1.5" fill="currentColor"/><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="M12.5 8h3.19a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-10"/><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="m14.5 5-2.47 2.47a.75.75 0 0 0 0 1.06L14.5 11"/></svg>';
   var ICON_REPEAT = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="M8 10 4.8 7.6c-.4-.3-.4-.9 0-1.2L8 4m8 10 3.2 2.4c.4.3.4.9 0 1.2L16 20"/><path stroke="currentColor" stroke-width="1.5" d="M4.5 7H16a5 5 0 0 1 4.387 7.4M19 17H8a5 5 0 0 1-5-5c0-.84.207-1.647.574-2.353"/></svg>';
-  var ICON_TURTLE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 14.6 4.4 13.9 4.4 15.3Z"/><path d="M4 15.4a7 6 0 0 1 14 0Z"/><rect x="6.3" y="14.9" width="2.2" height="3" rx="1.1"/><rect x="13.5" y="14.9" width="2.2" height="3" rx="1.1"/><path d="M17.3 13.4c1.6-.5 3.4.2 4 1.6-.5 1.4-2.2 2-3.6 1.3-1-.5-1.3-1.7-.9-2.6a1 1 0 0 1 .5-.3Z"/></svg>';
-  var ICON_RABBIT = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="11" cy="12.5" rx="7" ry="3.2" transform="rotate(-17 11 12.5)"/><ellipse cx="5.4" cy="13.2" rx="3.5" ry="2.4" transform="rotate(-22 5.4 13.2)"/><ellipse cx="3.7" cy="16" rx="3.1" ry="1.05" transform="rotate(7 3.7 16)"/><circle cx="18.1" cy="9.6" r="2.6"/><ellipse cx="18.2" cy="13.7" rx="2.7" ry="1.05" transform="rotate(34 18.2 13.7)"/><ellipse cx="16.2" cy="5.6" rx="1.1" ry="3.3" transform="rotate(-24 16.2 5.6)"/><ellipse cx="18.3" cy="5.7" rx="1.05" ry="3.1" transform="rotate(-9 18.3 5.7)"/></svg>';
   // Klein icoon dat middenin een zin past, zodat kinderen de knop herkennen.
   function iic(svg) { return '<span class="iic" aria-hidden="true">' + svg + '</span>'; }
   var ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5l13 7.5-13 7.5z"/></svg>';
@@ -685,8 +683,6 @@
         secties +
         breakdown +
       '</div>' +
-      '<div class="misscard"><div class="cardkick"><span class="dk-ic">' + ICON_IDEA + '</span>Leeuwenmissie</div>' +
-        '<p>' + esc(n.missie) + '</p></div>' +
       '<div class="notecard"><b>Veilig oefenen:</b> ' + esc(o.veilig) + '</div>' +
       '<a class="btn ghost" href="#/examenkaart" style="margin-top:16px;display:inline-block;text-decoration:none">Bekijk je hele examenkaart</a>' +
       '</div></div>';
@@ -894,7 +890,7 @@
     tellerSpeed = v;
     var seg = document.getElementById('cspeed');
     if (seg) {
-      var btns = seg.querySelectorAll('.segctrl button');
+      var btns = seg.querySelectorAll('.segctrl button[data-v]');
       for (var i = 0; i < btns.length; i++) {
         var on = parseFloat(btns[i].getAttribute('data-v')) === v;
         btns[i].classList.toggle('on', on);
@@ -902,8 +898,17 @@
         if (on && !prefersReduce()) { btns[i].classList.remove('pick'); void btns[i].offsetWidth; btns[i].classList.add('pick'); }
       }
       positionSegThumb(false);
+      var si = SPEEDS.indexOf(v);
+      var minus = seg.querySelector('.seg-slow'), plus = seg.querySelector('.seg-fast');
+      if (minus) minus.disabled = si <= 0;
+      if (plus) plus.disabled = si >= SPEEDS.length - 1;
     }
     if (tellerRunning) tellArm();
+  }
+  function tellerStep(dir) {
+    var i = SPEEDS.indexOf(tellerSpeed); if (i < 0) i = SPEEDS.indexOf(1);
+    var ni = Math.min(SPEEDS.length - 1, Math.max(0, i + dir));
+    if (ni !== i) tellerSetSpeed(SPEEDS[ni]);
   }
   function tellerToggleLoop() {
     tellerLoop = !tellerLoop;
@@ -920,11 +925,11 @@
       '<div class="tp-speed" id="cspeed" role="group" aria-label="Tempo">' +
         '<div class="segctrl" id="cseg">' +
         '<span class="segthumb" aria-hidden="true"></span>' +
-        '<span class="segend seg-slow" aria-hidden="true">' + ICON_TURTLE + '</span>' +
+        '<button class="segstep seg-slow" data-act="tellerStep" data-d="-1" aria-label="Langzamer">−</button>' +
         SPEEDS.map(function (v) {
           return '<button class="' + (v === tellerSpeed ? 'on' : '') + '" data-act="tellerSpeed" data-v="' + v + '" aria-pressed="' + (v === tellerSpeed) + '">' + fmtSpeed(v) + '</button>';
         }).join('') +
-        '<span class="segend seg-fast" aria-hidden="true">' + ICON_RABBIT + '</span>' +
+        '<button class="segstep seg-fast" data-act="tellerStep" data-d="1" aria-label="Sneller">+</button>' +
         '</div>' +
       '</div>' +
       '<div class="transport">' +
@@ -1063,6 +1068,7 @@
     else if (act === 'tellerToggle') tellerToggle();
     else if (act === 'tellerReset') tellerReset();
     else if (act === 'tellerSpeed') tellerSetSpeed(parseFloat(b.getAttribute('data-v')));
+    else if (act === 'tellerStep') tellerStep(parseInt(b.getAttribute('data-d'), 10));
     else if (act === 'tellerLoop') tellerToggleLoop();
     else if (act === 'backupCopy') doBackupCopy();
     else if (act === 'backupRestore') doBackupRestore();

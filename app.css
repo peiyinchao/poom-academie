@@ -469,9 +469,6 @@ button{font-family:inherit}
 .checklist{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
 .checklist li{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink)}
 .checklist li svg{width:18px;height:18px;color:var(--red);flex:none}
-.misscard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-  box-shadow:var(--shadow-sm);padding:15px 16px;margin-bottom:14px}
-.misscard p{margin:6px 0 0;font-size:14px;line-height:1.55;color:var(--ink)}
 
 /* ---------- Teller (1–10) — fullscreen ---------- */
 .tellerpage{display:flex;flex-direction:column;min-height:calc(100vh - var(--appbar-h) - var(--nav-h) - env(safe-area-inset-bottom));
@@ -506,9 +503,11 @@ button{font-family:inherit}
 .tbtn.on{color:var(--red)}
 .tp-speed{display:flex;flex-direction:column;align-items:center;gap:8px}
 .segctrl{position:relative;display:flex;align-items:stretch;width:100%;background:#E9ECF1;border-radius:14px;padding:3px}
-.segend{flex:none;display:grid;place-items:center;width:30px;color:var(--gray);
-  user-select:none;pointer-events:none}
-.segend svg{width:21px;height:21px}
+.segstep{flex:none;width:34px;align-self:stretch;display:grid;place-items:center;border:0;background:none;
+  color:var(--gray);font-family:var(--font-cond);font-weight:700;font-size:23px;line-height:1;
+  border-radius:11px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .2s,transform .12s}
+.segstep:active{transform:scale(.88)}
+.segstep:disabled{opacity:.32;cursor:default}
 .segthumb{position:absolute;top:3px;left:0;height:calc(100% - 6px);width:40px;
   background:#fff;border-radius:11px;box-shadow:0 1px 3px rgba(16,24,40,.16);
   transform:translateX(0);transition:transform .42s cubic-bezier(.34,1.5,.5,1),width .42s cubic-bezier(.34,1.5,.5,1)}
