@@ -314,13 +314,13 @@
           '<img class="wm" src="mark-taeguk.svg" alt="">' +
         '</div>' +
 
-        '<div class="daykick"><span class="dk-ic">' + ICON_TERM + '</span>' + esc(todLabel) + '</div>' +
         '<div class="trow tod">' +
-          '<div class="tx"><div class="ko">' + esc(tod.ko) + '</div><div class="ro">' + esc(tod.roman) + '</div><div class="nl">' + esc(tod.nl) + '</div></div>' +
+          '<div class="tx"><div class="cardkick"><span class="dk-ic">' + ICON_TERM + '</span>' + esc(todLabel) + '</div>' +
+            '<div class="ko">' + esc(tod.ko) + '</div><div class="ro">' + esc(tod.roman) + '</div><div class="nl">' + esc(tod.nl) + '</div></div>' +
           '<button class="speak" data-act="speak" data-ko="' + esc(tod.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>' +
 
-        '<div class="daykick"><span class="dk-ic">' + ICON_IDEA + '</span>Gedachte van de dag</div>' +
-        '<div class="quotecard">“' + esc(quote) + '”</div>' +
+        '<div class="quotecard"><div class="cardkick"><span class="dk-ic">' + ICON_IDEA + '</span>Gedachte van de dag</div>' +
+          '<span class="qt">“' + esc(quote) + '”</span></div>' +
 
         '<div class="grouphd">Naslag</div>' +
         '<div class="tiles">' + tiles + '</div>' +
