@@ -239,10 +239,9 @@ button{font-family:inherit}
   text-transform:uppercase;letter-spacing:.04em;font-size:10.5px}
 .bottomnav a .ni{display:grid;place-items:center;width:23px;height:23px}
 .bottomnav a .ni svg{grid-area:1/1;width:23px;height:23px}
-.bottomnav a .ni-fill{display:none}
+.bottomnav a .ni-out{display:none}
+.bottomnav a .ni-fill{display:block}
 .bottomnav a.on{color:var(--red)}
-.bottomnav a.on .ni-out{display:none}
-.bottomnav a.on .ni-fill{display:block}
 .bottomnav a.on .ni{animation:navbounce .42s cubic-bezier(.34,1.56,.64,1)}
 @keyframes navbounce{0%{transform:scale(.7)}55%{transform:scale(1.18)}100%{transform:scale(1)}}
 .navpill{position:absolute;top:9px;left:0;height:calc(var(--nav-h) - 18px);width:48px;z-index:0;border-radius:15px;
