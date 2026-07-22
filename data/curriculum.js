@@ -248,7 +248,7 @@ window.CURRICULUM = {
       { ko: "그만", roman: "Geuman", nl: "Stop of einde" },
       { ko: "갈려", roman: "Gallyeo", nl: "Onderbreek (uit elkaar)" }
     ]},
-    { groep: "Richtingen", items: [
+    { groep: "Richtingen 1", items: [
       { ko: "왼", roman: "Oen", nl: "Links" },
       { ko: "오른", roman: "Oreun", nl: "Rechts" },
       { ko: "앞", roman: "Ap", nl: "Voorwaarts" },
@@ -257,7 +257,9 @@ window.CURRICULUM = {
       { ko: "내려", roman: "Naeryo", nl: "Neerwaarts" },
       { ko: "올려", roman: "Ollyeo", nl: "Opwaarts" },
       { ko: "안", roman: "An", nl: "Binnenwaarts" },
-      { ko: "바깥", roman: "Bakat", nl: "Buitenwaarts" },
+      { ko: "바깥", roman: "Bakat", nl: "Buitenwaarts" }
+    ]},
+    { groep: "Richtingen 2", items: [
       { ko: "세워", roman: "Seweo", nl: "Verticaal" },
       { ko: "젖혀", roman: "Jeochyo", nl: "Omgekeerd; handpalm naar boven" },
       { ko: "당겨", roman: "Dangyo", nl: "Trekkend of omgekeerd opwaarts" },
@@ -268,7 +270,7 @@ window.CURRICULUM = {
       { ko: "몸돌려", roman: "Momdollyeo", nl: "Draaien via de rug om de lichaamsas" },
       { ko: "뛰어", roman: "Twieo", nl: "Gesprongen" }
     ]},
-    { groep: "Lichaamsdelen", items: [
+    { groep: "Lichaamsdelen 1", items: [
       { ko: "몸", roman: "Mom", nl: "Lichaam" },
       { ko: "얼굴", roman: "Eolgool", nl: "Hoog (boven de sleutelbeenderen)" },
       { ko: "몸통", roman: "Momtong", nl: "Midden (romp)" },
@@ -280,7 +282,9 @@ window.CURRICULUM = {
       { ko: "팔목", roman: "Palmok", nl: "Onderarm" },
       { ko: "안팔목", roman: "An Palmok", nl: "Binnenkant van de onderarm" },
       { ko: "바깥팔목", roman: "Bakat Palmok", nl: "Buitenkant van de onderarm" },
-      { ko: "주먹", roman: "Joomeok", nl: "Vuist" },
+      { ko: "주먹", roman: "Joomeok", nl: "Vuist" }
+    ]},
+    { groep: "Lichaamsdelen 2", items: [
       { ko: "메주먹", roman: "Me-Joomeok", nl: "Hamervuist" },
       { ko: "등주먹", roman: "Deung-Joomeok", nl: "Vuistrug" },
       { ko: "손", roman: "Son", nl: "Hand" },
