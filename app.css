@@ -527,14 +527,14 @@ button{font-family:inherit}
 .tbtn.play svg{width:40px;height:40px}
 .tbtn.on{color:var(--red)}
 .tp-speed{display:flex;flex-direction:column;align-items:center;gap:8px}
-.segctrl{position:relative;display:flex;align-items:stretch;width:100%;background:#EDEFF3;border-radius:14px;padding:3px}
+.segctrl{position:relative;display:flex;align-items:stretch;width:100%;background:transparent;border-radius:14px;padding:0}
 .segstep{flex:none;width:36px;align-self:stretch;display:grid;place-items:center;border:0;background:none;
   color:var(--gray);font-family:var(--font-cond);font-weight:700;font-size:28px;line-height:1;
   border-radius:11px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .2s,transform .12s}
 .segstep:active{transform:scale(.88)}
 .segstep:disabled{opacity:.32;cursor:default}
-.segthumb{position:absolute;top:3px;left:0;height:calc(100% - 6px);width:40px;
-  background:#fff;border-radius:11px;box-shadow:0 1px 3px rgba(16,24,40,.16);
+.segthumb{position:absolute;top:0;left:0;height:100%;width:40px;
+  background:#fff;border-radius:11px;box-shadow:0 1px 4px rgba(16,24,40,.22),0 0 0 1px rgba(16,24,40,.06);
   transform:translateX(0);transition:transform .42s cubic-bezier(.34,1.5,.5,1),width .42s cubic-bezier(.34,1.5,.5,1)}
 .segctrl button{position:relative;z-index:1;flex:1 1 0;min-width:0;padding:11px 4px;border:0;background:none;
   border-radius:11px;font-family:var(--font-cond);font-weight:700;font-size:15px;color:var(--gray);
