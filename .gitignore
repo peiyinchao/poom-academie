@@ -6,3 +6,11 @@ _shot.html
 node_modules/
 .venv/
 *.log
+
+# Large third-party / licensed graphics packs — never commit
+assets/Envato Graphics/
+# Reference/inspiration scratch (large)
+Inspiration/
+# Scratch screenshots & backups
+out_*.png
+*.bak
