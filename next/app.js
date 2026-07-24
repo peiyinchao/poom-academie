@@ -1,0 +1,1243 @@
+/* ============================================================
+   Mijn Poom Academie — App-logica (vanilla JS, geen build)
+   Router + views + voortgang (localStorage) + uitspraak + quiz.
+   ============================================================ */
+(function () {
+  "use strict";
+  var C = window.CURRICULUM;
+  var view = document.getElementById('view');
+  var nav = document.getElementById('nav');
+
+  /* ---------- Voortgang (localStorage) ---------- */
+  var KEY = 'poom.v1';
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function save(p) { try { localStorage.setItem(KEY, JSON.stringify(p)); } catch (e) {} }
+  function doBackupCopy() {
+    var code = JSON.stringify(prog);
+    var box = document.getElementById('backupbox');
+    if (box) box.value = code;
+    var done = function () { toast('Back-up gekopieerd — bewaar hem veilig'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(done, function () {
+        if (box) { box.focus(); box.select(); } toast('Back-up staat in het tekstvak — kopieer hem zelf');
+      });
+    } else if (box) { box.focus(); box.select(); toast('Back-up staat in het tekstvak — kopieer hem zelf'); }
+  }
+  function doBackupRestore() {
+    var box = document.getElementById('backupbox');
+    var raw = box ? box.value.trim() : '';
+    if (!raw) { toast('Plak eerst je back-upcode in het vak'); return; }
+    var data;
+    try { data = JSON.parse(raw); } catch (e) { toast('Deze back-upcode is niet leesbaar'); return; }
+    if (!data || typeof data !== 'object') { toast('Deze back-upcode is niet leesbaar'); return; }
+    prog = data; save(prog);
+    normalizeProg();
+    refreshStreak();
+    toast('Voortgang hersteld ✓');
+    go();
+  }
+  var prog = load();
+  function normalizeProg() {
+    if (!prog.poomsae) prog.poomsae = {};
+    if (prog.quizBest == null || typeof prog.quizBest === 'number') prog.quizBest = {};
+    if (prog.level !== '1' && prog.level !== '2') prog.level = '1';
+    if (!prog.exam) prog.exam = {};
+    if (!prog.hardTerms) prog.hardTerms = {};
+  }
+  normalizeProg();
+
+  /* ---------- Niveau (1e / 2e poom) ---------- */
+  function curLevel() { return prog.level === '2' ? 2 : 1; }
+  function examCount() { return curLevel() >= 2 ? 25 : 15; }
+  function bestScore() { return prog.quizBest[prog.level] || 0; }
+  function setBest(v) { prog.quizBest[prog.level] = v; save(prog); }
+  /* ---------- Moeilijke termen ---------- */
+  function termKey(t) { return t.roman; }
+  function isHard(t) { return !!prog.hardTerms[termKey(t)]; }
+  function toggleHard(k) {
+    if (prog.hardTerms[k]) delete prog.hardTerms[k]; else prog.hardTerms[k] = 1;
+    save(prog); return !!prog.hardTerms[k];
+  }
+  function allStudyItems() {
+    var a = allTerms();
+    C.technieken.forEach(function (g) { g.items.forEach(function (i) { a.push(i); }); });
+    C.standen.forEach(function (s) { a.push(s); });
+    return a;
+  }
+  function hardTermList() { return allStudyItems().filter(isHard); }
+  function hardBtn(t, sm) {
+    var h = isHard(t);
+    return '<button class="hardbtn' + (sm ? ' sm' : '') + (h ? ' on' : '') + '" data-act="hardterm" data-k="' + esc(termKey(t)) +
+      '" aria-pressed="' + h + '" aria-label="Markeer als moeilijk" title="Moeilijk">' + ICON_BOOKMARK + '</button>';
+  }
+  function visPoomsae() { var L = curLevel(); return C.poomsae.filter(function (p) { return (p.level || 0) === 0 || p.level <= L; }); }
+  function foundationPoomsae() { return C.poomsae.filter(function (p) { return (p.level || 0) === 0; }); }
+  function examPoomsae() { var L = curLevel(); return C.poomsae.filter(function (p) { return p.level >= 1 && p.level <= L; }); }
+  function examChecks() { prog.exam[prog.level] = prog.exam[prog.level] || {}; return prog.exam[prog.level]; }
+  var TILE_IDS = ['standen', 'theorie', 'ilbo', 'hosinsul', 'examen'];
+  function tileOrderIds() {
+    var saved = (prog.tileOrder || []).filter(function (id) { return TILE_IDS.indexOf(id) >= 0; });
+    TILE_IDS.forEach(function (id) { if (saved.indexOf(id) < 0) saved.push(id); });
+    return saved;
+  }
+
+  function isPracticedToday(id) { return !!daily().practiced[id]; }
+  function refreshStreak() { document.getElementById('streakN').textContent = prog.streakDays || 0; }
+
+  /* ---------- Dagelijkse uitdagingen ---------- */
+  function dkey(d) { d = d || new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function seededPick(arr, n, seedStr) {
+    var seed = 0; for (var i = 0; i < seedStr.length; i++) seed = (seed * 31 + seedStr.charCodeAt(i)) % 1e9;
+    var a = arr.slice(), out = [];
+    for (var k = 0; k < n && a.length; k++) { seed = (seed * 1103515245 + 12345) % 2147483647; var j = seed % a.length; out.push(a.splice(j, 1)[0]); }
+    return out;
+  }
+  function daily() {
+    if (!prog.daily || prog.daily.date !== dkey()) {
+      var pool = foundationPoomsae().map(function (p) { return p.id; });
+      prog.daily = { date: dkey(), quiz: false, practiced: {}, flash: 0, suggest: seededPick(pool, 3, dkey()), counted: false };
+      save(prog);
+    }
+    if (!prog.daily.practiced) prog.daily.practiced = {};
+    if (!prog.daily.suggest) prog.daily.suggest = seededPick(foundationPoomsae().map(function (p) { return p.id; }), 3, dkey());
+    return prog.daily;
+  }
+  function dailyGoals() {
+    var d = daily();
+    var pDone = d.suggest.filter(function (id) { return d.practiced[id]; }).length;
+    var names = d.suggest.map(function (id) { var p = C.poomsae.filter(function (x) { return x.id === id; })[0]; return p ? (p.sino || ('T' + p.nr)) : id; });
+    return [
+      { id: 'poomsae', label: 'Oefen 3 poomsae', sub: names.join(' · '), done: pDone >= 3, n: pDone, need: 3 },
+      { id: 'flash', label: 'Flashcards: 5 termen', done: (d.flash || 0) >= 5, n: d.flash || 0, need: 5 },
+      { id: 'quiz', label: 'Doe een quiz', done: !!d.quiz, n: d.quiz ? 1 : 0, need: 1 }
+    ];
+  }
+  function dailyAllDone() { return dailyGoals().every(function (g) { return g.done; }); }
+  function checkDaily() {
+    var d = daily();
+    if (dailyAllDone() && !d.counted) {
+      d.counted = true;
+      var y = dkey(new Date(Date.now() - 864e5));
+      prog.streakDays = (prog.lastDone === y ? (prog.streakDays || 0) + 1 : 1);
+      prog.lastDone = dkey();
+      save(prog);
+      toast('Dagdoel gehaald! 🔥 ' + prog.streakDays + ' dag' + (prog.streakDays === 1 ? '' : 'en'));
+      celebrate(); flareStreak();
+      if (location.hash.indexOf('home') >= 0 || location.hash === '' || location.hash === '#/') viewHome();
+    } else save(prog);
+  }
+
+  /* ---------- Helpers ---------- */
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+  var toastT;
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('show'); }, 1900);
+  }
+
+  /* ---------- Uitspraak (Web Speech API) ---------- */
+  var koVoice = null;
+  function pickVoice() {
+    if (!('speechSynthesis' in window)) return;
+    var vs = speechSynthesis.getVoices();
+    koVoice = vs.filter(function (v) { return /ko(-|_)?/i.test(v.lang); })[0] || null;
+  }
+  if ('speechSynthesis' in window) {
+    pickVoice();
+    speechSynthesis.onvoiceschanged = pickVoice;
+  }
+  var speakingBtn = null;
+  function clearSpeaking() { if (speakingBtn) { speakingBtn.classList.remove('speaking'); speakingBtn = null; } }
+  function speak(text, btn) {
+    if (!('speechSynthesis' in window)) { toast('Uitspraak niet ondersteund'); return; }
+    speechSynthesis.cancel();
+    clearSpeaking();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR'; if (koVoice) u.voice = koVoice; u.rate = .9; u.pitch = 1;
+    if (btn) {
+      speakingBtn = btn; btn.classList.add('speaking');
+      u.onend = u.onerror = function () { if (speakingBtn === btn) clearSpeaking(); };
+    }
+    speechSynthesis.speak(u);
+  }
+  function prefersReduce() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function pop(el, cls) { if (!el || prefersReduce()) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+  function celebrate() {
+    if (prefersReduce()) return;
+    var wrap = document.createElement('div'); wrap.className = 'confetti';
+    var colors = ['#E11D3F', '#2440B8', '#F79009', '#ffffff', '#12B76A'];
+    for (var i = 0; i < 44; i++) {
+      var p = document.createElement('i');
+      p.style.left = Math.random() * 100 + '%';
+      p.style.background = colors[i % colors.length];
+      p.style.setProperty('--x', (Math.random() * 180 - 90) + 'px');
+      p.style.animationDelay = (Math.random() * .25) + 's';
+      p.style.animationDuration = (1.1 + Math.random() * .8) + 's';
+      wrap.appendChild(p);
+    }
+    document.body.appendChild(wrap);
+    setTimeout(function () { wrap.remove(); }, 2300);
+  }
+  function flareStreak() {
+    var s = document.getElementById('streak');
+    if (!s || prefersReduce()) return;
+    s.classList.remove('flare'); void s.offsetWidth; s.classList.add('flare');
+    setTimeout(function () { s.classList.remove('flare'); }, 900);
+  }
+
+  /* ---------- Kleine SVG's ---------- */
+  var ICON_SPEAK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a4 4 0 0 1 0 7"/><path d="M18.5 6a7 7 0 0 1 0 12"/></svg>';
+  var ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  var ICON_CHEV = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+  var ICON_BOOKMARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg>';
+  var ICON_RESET = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="7" cy="8" r="1.5" fill="currentColor"/><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="M12.5 8h3.19a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-10"/><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="m14.5 5-2.47 2.47a.75.75 0 0 0 0 1.06L14.5 11"/></svg>';
+  var ICON_REPEAT = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="M8 10 4.8 7.6c-.4-.3-.4-.9 0-1.2L8 4m8 10 3.2 2.4c.4.3.4.9 0 1.2L16 20"/><path stroke="currentColor" stroke-width="1.5" d="M4.5 7H16a5 5 0 0 1 4.387 7.4M19 17H8a5 5 0 0 1-5-5c0-.84.207-1.647.574-2.353"/></svg>';
+  // Klein icoon dat middenin een zin past, zodat kinderen de knop herkennen.
+  function iic(svg) { return '<span class="iic" aria-hidden="true">' + svg + '</span>'; }
+  var ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5l13 7.5-13 7.5z"/></svg>';
+  var ICON_FB = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>';
+  var ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1.3"/><rect x="14" y="4.5" width="4" height="15" rx="1.3"/></svg>';
+  var ICON_TERM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg>';
+  var ICON_IDEA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18h5"/><path d="M10 21.5h4"/><path d="M12 2.5a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1V18h6v-1.8c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 2.5z"/></svg>';
+  var ICON_INFO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11.25v4.75"/><path d="M12 7.75h.01"/></svg>';
+  function feetSVG() {
+    return '<svg viewBox="0 0 40 40" fill="#AEB6C2"><g><ellipse cx="13" cy="24" rx="5" ry="8.5"/><circle cx="9.6" cy="13.5" r="1.7"/><circle cx="13" cy="12.2" r="1.9"/><circle cx="16.4" cy="13.5" r="1.7"/></g><g><ellipse cx="27" cy="24" rx="5" ry="8.5"/><circle cx="23.6" cy="13.5" r="1.7"/><circle cx="27" cy="12.2" r="1.9"/><circle cx="30.4" cy="13.5" r="1.7"/></g></svg>';
+  }
+  function trigramSVG(ch) {
+    var code = (ch.codePointAt(0) - 0x2630) & 7;
+    var bars = '';
+    for (var k = 0; k < 3; k++) {
+      var y = 6 + k * 6, broken = (code >> k) & 1;
+      bars += broken
+        ? '<rect x="3" y="' + (y - 1.4) + '" width="7.4" height="2.8" rx="1.4"/><rect x="13.6" y="' + (y - 1.4) + '" width="7.4" height="2.8" rx="1.4"/>'
+        : '<rect x="3" y="' + (y - 1.4) + '" width="18" height="2.8" rx="1.4"/>';
+    }
+    return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' + bars + '</svg>';
+  }
+
+  /* ---------- Router ---------- */
+  var routes = ['home', 'poomsae', 'techniek', 'termen', 'quiz', 'theorie', 'standen', 'examen', 'examenkaart', 'ilbo', 'hosinsul', 'teller', 'flash', 'bronnen'];
+  function parse() {
+    var h = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+    if (!h.length) h = ['home'];
+    return h;
+  }
+  function go() {
+    var seg = parse();
+    var r = seg[0];
+    if (routes.indexOf(r) < 0) r = 'home';
+    if (tellerTimer) { clearInterval(tellerTimer); tellerTimer = null; } tellerRunning = false;
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    clearSpeaking();
+    document.body.classList.remove('pdx-mode');
+    view.innerHTML = '';
+    if (r === 'home') viewHome();
+    else if (r === 'poomsae') { seg[1] ? viewPoomDetail(seg[1]) : viewPoomList(); }
+    else if (r === 'techniek') viewTechniek(seg[1]);
+    else if (r === 'standen') viewTechniek('standen');
+    else if (r === 'termen') viewTermen();
+    else if (r === 'quiz') viewQuiz();
+    else if (r === 'theorie') viewTheorie();
+    else if (r === 'examen') viewExamen();
+    else if (r === 'examenkaart') viewExamenkaart();
+    else if (r === 'ilbo') viewNaslag('ilbo');
+    else if (r === 'hosinsul') viewNaslag('hosinsul');
+    else if (r === 'teller') viewTeller();
+    else if (r === 'flash') viewFlash();
+    else if (r === 'bronnen') viewBronnen();
+    // nav active state
+    var navMap = { standen: 'techniek', examen: 'theorie', examenkaart: 'home', ilbo: 'home', hosinsul: 'home', bronnen: 'home', flash: 'termen' };
+    var navR = navMap[r] || r;
+    [].forEach.call(nav.querySelectorAll('a'), function (a) {
+      a.classList.toggle('on', a.getAttribute('data-r') === navR);
+    });
+    moveNavPill();
+    window.scrollTo(0, 0);
+    refreshStreak();
+  }
+
+  function moveNavPill() {
+    var pill = document.getElementById('navpill');
+    if (!pill) return;
+    var a = nav.querySelector('a.on');
+    if (!a) { pill.classList.remove('show'); return; }
+    var w = a.offsetWidth, x = a.offsetLeft;
+    var pw = Math.min(w - 8, 74);
+    pill.style.width = pw + 'px';
+    pill.style.transform = 'translateX(' + (x + (w - pw) / 2) + 'px)';
+    pill.classList.add('show');
+  }
+  window.addEventListener('resize', moveNavPill);
+  window.addEventListener('orientationchange', function(){ setTimeout(moveNavPill, 120); });
+
+  /* ---------- View: Home ---------- */
+  function viewHome() {
+    var idx = new Date().getDate() + new Date().getMonth();
+    var all = allTerms();
+    var todPool = hardTermList(); var todHard = todPool.length > 0; if (!todHard) todPool = all;
+    var tod = todPool[idx % todPool.length];
+    var todLabel = todHard ? 'Moeilijke term van de dag' : 'Term van de dag';
+    var quote = C.quotes[idx % C.quotes.length];
+    var WD = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
+    var MO = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
+    var nowD = new Date();
+    var dateStr = WD[nowD.getDay()] + ' ' + nowD.getDate() + ' ' + MO[nowD.getMonth()] + ' ' + nowD.getFullYear();
+
+    var lvlToggle = '<div class="lvltoggle">' + ['1', '2'].map(function (l) {
+      return '<button data-act="lvl" data-l="' + l + '" class="' + (prog.level === l ? 'on' : '') + '">' + esc(C.levels[l].naam) + '</button>';
+    }).join('') + '</div>';
+
+    var goals = dailyGoals();
+    var goalHtml = goals.map(function (g) {
+      var cnt = g.need > 1 ? '<span class="dn">' + g.n + '/' + g.need + '</span>' : '';
+      return '<button class="goal-item' + (g.done ? ' done' : '') + '" data-act="goal" data-g="' + g.id + '">' +
+        '<span class="gck">' + (g.done ? ICON_CHECK : '') + '</span>' +
+        '<span class="gl">' + esc(g.label) + (g.sub ? '<small>' + esc(g.sub) + '</small>' : '') + '</span>' + cnt +
+        '<span class="gchev">' + (g.done ? '' : ICON_CHEV) + '</span></button>';
+    }).join('');
+    var streak = prog.streakDays || 0;
+    var allDone = dailyAllDone();
+
+    var tileDefs = {
+      standen: ['#/standen', 'Standen', 'Standen met voetdiagram', feetMini()],
+      examen: ['#/examenkaart', 'Examen', 'Onderdelen & aftekenlijst', svgExam()],
+      theorie: ['#/theorie', 'Theorie', 'Achtergrond & etiquette', svgBook()],
+      ilbo: ['#/ilbo', 'Ilbo Taeryon', 'Eén-stap sparren', onderIcon('step')],
+      hosinsul: ['#/hosinsul', 'Hosinsul', 'Zelfverdediging · veilig loskomen', onderIcon('shield')]
+    };
+    var order = TILE_IDS.slice();
+    var tiles = order.map(function (id) {
+      var t = tileDefs[id]; if (!t) return '';
+      return '<a class="tile' + (id === 'examen' ? ' wide' : '') + '" href="' + t[0] + '"><span class="ti">' + t[3] + '</span>' +
+        '<h3>' + t[1] + '</h3><small>' + t[2] + '</small></a>';
+    }).join('');
+
+    view.innerHTML =
+      '<div class="view active"><div class="screen">' +
+        '<div class="hero hero-daily">' +
+          '<div class="myline">Mijn</div>' +
+          '<h1>Poom<span class="dot">.</span>Academy</h1>' +
+          '<div class="lvlsel"><span class="ll">Ik oefen voor</span>' + lvlToggle + '</div>' +
+          '<div class="hdaily-hd">' +
+            '<div class="hd-l"><span class="hd-label">Dagdoel</span>' +
+              '<span class="hd-date">' + esc(dateStr) + '</span></div>' +
+            '<span class="daystreak' + (streak ? ' on' : '') + '">🔥 ' + streak + ' dag' + (streak === 1 ? '' : 'en') + '</span>' +
+          '</div>' +
+          '<div class="hgoals">' + goalHtml + '</div>' +
+          (allDone ? '<div class="daily-done">Alle dagdoelen gehaald! Top gedaan. 🎉</div>' : '') +
+          '<img class="wm" src="../mark-taeguk.svg" alt="">' +
+        '</div>' +
+
+        '<div class="trow tod">' +
+          '<div class="tx"><div class="cardkick"><span class="dk-ic">' + ICON_TERM + '</span>' + esc(todLabel) + '</div>' +
+            '<div class="ko">' + esc(tod.ko) + ' · ' + esc(tod.nl) + '</div><div class="ro">' + esc(tod.roman) + '</div></div>' +
+          '<button class="speak" data-act="speak" data-ko="' + esc(tod.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>' +
+
+        '<div class="quotecard"><div class="cardkick"><span class="dk-ic">' + ICON_IDEA + '</span>Gedachte van de dag</div>' +
+          '<span class="qt">“' + esc(quote) + '”</span></div>' +
+
+        '<div class="grouphd">Naslag</div>' +
+        '<div class="tiles">' + tiles + '</div>' +
+
+        '<div class="notecard srcnote">' + esc(C.meta.bron) + ' Bekijk de <a href="#/bronnen">bronnen &amp; verantwoording</a>.</div>' +
+      '</div></div>';
+  }
+
+  /* ---------- View: Poomsae-lijst ---------- */
+  function poomRow(p) {
+    var done = isPracticedToday(p.id);
+    var th = poomTheme(p.id);
+    var title = p.level >= 1 ? esc(p.korean) : 'Taegeuk ' + p.nr + (p.sino ? ' · ' + esc(p.sino) : '');
+    var ask = (p.level || 0) === 0 && !done && daily().suggest.indexOf(p.id) >= 0;
+    return '<button class="poomrow el" data-act="poom" data-id="' + p.id + '" style="' + poomThemeVars(th) + '">' +
+      '<span class="tg' + (done ? ' done' : '') + '">' + trigramSVG(p.trigram) + '</span>' +
+      '<span class="pm"><b>' + title + (ask ? ' <span class="askbadge">vandaag</span>' : '') + '</b>' +
+      '<small><span class="elname">' + esc(p.element) + '</span> · ' + esc(p.trigramNaam) + ' · ' + esc(p.kup) + '</small></span>' +
+      '<span class="meta"><span class="mv">' + p.bewegingen + '</span><small>bew.</small></span>' +
+      (done ? '<span class="check on">' + ICON_CHECK + '</span>' : '<span class="chev">' + ICON_CHEV + '</span>') +
+      '</button>';
+  }
+  function viewPoomList() {
+    var foundation = foundationPoomsae().map(poomRow).join('');
+    var exams = examPoomsae();
+    var examHtml = exams.length
+      ? '<div class="grouphd">Examenpoomsae — ' + esc(C.levels[prog.level].naam) + '</div><div class="poomlist">' + exams.map(poomRow).join('') + '</div>'
+      : '';
+    view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<div class="stickyhd">' +
+      '<span class="secnum">De vormen</span>' +
+      '<h1 class="screen-title">Poomsae</h1>' +
+      '</div>' +
+      '<p class="screen-sub">De acht Taegeuk-vormen zijn je basis. Wat je daarboven nodig hebt, hangt af van je poom. Tik op een vorm voor de betekenis, het trigram en de nieuwe technieken.</p>' +
+      '<p class="screen-sub">' + esc(C.levels[prog.level].omschrijving) + '</p>' +
+      '<div class="grouphd">Taegeuk 1–8 · il i sam sa o yuk chil pal</div>' +
+      '<div class="poomlist">' + foundation + '</div>' +
+      examHtml +
+      '<div class="notecard">Elke Taegeuk-vorm hoort bij één van de acht <b>trigrammen</b> (pal gwae). De volledige choreografie leer je met je trainer in de dojang.</div>' +
+      '</div></div>';
+  }
+
+  /* ---------- Elemental theme (Poomsae-detail) ---------- */
+  var POOM_THEME = {
+    il:       { el: '#3E5BD6', deep: '#22307F', ink: '#12183A', tint: '#EEF2FF', line: 'rgba(40,60,140,.14)',  hot: '#A9BEFF', glow: '120,150,255', dp: '62,91,214',   hanja: '天', en: 'Heaven' },
+    i:        { el: '#12A594', deep: '#0A6E70', ink: '#062A2C', tint: '#E9FBF7', line: 'rgba(10,110,112,.14)', hot: '#7FE9D6', glow: '60,224,200',  dp: '18,165,148',  hanja: '澤', en: 'Lake' },
+    sam:      { el: '#F0522B', deep: '#B01430', ink: '#3A0F14', tint: '#FFF4EF', line: 'rgba(207,60,35,.15)',  hot: '#F8A487', glow: '255,122,24',  dp: '225,29,63',   hanja: '火', en: 'Fire' },
+    sa:       { el: '#8B45E6', deep: '#5A1E9E', ink: '#200A3A', tint: '#F6EEFF', line: 'rgba(90,30,158,.14)',  hot: '#CDA8FF', glow: '199,125,255', dp: '139,69,230',  hanja: '雷', en: 'Thunder' },
+    o:        { el: '#2F9E56', deep: '#1B6B3A', ink: '#0B2A18', tint: '#EDFBF0', line: 'rgba(27,107,58,.14)',  hot: '#8FE6A9', glow: '107,224,138', dp: '47,158,86',   hanja: '風', en: 'Wind' },
+    yuk:      { el: '#2468D6', deep: '#143F8F', ink: '#0A1A3A', tint: '#EAF2FF', line: 'rgba(20,63,143,.14)',  hot: '#93C4FF', glow: '79,176,255',  dp: '36,104,214',  hanja: '水', en: 'Water' },
+    chil:     { el: '#C2792E', deep: '#8A4E17', ink: '#2A1B0A', tint: '#FBF2E6', line: 'rgba(138,78,23,.15)',  hot: '#E8C089', glow: '240,169,77',  dp: '194,121,46',  hanja: '山', en: 'Mountain' },
+    pal:      { el: '#A6642B', deep: '#6E3E15', ink: '#241606', tint: '#F8F0E6', line: 'rgba(110,62,21,.15)',  hot: '#E0B183', glow: '216,155,74',  dp: '166,100,43',  hanja: '地', en: 'Earth' },
+    koryo:    { el: '#B23A48', deep: '#7A1F2B', ink: '#2A0C12', tint: '#FBEEEF', line: 'rgba(122,31,43,.15)',  hot: '#E39AA3', glow: '214,90,104',  dp: '150,40,55',   hanja: '士', en: 'Scholar' },
+    keumgang: { el: '#4A6A8A', deep: '#2E465E', ink: '#121C28', tint: '#EEF3F8', line: 'rgba(46,70,94,.14)',   hot: '#A9C6E0', glow: '150,190,225', dp: '74,106,138',  hanja: '金', en: 'Diamond' }
+  };
+  function poomTheme(id) { return POOM_THEME[id] || POOM_THEME.sam; }
+  function poomThemeVars(t) {
+    return '--el:' + t.el + ';--el-deep:' + t.deep + ';--el-ink:' + t.ink + ';--el-tint:' + t.tint +
+      ';--el-line:' + t.line + ';--el-hot:' + t.hot + ';--el-glow-rgb:' + t.glow + ';--el-deep-rgb:' + t.dp + ';';
+  }
+  var pdxScrollBound = false;
+  function pdxOnScroll() {
+    var h = document.getElementById('phero');
+    if (!h) return;
+    var root = h.parentNode;
+    if (!root || root.className.indexOf('pdx') < 0) return;
+    var t = Math.min(1, Math.max(0, window.scrollY / 232));
+    root.style.setProperty('--t', t.toFixed(4));
+    root.style.setProperty('--p', (t * 100).toFixed(2) + '%');
+  }
+  function bindPdxScroll() {
+    if (pdxScrollBound) return;
+    pdxScrollBound = true;
+    window.addEventListener('scroll', pdxOnScroll, { passive: true });
+    window.addEventListener('resize', pdxOnScroll);
+  }
+  function pmi(k, v, hot) {
+    return '<div class="mi"><div class="mk">' + esc(k) + '</div><div class="mv' + (hot ? ' hot' : '') + '">' + esc(v) + '</div></div>';
+  }
+
+  /* ---------- View: Poomsae-detail ---------- */
+  function viewPoomDetail(id) {
+    var p = C.poomsae.filter(function (x) { return x.id === id; })[0];
+    if (!p) { location.hash = '#/poomsae'; return; }
+    var th = poomTheme(p.id);
+    var done = isPracticedToday(p.id);
+    var isTg = p.nr <= 8;
+    var kicker = isTg ? ('Poomsae · ' + (p.nr < 10 ? '0' : '') + p.nr + ' / 08') : 'Examenpoomsae';
+    var wm = isTg ? String(p.nr) : th.hanja;
+    var title = esc(p.korean).replace(' ', '<br>');
+    var reduce = prefersReduce();
+
+    var nieuw = p.nieuw.map(function (x) {
+      return '<div class="ptc">' +
+        '<div class="ptc-x"><div class="ko">' + esc(x.ko) + '</div><div class="ro">' + esc(x.roman) + '</div><div class="nl">' + esc(x.nl) + '</div></div>' +
+        '<button class="speak" data-act="speak" data-ko="' + esc(x.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>';
+    }).join('');
+    var focus = p.focus.map(function (f) { return '<li><span class="sq"></span><span>' + esc(f) + '</span></li>'; }).join('');
+    var fcard = (p.beeld || p.kernpunt) ?
+      '<div class="pfcard">' +
+        (p.beeld ? '<div class="r"><span class="tg">Beeld</span><span class="v">' + esc(p.beeld) + '</span></div>' : '') +
+        (p.kernpunt ? '<div class="r"><span class="tg">Focus</span><span class="v">' + esc(p.kernpunt) + '</span></div>' : '') +
+      '</div>' : '';
+    var chips = p.standen.map(function (s) {
+      var st = C.standen.filter(function (x) { return x.roman === s; })[0];
+      return '<span class="pchip">' + esc(st ? st.roman : s) + '</span>';
+    }).join('');
+    var videoHtml = p.video
+      ? '<div class="psl"><h4>Instructievideo</h4><span class="ln"></span></div>' +
+        '<div class="video" data-act="video" data-v="' + p.video + '">' +
+          '<img src="https://i.ytimg.com/vi/' + p.video + '/hqdefault.jpg" alt="" loading="lazy">' +
+          '<span class="playbtn" aria-hidden="true"></span>' +
+          '<span class="vlabel">Poomsae-video · Kyuhyung Lee</span>' +
+        '</div>'
+      : '';
+    var lead = esc(p.betekenis);
+    var leadHtml = lead ? '<span class="drop">' + lead.charAt(0) + '</span>' + lead.slice(1) : '';
+    var chevL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+
+    view.innerHTML = '<div class="view active pdx" style="' + poomThemeVars(th) + '">' +
+      '<header class="phero' + (reduce ? ' noco' : '') + '" id="phero">' +
+        '<div class="pwm">' + esc(wm) + '</div>' +
+        '<div class="ptop">' +
+          '<button class="pico" data-act="back" aria-label="Terug">' + chevL + '</button>' +
+          '<span class="pkick">' + esc(kicker) + '</span>' +
+          '<span class="pico ghost" aria-hidden="true"></span>' +
+        '</div>' +
+        '<div class="pcompact"><b>' + esc(p.korean) + '</b></div>' +
+        '<div class="phbody">' +
+          '<div class="pemblem">' +
+            '<div class="ptrig">' + trigramSVG(p.trigram) + '</div>' +
+            '<div class="peyebrow"><span class="sq"></span>' + esc(p.element) + ' · ' + esc(th.hanja) + ' · ' + esc(th.en) + '</div>' +
+          '</div>' +
+          '<h1 class="ptitle">' + title + '</h1>' +
+          '<div class="psub"><span class="han">' + esc(p.hangul) + '</span> · ' + esc(p.trigramNaam) + ' (' + esc(p.trigramHangul) + ')</div>' +
+          '<div class="pmeta">' +
+            pmi('Element', p.element, true) + pmi('Graad', p.kup) + pmi('Band', p.band) + pmi('Stappen', p.bewegingen) +
+          '</div>' +
+        '</div>' +
+        '<div class="pprog"><i></i></div>' +
+      '</header>' +
+      '<div class="pbody">' +
+        '<p class="plead">' + leadHtml + '</p>' +
+        '<div class="psl"><h4>Waar let je op</h4><span class="ln"></span></div>' +
+        fcard + '<ul class="pfocus">' + focus + '</ul>' +
+        '<div class="psl"><h4>Nieuwe technieken</h4><span class="ln"></span><span class="cnt">' + p.nieuw.length + '</span></div>' +
+        '<div class="ptech">' + nieuw + '</div>' +
+        '<div class="psl"><h4>Standen in deze vorm</h4><span class="ln"></span></div>' +
+        '<div class="pchips">' + chips + '</div>' +
+        videoHtml +
+        '<button class="btn ' + (done ? 'ghost donebtn' : 'primary') + '" style="width:100%;margin-top:26px" data-act="togglepoom" data-id="' + p.id + '">' +
+          (done ? '<span class="ck">' + ICON_CHECK + '</span>Geoefend — tik om te wissen' : 'Markeer als geoefend') + '</button>' +
+      '</div>' +
+    '</div>';
+
+    document.body.classList.add('pdx-mode');
+    if (!reduce) { window.scrollTo(0, 0); bindPdxScroll(); pdxOnScroll(); }
+  }
+  function fact(l, v) { return '<div class="fact"><div class="fl">' + esc(l) + '</div><div class="fv">' + esc(v) + '</div></div>'; }
+
+  /* ---------- View: Techniek (standen + technieken) ---------- */
+  function viewTechniek(sub) {
+    var segs = [{ k: 'standen', label: 'Standen' }];
+    C.technieken.forEach(function (g, i) { segs.push({ k: 'g' + i, label: g.cat.replace(/ \(.*/, '') }); });
+    if (!sub || !segs.some(function (s) { return s.k === sub; })) sub = 'standen';
+
+    var segHtml = segs.map(function (s) {
+      return '<button class="' + (s.k === sub ? 'on' : '') + '" data-act="seg" data-k="' + s.k + '">' + esc(s.label) + '</button>';
+    }).join('');
+
+    var body;
+    if (sub === 'standen') {
+      body = '<div class="rows">' + C.standen.filter(function (s) { return stanceImg(s.roman); }).map(function (s) {
+        var hard = isHard(s);
+        return '<div class="stance' + (hard ? ' hard' : '') + '"><span class="feet"><img src="' + stanceImg(s.roman) + '" alt="Voetdiagram ' + esc(s.roman) + '" loading="lazy"></span>' +
+          '<div class="sd"><div class="sdhd"><b>' + esc(s.roman) + '</b>' +
+          hardBtn(s, true) +
+          '<button class="speak sm" data-act="speak" data-ko="' + esc(s.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>' +
+          '<span class="ko">' + esc(s.ko) + ' · ' + esc(s.nl) + '</span>' +
+          '<small>' + esc(s.uitleg) + '</small>' +
+          '<span class="wt">' + esc(s.gewicht) + '</span></div></div>';
+      }).join('') + '</div>';
+    } else {
+      var g = C.technieken[+sub.slice(1)];
+      body = '<div class="grouphd">' + esc(g.cat) + '</div><div class="rows">' + g.items.map(techRow).join('') + '</div>';
+    }
+
+    view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<div class="stickyhd">' +
+      '<div class="hdrow"><div class="hdtitle">' +
+      '<span class="secnum">Techniek</span>' +
+      '<h1 class="screen-title">Standen &amp; technieken</h1></div>' +
+      '<button class="infobtn" data-act="toggleinfo" aria-label="Uitleg tonen" aria-expanded="false">' + ICON_INFO + '</button></div>' +
+      '<p class="screen-sub infopanel" hidden>De bouwstenen van elke vorm. Tik op de luidspreker ' + iic(ICON_SPEAK) + ' om de Koreaanse naam te horen.</p>' +
+      '<div class="termtabs">' + segHtml + '</div>' +
+      '</div>' +
+      '<div id="techbody">' + body + '</div>' +
+      '</div></div>';
+  }
+
+  function techRow(t) {
+    var hard = isHard(t);
+    return '<div class="stance tech' + (hard ? ' hard' : '') + '">' +
+      '<div class="sd"><div class="sdhd"><b>' + esc(t.roman) + '</b>' +
+      hardBtn(t, true) +
+      '<button class="speak sm" data-act="speak" data-ko="' + esc(t.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>' +
+      '<span class="ko">' + esc(t.ko) + ' · ' + esc(t.nl) + '</span></div></div>';
+  }
+
+  function termRow(t) {
+    return '<div class="trow"><button class="speak" data-act="speak" data-ko="' + esc(t.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' +
+      '<div class="tx"><div class="ko">' + esc(t.ko) + '</div><div class="ro">' + esc(t.roman) + '</div><div class="nl">' + esc(t.nl) + '</div></div></div>';
+  }
+
+  /* ---------- View: Termen ---------- */
+  var termTab = null;
+  function termTabs() {
+    var tabs = C.termen.map(function (g) { return { k: g.groep, label: g.groep }; });
+    if (hardTermList().length) tabs.push({ k: 'hard', label: 'Moeilijk' });
+    return tabs;
+  }
+  function viewTermen() {
+    view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<div class="stickyhd">' +
+      '<div class="hdrow"><div class="hdtitle">' +
+      '<span class="secnum">Woordenschat</span>' +
+      '<h1 class="screen-title">Koreaanse termen</h1></div>' +
+      '<button class="infobtn" data-act="toggleinfo" aria-label="Uitleg tonen" aria-expanded="false">' + ICON_INFO + '</button></div>' +
+      '<p class="screen-sub infopanel" hidden>Kies een categorie en luister naar de uitspraak ' + iic(ICON_SPEAK) + '. Tik op de bladwijzer ' + iic(ICON_BOOKMARK) + ' om een term als moeilijk te bewaren — die komt vaker terug in je dagterm en flashcards.</p>' +
+      '<div class="termtabs" id="termtabs"></div>' +
+      '</div>' +
+      '<div id="termbody"></div>' +
+      '</div></div>';
+    renderTermTabs();
+    renderTermTab();
+  }
+  function renderTermTabs() {
+    var tabs = termTabs();
+    if (!termTab || !tabs.some(function (t) { return t.k === termTab; })) termTab = tabs[0].k;
+    document.getElementById('termtabs').innerHTML = tabs.map(function (t) {
+      return '<button class="' + (t.k === termTab ? 'on' : '') + '" data-act="termtab" data-k="' + esc(t.k) + '">' + esc(t.label) + '</button>';
+    }).join('');
+  }
+  function termRowH(t) {
+    var hard = isHard(t);
+    return '<div class="trow' + (hard ? ' hard' : '') + '">' + hardBtn(t) +
+      '<div class="tx"><div class="ko">' + esc(t.ko) + '</div><div class="ro">' + esc(t.roman) + '</div><div class="nl">' + esc(t.nl) + '</div></div>' +
+      '<button class="speak" data-act="speak" data-ko="' + esc(t.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>';
+  }
+  function renderTermTab() {
+    var items, hd;
+    if (termTab === 'hard') { items = hardTermList(); hd = 'Moeilijke termen'; }
+    else { var g = C.termen.filter(function (x) { return x.groep === termTab; })[0]; items = g ? g.items : []; hd = g ? g.groep : ''; }
+    var body = items.length
+      ? '<div class="grouphd">' + esc(hd) + ' <span class="gcount">' + items.length + '</span></div><div class="rows">' + items.map(termRowH).join('') + '</div>'
+      : '<p class="termempty">Nog geen moeilijke termen. Tik op de bladwijzer ' + iic(ICON_BOOKMARK) + ' bij een term om die vaker te oefenen.</p>';
+    document.getElementById('termbody').innerHTML = body;
+  }
+
+  /* ---------- View: Quiz ---------- */
+  var quizState = null;
+  var tellerTimer = null, tellerIdx = 0, tellerSpeed = 1, tellerRunning = false, tellerLoop = false, tellerPrep = null, tellerDoneTimer = null;
+  var SPEEDS = [0.25, 0.5, 1, 1.5, 2];
+  function fmtSpeed(v) { return String(v).replace('.', ',') + '×'; }
+  function nativeRoman(c) { return String(c.roman || '').split('/')[0].trim(); }
+  var flashState = null;
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function viewQuiz() {
+    var L = curLevel();
+    var pool = C.quiz.filter(function (q) { return !q.lvl || q.lvl <= L; });
+    var picked = shuffle(pool).slice(0, Math.min(examCount(), pool.length)).map(function (q) {
+      var idx = shuffle(q.o.map(function (_, i) { return i; }));
+      return { v: q.v, o: idx.map(function (i) { return q.o[i]; }), a: idx.indexOf(q.a) };
+    });
+    quizState = { qs: picked, i: 0, score: 0, answered: false };
+    renderQuiz();
+  }
+  function quizPass(n) { return Math.ceil(n * 0.6); }
+  function renderQuiz() {
+    var s = quizState, n = s.qs.length;
+    if (s.i >= n) return renderQuizDone();
+    var q = s.qs[s.i];
+    var opts = q.o.map(function (o, i) {
+      return '<button class="opt" data-act="qopt" data-i="' + i + '"><span class="lt">' + 'ABCD'[i] + '</span>' + esc(o) + '</button>';
+    }).join('');
+    view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<span class="secnum">Oefenen</span>' +
+      '<h1 class="screen-title">Examenquiz</h1>' +
+      '<p class="screen-sub">Vraag ' + (s.i + 1) + ' van ' + n + ' · net als op je ' + esc(C.levels[prog.level].naam) + '-examen. Geslaagd vanaf ' + quizPass(n) + ' goed.</p>' +
+      '<div class="quizbar"><i id="qbar" style="width:' + (s.prevPct || 0) + '%"></i></div>' +
+      '<div class="quizcard"><div class="qnum">Vraag ' + (s.i + 1) + '</div>' +
+        '<div class="q">' + esc(q.v) + '</div><div class="opts">' + opts + '</div>' +
+        '<div class="qfoot" id="qfoot"></div>' +
+      '</div></div></div>';
+    var qpct = s.i / n * 100; s.prevPct = qpct;
+    requestAnimationFrame(function () { var el = document.getElementById('qbar'); if (el) el.style.width = qpct + '%'; });
+  }
+  function answerQuiz(i) {
+    var s = quizState; if (s.answered) return;
+    s.answered = true;
+    var q = s.qs[s.i], btns = view.querySelectorAll('.opt');
+    if (i === q.a) s.score++;
+    [].forEach.call(btns, function (b, bi) {
+      b.disabled = true;
+      if (bi === q.a) b.classList.add('correct');
+      else if (bi === i) b.classList.add('wrong');
+    });
+    var last = s.i === s.qs.length - 1;
+    document.getElementById('qfoot').innerHTML =
+      '<span style="color:var(--gray);font-size:14px">' + (i === q.a ? 'Goed! 🎉' : 'Bijna — kijk het juiste antwoord.') + '</span>' +
+      '<button class="btn primary" data-act="qnext">' + (last ? 'Bekijk score' : 'Volgende') + '</button>';
+  }
+  function renderQuizDone() {
+    var s = quizState, n = s.qs.length;
+    if (s.score > bestScore()) setBest(s.score);
+    var d = daily(); if (!d.quiz) { d.quiz = true; save(prog); checkDaily(); }
+    var need = quizPass(n), passed = s.score >= need;
+    var msg = s.score === n ? 'Perfect! Meesterlijk. 🥋' : passed ? 'Geslaagd! Dit was genoeg geweest. ✅' : 'Nog niet gehaald — blijf oefenen.';
+    view.innerHTML = '<div class="view active"><div class="screen"><div class="quizcard quizdone">' +
+      '<div class="score">' + s.score + '/' + n + '</div>' +
+      '<div class="qbadge ' + (passed ? 'pass' : 'fail') + '">' + (passed ? 'Geslaagd' : 'Nog niet geslaagd') + '</div>' +
+      '<h2 style="margin:10px 0 4px">' + msg + '</h2>' +
+      '<p>Je hebt <b>' + need + ' van de ' + n + '</b> goed nodig om te slagen (60%).</p>' +
+      '<p class="qhint">Beste score tot nu: ' + bestScore() + '/' + n + '. Zoveel vragen krijg je ook op je echte ' + esc(C.levels[prog.level].naam) + '-examen — elke ronde is willekeurig.</p>' +
+      '<button class="btn primary" data-act="qretry" style="margin-top:14px">Opnieuw</button> ' +
+      '<a class="btn ghost" href="#/home" style="margin-top:14px;display:inline-block;text-decoration:none">Naar home</a>' +
+      '</div></div></div>';
+    if (passed) celebrate();
+  }
+
+  /* ---------- View: Theorie ---------- */
+  function viewTheorie() {
+    var acc = C.theorie.map(function (t, i) {
+      return '<details' + (i === 0 ? ' open' : '') + '><summary>' + esc(t.titel) + '<span class="pl">+</span></summary>' +
+        '<div class="body">' + t.body + '</div></details>';
+    }).join('');
+    view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<span class="secnum">Achtergrond</span>' +
+      '<h1 class="screen-title">Theorie</h1>' +
+      '<p class="screen-sub">De verhalen achter de sport — vaak gevraagd op je examen.</p>' +
+      '<div class="acc">' + acc + '</div>' +
+      '<div class="notecard">' + esc(C.meta.bron) + '</div>' +
+      '</div></div>';
+  }
+
+  /* ---------- View: Examenonderdelen ---------- */
+  function onderIcon(k) {
+    var s = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+    if (k === 'step') return '<svg ' + s + '><path d="M7 4v7l-2 9"/><path d="M7 11l4 1 1 8"/><circle cx="8" cy="3" r="0"/><path d="M14 6l4 2"/></svg>';
+    if (k === 'shield') return '<svg ' + s + '><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9.5 12l2 2 3.5-4"/></svg>';
+    if (k === 'spar') return '<svg ' + s + '><path d="M4 9l3-1 3 3 4-4 3 1"/><path d="M5 14h14"/><path d="M7 14v4M17 14v4"/></svg>';
+    if (k === 'break') return '<svg ' + s + '><path d="M5 4h14v16H5z"/><path d="M11 4l2 7-3 2 2 7"/></svg>';
+    return '<svg ' + s + '><circle cx="12" cy="12" r="8"/></svg>';
+  }
+  function viewExamen() {
+    var cards = C.onderdelen.map(function (o) {
+      var tips = o.tips.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
+      return '<div class="examcard">' +
+        '<div class="examhd"><span class="examico">' + onderIcon(o.icon) + '</span>' +
+          '<div class="examt"><b>' + esc(o.nl) + '</b><span class="kr">' + esc(o.ko) + ' · ' + esc(o.roman) + '</span></div>' +
+          '<button class="speak" data-act="speak" data-ko="' + esc(o.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>' +
+        '<p class="examb">' + esc(o.uitleg) + '</p>' +
+        '<div class="sect"><h4>Let op</h4></div><ul class="ul">' + tips + '</ul>' +
+        '</div>';
+    }).join('');
+    view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<span class="secnum">Examen</span>' +
+      '<h1 class="screen-title">Examenonderdelen</h1>' +
+      '<p class="screen-sub">Op je poom-examen laat je meer zien dan alleen poomsae. Tik op de luidspreker ' + iic(ICON_SPEAK) + ' voor de Koreaanse uitspraak.</p>' +
+      cards +
+      '<div class="notecard">Oefen sparren, zelfverdediging en breektesten <b>altijd onder begeleiding</b> van je trainer.</div>' +
+      '</div></div>';
+  }
+
+  /* ---------- View: Naslag-onderdeel (Ilbo Taeryon / Hosinsul, poom-bewust) ---------- */
+  function viewNaslag(id) {
+    var o = (C.naslag || {})[id];
+    if (!o) { location.hash = '#/home'; return; }
+    var L = prog.level, n = o.niveau[L] || o.niveau['1'];
+
+    var toggle = '<div class="lvltoggle light">' + ['1', '2'].map(function (l) {
+      return '<button data-act="lvl" data-l="' + l + '" class="' + (L === l ? 'on' : '') + '">' + esc(C.levels[l].naam) + '</button>';
+    }).join('') + '</div>';
+
+    var secties = n.secties.map(function (s) {
+      return '<div class="sect"><h4>' + esc(s.h) + '</h4></div><p class="examb">' + esc(s.b) + '</p>';
+    }).join('');
+
+    var breakdown = '';
+    if (n.categorieen) {
+      breakdown = '<div class="sect"><h4>Verdeel je 12 technieken</h4></div>' +
+        '<div class="catgrid">' + n.categorieen.map(function (c) {
+          return '<div class="catchip"><b>' + c.n + '×</b><span>' + esc(c.t) + '</span></div>';
+        }).join('') + '</div>';
+    } else if (n.check) {
+      breakdown = '<div class="sect"><h4>Je serie klopt</h4></div>' +
+        '<ul class="checklist">' + n.check.map(function (c) {
+          return '<li>' + iic(ICON_CHECK) + '<span>' + esc(c) + '</span></li>';
+        }).join('') + '</ul>';
+    }
+
+    var videoHtml = o.video
+      ? '<div class="sect"><h4>Taekwondo Kawarmala Holland</h4></div>' +
+        '<a class="reelcard" href="' + esc(o.video.url) + '" target="_blank" rel="noopener">' +
+          '<img src="' + o.video.poster.replace(/^\.\//, '../') + '" alt="" loading="lazy">' +
+          '<span class="reelfb">' + ICON_FB + ' Facebook</span>' +
+          '<span class="playbtn" aria-hidden="true"></span>' +
+          '<span class="reelmeta"><b>' + esc(o.video.titel) + '</b><span>' + esc(o.video.bron) + '</span></span>' +
+        '</a>'
+      : '';
+
+    view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<p class="screen-sub">' + esc(o.intro) + ' Wissel hieronder tussen ' + esc(C.levels['1'].naam) + ' en ' + esc(C.levels['2'].naam) + ' — de eisen verschillen.</p>' +
+      toggle +
+      '<div class="examcard">' +
+        '<div class="examhd"><span class="examico">' + onderIcon(o.icon) + '</span>' +
+          '<div class="examt"><b>' + esc(o.roman) + '</b><span class="kr">' + esc(o.ko) + ' · ' + esc(o.nl) + '</span></div>' +
+          '<button class="speak" data-act="speak" data-ko="' + esc(o.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button></div>' +
+        '<div class="eisbox"><span class="eislabel">Wat je laat zien · ' + esc(C.levels[L].naam) + '</span>' +
+          '<p>' + esc(n.eis) + '</p></div>' +
+        secties +
+        breakdown +
+      '</div>' +
+      '<div class="notecard"><b>Veilig oefenen:</b> ' + esc(o.veilig) + '</div>' +
+      videoHtml +
+      '<a class="btn ghost" href="#/examenkaart" style="margin-top:16px;display:inline-block;text-decoration:none">Bekijk je hele examenkaart</a>' +
+      '</div></div>';
+  }
+
+  /* ---------- View: Examen (examenkaart + onderdeel-detail, samengevoegd) ---------- */
+  function onderByRow(id) {
+    var map = { pyojeok: 'gyeorugi' };
+    var key = map[id] || id;
+    return C.onderdelen.filter(function (o) { return o.id === key; })[0];
+  }
+  function viewExamenkaart() {
+    var L = prog.level, kaart = C.examenkaart[L], checks = examChecks();
+    var total = kaart.onderdelen.length;
+    var doneN = kaart.onderdelen.filter(function (o) { return checks[o.id]; }).length;
+    var pct = Math.round(doneN / total * 100);
+
+    var toggle = '<div class="lvltoggle light">' + ['1', '2'].map(function (l) {
+      return '<button data-act="lvl" data-l="' + l + '" class="' + (L === l ? 'on' : '') + '">' + esc(C.levels[l].naam) + '</button>';
+    }).join('') + '</div>';
+
+    var rows = kaart.onderdelen.map(function (o) {
+      var on = !!checks[o.id];
+      var spk = o.ko ? '<button class="speak" data-act="speak" data-ko="' + esc(o.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' : '';
+      var kr = (o.ko ? esc(o.ko) + ' · ' : '') + esc(o.roman);
+      var link = o.link ? '<a class="btn ghost sm" href="' + o.link + '">' + esc(o.linkLabel || 'Oefen') + '</a>' : '';
+      var det = onderByRow(o.id);
+      var detail = '';
+      if (det) {
+        var tips = det.tips.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
+        detail = '<details class="exdet"><summary>Wat is dit &amp; waar let je op<span class="pl">+</span></summary>' +
+          '<div class="exdet-b"><p>' + esc(det.uitleg) + '</p><ul class="ul">' + tips + '</ul></div></details>';
+      }
+      return '<div class="exrow' + (on ? ' on' : '') + '">' +
+        '<button class="exchk" data-act="examchk" data-id="' + o.id + '" aria-label="Afvinken">' + (on ? ICON_CHECK : '') + '</button>' +
+        '<div class="exmain">' +
+          '<div class="exhd"><b>' + esc(o.nl) + '</b><span class="kr">' + kr + '</span>' + spk + '</div>' +
+          '<p class="exeis">' + esc(o.eis) + '</p>' +
+          detail +
+          (link ? '<div class="exact">' + link + '</div>' : '') +
+        '</div></div>';
+    }).join('');
+
+    view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<span class="secnum">Examen</span>' +
+      '<h1 class="screen-title">Jouw examen in één beeld</h1>' +
+      '<p class="screen-sub">Alle onderdelen die je laat zien voor je poom. Tik een onderdeel open voor uitleg, of vink af ' + iic(ICON_CHECK) + ' wat al goed gaat.</p>' +
+      toggle +
+      '<div class="exprog"><div class="quizbar"><i id="exbar" style="width:0%"></i></div>' +
+        '<span>' + doneN + ' / ' + total + ' onderdelen afgevinkt</span></div>' +
+      '<div class="exlist">' + rows + '</div>' +
+      '<div class="notecard"><b>Slagen voor theorie:</b> ' + esc(kaart.slagen) + '.</div>' +
+      '<div class="notecard">Oefen sparren, zelfverdediging en breektesten <b>altijd onder begeleiding</b> van je trainer. Deze kaart vertelt <b>wát</b> je laat zien — je trainer leert je <b>hoe</b>.</div>' +
+      '</div></div>';
+    requestAnimationFrame(function () { var el = document.getElementById('exbar'); if (el) el.style.width = pct + '%'; });
+  }
+
+  /* ---------- View: Bronnen & back-up ---------- */
+  function viewBronnen() {
+    var b = C.bronnen || { items: [] };
+    var rows = (b.items || []).map(function (s) {
+      return '<div class="srccard">' +
+        '<div class="src-hd"><b>' + esc(s.titel) + '</b>' + (s.org ? '<span class="src-org">' + esc(s.org) + '</span>' : '') + '</div>' +
+        '<p class="src-wat">' + esc(s.wat) + '</p>' +
+        (s.url ? '<a class="src-link" href="' + esc(s.url) + '" target="_blank" rel="noopener">Open officiële bron ↗</a>' : '') +
+        '</div>';
+    }).join('');
+    view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<span class="secnum">Bronnen</span>' +
+      '<h1 class="screen-title">Bronnen &amp; verantwoording</h1>' +
+      '<p class="screen-sub">' + esc(b.gecontroleerd || '') + ' ' + esc(b.disclaimer || '') + '</p>' +
+      '<div class="srclist">' + rows + '</div>' +
+      '<div class="sect"><h4>Back-up &amp; herstel</h4></div>' +
+      '<div class="notecard">Je voortgang (streak, dagdoelen, moeilijke termen) staat alleen op dit toestel. ' +
+        'Maak af en toe een back-up — handig als je de app opnieuw op je beginscherm zet.</div>' +
+      '<div class="cctrl">' +
+        '<button class="btn primary" data-act="backupCopy">Back-up kopiëren</button>' +
+        '<button class="btn ghost" data-act="backupRestore">Herstellen</button>' +
+      '</div>' +
+      '<textarea class="backupbox" id="backupbox" placeholder="Plak hier je back-upcode om te herstellen…" spellcheck="false"></textarea>' +
+      '</div></div>';
+  }
+
+  /* ---------- View: Teller (Koreaans 1–10) ---------- */
+  function tellCounts() { var g = C.termen.filter(function (x) { return /Tellen/.test(x.groep); })[0]; return g ? g.items : []; }
+  var tellAudio = null;
+  function beep(freq, dur) {
+    try {
+      if (!tellAudio) tellAudio = new (window.AudioContext || window.webkitAudioContext)();
+      if (tellAudio.state === 'suspended') tellAudio.resume();
+      var t = tellAudio.currentTime, d = dur || 0.12;
+      var o = tellAudio.createOscillator(), g = tellAudio.createGain();
+      o.type = 'sine'; o.frequency.value = freq || 620;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.22, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      o.connect(g); g.connect(tellAudio.destination);
+      o.start(t); o.stop(t + d + 0.02);
+    } catch (e) {}
+  }
+  function tellSet(numTxt, c, activeIdx) {
+    var n = document.getElementById('cnum'), k = document.getElementById('cko');
+    if (n) n.textContent = numTxt;
+    if (k) k.textContent = c ? (c.msg ? c.msg : nativeRoman(c)) : '';
+  }
+  function tellSetPlaying(on) {
+    var b = document.getElementById('cplaybtn');
+    if (b) { b.innerHTML = on ? ICON_PAUSE : ICON_PLAY; b.setAttribute('aria-label', on ? 'Pauze' : 'Start'); }
+    var card = document.getElementById('ccard');
+    if (card) card.classList.toggle('running', on);
+  }
+  function tellSpeak(c) {
+    if (!c || !('speechSynthesis' in window)) return;
+    try {
+      speechSynthesis.cancel();
+      var u;
+      if (koVoice) { u = new SpeechSynthesisUtterance(c.ko); u.lang = 'ko-KR'; u.voice = koVoice; }
+      else { u = new SpeechSynthesisUtterance(nativeRoman(c)); u.lang = 'nl-NL'; }
+      u.rate = 0.95; u.pitch = 1;
+      speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+  function primeSpeech() {
+    if (!('speechSynthesis' in window)) return;
+    try { var u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) {}
+  }
+  function tellStep() {
+    var counts = tellCounts(); if (!counts.length) return;
+    if (tellerIdx >= counts.length) {
+      if (tellerLoop) { tellerIdx = 0; }
+      else {
+        tellerPause(); tellSet('✓', { msg: 'Klaar!' }, -1); tellerIdx = 0; tellSetPlaying(false);
+        var dcard = document.getElementById('ccard');
+        if (dcard && !prefersReduce()) { dcard.classList.remove('done'); void dcard.offsetWidth; dcard.classList.add('done'); }
+        if (tellerDoneTimer) clearTimeout(tellerDoneTimer);
+        tellerDoneTimer = setTimeout(function () { tellerDoneTimer = null; if (!tellerRunning) tellerReset(); }, 3000);
+        return;
+      }
+    }
+    var c = counts[tellerIdx];
+    tellSet(String(tellerIdx + 1), c, tellerIdx);
+    tellSpeak(c);
+    tellerIdx++;
+  }
+  function tellArm() {
+    if (tellerTimer) clearInterval(tellerTimer);
+    tellerTimer = setInterval(tellStep, Math.round(1000 / tellerSpeed));
+  }
+  function tellerPause() {
+    tellerRunning = false;
+    if (tellerTimer) { clearInterval(tellerTimer); tellerTimer = null; }
+    if (tellerPrep) { clearInterval(tellerPrep); tellerPrep = null; }
+    var card = document.getElementById('ccard'); if (card) card.classList.remove('prep');
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+  }
+  function tellerStartCountdown() {
+    var n = 3;
+    tellSetPlaying(true);
+    var card = document.getElementById('ccard'); if (card) card.classList.add('prep');
+    tellSet(String(n), { msg: 'Junbi / Klaarstaan' }, -1);
+    beep(620, 0.12);
+    var iv = 1000;
+    tellerPrep = setInterval(function () {
+      n--;
+      if (n <= 0) {
+        clearInterval(tellerPrep); tellerPrep = null;
+        if (card) card.classList.remove('prep');
+        beep(920, 0.16);
+        tellStep(); tellArm();
+      } else {
+        tellSet(String(n), { msg: 'Junbi / Klaarstaan' }, -1);
+        beep(620, 0.12);
+      }
+    }, iv);
+  }
+  function tellerToggle() {
+    if (!tellCounts().length) return;
+    if (tellerDoneTimer) { clearTimeout(tellerDoneTimer); tellerDoneTimer = null; }
+    if (tellerRunning) { tellerPause(); tellSetPlaying(false); return; }
+    var tcard = document.getElementById('ccard'); if (tcard) tcard.classList.remove('done');
+    tellerRunning = true;
+    primeSpeech();
+    if (tellerIdx > 0) { tellSetPlaying(true); tellStep(); tellArm(); }
+    else tellerStartCountdown();
+  }
+  function tellerReset() {
+    if (tellerDoneTimer) { clearTimeout(tellerDoneTimer); tellerDoneTimer = null; }
+    tellerPause(); tellerIdx = 0;
+    var rcard = document.getElementById('ccard'); if (rcard) rcard.classList.remove('done');
+    var n = document.getElementById('cnum'), k = document.getElementById('cko');
+    if (n) n.textContent = '';
+    if (k) k.textContent = 'Tik om te starten';
+    tellSetPlaying(false);
+  }
+  function positionSegThumb(instant) {
+    var seg = document.getElementById('cseg'); if (!seg) return;
+    var thumb = seg.querySelector('.segthumb'); if (!thumb) return;
+    var on = seg.querySelector('button.on'); if (!on) return;
+    if (instant) thumb.style.transition = 'none';
+    thumb.style.width = on.offsetWidth + 'px';
+    thumb.style.transform = 'translateX(' + on.offsetLeft + 'px)';
+    if (instant) { void thumb.offsetWidth; thumb.style.transition = ''; }
+  }
+  function tellerSetSpeed(v) {
+    tellerSpeed = v;
+    var seg = document.getElementById('cspeed');
+    if (seg) {
+      var btns = seg.querySelectorAll('.segctrl button[data-v]');
+      for (var i = 0; i < btns.length; i++) {
+        var on = parseFloat(btns[i].getAttribute('data-v')) === v;
+        btns[i].classList.toggle('on', on);
+        btns[i].setAttribute('aria-pressed', on);
+        if (on && !prefersReduce()) { btns[i].classList.remove('pick'); void btns[i].offsetWidth; btns[i].classList.add('pick'); }
+      }
+      positionSegThumb(false);
+      var si = SPEEDS.indexOf(v);
+      var minus = seg.querySelector('.seg-slow'), plus = seg.querySelector('.seg-fast');
+      if (minus) minus.disabled = si <= 0;
+      if (plus) plus.disabled = si >= SPEEDS.length - 1;
+    }
+    if (tellerRunning) tellArm();
+  }
+  function tellerStep(dir) {
+    var i = SPEEDS.indexOf(tellerSpeed); if (i < 0) i = SPEEDS.indexOf(1);
+    var ni = Math.min(SPEEDS.length - 1, Math.max(0, i + dir));
+    if (ni !== i) tellerSetSpeed(SPEEDS[ni]);
+  }
+  function tellerToggleLoop() {
+    tellerLoop = !tellerLoop;
+    var b = document.getElementById('cloopbtn');
+    if (b) { b.classList.toggle('on', tellerLoop); b.setAttribute('aria-pressed', tellerLoop); }
+  }
+  function viewTeller() {
+    tellerIdx = 0; tellerRunning = false;
+    view.innerHTML = '<div class="view active"><div class="tellerpage">' +
+      '<button class="ccard" id="ccard" data-act="tellerToggle" aria-label="Start">' +
+        '<div class="cnum" id="cnum"></div>' +
+        '<div class="cko" id="cko">Tik om te starten</div>' +
+      '</button>' +
+      '<div class="tp-speed" id="cspeed" role="group" aria-label="Tempo">' +
+        '<div class="segctrl" id="cseg">' +
+        '<span class="segthumb" aria-hidden="true"></span>' +
+        '<button class="segstep seg-slow" data-act="tellerStep" data-d="-1" aria-label="Langzamer">−</button>' +
+        SPEEDS.map(function (v) {
+          return '<button class="' + (v === tellerSpeed ? 'on' : '') + '" data-act="tellerSpeed" data-v="' + v + '" aria-pressed="' + (v === tellerSpeed) + '">' + fmtSpeed(v) + '</button>';
+        }).join('') +
+        '<button class="segstep seg-fast" data-act="tellerStep" data-d="1" aria-label="Sneller">+</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="transport">' +
+        '<button class="tbtn" data-act="tellerReset" aria-label="Opnieuw" title="Opnieuw">' + ICON_RESET + '</button>' +
+        '<button class="tbtn play" id="cplaybtn" data-act="tellerToggle" aria-label="Start">' + ICON_PLAY + '</button>' +
+        '<button class="tbtn" id="cloopbtn" data-act="tellerLoop" aria-pressed="false" aria-label="Blijf herhalen" title="Blijf herhalen">' + ICON_REPEAT + '</button>' +
+      '</div>' +
+      '</div></div>';
+    tellSetPlaying(false);
+    requestAnimationFrame(function () { positionSegThumb(true); });
+  }
+
+  /* ---------- View: Flashcards (termen) ---------- */
+  function allTerms() { var a = []; C.termen.forEach(function (g) { g.items.forEach(function (i) { a.push(i); }); }); return a; }
+  function viewFlash() {
+    var hard = shuffle(hardTermList());
+    var rest = shuffle(allTerms().filter(function (t) { return !isHard(t); }));
+    flashState = { cards: hard.concat(rest).slice(0, 10), i: 0, flipped: false, answers: [] };
+    renderFlash();
+  }
+  function renderFlash() {
+    var s = flashState;
+    if (s.i >= s.cards.length) return renderFlashDone();
+    var c = s.cards[s.i], d = daily();
+    view.innerHTML = '<div class="view active"><div class="screen">' +
+      '<button class="backlink" data-act="flashexit">‹ Terug</button>' +
+      '<span class="secnum">Flashcards</span>' +
+      '<h1 class="screen-title">Termen oefenen</h1>' +
+      '<p class="screen-sub">Kaart ' + (s.i + 1) + ' van ' + s.cards.length + ' · dagdoel ' + Math.min(d.flash || 0, 5) + '/5</p>' +
+      '<div class="flashbar"><i id="fbar" style="width:' + (s.prevPct || 0) + '%"></i></div>' +
+      '<div class="flashcard' + (s.flipped ? ' flip' : '') + '" data-act="flashflip">' +
+        '<div class="fc-in">' +
+          '<div class="fc-face fc-front"><button class="speak" data-act="speak" data-ko="' + esc(c.ko) + '" aria-label="Spreek uit">' + ICON_SPEAK + '</button>' +
+            '<div class="ko">' + esc(c.ko) + '</div><div class="hint">Tik om te draaien</div></div>' +
+          '<div class="fc-face fc-back"><div class="ro">' + esc(c.roman) + '</div><div class="nl">' + esc(c.nl) + '</div></div>' +
+        '</div></div>' +
+      '<div class="flashctrl">' +
+        '<button class="btn ghost" data-act="flashnext" data-k="0">Nog niet</button>' +
+        '<button class="btn primary" data-act="flashnext" data-k="1">Wist ik ✓</button>' +
+      '</div>' +
+      (s.i > 0 ? '<button class="flashback" data-act="flashprev">‹ Vorige kaart</button>' : '') +
+      '</div></div>';
+    var fpct = s.i / s.cards.length * 100; s.prevPct = fpct;
+    requestAnimationFrame(function () { var el = document.getElementById('fbar'); if (el) el.style.width = fpct + '%'; });
+  }
+  function flashNext(knew) {
+    var s = flashState;
+    var firstTime = s.answers[s.i] === undefined;
+    s.answers[s.i] = knew ? 1 : 0;
+    if (firstTime) { var d = daily(); d.flash = (d.flash || 0) + 1; save(prog); checkDaily(); }
+    s.i++; s.flipped = false; renderFlash();
+  }
+  function flashPrev() {
+    var s = flashState;
+    if (s.i <= 0) return;
+    s.i--; s.flipped = false; renderFlash();
+  }
+  function renderFlashDone() {
+    var s = flashState;
+    var knew = s.answers.filter(function (a) { return a === 1; }).length;
+    view.innerHTML = '<div class="view active"><div class="screen"><div class="quizcard quizdone">' +
+      '<div class="score">' + knew + '/' + s.cards.length + '</div>' +
+      '<h2 style="margin:10px 0 4px">Sterk geoefend! 🧠</h2>' +
+      '<p>Je wist ' + knew + ' van de ' + s.cards.length + ' termen.</p>' +
+      '<button class="btn primary" data-act="flashretry" style="margin-top:14px">Nog een set</button> ' +
+      '<a class="btn ghost" href="#/home" style="margin-top:14px;display:inline-block;text-decoration:none">Naar home</a>' +
+      '</div></div></div>';
+  }
+
+  /* ---------- Stand-illustraties (getekende 1:2 voetdiagrammen) ----------
+     Eén PNG per stand (met ingebouwde looplijn, hoek en gewichtskleuren).
+     Standen zonder tekening (Dwit koa, Kyotdari) tonen we voorlopig niet. */
+  var STANCE_IMG = {
+    'Moa seogi': 'moa', 'Naranhi seogi': 'naranhi', 'Ap seogi': 'ap-seogi',
+    'Ap kubi': 'ap-kubi', 'Dwit kubi': 'dwit-kubi', 'Juchum seogi': 'juchum',
+    'Beom seogi': 'beom', 'Oreun seogi': 'oreun', 'Wen seogi': 'wen',
+    'Ap koa seogi': 'ap-koa', 'Hakdari seogi': 'hakdari'
+  };
+  function stanceImg(roman) {
+    var slug = STANCE_IMG[roman];
+    return slug ? '../img/stances/' + slug + '.png' : null;
+  }
+
+
+  function svgCircle() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 0 0 9 4.5 4.5 0 0 1 0 9" stroke-linecap="round"/></svg>'; }
+  function svgBolt() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 13h6l-1 8 9-11h-6z"/></svg>'; }
+  function svgChat() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11h-9l-4 4v-4H4z"/></svg>'; }
+  function svgQuiz() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6a2 2 0 0 1 2 2v14l-5-3-5 3V6a2 2 0 0 1 2-2z"/><path d="M9.5 9.5l1.8 1.8 3.2-3.4"/></svg>'; }
+  function svgBook() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h10v16H6a2 2 0 0 0-2 2z"/><path d="M16 3h2a2 2 0 0 1 2 2v14"/></svg>'; }
+  function feetMini() { return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.249 3.224a.75.75 0 0 0-.774-.724.75.75 0 0 0-.725.776zM5.114 18.53l-.738.13zM3.77 6.512a.75.75 0 0 0-.868-.608.75.75 0 0 0-.61.87zm2.298-1.369a.75.75 0 0 0-.868-.607.75.75 0 0 0-.61.87zM4.753 6.338l.13.738 1.477-.262-.13-.738zM8.446 4.24a.75.75 0 0 0-.868-.608.75.75 0 0 0-.609.87zM7.133 5.435l.13.739 1.476-.262-.13-.739zM10.5 3.25l-.75.026v.008l.013.464c.008.296.017.71.023 1.183a53 53 0 0 1-.035 3.032L10.5 8l.748.037c.05-.965.049-2.172.037-3.128a96 96 0 0 0-.035-1.651v-.032l-.001-.002zm0 4.75-.75-.037c-.04.808-.362 1.526-.709 2.585-.33 1.011-.619 2.198-.363 3.656l.738-.13.739-.131c-.194-1.106.012-2.016.311-2.93.284-.867.728-1.904.782-2.976zm-1.084 6.073-.738.131c.18 1.033.413 1.6.63 2.083.2.446.349.747.453 1.344l.739-.131.738-.13c-.14-.803-.365-1.259-.562-1.699-.18-.403-.367-.85-.521-1.728zM10.5 17.5l-.739.13a2.24 2.24 0 0 1-.283 1.562c-.275.44-.756.82-1.542.96l.13.738.13.739c1.183-.21 2.042-.826 2.553-1.644.5-.802.64-1.754.49-2.616zm-2.434 3.39-.13-.739c-.664.118-1.124-.141-1.473-.542-.376-.43-.57-.978-.61-1.21l-.739.13-.738.132c.082.467.38 1.274.956 1.936.604.692 1.559 1.263 2.863 1.032zm-2.952-2.36.739-.131-1.594-9.09-.739.13-.738.132 1.594 9.09zM3.52 9.44l.739-.131-.49-2.797-.739.131-.738.131.49 2.797zm1.808-4.166-.738.131.163.933.739-.131.738-.131-.163-.933zm2.38-.902-.739.13.164.933.738-.131.739-.131-.164-.932zm5.043-1.124a.75.75 0 1 1 1.5.002zm6.115 15.292.739.13zm1.36-12.029a.75.75 0 0 1 1.477.26zm-2.298-1.367a.75.75 0 1 1 1.477.26zm1.313 1.193-.13.739-1.477-.26.13-.74zm-3.692-2.094a.75.75 0 1 1 1.477.26zm1.312 1.194-.13.738-1.477-.26.13-.739zm-3.36-2.188.75.001V8h-1.5V3.248zm0 4.75h.75c0 .781.31 1.491.664 2.548.337 1.006.65 2.201.39 3.669l-.738-.13-.739-.131c.194-1.1-.026-2.008-.336-2.932-.293-.876-.742-1.925-.742-3.023zm1.066 6.086.739.13c-.182 1.031-.41 1.594-.62 2.072-.195.442-.341.742-.447 1.343l-.739-.13-.739-.13c.141-.8.36-1.25.552-1.688.177-.4.36-.845.515-1.727zM13.5 17.5l.739.13c-.096.542-.006 1.117.275 1.577.27.442.745.823 1.527.96l-.13.74-.13.738c-1.189-.21-2.043-.832-2.547-1.655-.493-.807-.624-1.761-.473-2.62zm2.41 3.407.13-.74c.665.118 1.126-.142 1.476-.544.376-.431.57-.98.612-1.212l.738.13.739.13c-.082.467-.381 1.276-.959 1.938-.605.694-1.56 1.266-2.866 1.036zm2.956-2.366-.738-.13 1.604-9.1.739.13.738.131-1.604 9.1zm1.605-9.1-.739-.13.494-2.799.738.13.739.13-.494 2.8zm-1.804-4.166.738.13-.164.933-.739-.13-.738-.13.164-.933zm-2.38-.9.739.13-.165.933-.738-.13-.739-.13.165-.934z"/></svg>'; }
+  function svgExam() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9.5 12l2 2 3.5-4"/></svg>'; }
+  function svgTimer() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6"/><path d="M12 8v6l4 2"/><circle cx="12" cy="14" r="8"/></svg>'; }
+  function svgCard() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h4M7 13h7"/><path d="M15.5 8.5l1.4 1.4 2.6-2.8"/></svg>'; }
+
+  /* ---------- Event-delegatie ---------- */
+  view.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]'); if (!b) return;
+    var act = b.getAttribute('data-act');
+    if (act === 'speak') speak(b.getAttribute('data-ko'), b);
+    else if (act === 'poom') location.hash = '#/poomsae/' + b.getAttribute('data-id');
+    else if (act === 'back') location.hash = '#/poomsae';
+    else if (act === 'seg') { location.hash = '#/techniek/' + b.getAttribute('data-k'); }
+    else if (act === 'lvl') {
+      var l = b.getAttribute('data-l');
+      if (prog.level !== l) { prog.level = l; save(prog); toast('Niveau: ' + C.levels[l].naam); go(); }
+    }
+    else if (act === 'examchk') {
+      var eid = b.getAttribute('data-id'), ch = examChecks();
+      ch[eid] = !ch[eid]; save(prog);
+      toast(ch[eid] ? 'Afgevinkt ✓' : 'Vinkje gewist');
+      viewExamenkaart();
+    }
+    else if (act === 'goal') {
+      var g = b.getAttribute('data-g');
+      location.hash = g === 'quiz' ? '#/quiz' : g === 'flash' ? '#/flash' : '#/poomsae';
+    }
+    else if (act === 'togglepoom') {
+      var id = b.getAttribute('data-id');
+      var dd = daily();
+      var nowOn = !dd.practiced[id];
+      if (nowOn) dd.practiced[id] = true; else delete dd.practiced[id];
+      save(prog);
+      toast(nowOn ? 'Gemarkeerd als geoefend ✓' : 'Markering gewist');
+      if (nowOn) checkDaily();
+      viewPoomDetail(id); refreshStreak();
+      if (nowOn && !prefersReduce()) {
+        var mb = view.querySelector('[data-act="togglepoom"]'); if (mb) mb.classList.add('justdone');
+        var tg = view.querySelector('.ptrig'); if (tg) tg.classList.add('tgpop');
+      }
+    }
+    else if (act === 'video') {
+      var v = b.getAttribute('data-v');
+      b.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + v + '?rel=0&modestbranding=1&autoplay=1" title="Poomsae-video" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+      b.classList.add('playing'); b.removeAttribute('data-act');
+    }
+    else if (act === 'tellerToggle') tellerToggle();
+    else if (act === 'tellerReset') tellerReset();
+    else if (act === 'tellerSpeed') tellerSetSpeed(parseFloat(b.getAttribute('data-v')));
+    else if (act === 'tellerStep') tellerStep(parseInt(b.getAttribute('data-d'), 10));
+    else if (act === 'toggleinfo') {
+      var ip = document.querySelector('.infopanel');
+      if (ip) { var willOpen = ip.hasAttribute('hidden'); ip.toggleAttribute('hidden'); b.setAttribute('aria-expanded', willOpen ? 'true' : 'false'); }
+    }
+    else if (act === 'tellerLoop') tellerToggleLoop();
+    else if (act === 'backupCopy') doBackupCopy();
+    else if (act === 'backupRestore') doBackupRestore();
+    else if (act === 'flashflip') { flashState.flipped = !flashState.flipped; b.classList.toggle('flip', flashState.flipped); }
+    else if (act === 'flashnext') {
+      var knewC = b.getAttribute('data-k') === '1';
+      if (knewC && !prefersReduce()) {
+        var fc = view.querySelector('.flashcard');
+        if (fc) { pop(fc, 'knew'); setTimeout(function () { flashNext(true); }, 230); return; }
+      }
+      flashNext(knewC);
+    }
+    else if (act === 'flashretry') viewFlash();
+    else if (act === 'flashprev') flashPrev();
+    else if (act === 'flashexit') location.hash = '#/home';
+    else if (act === 'qopt') answerQuiz(+b.getAttribute('data-i'));
+    else if (act === 'qnext') { quizState.i++; quizState.answered = false; renderQuiz(); }
+    else if (act === 'qretry') viewQuiz();
+    else if (act === 'termtab') { termTab = b.getAttribute('data-k'); renderTermTabs(); renderTermTab(); window.scrollTo(0, 0); }
+    else if (act === 'hardterm') {
+      var hk = b.getAttribute('data-k');
+      var on = toggleHard(hk);
+      toast(on ? 'Bewaard als moeilijk' : 'Markering verwijderd');
+      var inTermen = !!document.getElementById('termtabs');
+      if (inTermen && termTab === 'hard') { renderTermTabs(); renderTermTab(); }
+      else {
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', on);
+        var row = b.closest('.trow, .stance'); if (row) row.classList.toggle('hard', on);
+        if (inTermen) renderTermTabs();
+        if (on) pop(b, 'pop');
+      }
+    }
+  });
+
+  /* ---------- Segmented control zonder route-herlaad (soepeler) ---------- */
+  // (seg gebruikt hash zodat terugknop werkt; hashchange re-rendert)
+
+  /* ---------- Install-prompt (A2HS) ---------- */
+  var deferred = null;
+  var bar = document.getElementById('installbar');
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault(); deferred = e;
+    if (localStorage.getItem('poom.install.dismissed') !== '1') bar.classList.add('show');
+  });
+  document.getElementById('installYes').addEventListener('click', function () {
+    bar.classList.remove('show');
+    if (deferred) { deferred.prompt(); deferred = null; }
+  });
+  document.getElementById('installNo').addEventListener('click', function () {
+    bar.classList.remove('show'); localStorage.setItem('poom.install.dismissed', '1');
+  });
+  window.addEventListener('appinstalled', function () { bar.classList.remove('show'); toast('Geïnstalleerd 🥋'); });
+
+  /* ---------- Swipe tussen tabbladen ---------- */
+  (function () {
+    var TABS = ['home', 'poomsae', 'techniek', 'termen', 'teller'];
+    var sx = 0, sy = 0, tracking = false;
+    view.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) { tracking = false; return; }
+      tracking = true; sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    }, { passive: true });
+    view.addEventListener('touchend', function (e) {
+      if (!tracking) return; tracking = false;
+      var t = e.changedTouches[0]; var dx = t.clientX - sx, dy = t.clientY - sy;
+      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 2) return;
+      var seg = parse(); var r = seg[0];
+      var i = TABS.indexOf(r); if (i < 0) return;
+      if (r === 'poomsae' && seg.length > 1) return;
+      var j = dx < 0 ? i + 1 : i - 1;
+      if (j < 0 || j >= TABS.length) return;
+      location.hash = '#/' + TABS[j];
+    }, { passive: true });
+  })();
+
+  /* ---------- Start ---------- */
+  function setAppbarH() {
+    var ab = document.querySelector('.appbar');
+    if (ab) document.documentElement.style.setProperty('--appbar-h', Math.round(ab.getBoundingClientRect().height) + 'px');
+  }
+  setAppbarH();
+  window.addEventListener('resize', setAppbarH);
+  window.addEventListener('load', setAppbarH);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(setAppbarH);
+  window.addEventListener('hashchange', go);
+  if (!location.hash) location.replace('#/home');
+  go();
+})();
