@@ -2816,8 +2816,27 @@
     o.connect(g); g.connect(ac.destination);
     o.start(t0); o.stop(t0+dur+0.03);
   }
+  /* iOS: make Web-Audio effect sounds play through the silent/ring switch, the
+     same way the timer voiceover (speechSynthesis) already does. audioSession
+     'playback' routes our sound to the media session so the chimes are audible
+     even with the ringer off. */
+  function sfxSession(){ try{ if(navigator.audioSession && navigator.audioSession.type!=='playback'){ navigator.audioSession.type='playback'; } }catch(e){} }
+  /* Unlock + resume on the first user gesture (fires on pointerdown/touchend,
+     before the click that plays a sound); re-resume on later gestures because
+     iOS auto-suspends the context after inactivity/backgrounding. */
+  var _sfxPrimed=false;
+  function sfxUnlock(){
+    var ac=sfxCtx(); if(!ac) return;
+    sfxSession();
+    if(ac.state==='suspended'){ try{ ac.resume(); }catch(e){} }
+    if(!_sfxPrimed){ try{ var b=ac.createBuffer(1,1,22050), s=ac.createBufferSource(); s.buffer=b; s.connect(ac.destination); s.start(0); }catch(e){} _sfxPrimed=true; }
+  }
+  ['pointerdown','touchend','mousedown','keydown'].forEach(function(ev){
+    try{ window.addEventListener(ev, sfxUnlock, {capture:true, passive:true}); }catch(e){ window.addEventListener(ev, sfxUnlock, true); }
+  });
   function sfx(name){
     var ac=sfxCtx(); if(!ac) return;
+    sfxSession();
     if(ac.state==='suspended'){ try{ ac.resume(); }catch(e){} }
     try{
       if(name==='check'){ sfxTone(1760,0,0.045,'triangle',0.08); sfxTone(1046.5,0.02,0.10,'sine',0.17); sfxTone(1568,0.10,0.22,'sine',0.17); sfxTone(2093,0.10,0.15,'sine',0.05); }
