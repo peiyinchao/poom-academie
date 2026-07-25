@@ -34,7 +34,23 @@ window.CURRICULUM = {
     "Je grootste tegenstander ben jij van gisteren.",
     "Herhaling maakt de meester.",
     "Moed is doorgaan als het moeilijk wordt.",
-    "Een rustige geest draagt een sterke stand."
+    "Een rustige geest draagt een sterke stand.",
+    "Techniek verslaat kracht.",
+    "Snelheid komt uit ontspanning, niet uit spanning.",
+    "Focus op vandaag; je band volgt vanzelf.",
+    "Je band kleurt met zweet, niet met tijd.",
+    "Val zeven keer, sta acht keer op.",
+    "Geduld is ook een techniek.",
+    "Beheers jezelf, dan beheers je de wedstrijd.",
+    "Een kihap komt uit je buik, niet uit je keel.",
+    "Nederigheid maakt ruimte om te groeien.",
+    "Balans begint bij je adem.",
+    "Eerst begrijpen, dan pas versnellen.",
+    "Doorzetten is belangrijker dan winnen.",
+    "Een buiging kost niets en zegt alles.",
+    "Oefen de basis tot de basis jou oefent.",
+    "Wie zichzelf overwint, is pas echt sterk.",
+    "Zachtheid overwint hardheid."
   ],
 
   /* -------------------- POOMSAE: Taegeuk 1–8 -------------------- */

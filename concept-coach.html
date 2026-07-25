@@ -93,7 +93,8 @@
   .greet .hello{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:42px;
     letter-spacing:-.015em;line-height:.98;color:var(--ink)}
   .greet .hello .wave{-webkit-text-fill-color:initial}
-  .greet .line{margin-top:8px;font-size:15px;line-height:1.5;color:#48505E;max-width:32ch}
+  .greet .line{margin-top:8px;font-size:15px;line-height:1.5;color:#48505E;max-width:32ch;
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;min-height:4.5em}
 
   /* section eyebrow */
   .eye{display:flex;align-items:center;gap:10px;margin:26px 2px 12px}
@@ -174,11 +175,15 @@
     display:inline-flex;align-items:center;gap:5px}
   .ribbon .rb-foot .go svg{width:14px;height:14px}
 
-  .greet .gday{margin-top:11px;padding-left:16px;position:relative}
+  .greet .gday{margin-top:11px;padding-left:16px;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .greet .gday::before{content:'';position:absolute;left:0;top:.18em;bottom:.18em;width:6px;
     border-radius:3px;background:var(--gd,var(--el));opacity:.9}
   .greet .gday q{font-style:italic;font-weight:600;font-size:14.5px;line-height:1.5;
     color:var(--gray);quotes:'“' '”'}
+  .greet .gday.gflip q{animation:gflip .42s cubic-bezier(.22,1,.36,1)}
+  .greet .gday.gflip::before{animation:gflipbar .42s ease}
+  @keyframes gflip{0%{opacity:0;transform:translateY(7px)}100%{opacity:1;transform:translateY(0)}}
+  @keyframes gflipbar{0%{transform:scaleY(.2);opacity:.4}100%{transform:scaleY(1);opacity:.9}}
 
   /* ---------- Journey map ---------- */
   .jhead{padding:16px 0 4px}
@@ -1762,11 +1767,11 @@
       var cls = DONE[id] ? 'on' : (id===CUR ? 'cur' : '');
       return '<i class="'+cls+'"></i>';
     }).join('');
-    var quote = (C.quotes && C.quotes.length) ? C.quotes[new Date().getDate() % C.quotes.length] : 'Elke dag een beetje sterker.';
+    var quote = curQuote();
     var wfSet = WEEK_FOCUS.length>0;
     var greetLine = wfSet
       ? 'Deze week letten we extra op <b>'+esc(weekFocusText())+'</b>. Vandaag maken we <b>'+esc(f.korean)+'</b> sterker.'
-      : 'Je bent goed op weg. Vandaag maken we <b>'+esc(f.korean)+'</b> sterker — klaar voor je training?';
+      : 'Vandaag maken we <b>'+esc(f.korean)+'</b> sterker — klaar voor je training?';
     var checkin = wfSet
       ? '<div class="checkin set" data-act="reflect">'+
           '<span class="ci-t"><small>'+IC.target+' Deze week werk je aan</small><b>'+esc(weekFocusText())+'</b></span>'+
@@ -1803,7 +1808,7 @@
         '<div class="greet">'+
           '<div class="greet-txt">'+
             '<div class="hello">'+greetingWord()+',<br>Jayden</div>'+
-            '<div class="gday" style="--gd:'+beltStroke(geupInfo(GEUP_I))+'"><q>'+esc(quote)+'</q></div>'+
+            '<div class="gday" data-act="shufflequote" title="Schud je toestel voor een nieuwe wijsheid" style="--gd:'+beltStroke(geupInfo(GEUP_I))+'"><q>'+esc(quote)+'</q></div>'+
             '<div class="line">'+greetLine+'</div>'+
           '</div>'+
           '<span class="greet-masc" data-act="mascwink" title="Tik op me"><span class="gm-b">'+
@@ -2801,6 +2806,43 @@
   var OT_BASE = 850, OT_READY = 3, OT_DRAIN = 520;
   var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, loop:false, _lastFrac:0, _wrapT:null };
   function buzz(ms){ if(navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
+
+  /* ---- Daily wisdom: shake (or tap) the greeting quote to draw a new one ---- */
+  function dailyQuote(){ var q=C.quotes||[]; return q.length ? q[new Date().getDate()%q.length] : 'Elke dag een beetje sterker.'; }
+  var _quote=null;                       // current quote (null = today's default)
+  function curQuote(){ return _quote || dailyQuote(); }
+  function shuffleQuote(){
+    var q=C.quotes||[]; if(!q.length) return;
+    if(q.length>1){ var cur=curQuote(), i; do{ i=Math.floor(Math.random()*q.length); }while(q[i]===cur); _quote=q[i]; }
+    else _quote=q[0];
+    var el=document.querySelector('.greet .gday');
+    if(el){ var qq=el.querySelector('q'); if(qq) qq.textContent=_quote;
+      el.classList.remove('gflip'); void el.offsetWidth; el.classList.add('gflip'); }
+    buzz(10);
+  }
+  /* Shake detection → new quote. iOS 13+ gates DeviceMotion behind a permission
+     prompt that must be requested from a user gesture, so we ask once on the first
+     tap (via sfxUnlock). Tapping the quote works everywhere as a fallback. */
+  var _shakeOn=false, _shakeAsked=false, _lastShake=0, _accPrev=null;
+  function onShakeMotion(e){
+    var a=e.accelerationIncludingGravity||e.acceleration; if(!a||a.x==null) return;
+    if(_accPrev){
+      var d=Math.abs(a.x-_accPrev.x)+Math.abs(a.y-_accPrev.y)+Math.abs(a.z-_accPrev.z);
+      var now=Date.now(), g=document.querySelector('.greet .gday');
+      if(d>18 && now-_lastShake>1400 && g && g.offsetParent!==null){ _lastShake=now; shuffleQuote(); }
+    }
+    _accPrev={x:a.x,y:a.y,z:a.z};
+  }
+  function enableShake(){
+    if(_shakeOn||_shakeAsked) return; _shakeAsked=true;
+    try{
+      if(typeof DeviceMotionEvent!=='undefined' && typeof DeviceMotionEvent.requestPermission==='function'){
+        DeviceMotionEvent.requestPermission().then(function(r){ if(r==='granted'){ window.addEventListener('devicemotion',onShakeMotion); _shakeOn=true; } }).catch(function(){});
+      } else if(typeof DeviceMotionEvent!=='undefined'){
+        window.addEventListener('devicemotion',onShakeMotion); _shakeOn=true;
+      }
+    }catch(e){}
+  }
   /* Lightweight offline sound-effects (synthesised via Web Audio — no asset files needed).
      Context is created lazily inside a user gesture so autoplay policies are satisfied. */
   var _sfxCtx=null;
@@ -2830,18 +2872,54 @@
     sfxSession();
     if(ac.state==='suspended'){ try{ ac.resume(); }catch(e){} }
     if(!_sfxPrimed){ try{ var b=ac.createBuffer(1,1,22050), s=ac.createBufferSource(); s.buffer=b; s.connect(ac.destination); s.start(0); }catch(e){} _sfxPrimed=true; }
+    enableShake();
   }
   ['pointerdown','touchend','mousedown','keydown'].forEach(function(ev){
     try{ window.addEventListener(ev, sfxUnlock, {capture:true, passive:true}); }catch(e){ window.addEventListener(ev, sfxUnlock, true); }
   });
+  /* Real recorded sound effects (MP3). We decode them into the SAME AudioContext
+     used for the synth tones, so they inherit the audioSession='playback' routing
+     and stay audible with the iPhone ring/silent switch OFF (like the timer voice).
+     Until a sample is decoded we fall back to the synth tones below. */
+  var SFX_SAMPLES={
+    check:   'assets/sounds/freesound_community-pencil_check_mark_2-105940.mp3',
+    complete:'assets/sounds/updatepelgo-success-221935.mp3',
+    chime:   'assets/sounds/soundshelfstudio-mission-complete-chime-534595.mp3'
+  };
+  var SFX_GAIN={check:0.95, complete:0.85, chime:0.85};
+  var _sfxBuf={}, _sfxLoading={};
+  function sfxLoad(name){
+    var ac=sfxCtx(); if(!ac) return;
+    if(_sfxBuf[name]!==undefined || _sfxLoading[name]) return;
+    var url=SFX_SAMPLES[name]; if(!url) return;
+    _sfxLoading[name]=true;
+    fetch(url).then(function(r){ return r.arrayBuffer(); }).then(function(ab){
+      ac.decodeAudioData(ab, function(buf){ _sfxBuf[name]=buf; _sfxLoading[name]=false; },
+        function(){ _sfxBuf[name]=null; _sfxLoading[name]=false; });
+    }).catch(function(){ _sfxBuf[name]=null; _sfxLoading[name]=false; });
+  }
+  function sfxPreload(){ for(var k in SFX_SAMPLES){ sfxLoad(k); } }
+  function sfxSample(name, gain){
+    var ac=sfxCtx(); if(!ac) return false;
+    var buf=_sfxBuf[name]; if(!buf){ sfxLoad(name); return false; }
+    try{
+      var src=ac.createBufferSource(), g=ac.createGain();
+      src.buffer=buf; g.gain.value=(gain!=null?gain:(SFX_GAIN[name]||0.85));
+      src.connect(g); g.connect(ac.destination); src.start(0);
+      return true;
+    }catch(e){ return false; }
+  }
+  // Warm the sample buffers shortly after load so even the first check has its
+  // recorded sound ready (the context stays suspended until the first gesture).
+  setTimeout(function(){ try{ sfxPreload(); }catch(e){} }, 1200);
   function sfx(name){
     var ac=sfxCtx(); if(!ac) return;
     sfxSession();
     if(ac.state==='suspended'){ try{ ac.resume(); }catch(e){} }
     try{
-      if(name==='check'){ sfxTone(1760,0,0.045,'triangle',0.08); sfxTone(1046.5,0.02,0.10,'sine',0.17); sfxTone(1568,0.10,0.22,'sine',0.17); sfxTone(2093,0.10,0.15,'sine',0.05); }
+      if(name==='check'){ if(!sfxSample('check')){ sfxTone(1760,0,0.045,'triangle',0.08); sfxTone(1046.5,0.02,0.10,'sine',0.17); sfxTone(1568,0.10,0.22,'sine',0.17); sfxTone(2093,0.10,0.15,'sine',0.05); } }
       else if(name==='uncheck'){ sfxTone(420,0,0.11,'sine',0.12); }
-      else if(name==='complete'){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); }
+      else if(name==='complete'){ if(!sfxSample('complete')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
     }catch(e){}
   }
   function otTempoLabel(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].s+'<span class="ot-tx">×</span>'; } return '1<span class="ot-tx">×</span>'; }
@@ -3179,6 +3257,7 @@
     else if(a==='rclose'){ closeReflection(); }
     else if(a==='mission'){ toggleMission(act.getAttribute('data-id')); }
     else if(a==='mascwink'){ mascWink(); }
+    else if(a==='shufflequote'){ shuffleQuote(); }
   });
 
   function handleAnswer(btn){
