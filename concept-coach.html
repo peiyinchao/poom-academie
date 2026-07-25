@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4F1EA">
 <title>Poom Academy — Concept: Je Reis (smart trainer)</title>
 <link rel="stylesheet" href="fonts/inter.css">
 <link rel="stylesheet" href="fonts/poster.css">
@@ -2398,6 +2399,15 @@
   }
   function examRetry(){ closeExam(); openExam(); }
 
+  // Tint the iOS Safari top bar to match the current screen. The Vandaag/handboek
+  // screens are cream (--page); the Oefentimer is its element-coloured gradient, so
+  // we point the theme-color at that gradient's top (--el) while the timer is open.
+  function setTopBar(color){
+    var m=document.querySelector('meta[name="theme-color"]'); if(!m) return;
+    var c=(color||getComputedStyle(document.documentElement).getPropertyValue('--page')||'#F4F1EA');
+    m.setAttribute('content', String(c).trim());
+  }
+
   // Standalone practice timer — reachable any time via the round nav button (reuses the pt-* engine)
   function openTimer(){
     if(timerScreen) return;
@@ -2405,6 +2415,7 @@
     el.className='session timerscreen'; el.id='timerscreen';
     applyTheme(el, CUR);
     el.setAttribute('data-el', CUR);   // element-themed background (sky / fire / water / earth …)
+    setTopBar(th(CUR).el);             // match the iOS top bar to the timer's gradient
     var tOpts = OT_TEMPOS.map(function(t){
       return '<button class="ot-topt'+(t.v===otState.speed?' on':'')+'" data-act="otspeed" data-v="'+t.v+'"><span class="ot-tlab">'+t.s+'<span class="ot-tx">×</span></span></button>';
     }).join('');
@@ -2469,6 +2480,7 @@
   function closeTimer(){
     if(!timerScreen) return;
     otStop();
+    setTopBar();                       // restore the cream top bar
     timerScreen.classList.remove('show');
     fnav.classList.remove('hide');
     var s = timerScreen; timerScreen=null;
