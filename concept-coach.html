@@ -3491,7 +3491,9 @@
   ];
   // ---- layout variants (compare on device with ?compare=1 or ?ux=accordion|swipe|page) ----
   var _ciUxParam=(function(){ var m=/[?&]ux=(page|accordion|swipe)/.exec(location.search||''); return m?m[1]:null; })();
-  var _ciCompare=/[?&](compare=1|ux=)/.test(location.search||'');
+  // Comparison phase: show the layout switcher by default so it can be tried on device
+  // without typing a URL param. Add ?compare=0 to hide it. (Remove once a default is chosen.)
+  var _ciCompare=!/[?&]compare=0/.test(location.search||'');
   var CI_UX=_ciUxParam || (function(){ try{ return localStorage.getItem('ciUx')||'page'; }catch(e){ return 'page'; } })();
   function setCiUx(u){ CI_UX=u; try{ localStorage.setItem('ciUx',u); }catch(e){} }
   function optInfo(arr,r){ for(var i=0;i<arr.length;i++) if(arr[i].r===r) return arr[i]; return null; }
