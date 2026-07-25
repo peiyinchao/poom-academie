@@ -2870,11 +2870,11 @@
     o.connect(g); g.connect(ac.destination);
     o.start(t0); o.stop(t0+dur+0.03);
   }
-  /* iOS: make Web-Audio effect sounds play through the silent/ring switch, the
-     same way the timer voiceover (speechSynthesis) already does. audioSession
-     'playback' routes our sound to the media session so the chimes are audible
-     even with the ringer off. */
-  function sfxSession(){ try{ if(navigator.audioSession && navigator.audioSession.type!=='playback'){ navigator.audioSession.type='playback'; } }catch(e){} }
+  /* iOS: use the "ambient" audio session for our effect sounds. Ambient mixes with
+     other audio and — crucially — is silenced by the ring/silent switch and never
+     registers as "now playing", so checking a box no longer wakes the Dynamic Island.
+     (The spoken timer countdown uses speechSynthesis, which stays audible regardless.) */
+  function sfxSession(){ try{ if(navigator.audioSession && navigator.audioSession.type!=='ambient'){ navigator.audioSession.type='ambient'; } }catch(e){} }
   /* Unlock + resume on the first user gesture (fires on pointerdown/touchend,
      before the click that plays a sound); re-resume on later gestures because
      iOS auto-suspends the context after inactivity/backgrounding. */
@@ -2890,8 +2890,8 @@
     try{ window.addEventListener(ev, sfxUnlock, {capture:true, passive:true}); }catch(e){ window.addEventListener(ev, sfxUnlock, true); }
   });
   /* Real recorded sound effects (MP3). We decode them into the SAME AudioContext
-     used for the synth tones, so they inherit the audioSession='playback' routing
-     and stay audible with the iPhone ring/silent switch OFF (like the timer voice).
+     used for the synth tones, so they share the ambient audio session (they follow
+     the iPhone ring/silent switch and never register as now-playing media).
      Until a sample is decoded we fall back to the synth tones below. */
   var SFX_SAMPLES={
     check:   'assets/sounds/freesound_community-pencil_check_mark_2-105940.mp3',
