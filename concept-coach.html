@@ -768,12 +768,20 @@
   .wfchip .em{font-size:14px}
 
   /* ---- Reflection overlay ---- */
-  .rate{display:grid;gap:11px;margin-top:22px}
-  .rate button{display:flex;align-items:center;gap:15px;background:var(--surface);border:1.5px solid var(--line);
-    border-radius:16px;padding:16px 18px;font-size:16.5px;font-weight:600;color:var(--ink);text-align:left;transition:.16s}
-  .rate button .em{font-size:26px;line-height:1;transition:transform .16s}
-  .rate button.sel{border-color:var(--el);background:var(--tint)}
-  .rate button.sel .em{transform:scale(1.12)}
+  .rate{display:grid;gap:12px;margin-top:22px}
+  .rateb{display:flex;align-items:center;gap:14px;width:100%;background:var(--surface);border:1.5px solid var(--line);
+    border-radius:16px;padding:15px 16px;font-size:16px;font-weight:500;color:var(--ink);text-align:left;
+    transition:transform .14s ease, border-color .16s ease, background .16s ease}
+  .rateb .re{font-size:26px;line-height:1;flex:none;transition:transform .16s}
+  .rateb .rtxt{flex:1;min-width:0;line-height:1.34}
+  .rateb .rtxt b{font-weight:800}
+  .rateb .rok{width:24px;height:24px;flex:none;border-radius:50%;background:var(--el);color:#fff;
+    display:grid;place-items:center;opacity:0;transform:scale(.6);transition:opacity .18s ease, transform .18s ease}
+  .rateb .rok svg{width:14px;height:14px}
+  .rateb.on{border-color:var(--el);background:var(--tint)}
+  .rateb.on .re{transform:scale(1.12)}
+  .rateb.on .rok{opacity:1;transform:scale(1)}
+  .rateb:active{transform:scale(.98)}
   .fchips{display:flex;flex-wrap:wrap;gap:11px;margin-top:22px}
   .fchip{display:inline-flex;align-items:center;gap:9px;background:var(--surface);border:1.5px solid var(--line);
     border-radius:14px;padding:13px 16px;font-size:15px;font-weight:600;color:var(--ink);transition:.16s}
@@ -790,6 +798,18 @@
   .rsummary{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
   .rsummary .rs{background:var(--tint);border:1px solid var(--elline);border-radius:12px;padding:11px 15px;
     font-weight:700;color:var(--deep);font-size:15px}
+  /* Check-in header: calm 64px controls (match the timer) with the progress bar centred between
+     them. Back sits left, close right; the back slot stays reserved (visibility) so the bar
+     never shifts between steps. Scoped to .reflect so the guided-training header is untouched. */
+  .reflect .shead{align-items:center;gap:8px}
+  .reflect .shead .sx{order:0;width:64px;height:64px;flex:none;margin:0;border:0;border-radius:50%;
+    background:transparent;color:var(--gray);display:grid;place-items:center;
+    transition:transform .16s ease, background .2s ease, color .2s ease}
+  .reflect .shead .sx:hover{background:rgba(20,23,18,.05);color:var(--ink)}
+  .reflect .shead .sx:active{transform:scale(.9)}
+  .reflect .shead .sx svg{width:24px;height:24px}
+  .reflect .shead .sb{color:var(--ink)}
+  .reflect .shead .reflectbar{flex:1;margin:0}
 
   /* ===== Technique vocabulary ===== */
   .tveye{display:flex;align-items:center;gap:12px;margin:16px 2px 0;
@@ -1573,6 +1593,30 @@
     if(labels.length<=2) return labels.join(' · ');
     return labels.slice(0,2).join(' · ')+' +'+(labels.length-2);
   }
+  var WEEK_MOOD = null;        // goal-phase feeling → weekly challenge level
+  var WEEK_HELP = null;        // reflect-phase: were the suggested trainings helpful
+  var weekGoalSet = false;     // goal flow completed this week
+  var weekReflected = false;   // reflection completed this week
+  // ISO-8601 week number (weeks start Monday; week 1 holds the year's first Thursday)
+  function weekNo(dt){
+    var d = dt ? new Date(dt.getTime()) : new Date();
+    d.setHours(0,0,0,0);
+    d.setDate(d.getDate() + 3 - ((d.getDay()+6)%7));
+    var wk1 = new Date(d.getFullYear(), 0, 4);
+    return 1 + Math.round(((d - wk1)/864e5 - 3 + ((wk1.getDay()+6)%7))/7);
+  }
+  // Goal-setting early in the week (Mon–Fri), reflection at the end (Sat–Sun).
+  // Preview either flow on any day with ?ci=goal or ?ci=reflect in the URL.
+  var _ciOverride = (function(){ var m=/[?&]ci=(goal|reflect)/.exec(location.search||''); return m?m[1]:null; })();
+  function weekPhase(){ if(_ciOverride) return _ciOverride; var wd=new Date().getDay(); return (wd===0||wd===6)?'reflect':'goal'; }
+  var MOOD_OPTS = [
+    {r:'fit', em:'💪', t:'Fit', s:'ik heb er zin in', ch:'pittig'},
+    {r:'ok',  em:'🙂', t:'Prima', s:'gewoon lekker bezig', ch:'normaal'},
+    {r:'moe', em:'😌', t:'Wat moe', s:'even rustig aan', ch:'rustig'}
+  ];
+  var CHALLENGE = { pittig:{label:'Pittig', em:'🔥'}, normaal:{label:'Normaal', em:'⚡'}, rustig:{label:'Rustig', em:'🌿'} };
+  function moodInfo(r){ for(var i=0;i<MOOD_OPTS.length;i++) if(MOOD_OPTS[i].r===r) return MOOD_OPTS[i]; return null; }
+  function weekChallenge(){ var m=moodInfo(WEEK_MOOD); return m?CHALLENGE[m.ch]:null; }
 
   /* ---- Training van vandaag: missie-assemblage (vervangt de losse dagdoel) ----
      8e t/m 1e geup volgen de Poom 1-eisen; richting 2e poom → zet POOM = "2".
@@ -1773,13 +1817,26 @@
     var greetLine = wfSet
       ? 'Deze week letten we extra op <b>'+esc(weekFocusText())+'</b>. Vandaag maken we <b>'+esc(f.korean)+'</b> sterker.'
       : 'Vandaag maken we <b>'+esc(f.korean)+'</b> sterker — klaar voor je training?';
-    var checkin = wfSet
-      ? '<div class="checkin set" data-act="reflect">'+
-          '<span class="ci-t"><small>'+IC.target+' Deze week werk je aan</small><b>'+esc(weekFocusText())+'</b></span>'+
-          '<span class="ci-cta">Wijzig '+IC.chev+'</span></div>'
-      : '<div class="checkin due" data-act="reflect">'+
-          '<span class="ci-t"><small><span class="ci-compass" aria-hidden="true"></span> Wekelijkse check-in</small><b>Waar wil je deze week extra op letten?</b></span>'+
-          '<span class="dot"></span></div>';
+    var ciWk = 'wk '+weekNo();
+    var checkin;
+    if(weekPhase()==='reflect'){
+      checkin = weekReflected
+        ? '<div class="checkin set" data-act="cireflect">'+
+            '<span class="ci-t"><small>'+IC.check+' Check-in · '+ciWk+'</small><b>Week afgerond — mooi gedaan!</b></span>'+
+            '<span class="ci-cta">Bekijk '+IC.chev+'</span></div>'
+        : '<div class="checkin due" data-act="cireflect">'+
+            '<span class="ci-t"><small><span class="ci-compass" aria-hidden="true"></span> Wekelijkse check-in · '+ciWk+'</small><b>Hoe ging je training deze week?</b></span>'+
+            '<span class="dot"></span></div>';
+    } else {
+      var ciCh = weekChallenge();
+      checkin = wfSet
+        ? '<div class="checkin set" data-act="cigoal">'+
+            '<span class="ci-t"><small>'+IC.target+' Weekdoel · '+ciWk+(ciCh?' · '+ciCh.em+' '+ciCh.label:'')+'</small><b>'+esc(weekFocusText())+'</b></span>'+
+            '<span class="ci-cta">Wijzig '+IC.chev+'</span></div>'
+        : '<div class="checkin due" data-act="cigoal">'+
+            '<span class="ci-t"><small><span class="ci-compass" aria-hidden="true"></span> Wekelijkse check-in · '+ciWk+'</small><b>Zet je doel voor deze week</b></span>'+
+            '<span class="dot"></span></div>';
+    }
     var missions = todaysMissions();
     var doneN = missions.filter(function(m){return missionDone[m.id];}).length;
     var missionCols = missions.map(function(m,i){
@@ -3253,7 +3310,8 @@
     else if(a==='say'){ speak(act.getAttribute('data-ko'), act.getAttribute('data-stop')?act:act); }
     else if(a==='flip'){ var fl=session.querySelector('#flip'); if(fl) fl.classList.toggle('flipped'); }
     else if(a==='answer'){ handleAnswer(act); }
-    else if(a==='reflect'){ openReflection(); }
+    else if(a==='cigoal'){ openCheckin('goal'); }
+    else if(a==='cireflect'){ openCheckin('reflect'); }
     else if(a==='beltsheet'){ openBeltSheet(); }
     else if(a==='beltsheetclose'){ closeBeltSheet(); }
     else if(a==='opencat'){ openCat(act.getAttribute('data-groep')); }
@@ -3262,11 +3320,13 @@
     else if(a==='examchk'){ toggleExamChk(act.getAttribute('data-k')); }
     else if(a==='openhb'){ openHb(act.getAttribute('data-hb')); }
     else if(a==='hbclose'){ closeHb(); }
-    else if(a==='rate'){ rfRating=act.getAttribute('data-r'); renderReflect(); }
+    else if(a==='pickmood'){ rfMood=act.getAttribute('data-r'); ciSel(act); setTimeout(ciAdvance,220); }
+    else if(a==='pickwent'){ rfRating=act.getAttribute('data-r'); ciSel(act); setTimeout(ciAdvance,220); }
+    else if(a==='pickhelp'){ rfHelp=act.getAttribute('data-r'); ciSel(act); setTimeout(ciAdvance,220); }
     else if(a==='pickfocus'){ togglePick(act.getAttribute('data-id')); syncFocusChips(); }
-    else if(a==='rnext'){ rfIndex++; renderReflect(); }
-    else if(a==='rdone'){ closeReflection(); showScreen('today'); }
-    else if(a==='rclose'){ closeReflection(); }
+    else if(a==='rnext'){ ciAdvance(); }
+    else if(a==='rback'){ ciBack(); }
+    else if(a==='rclose'){ closeCheckin(); }
     else if(a==='mission'){ toggleMission(act.getAttribute('data-id')); }
     else if(a==='mascwink'){ mascWink(); }
     else if(a==='shufflequote'){ shuffleQuote(); }
@@ -3320,8 +3380,8 @@
     }
   }
 
-  /* ---- weekly reflection overlay ---- */
-  var reflect=null, rfIndex=0, rfSteps=['rate','focus','done'], rfRating=null, rfPick=[];
+  /* ---- weekly check-in overlay (goal-setting Mon–Fri · reflective Sat–Sun) ---- */
+  var reflect=null, rfIndex=0, rfMode='goal', rfSteps=[], rfRating=null, rfPick=[], rfMood=null, rfHelp=null;
   function togglePick(id){
     var i = rfPick.indexOf(id);
     if(i>=0){ rfPick.splice(i,1); }
@@ -3342,49 +3402,81 @@
       ? '<button class="nextbtn" data-act="rnext">Klaar '+IC.check+'</button>'
       : '<button class="nextbtn ghost" disabled style="opacity:.4">Kies minstens 1</button>';
   }
-  function openReflection(){
-    rfIndex = WEEK_FOCUS.length ? 0 : 0;
-    rfRating = WEEK_RATING; rfPick = WEEK_FOCUS.slice();
+  // single-choice option as a flowing sentence: "**Sterk**, het ging lekker deze week"
+  function ciOpt(o, on, act){
+    return '<button class="rateb'+(on?' on':'')+'" data-act="'+act+'" data-r="'+o.r+'">'+
+      '<span class="re">'+o.em+'</span>'+
+      '<span class="rtxt"><b>'+o.t+'</b>, '+o.s+'</span>'+
+      '<span class="rok">'+IC.check+'</span></button>';
+  }
+  function ciSel(el){
+    var wrap=el&&el.parentNode; if(!wrap) return;
+    [].forEach.call(wrap.querySelectorAll('.rateb'), function(b){ b.classList.toggle('on', b===el); });
+  }
+  var WENT_OPTS = [
+    {r:'sterk',  em:'💪', t:'Sterk', s:'het ging lekker deze week'},
+    {r:'oke',    em:'🙂', t:'Oké', s:'een paar dingen waren lastig'},
+    {r:'pittig', em:'😅', t:'Pittig', s:'ik wil meer oefenen'}
+  ];
+  var HELP_OPTS = [
+    {r:'ja',     em:'👍', t:'Ja', s:'precies goed'},
+    {r:'beetje', em:'🤏', t:'Een beetje', s:'sommige wel'},
+    {r:'nee',    em:'👎', t:'Niet echt', s:'liever iets anders'}
+  ];
+  function openCheckin(mode){
+    rfMode = (mode==='goal'||mode==='reflect') ? mode : weekPhase();
+    rfSteps = rfMode==='goal' ? ['mood','focus'] : ['went','helpful'];
+    rfIndex = 0;
+    rfRating = WEEK_RATING; rfPick = WEEK_FOCUS.slice(); rfMood = WEEK_MOOD; rfHelp = WEEK_HELP;
     reflect = document.createElement('div');
     reflect.className='session reflect'; reflect.id='reflect';
     applyTheme(reflect, CUR);
     reflect.innerHTML =
-      '<div class="shead"><button class="sx" data-act="rclose" aria-label="Sluiten">'+IC.x+'</button>'+
-        '<div class="sprog reflectbar"><i id="rfbar"></i></div></div>'+
+      '<div class="shead">'+
+        '<button class="sx sb" data-act="rback" aria-label="Vorige vraag">'+IC.back+'</button>'+
+        '<div class="sprog reflectbar"><i id="rfbar"></i></div>'+
+        '<button class="sx" data-act="rclose" aria-label="Sluiten">'+IC.x+'</button>'+
+      '</div>'+
       '<div class="sbody" id="rfbody"></div>'+
       '<div class="sfoot" id="rffoot"></div>';
     stage.appendChild(reflect);
     fnav.classList.add('hide');
     requestAnimationFrame(function(){ reflect.classList.add('show'); });
-    renderReflect();
+    renderCheckin();
   }
-  function closeReflection(){
+  function closeCheckin(){
     if(!reflect) return;
     reflect.classList.remove('show');
     var r=reflect; reflect=null;
     setTimeout(function(){ if(r&&r.parentNode) r.parentNode.removeChild(r); }, 300);
     fnav.classList.remove('hide');
   }
-  function renderReflect(){
+  function ciSave(){
+    if(rfMode==='goal'){ WEEK_FOCUS = rfPick.slice(); WEEK_MOOD = rfMood; weekGoalSet = true; }
+    else { WEEK_RATING = rfRating; WEEK_HELP = rfHelp; weekReflected = true; }
+  }
+  // Selecting the last step saves and drops straight back to Vandaag (no extra "done" step).
+  function ciAdvance(){
+    if(!reflect) return;
+    if(rfIndex < rfSteps.length-1){ rfIndex++; renderCheckin(); }
+    else { ciSave(); closeCheckin(); showScreen('today'); if(rfMode==='goal') confetti(); }
+  }
+  function ciBack(){
+    if(!reflect) return;
+    if(rfIndex>0){ rfIndex--; renderCheckin(); }
+    else { closeCheckin(); }
+  }
+  function renderCheckin(){
     if(!reflect) return;
     var body=reflect.querySelector('#rfbody'), foot=reflect.querySelector('#rffoot');
-    var bar=reflect.querySelector('#rfbar');
+    var bar=reflect.querySelector('#rfbar'), back=reflect.querySelector('[data-act="rback"]');
     var step=rfSteps[rfIndex];
-    var html='', footHtml='';
-    if(step==='rate'){
-      var opts=[{r:'sterk',em:'💪',t:'Sterk',s:'Ging lekker deze week'},
-                {r:'oke',em:'🙂',t:'Oké',s:'Een paar dingen lastig'},
-                {r:'pittig',em:'😅',t:'Pittig',s:'Ik wil meer oefenen'}];
-      html='<div class="stepin">'+sHead('WEKELIJKSE CHECK-IN','Hoe voelde je training deze week?','Eerlijk zijn helpt je coach je beter te helpen.')+
-        '<div class="rate">'+opts.map(function(o){
-          return '<button class="rateb'+(rfRating===o.r?' on':'')+'" data-act="rate" data-r="'+o.r+'">'+
-            '<span class="re">'+o.em+'</span><span class="rt">'+o.t+'</span><span class="rs">'+o.s+'</span></button>';
-        }).join('')+'</div></div>';
-      footHtml = rfRating
-        ? '<button class="nextbtn" data-act="rnext">Volgende '+IC.arrow+'</button>'
-        : '<button class="nextbtn ghost" disabled style="opacity:.4">Kies er één</button>';
+    var wk=weekNo(), html='', footHtml='';
+    if(step==='mood'){
+      html='<div class="stepin">'+sHead('WEEKDOEL · WK '+wk,'Hoe voel je je deze week?','Zo stemt je coach de uitdaging af — kies er één.')+
+        '<div class="rate">'+MOOD_OPTS.map(function(o){ return ciOpt(o, rfMood===o.r, 'pickmood'); }).join('')+'</div></div>';
     } else if(step==='focus'){
-      html='<div class="stepin">'+sHead('JOUW WEEKDOEL','Waar wil je extra op letten?','Kies er 1 tot 5. Je coach zet dit deze week centraal.')+
+      html='<div class="stepin">'+sHead('JOUW WEEKDOEL','Waar wil je op letten?','Kies er 1 tot 5. Je coach zet dit deze week centraal.')+
         '<div class="fchips">'+FOCUS_AREAS.map(function(fa){
           var on=rfPick.indexOf(fa.id)>=0;
           return '<button class="fchip'+(on?' on':'')+'" data-act="pickfocus" data-id="'+fa.id+'">'+
@@ -3396,18 +3488,16 @@
       footHtml = rfPick.length
         ? '<button class="nextbtn" data-act="rnext">Klaar '+IC.check+'</button>'
         : '<button class="nextbtn ghost" disabled style="opacity:.4">Kies minstens 1</button>';
-    } else {
-      WEEK_FOCUS = rfPick.slice(); WEEK_RATING = rfRating;
-      html='<div class="stepin"><div class="done"><div class="rdone-ic">'+sealSVG('週')+'</div>'+
-        '<h2>Weekdoel gezet!</h2>'+
-        '<p class="sub">Je coach houdt deze week extra rekening met jouw keuze.</p>'+
-        '<div class="rsummary"><span class="rs-k">Deze week werk je aan</span><b>'+esc(weekFocusText())+'</b></div>'+
-        '</div></div>';
-      footHtml = '<button class="nextbtn" data-act="rdone">Terug naar vandaag</button>';
-      confetti();
+    } else if(step==='went'){
+      html='<div class="stepin">'+sHead('WEKELIJKSE CHECK-IN · WK '+wk,'Hoe ging je training deze week?','Eerlijk zijn helpt je coach je beter te helpen.')+
+        '<div class="rate">'+WENT_OPTS.map(function(o){ return ciOpt(o, rfRating===o.r, 'pickwent'); }).join('')+'</div></div>';
+    } else { // helpful
+      html='<div class="stepin">'+sHead('JOUW REFLECTIE','Hielpen de voorgestelde trainingen?','Zo weet je coach wat werkt — kies er één.')+
+        '<div class="rate">'+HELP_OPTS.map(function(o){ return ciOpt(o, rfHelp===o.r, 'pickhelp'); }).join('')+'</div></div>';
     }
     body.innerHTML=html; foot.innerHTML=footHtml; body.scrollTop=0;
     if(bar){ bar.style.width = Math.round((rfIndex+1)/rfSteps.length*100)+'%'; }
+    if(back){ back.style.visibility = rfIndex>0 ? 'visible' : 'hidden'; }
   }
 
   /* ---- boot ---- */
