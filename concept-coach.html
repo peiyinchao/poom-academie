@@ -815,14 +815,17 @@
   .reflect .shead .sx:active{transform:scale(.9)}
   .reflect .shead .sx svg{width:24px;height:24px}
   .reflect .cihead{margin:2px 2px 0}
-  .reflect .cihead .ci-badge{width:54px;height:54px;border-radius:16px;display:block;position:relative;
-    background:var(--tint);margin-bottom:15px}
-  .reflect .cihead .ci-badge::after{content:"";position:absolute;inset:0;margin:auto;width:34px;height:34px;
+  .reflect .ci-badge{border-radius:16px;display:block;position:relative;background:var(--tint)}
+  .reflect .ci-badge::after{content:"";position:absolute;inset:0;margin:auto;
     background:var(--el);-webkit-mask:center/contain no-repeat;mask:center/contain no-repeat}
-  .reflect .cihead .ci-badge.reflectie::after{-webkit-mask-image:url(assets/icons/Check-In%20-%20Reflectie.png);
+  .reflect .ci-badge.reflectie::after{-webkit-mask-image:url(assets/icons/Check-In%20-%20Reflectie.png);
     mask-image:url(assets/icons/Check-In%20-%20Reflectie.png)}
-  .reflect .cihead .ci-badge.doel::after{-webkit-mask-image:url(assets/icons/Check-In-Goal.png);
+  .reflect .ci-badge.doel::after{-webkit-mask-image:url(assets/icons/Check-In-Goal.png);
     mask-image:url(assets/icons/Check-In-Goal.png)}
+  .reflect .cihead .ci-badge{width:54px;height:54px;margin-bottom:15px}
+  .reflect .cihead .ci-badge::after{width:34px;height:34px}
+  .reflect .ci-badge.sm{width:38px;height:38px}
+  .reflect .ci-badge.sm::after{width:24px;height:24px}
   .reflect .cihead .k{font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;font-size:12px;
     color:var(--el);font-weight:700}
   .reflect .cihead h2{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:30px;line-height:1;
@@ -833,6 +836,51 @@
   .reflect .qblock .qhint{color:var(--gray);font-size:13.5px;margin:5px 0 0;line-height:1.45}
   .reflect .qblock .rate{margin-top:14px}
   .reflect .qblock .fchips{margin-top:14px}
+  /* layout switcher (compare mode only) — sits between header and body, outside the scroll area */
+  .uxswitch{display:flex;gap:6px;padding:4px 20px 8px;justify-content:center;flex:none}
+  .uxswitch .uxb{flex:1;max-width:128px;border:1px solid var(--line);background:var(--surface);border-radius:999px;
+    padding:8px 6px;font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;font-size:12px;
+    font-weight:700;color:var(--gray);transition:.16s}
+  .uxswitch .uxb.on{background:var(--el);border-color:var(--el);color:#fff}
+  /* variant B — accordion */
+  .acclist{margin-top:22px;display:grid;gap:12px}
+  .acc{border:1.5px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden;transition:border-color .18s}
+  .acc.open{border-color:var(--el)}
+  .acc-h{display:flex;align-items:center;gap:12px;width:100%;padding:15px 16px;text-align:left;background:none;border:0}
+  .acc-n{width:26px;height:26px;flex:none;border-radius:50%;background:var(--soft);color:var(--gray);
+    display:grid;place-items:center;font-family:var(--cond);font-weight:700;font-size:13px;transition:.2s}
+  .acc.open .acc-n,.acc.done .acc-n{background:var(--el);color:#fff}
+  .acc-qt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .acc-q{font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.25}
+  .acc-a{font-size:13px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .acc.done .acc-a{color:var(--el);font-weight:600}
+  .acc-chev{flex:none;color:var(--gray);transition:transform .3s cubic-bezier(.32,.72,0,1),color .2s}
+  .acc-chev svg{width:18px;height:18px;display:block}
+  .acc.open .acc-chev{transform:rotate(90deg);color:var(--el)}
+  .acc-b{max-height:0;overflow:hidden;opacity:.4;transition:max-height .34s cubic-bezier(.32,.72,0,1),opacity .26s ease}
+  .acc.open .acc-b{opacity:1}
+  .acc-bin{padding:0 16px 18px}
+  .acc-bin .rate{margin-top:2px}
+  .acc-bin .fchips{margin-top:2px}
+  /* variant C — vertical swipe cards */
+  .ux-swipe .sbody{padding:0;scroll-snap-type:y mandatory;scroll-behavior:smooth}
+  .qcard{scroll-snap-align:center;scroll-snap-stop:always;min-height:100%;display:flex;flex-direction:column;
+    justify-content:center;padding:14px 24px 22px;box-sizing:border-box}
+  .qcard-in{width:100%}
+  .qc-top{display:flex;align-items:center;gap:11px;margin-bottom:16px}
+  .qc-count{font-family:var(--cond);text-transform:uppercase;letter-spacing:.09em;font-size:11.5px;color:var(--el);font-weight:700}
+  .qc-q{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:27px;line-height:1.03;
+    letter-spacing:-.01em;margin:0;color:var(--ink)}
+  .qc-sub{color:var(--gray);font-size:14px;margin:9px 0 0;line-height:1.5}
+  .qc-opts{margin-top:20px}
+  .qc-opts .rate{margin-top:0}
+  .qc-opts .fchips{margin-top:0}
+  .qc-swipehint{margin-top:22px;display:flex;align-items:center;justify-content:center;gap:6px;
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-size:11px;color:var(--gray);opacity:.8}
+  .qc-swipehint svg{width:13px;height:13px;transform:rotate(-90deg)}
+  .swipedots{position:absolute;right:9px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;z-index:6}
+  .swipedots span{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .2s,transform .2s}
+  .swipedots span.on{background:var(--el);transform:scale(1.35)}
 
   /* ===== Technique vocabulary ===== */
   .tveye{display:flex;align-items:center;gap:12px;margin:16px 2px 0;
@@ -3343,10 +3391,12 @@
     else if(a==='examchk'){ toggleExamChk(act.getAttribute('data-k')); }
     else if(a==='openhb'){ openHb(act.getAttribute('data-hb')); }
     else if(a==='hbclose'){ closeHb(); }
-    else if(a==='pickmood'){ rfMood=act.getAttribute('data-r'); ciSel(act); syncSubmit(); }
-    else if(a==='pickwent'){ rfRating=act.getAttribute('data-r'); ciSel(act); syncSubmit(); }
-    else if(a==='pickhelp'){ rfHelp=act.getAttribute('data-r'); ciSel(act); syncSubmit(); }
-    else if(a==='pickfocus'){ togglePick(act.getAttribute('data-id')); syncFocusChips(); syncSubmit(); }
+    else if(a==='pickmood'){ rfMood=act.getAttribute('data-r'); ciAfterPick('mood',act); }
+    else if(a==='pickwent'){ rfRating=act.getAttribute('data-r'); ciAfterPick('went',act); }
+    else if(a==='pickhelp'){ rfHelp=act.getAttribute('data-r'); ciAfterPick('helpful',act); }
+    else if(a==='pickfocus'){ togglePick(act.getAttribute('data-id')); ciAfterFocus(); }
+    else if(a==='acctoggle'){ accToggle(act.getAttribute('data-q')); }
+    else if(a==='setux'){ setCiUx(act.getAttribute('data-ux')); renderCheckin(); }
     else if(a==='cisubmit'){ ciSubmit(); }
     else if(a==='rclose'){ closeCheckin(); }
     else if(a==='mission'){ toggleMission(act.getAttribute('data-id')); }
@@ -3439,6 +3489,53 @@
     {r:'beetje', em:'🤏', t:'Een beetje', s:'sommige wel'},
     {r:'nee',    em:'👎', t:'Niet echt', s:'liever iets anders'}
   ];
+  // ---- layout variants (compare on device with ?compare=1 or ?ux=accordion|swipe|page) ----
+  var _ciUxParam=(function(){ var m=/[?&]ux=(page|accordion|swipe)/.exec(location.search||''); return m?m[1]:null; })();
+  var _ciCompare=/[?&](compare=1|ux=)/.test(location.search||'');
+  var CI_UX=_ciUxParam || (function(){ try{ return localStorage.getItem('ciUx')||'page'; }catch(e){ return 'page'; } })();
+  function setCiUx(u){ CI_UX=u; try{ localStorage.setItem('ciUx',u); }catch(e){} }
+  function optInfo(arr,r){ for(var i=0;i<arr.length;i++) if(arr[i].r===r) return arr[i]; return null; }
+  function focusShortFrom(ids){
+    var labels=ids.map(function(id){ return focusLabel(id).label; });
+    if(labels.length<=2) return labels.join(' · ');
+    return labels.slice(0,2).join(' · ')+' +'+(labels.length-2);
+  }
+  // one shared question model, rendered three ways (page / accordion / swipe)
+  function ciQuestions(){
+    if(rfMode==='goal') return [
+      { id:'mood', q:'Hoe voel je je deze week?', hint:'Zo stemt je coach de uitdaging af.',
+        opts:function(){ return '<div class="rate">'+MOOD_OPTS.map(function(o){ return ciOpt(o, rfMood===o.r, 'pickmood'); }).join('')+'</div>'; },
+        answered:function(){ return !!rfMood; },
+        summary:function(){ var m=moodInfo(rfMood); return m?m.em+' '+m.t:''; } },
+      { id:'focus', q:'Waar wil je op letten?', hint:'Kies er 1 tot 5 om deze week centraal te zetten.',
+        opts:function(){ return '<div class="fchips">'+FOCUS_AREAS.map(function(fa){
+            var on=rfPick.indexOf(fa.id)>=0;
+            return '<button class="fchip'+(on?' on':'')+'" data-act="pickfocus" data-id="'+fa.id+'">'+
+              '<span class="fe">'+fa.em+'</span><span>'+fa.label+'</span><span class="fck">'+IC.check+'</span></button>';
+          }).join('')+'</div><div class="rhint">'+focusHint()+'</div>'; },
+        answered:function(){ return rfPick.length>0; },
+        summary:function(){ return rfPick.length?focusShortFrom(rfPick):''; } }
+    ];
+    return [
+      { id:'went', q:'Hoe ging je training deze week?', hint:'Eerlijk zijn helpt je coach.',
+        opts:function(){ return '<div class="rate">'+WENT_OPTS.map(function(o){ return ciOpt(o, rfRating===o.r, 'pickwent'); }).join('')+'</div>'; },
+        answered:function(){ return !!rfRating; },
+        summary:function(){ var o=optInfo(WENT_OPTS,rfRating); return o?o.em+' '+o.t:''; } },
+      { id:'helpful', q:'Hielpen de voorgestelde trainingen?', hint:'Zo weet je coach wat werkt.',
+        opts:function(){ return '<div class="rate">'+HELP_OPTS.map(function(o){ return ciOpt(o, rfHelp===o.r, 'pickhelp'); }).join('')+'</div>'; },
+        answered:function(){ return !!rfHelp; },
+        summary:function(){ var o=optInfo(HELP_OPTS,rfHelp); return o?o.em+' '+o.t:''; } }
+    ];
+  }
+  function ciMeta(){
+    return rfMode==='goal'
+      ? { icon:'doel', k:'DOELSTELLING · WK '+weekNo(), h:'Zet je doel voor deze week', sub:'Twee snelle keuzes — daarna kun je los.' }
+      : { icon:'reflectie', k:'REFLECTIE · WK '+weekNo(), h:'Hoe was jouw week?', sub:'Eerlijk zijn helpt je coach je beter te helpen.' };
+  }
+  function ciSwitcherInner(){
+    var modes=[['page','Pagina'],['accordion','Accordeon'],['swipe','Kaarten']];
+    return modes.map(function(m){ return '<button class="uxb'+(CI_UX===m[0]?' on':'')+'" data-act="setux" data-ux="'+m[0]+'">'+m[1]+'</button>'; }).join('');
+  }
   function openCheckin(mode){
     rfMode = (mode==='goal'||mode==='reflect') ? mode : weekPhase();
     rfRating = WEEK_RATING; rfPick = WEEK_FOCUS.slice(); rfMood = WEEK_MOOD; rfHelp = WEEK_HELP;
@@ -3495,34 +3592,118 @@
   function ciQ(q,hint,inner){
     return '<section class="qblock"><h3 class="qh">'+q+'</h3>'+(hint?'<p class="qhint">'+hint+'</p>':'')+inner+'</section>';
   }
-  // Single scrollable page: all questions at once, one submit button. No pagination/back/progress.
+  /* ===== variant A: single page (all questions stacked) ===== */
+  function renderPage(){
+    var m=ciMeta(), qs=ciQuestions();
+    return '<div class="stepin">'+ciTitle(m.icon,m.k,m.h,m.sub)+
+      qs.map(function(x){ return ciQ(x.q,x.hint,x.opts()); }).join('')+'</div>';
+  }
+
+  /* ===== variant B: accordion (one question open at a time; tap a row to reopen it) ===== */
+  function renderAccordion(){
+    var m=ciMeta(), qs=ciQuestions();
+    return '<div class="stepin">'+ciTitle(m.icon,m.k,m.h,'')+
+      '<div class="acclist">'+qs.map(function(x,i){
+        return '<div class="acc" data-q="'+x.id+'">'+
+          '<button class="acc-h" data-act="acctoggle" data-q="'+x.id+'">'+
+            '<span class="acc-n">'+(i+1)+'</span>'+
+            '<span class="acc-qt"><span class="acc-q">'+x.q+'</span>'+
+              '<span class="acc-a">'+(x.answered()?esc(x.summary()):'Tik om te kiezen')+'</span></span>'+
+            '<span class="acc-chev">'+IC.chev+'</span>'+
+          '</button>'+
+          '<div class="acc-b"><div class="acc-bin">'+x.opts()+'</div></div>'+
+        '</div>';
+      }).join('')+'</div></div>';
+  }
+  function accEl(qid){ return reflect?reflect.querySelector('.acc[data-q="'+qid+'"]'):null; }
+  function accResize(qid){ var el=accEl(qid); if(!el||!el.classList.contains('open'))return; var b=el.querySelector('.acc-b'); b.style.maxHeight=b.scrollHeight+'px'; }
+  function accOpen(qid){
+    if(!reflect) return;
+    [].forEach.call(reflect.querySelectorAll('.acc'), function(el){
+      var open=el.getAttribute('data-q')===qid;
+      el.classList.toggle('open',open);
+      var b=el.querySelector('.acc-b');
+      b.style.maxHeight = open ? b.scrollHeight+'px' : '0px';
+    });
+  }
+  function accOpenNone(){ if(!reflect) return; [].forEach.call(reflect.querySelectorAll('.acc'), function(el){ el.classList.remove('open'); el.querySelector('.acc-b').style.maxHeight='0px'; }); }
+  function accInit(){
+    var qs=ciQuestions(), openId=null;
+    for(var i=0;i<qs.length;i++){ if(!qs[i].answered()){ openId=qs[i].id; break; } }
+    if(openId) accOpen(openId); else accOpenNone();
+  }
+  function accSummary(qid){
+    var el=accEl(qid); if(!el) return;
+    var qs=ciQuestions(), x=null; qs.forEach(function(q){ if(q.id===qid) x=q; });
+    if(!x) return;
+    var a=el.querySelector('.acc-a'); if(a) a.textContent = x.answered()?x.summary():'Tik om te kiezen';
+    el.classList.toggle('done', x.answered());
+  }
+  function accToggle(qid){ var el=accEl(qid); if(!el)return; if(el.classList.contains('open')) accOpenNone(); else accOpen(qid); }
+  function accAdvance(qid){
+    accSummary(qid);
+    var qs=ciQuestions(), idx=-1, i, nextId=null;
+    for(i=0;i<qs.length;i++) if(qs[i].id===qid) idx=i;
+    for(i=idx+1;i<qs.length;i++){ if(!qs[i].answered()){ nextId=qs[i].id; break; } }
+    if(!nextId) for(i=0;i<qs.length;i++){ if(!qs[i].answered()){ nextId=qs[i].id; break; } }
+    if(nextId) accOpen(nextId); else accOpenNone();
+  }
+
+  /* ===== variant C: vertical swipe cards (scroll-snap; auto-advances on answer) ===== */
+  function renderSwipe(){
+    var m=ciMeta(), qs=ciQuestions(), n=qs.length;
+    return qs.map(function(x,i){
+      return '<section class="qcard" data-q="'+x.id+'"><div class="qcard-in">'+
+        '<div class="qc-top"><span class="ci-badge sm '+m.icon+'" aria-hidden="true"></span>'+
+          '<span class="qc-count">'+m.k+' · '+(i+1)+'/'+n+'</span></div>'+
+        '<h2 class="qc-q">'+x.q+'</h2>'+(x.hint?'<p class="qc-sub">'+x.hint+'</p>':'')+
+        '<div class="qc-opts">'+x.opts()+'</div>'+
+        (i<n-1?'<div class="qc-swipehint">'+IC.chev+' veeg omhoog</div>':'')+
+      '</div></section>';
+    }).join('');
+  }
+  function swipeInit(){
+    var body=reflect.querySelector('#rfbody');
+    var cards=[].slice.call(body.querySelectorAll('.qcard'));
+    var dots=document.createElement('div'); dots.className='swipedots';
+    dots.innerHTML=cards.map(function(_,i){ return '<span'+(i===0?' class="on"':'')+'></span>'; }).join('');
+    reflect.insertBefore(dots, reflect.querySelector('.sfoot'));
+    var upd=function(){
+      var bt=body.getBoundingClientRect(), mid=bt.top+bt.height/2, act=0, best=1e9;
+      cards.forEach(function(c,i){ var r=c.getBoundingClientRect(), d=Math.abs((r.top+r.height/2)-mid); if(d<best){ best=d; act=i; } });
+      [].forEach.call(dots.children,function(d,i){ d.classList.toggle('on',i===act); });
+    };
+    if(body._swipeUpd) body.removeEventListener('scroll',body._swipeUpd);
+    body._swipeUpd=upd; body.addEventListener('scroll',upd,{passive:true}); upd();
+  }
+  function swipeAdvance(qid){
+    var body=reflect.querySelector('#rfbody'), cards=[].slice.call(body.querySelectorAll('.qcard'));
+    for(var i=0;i<cards.length;i++){ if(cards[i].getAttribute('data-q')===qid){ if(cards[i+1]) setTimeout(function(c){ return function(){ c.scrollIntoView({behavior:'smooth',block:'start'}); }; }(cards[i+1]),180); break; } }
+  }
+
+  // shared post-pick behaviour across the three layouts
+  function ciAfterPick(qid, el){
+    if(el) ciSel(el);
+    if(CI_UX==='accordion') accAdvance(qid);
+    else if(CI_UX==='swipe') swipeAdvance(qid);
+    syncSubmit();
+  }
+  function ciAfterFocus(){
+    syncFocusChips();
+    if(CI_UX==='accordion') accResize('focus');
+    syncSubmit();
+  }
   function renderCheckin(){
     if(!reflect) return;
+    reflect.classList.remove('ux-page','ux-accordion','ux-swipe'); reflect.classList.add('ux-'+CI_UX);
+    var od=reflect.querySelector('.swipedots'); if(od) od.parentNode.removeChild(od);
+    var sw=reflect.querySelector('.uxswitch'); if(sw) sw.parentNode.removeChild(sw);
+    if(_ciCompare){ var d=document.createElement('div'); d.className='uxswitch'; d.innerHTML=ciSwitcherInner(); reflect.insertBefore(d, reflect.querySelector('#rfbody')); }
     var body=reflect.querySelector('#rfbody');
-    var wk=weekNo(), html='';
-    if(rfMode==='goal'){
-      html='<div class="stepin">'+
-        ciTitle('doel','DOELSTELLING · WK '+wk,'Zet je doel voor deze week','Twee snelle keuzes — daarna kun je los.')+
-        ciQ('Hoe voel je je deze week?','Zo stemt je coach de uitdaging af.',
-          '<div class="rate">'+MOOD_OPTS.map(function(o){ return ciOpt(o, rfMood===o.r, 'pickmood'); }).join('')+'</div>')+
-        ciQ('Waar wil je op letten?','Kies er 1 tot 5 om deze week centraal te zetten.',
-          '<div class="fchips">'+FOCUS_AREAS.map(function(fa){
-            var on=rfPick.indexOf(fa.id)>=0;
-            return '<button class="fchip'+(on?' on':'')+'" data-act="pickfocus" data-id="'+fa.id+'">'+
-              '<span class="fe">'+fa.em+'</span><span>'+fa.label+'</span><span class="fck">'+IC.check+'</span></button>';
-          }).join('')+'</div>'+
-          '<div class="rhint">'+focusHint()+'</div>')+
-        '</div>';
-    } else {
-      html='<div class="stepin">'+
-        ciTitle('reflectie','REFLECTIE · WK '+wk,'Hoe was jouw week?','Eerlijk zijn helpt je coach je beter te helpen.')+
-        ciQ('Hoe ging je training deze week?','',
-          '<div class="rate">'+WENT_OPTS.map(function(o){ return ciOpt(o, rfRating===o.r, 'pickwent'); }).join('')+'</div>')+
-        ciQ('Hielpen de voorgestelde trainingen?','',
-          '<div class="rate">'+HELP_OPTS.map(function(o){ return ciOpt(o, rfHelp===o.r, 'pickhelp'); }).join('')+'</div>')+
-        '</div>';
-    }
-    body.innerHTML=html; body.scrollTop=0;
+    body.innerHTML = CI_UX==='accordion' ? renderAccordion() : CI_UX==='swipe' ? renderSwipe() : renderPage();
+    body.scrollTop=0;
+    if(CI_UX==='accordion') requestAnimationFrame(accInit);
+    if(CI_UX==='swipe') requestAnimationFrame(swipeInit);
     syncSubmit();
   }
 
