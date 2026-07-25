@@ -721,7 +721,7 @@
   .ti-t{font-family:var(--cond);text-transform:uppercase;letter-spacing:.02em;font-weight:800;font-size:15.5px;line-height:1.05;
     align-self:flex-start;position:relative}
   .ti-s{font-size:12.5px;color:rgba(255,255,255,.72);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .ti-ck{flex:none;position:relative;width:27px;height:27px;border-radius:50%;border:1.8px solid rgba(255,255,255,.5);
+  .ti-ck{flex:none;position:relative;width:27px;height:27px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:rgba(255,255,255,.14);
     display:grid;place-items:center;color:transparent;transition:background .18s, border-color .18s, color .18s}
   .ti-ck svg{width:15px;height:15px}
   /* hand-drawn "hit" burst that pops around the checkbox on complete */
@@ -807,7 +807,7 @@
   /* One-page check-in: a single scrollable page (no pagination, no progress bar). Slim header
      with just a 64px no-background close button, top-right; the title sits high in the body.
      Scoped to .reflect so the guided-training header is untouched. */
-  .reflect .shead{align-items:center;justify-content:flex-end;gap:8px;padding-bottom:2px}
+  .reflect .shead{align-items:center;justify-content:flex-end;gap:8px;padding-bottom:2px;position:relative;z-index:5}
   .reflect .shead .sx{width:64px;height:64px;flex:none;margin:0;border:0;border-radius:50%;
     background:transparent;color:var(--gray);display:grid;place-items:center;
     transition:transform .16s ease, background .2s ease, color .2s ease}
@@ -877,10 +877,51 @@
   .qc-opts .fchips{margin-top:0}
   .qc-swipehint{margin-top:22px;display:flex;align-items:center;justify-content:center;gap:6px;
     font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-size:11px;color:var(--gray);opacity:.8}
-  .qc-swipehint svg{width:13px;height:13px;transform:rotate(-90deg)}
-  .swipedots{position:absolute;right:9px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;z-index:6}
+  .qc-swipehint svg{width:13px;height:13px;transform:rotate(-90deg);animation:hintBounce 5s ease-in-out infinite}
+  @keyframes hintBounce{
+    0%,84%,100%{transform:translateY(0) rotate(-90deg)}
+    89%{transform:translateY(-6px) rotate(-90deg)}
+    93%{transform:translateY(-1px) rotate(-90deg)}
+    97%{transform:translateY(-4px) rotate(-90deg)}
+  }
+  .swipedots{position:absolute;right:9px;display:flex;flex-direction:column;gap:8px;z-index:6}
   .swipedots span{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .2s,transform .2s}
   .swipedots span.on{background:var(--el);transform:scale(1.35)}
+
+  /* --- Kaarten refinements: greeting-style title, framed cards, belt band --- */
+  .reflect{overflow:hidden}
+  .reflect .sbody{position:relative;z-index:1}
+  .reflect .sfoot{position:relative;z-index:2}
+  .uxswitch{position:relative;z-index:4}
+  /* title sits high, like the Vandaag greeting; goal shows the cheering kid beside it */
+  .ci-topttl{flex:none;position:relative;z-index:4;display:flex;align-items:flex-end;gap:6px;padding:0 24px 14px}
+  .ci-topttl .ci-tt-txt{flex:1 1 auto;min-width:0}
+  .ci-topttl .k{font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--el);font-weight:700}
+  .ci-topttl h2{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:34px;line-height:.96;
+    letter-spacing:-.01em;margin:8px 0 0;color:var(--ink)}
+  .ci-topttl .ci-tt-masc{flex:0 0 auto;width:104px;margin:0 -6px -12px 0;display:block;
+    filter:drop-shadow(0 12px 16px rgba(20,23,18,.18));pointer-events:none}
+  .ci-topttl .ci-tt-masc .gm-b{position:relative;display:block;width:100%}
+  .ci-topttl .ci-tt-masc .gm-i{display:block;width:100%;height:auto}
+  .ci-topttl .ci-tt-masc .gm-blink{position:absolute;inset:0;height:100%;opacity:0}
+  .ci-topttl .ci-tt-masc .gm-b.blink .gm-blink{opacity:1}
+  .ux-swipe .qcard{padding:10px 22px 20px}
+  .ux-swipe .qcard-in{background:var(--surface);border:1.5px solid var(--line);border-radius:22px;
+    box-shadow:0 22px 46px -26px rgba(20,23,18,.42),inset 0 1px 0 rgba(255,255,255,.7);
+    padding:24px 20px 26px;position:relative;z-index:1}
+  .ux-swipe .qc-count{display:inline-block;font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;
+    font-size:11px;color:var(--gray);font-weight:700;margin-bottom:12px}
+  /* reflect: coiled belt lying between the cards and the button (rotated 90deg CCW -> label on the right) */
+  .ci-beltband{flex:none;position:relative;z-index:1;height:118px;pointer-events:none}
+  .bb-belt{position:absolute;left:157px;top:50%;width:99px;height:270px;transform:translate(-50%,-50%) rotate(-90deg)}
+  .bb-belt .cb{position:absolute;inset:0}
+  .bb-belt .cb-main{background:var(--belt-main,#2F3030);
+    -webkit-mask:url(assets/img/reflect-belt-main.png) no-repeat center/contain;
+    mask:url(assets/img/reflect-belt-main.png) no-repeat center/contain}
+  .bb-belt .cb-dark{background:var(--belt-dark,#202121);
+    -webkit-mask:url(assets/img/reflect-belt-dark.png) no-repeat center/contain;
+    mask:url(assets/img/reflect-belt-dark.png) no-repeat center/contain}
+  .bb-belt .cb-ink{background:url(assets/img/reflect-belt-ink.png) no-repeat center/contain}
 
   /* ===== Technique vocabulary ===== */
   .tveye{display:flex;align-items:center;gap:12px;margin:16px 2px 0;
@@ -3345,6 +3386,21 @@
     blinkOnce(el, true);   /* playful double-blink reaction on tap */
     scheduleBlink();       /* push the ambient blink out so it won't fire right after */
   }
+  /* ---- check-in goal mascot: same gentle eye-blink while the sheet is open ---- */
+  var ciBlinkTO=null;
+  function ciStopBlink(){ if(ciBlinkTO){ clearTimeout(ciBlinkTO); ciBlinkTO=null; } }
+  function ciScheduleBlink(){
+    ciStopBlink();
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    (function next(delay){
+      ciBlinkTO=setTimeout(function(){
+        var el=reflect && reflect.querySelector('.ci-tt-masc .gm-b');
+        if(!el){ ciStopBlink(); return; }
+        blinkOnce(el, Math.random()<0.24);
+        next(2600+Math.random()*3800);
+      }, delay);
+    })(1200+Math.random()*1600);
+  }
 
   /* ---- global click handling ---- */
   document.addEventListener('click', function(e){
@@ -3491,10 +3547,10 @@
   ];
   // ---- layout variants (compare on device with ?compare=1 or ?ux=accordion|swipe|page) ----
   var _ciUxParam=(function(){ var m=/[?&]ux=(page|accordion|swipe)/.exec(location.search||''); return m?m[1]:null; })();
-  // Comparison phase: show the layout switcher by default so it can be tried on device
-  // without typing a URL param. Add ?compare=0 to hide it. (Remove once a default is chosen.)
-  var _ciCompare=!/[?&]compare=0/.test(location.search||'');
-  var CI_UX=_ciUxParam || (function(){ try{ return localStorage.getItem('ciUx')||'page'; }catch(e){ return 'page'; } })();
+  // Kaarten (swipe) is the chosen check-in layout. The layout switcher is opt-in via ?compare=1
+  // (kept for reference/testing); ?ux=page|accordion|swipe still forces a layout.
+  var _ciCompare=/[?&]compare=1/.test(location.search||'');
+  var CI_UX=_ciUxParam || 'swipe';
   function setCiUx(u){ CI_UX=u; try{ localStorage.setItem('ciUx',u); }catch(e){} }
   function optInfo(arr,r){ for(var i=0;i<arr.length;i++) if(arr[i].r===r) return arr[i]; return null; }
   function focusShortFrom(ids){
@@ -3557,6 +3613,7 @@
   }
   function closeCheckin(){
     if(!reflect) return;
+    ciStopBlink();
     reflect.classList.remove('show');
     var r=reflect; reflect=null;
     setTimeout(function(){ if(r&&r.parentNode) r.parentNode.removeChild(r); }, 300);
@@ -3596,15 +3653,15 @@
   }
   /* ===== variant A: single page (all questions stacked) ===== */
   function renderPage(){
-    var m=ciMeta(), qs=ciQuestions();
-    return '<div class="stepin">'+ciTitle(m.icon,m.k,m.h,m.sub)+
+    var qs=ciQuestions();
+    return '<div class="stepin">'+
       qs.map(function(x){ return ciQ(x.q,x.hint,x.opts()); }).join('')+'</div>';
   }
 
   /* ===== variant B: accordion (one question open at a time; tap a row to reopen it) ===== */
   function renderAccordion(){
-    var m=ciMeta(), qs=ciQuestions();
-    return '<div class="stepin">'+ciTitle(m.icon,m.k,m.h,'')+
+    var qs=ciQuestions();
+    return '<div class="stepin">'+
       '<div class="acclist">'+qs.map(function(x,i){
         return '<div class="acc" data-q="'+x.id+'">'+
           '<button class="acc-h" data-act="acctoggle" data-q="'+x.id+'">'+
@@ -3653,11 +3710,10 @@
 
   /* ===== variant C: vertical swipe cards (scroll-snap; auto-advances on answer) ===== */
   function renderSwipe(){
-    var m=ciMeta(), qs=ciQuestions(), n=qs.length;
+    var qs=ciQuestions(), n=qs.length;
     return qs.map(function(x,i){
       return '<section class="qcard" data-q="'+x.id+'"><div class="qcard-in">'+
-        '<div class="qc-top"><span class="ci-badge sm '+m.icon+'" aria-hidden="true"></span>'+
-          '<span class="qc-count">'+m.k+' · '+(i+1)+'/'+n+'</span></div>'+
+        '<span class="qc-count">Vraag '+(i+1)+' / '+n+'</span>'+
         '<h2 class="qc-q">'+x.q+'</h2>'+(x.hint?'<p class="qc-sub">'+x.hint+'</p>':'')+
         '<div class="qc-opts">'+x.opts()+'</div>'+
         (i<n-1?'<div class="qc-swipehint">'+IC.chev+' veeg omhoog</div>':'')+
@@ -3670,6 +3726,14 @@
     var dots=document.createElement('div'); dots.className='swipedots';
     dots.innerHTML=cards.map(function(_,i){ return '<span'+(i===0?' class="on"':'')+'></span>'; }).join('');
     reflect.insertBefore(dots, reflect.querySelector('.sfoot'));
+    // vertically align the dots with the "veeg omhoog" swipe hint (fallback: card bottom)
+    var place=function(){
+      var rr=reflect.getBoundingClientRect(), hint=body.querySelector('.qc-swipehint'), y;
+      if(hint){ var hr=hint.getBoundingClientRect(); y=(hr.top+hr.height/2)-rr.top-dots.offsetHeight/2; }
+      else { y=body.getBoundingClientRect().bottom-rr.top-dots.offsetHeight-4; }
+      dots.style.top=Math.round(y)+'px';
+    };
+    place(); requestAnimationFrame(place);
     var upd=function(){
       var bt=body.getBoundingClientRect(), mid=bt.top+bt.height/2, act=0, best=1e9;
       cards.forEach(function(c,i){ var r=c.getBoundingClientRect(), d=Math.abs((r.top+r.height/2)-mid); if(d<best){ best=d; act=i; } });
@@ -3695,17 +3759,40 @@
     if(CI_UX==='accordion') accResize('focus');
     syncSubmit();
   }
+  // corner belt graphic recolours to the current grade (solid primary; poom stays black)
+  function ciPaintBelt(node){
+    var g=geupInfo(GEUP_I);
+    node.style.setProperty('--belt-main', g.col);
+    node.style.setProperty('--belt-dark', shade(g.col,-38));
+  }
   function renderCheckin(){
     if(!reflect) return;
+    var m=ciMeta();
     reflect.classList.remove('ux-page','ux-accordion','ux-swipe'); reflect.classList.add('ux-'+CI_UX);
-    var od=reflect.querySelector('.swipedots'); if(od) od.parentNode.removeChild(od);
-    var sw=reflect.querySelector('.uxswitch'); if(sw) sw.parentNode.removeChild(sw);
-    if(_ciCompare){ var d=document.createElement('div'); d.className='uxswitch'; d.innerHTML=ciSwitcherInner(); reflect.insertBefore(d, reflect.querySelector('#rfbody')); }
-    var body=reflect.querySelector('#rfbody');
-    body.innerHTML = CI_UX==='accordion' ? renderAccordion() : CI_UX==='swipe' ? renderSwipe() : renderPage();
-    body.scrollTop=0;
+    ['.swipedots','.uxswitch','.ci-topttl','.ci-beltband'].forEach(function(sel){ var e=reflect.querySelector(sel); if(e) e.parentNode.removeChild(e); });
+    var bodyEl=reflect.querySelector('#rfbody'), footEl=reflect.querySelector('#rffoot');
+    // greeting-style title at the top (like Vandaag); goal shows the cheering kid beside it
+    var ttl=document.createElement('div'); ttl.className='ci-topttl'+(rfMode==='goal'?' has-masc':'');
+    ttl.innerHTML='<div class="ci-tt-txt"><div class="k">'+m.k+'</div><h2>'+m.h+'</h2></div>'+
+      (rfMode==='goal'?'<span class="ci-tt-masc"><span class="gm-b">'+
+        '<img class="gm-i" src="assets/img/goal-kid.png" alt="" aria-hidden="true">'+
+        '<img class="gm-i gm-blink" src="assets/img/goal-kid-blink.png" alt="" aria-hidden="true">'+
+      '</span></span>':'');
+    reflect.insertBefore(ttl, bodyEl);
+    if(_ciCompare){ var d=document.createElement('div'); d.className='uxswitch'; d.innerHTML=ciSwitcherInner(); reflect.insertBefore(d, bodyEl); }
+    bodyEl.innerHTML = CI_UX==='accordion' ? renderAccordion() : CI_UX==='swipe' ? renderSwipe() : renderPage();
+    bodyEl.scrollTop=0;
+    // reflect: a coiled belt lies in the band between the cards and the button
+    // (rotated 90deg CCW so the white label tag sits on the right); recolours to the current grade
+    if(rfMode!=='goal'){
+      var band=document.createElement('div'); band.className='ci-beltband'; band.setAttribute('aria-hidden','true');
+      band.innerHTML='<div class="bb-belt"><span class="cb cb-main"></span><span class="cb cb-dark"></span><span class="cb cb-ink"></span></div>';
+      reflect.insertBefore(band, footEl);
+      ciPaintBelt(band.querySelector('.bb-belt'));
+    }
     if(CI_UX==='accordion') requestAnimationFrame(accInit);
     if(CI_UX==='swipe') requestAnimationFrame(swipeInit);
+    if(rfMode==='goal') ciScheduleBlink(); else ciStopBlink();
     syncSubmit();
   }
 
