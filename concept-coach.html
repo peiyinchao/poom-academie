@@ -876,7 +876,7 @@
   .qc-opts .rate{margin-top:0}
   .qc-opts .fchips{margin-top:0}
   .qc-swipehint{margin-top:22px;display:flex;align-items:center;justify-content:center;gap:6px;
-    font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-size:11px;color:var(--gray);opacity:.8}
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.09em;font-size:11.5px;color:var(--gray);opacity:1}
   .qc-swipehint svg{width:13px;height:13px;transform:rotate(-90deg);animation:hintBounce 5s ease-in-out infinite}
   @keyframes hintBounce{
     0%,84%,100%{transform:translateY(0) rotate(-90deg)}
@@ -905,6 +905,10 @@
   .ci-topttl .ci-tt-masc .gm-i{display:block;width:100%;height:auto}
   .ci-topttl .ci-tt-masc .gm-blink{position:absolute;inset:0;height:100%;opacity:0}
   .ci-topttl .ci-tt-masc .gm-b.blink .gm-blink{opacity:1}
+  /* reflect: the coiled belt shrinks into the SAME slot as the goal mascot, beside the title */
+  .ci-topttl .ci-tt-belt{flex:0 0 auto;position:relative;width:104px;height:199px;margin:0 -6px -12px 0;
+    display:block;pointer-events:none;filter:drop-shadow(0 12px 16px rgba(20,23,18,.18))}
+  .ci-topttl .ci-tt-belt .bb-belt{position:absolute;inset:0;left:0;top:0;width:100%;height:100%;transform:none}
   .ux-swipe .qcard{padding:10px 22px 20px}
   .ux-swipe .qcard-in{background:var(--surface);border:1.5px solid var(--line);border-radius:22px;
     box-shadow:0 22px 46px -26px rgba(20,23,18,.42),inset 0 1px 0 rgba(255,255,255,.7);
@@ -3830,26 +3834,8 @@
     }).join('');
   }
   function swipeInit(){
-    var body=reflect.querySelector('#rfbody');
-    var cards=[].slice.call(body.querySelectorAll('.qcard'));
-    var dots=document.createElement('div'); dots.className='swipedots';
-    dots.innerHTML=cards.map(function(_,i){ return '<span'+(i===0?' class="on"':'')+'></span>'; }).join('');
-    reflect.insertBefore(dots, reflect.querySelector('.sfoot'));
-    // vertically align the dots with the "veeg omhoog" swipe hint (fallback: card bottom)
-    var place=function(){
-      var rr=reflect.getBoundingClientRect(), hint=body.querySelector('.qc-swipehint'), y;
-      if(hint){ var hr=hint.getBoundingClientRect(); y=(hr.top+hr.height/2)-rr.top-dots.offsetHeight/2; }
-      else { y=body.getBoundingClientRect().bottom-rr.top-dots.offsetHeight-4; }
-      dots.style.top=Math.round(y)+'px';
-    };
-    place(); requestAnimationFrame(place);
-    var upd=function(){
-      var bt=body.getBoundingClientRect(), mid=bt.top+bt.height/2, act=0, best=1e9;
-      cards.forEach(function(c,i){ var r=c.getBoundingClientRect(), d=Math.abs((r.top+r.height/2)-mid); if(d<best){ best=d; act=i; } });
-      [].forEach.call(dots.children,function(d,i){ d.classList.toggle('on',i===act); });
-    };
-    if(body._swipeUpd) body.removeEventListener('scroll',body._swipeUpd);
-    body._swipeUpd=upd; body.addEventListener('scroll',upd,{passive:true}); upd();
+    /* Pagination dots removed: the per-card "Vraag n / 2" counter shows position and the animated
+       "veeg omhoog" hint (higher-contrast, matches the app's swipe-up pattern) guides the swipe. */
   }
   function swipeAdvance(qid){
     var body=reflect.querySelector('#rfbody'), cards=[].slice.call(body.querySelectorAll('.qcard'));
@@ -3881,24 +3867,22 @@
     ['.swipedots','.uxswitch','.ci-topttl','.ci-beltband'].forEach(function(sel){ var e=reflect.querySelector(sel); if(e) e.parentNode.removeChild(e); });
     var bodyEl=reflect.querySelector('#rfbody'), footEl=reflect.querySelector('#rffoot');
     // greeting-style title at the top (like Vandaag); goal shows the cheering kid beside it
-    var ttl=document.createElement('div'); ttl.className='ci-topttl'+(rfMode==='goal'?' has-masc':'');
+    var ttl=document.createElement('div'); ttl.className='ci-topttl'+(rfMode==='goal'?' has-masc':' has-belt');
     ttl.innerHTML='<div class="ci-tt-txt"><div class="k">'+m.k+'</div><h2>'+m.h+'</h2></div>'+
-      (rfMode==='goal'?'<span class="ci-tt-masc"><span class="gm-b">'+
-        '<img class="gm-i" src="assets/img/goal-kid.png" alt="" aria-hidden="true">'+
-        '<img class="gm-i gm-blink" src="assets/img/goal-kid-blink.png" alt="" aria-hidden="true">'+
-      '</span></span>':'');
+      (rfMode==='goal'
+        ? '<span class="ci-tt-masc"><span class="gm-b">'+
+            '<img class="gm-i" src="assets/img/goal-kid.png" alt="" aria-hidden="true">'+
+            '<img class="gm-i gm-blink" src="assets/img/goal-kid-blink.png" alt="" aria-hidden="true">'+
+          '</span></span>'
+        : '<span class="ci-tt-belt" aria-hidden="true"><span class="bb-belt">'+
+            '<span class="cb cb-main"></span><span class="cb cb-dark"></span><span class="cb cb-ink"></span>'+
+          '</span></span>');
     reflect.insertBefore(ttl, bodyEl);
     if(_ciCompare){ var d=document.createElement('div'); d.className='uxswitch'; d.innerHTML=ciSwitcherInner(); reflect.insertBefore(d, bodyEl); }
     bodyEl.innerHTML = CI_UX==='accordion' ? renderAccordion() : CI_UX==='swipe' ? renderSwipe() : renderPage();
     bodyEl.scrollTop=0;
-    // reflect: a coiled belt lies in the band between the title and the question cards
-    // (rotated 90deg CCW so the white label tag sits on the right); recolours to the current grade
-    if(rfMode!=='goal'){
-      var band=document.createElement('div'); band.className='ci-beltband'; band.setAttribute('aria-hidden','true');
-      band.innerHTML='<div class="bb-belt"><span class="cb cb-main"></span><span class="cb cb-dark"></span><span class="cb cb-ink"></span></div>';
-      reflect.insertBefore(band, bodyEl);
-      ciPaintBelt(band.querySelector('.bb-belt'));
-    }
+    // reflect: the coiled belt sits beside the title (goal-mascot slot); recolours to the current grade
+    if(rfMode!=='goal'){ var bb=ttl.querySelector('.bb-belt'); if(bb) ciPaintBelt(bb); }
     if(CI_UX==='accordion') requestAnimationFrame(accInit);
     if(CI_UX==='swipe') requestAnimationFrame(swipeInit);
     if(rfMode==='goal') ciScheduleBlink(); else ciStopBlink();
