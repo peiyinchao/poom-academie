@@ -1058,9 +1058,9 @@
   .timerscreen .ot-fr .sl{font-weight:500;margin:0 .18em}
   .ot-tempo.open .ot-tempo-fab{opacity:0;pointer-events:none}
   /* Fold-out pill: same height as the button, grows RIGHTWARD from the left edge; ROUND option thumbs */
-  .ot-tmenu{position:absolute;left:0;bottom:0;height:64px;width:64px;z-index:2;overflow:hidden;
+  .ot-tmenu{position:absolute;left:0;bottom:3px;height:58px;width:64px;z-index:2;overflow:hidden;
     display:flex;align-items:center;justify-content:flex-start;padding:6px;box-sizing:border-box;
-    border-radius:32px;background:rgba(16,8,4,.52);border:1px solid rgba(255,255,255,.24);
+    border-radius:29px;background:rgba(16,8,4,.52);border:1px solid rgba(255,255,255,.24);
     -webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);
     box-shadow:0 18px 44px -16px rgba(0,0,0,.72);
     opacity:0;visibility:hidden;pointer-events:none;
@@ -3285,7 +3285,7 @@
     if(w.classList.contains('open')){ otCloseFan(); return; }
     var menu=w.querySelector('.ot-tmenu'), inner=w.querySelector('.ot-tmenu-inner');
     w.classList.add('open');
-    if(menu&&inner) menu.style.width=(inner.offsetWidth+12)+'px';
+    if(menu&&inner) menu.style.width=(inner.offsetWidth+14)+'px'; // +14 = 2×(1px border + 6px padding) → 7px gap each side
     moveTempoThumb(false);
   }
   function otCloseFan(){
@@ -3313,7 +3313,7 @@
     var menu=w.querySelector('.ot-tmenu'), inner=w.querySelector('.ot-tmenu-inner'),
         thumb=w.querySelector('.ot-tthumb'), on=inner&&inner.querySelector('.ot-topt.on');
     if(!menu||!inner||!thumb||!on){ otCloseFan(); return; }
-    var tx=4-on.offsetLeft; // land the chosen value centered under the 64px closed FAB
+    var tx=3-on.offsetLeft; // land the chosen value centered under the 64px closed FAB (border+padding=7)
     w.classList.add('collapsing');
     inner.style.transition='transform .36s cubic-bezier(.4,0,.2,1)';
     inner.style.transform='translateX('+tx+'px)';
