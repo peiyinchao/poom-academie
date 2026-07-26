@@ -1035,6 +1035,14 @@
   .ot-fab:active{transform:scale(.9)}
   .ot-fab svg{width:26px;height:26px}
   .ot-fab.on{background:#fff;border-color:#fff;color:var(--deep)}
+  /* small label above a control, revealed only in context; reset dims until there's progress to undo */
+  .ot-ctl{position:relative;display:inline-flex;flex:none}
+  .ot-lab{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);margin-bottom:9px;
+    font-family:var(--cond);text-transform:uppercase;font-size:10px;letter-spacing:.11em;font-weight:700;
+    color:rgba(255,255,255,.72);white-space:nowrap;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.34);
+    opacity:0;transition:opacity .22s ease}
+  .ot-ctl.lab-on .ot-lab,.ot-tempo.open .ot-lab{opacity:1}
+  .ot-fab.is-off{opacity:.32;pointer-events:none}
   .ot-bar{position:absolute;left:22px;right:22px;bottom:calc(env(safe-area-inset-bottom) + 20px);z-index:6;
     display:flex;align-items:center;justify-content:space-between}
   .ot-left{display:flex;align-items:center;gap:12px}
@@ -2625,14 +2633,16 @@
         '<img class="ot-blink" id="ot-masc-blink" src="'+mBlink+'" alt=""></div></div>'+
       '<div class="ot-bar">'+
         '<div class="ot-left">'+
-          '<button class="ot-fab" id="ot-repeat" data-act="otrepeat" aria-label="Herhalen">'+IC.repeat+'</button>'+
+          '<div class="ot-ctl" id="ot-repeat-ctl"><span class="ot-lab">Herhaal</span>'+
+            '<button class="ot-fab" id="ot-repeat" data-act="otrepeat" aria-label="Herhalen">'+IC.repeat+'</button></div>'+
           '<div class="ot-tempo">'+
+            '<span class="ot-lab">Tempo</span>'+
             '<div class="ot-tmenu"><div class="ot-tmenu-inner"><span class="ot-tthumb"></span>'+tOpts+'</div></div>'+
             '<button class="ot-fab ot-tempo-fab" data-act="ottempo" aria-label="Tempo">'+
               '<span class="ot-tempo-cur" id="ot-tempo-cur">'+otTempoLabel()+'</span></button>'+
           '</div>'+
         '</div>'+
-        '<button class="ot-fab" data-act="otreset" aria-label="Opnieuw">'+IC.reset+'</button>'+
+        '<button class="ot-fab" id="ot-reset" data-act="otreset" aria-label="Opnieuw">'+IC.reset+'</button>'+
       '</div>';
     stage.appendChild(el);
     timerScreen = el;
@@ -3158,9 +3168,12 @@
     if(dec){ void host.offsetWidth; }
     otState._lastFrac=frac;
   }
+  function otResettable(){ return otState.running || otState.phase!=='idle' || otState.i>0; }
   function otSyncControls(){
     var host=timerScreen; if(!host) return;
     var rb=host.querySelector('#ot-repeat'); if(rb) rb.classList.toggle('on', otState.loop);
+    var rc=host.querySelector('#ot-repeat-ctl'); if(rc) rc.classList.toggle('lab-on', otState.loop);
+    var rs=host.querySelector('#ot-reset'); if(rs) rs.classList.toggle('is-off', !otResettable());
     var cur=host.querySelector('#ot-tempo-cur'); if(cur) cur.innerHTML=otTempoLabel();
     [].forEach.call(host.querySelectorAll('.ot-topt'),function(o){ o.classList.toggle('on', parseFloat(o.getAttribute('data-v'))===otState.speed); });
   }
@@ -3222,7 +3235,7 @@
     }
     if(otState.i>=COUNT.length-1){
       if(otState.loop){ otLoopWrap(); otSchedule(); }
-      else { otStop(); otRender(); buzz(22); if(Math.random()<0.45) otMascotPeek(); }
+      else { otStop(); otRender(); otSyncControls(); buzz(22); if(Math.random()<0.45) otMascotPeek(); }
       return;
     }
     otState.i++; otRender(); otPop(); speak(COUNT[otState.i][0]); buzz(6); otSchedule();
@@ -3230,17 +3243,18 @@
   function otStart(){
     otCloseFan();
     otState.phase='ready'; otState.ready=OT_READY; otState.i=0; otState.running=true;
-    otRender(); speak('준비'); buzz(16); otSchedule();
+    otRender(); otSyncControls(); speak('준비'); buzz(16); otSchedule();
   }
   function otPause(){
     otState.running=false; clearTimeout(otState.iv);
     var hint=timerScreen&&timerScreen.querySelector('#ot-hint');
     if(hint){ hint.textContent='gepauzeerd — tik om verder te gaan'; hint.style.opacity='1'; }
+    otSyncControls();
   }
   function otResume(){
     otState.running=true;
     var hint=timerScreen&&timerScreen.querySelector('#ot-hint'); if(hint) hint.style.opacity='0';
-    otSchedule();
+    otSyncControls(); otSchedule();
   }
   function otTap(){
     var w=timerScreen&&timerScreen.querySelector('.ot-tempo');
@@ -3259,7 +3273,7 @@
   }
   function otRepeat(){
     otCloseFan(); otState.loop=!otState.loop;
-    var b=timerScreen&&timerScreen.querySelector('#ot-repeat'); if(b) b.classList.toggle('on', otState.loop);
+    otSyncControls();
   }
   function otTempo(){
     var host=timerScreen; if(!host) return;
