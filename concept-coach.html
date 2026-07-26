@@ -1006,9 +1006,9 @@
   /* attention glint on the "tik om te starten" prompt — a bright slice sweeps through the letters,
      matching the sheen on the Vandaag "Start geleide training" CTA */
   .pt-hint.glint{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
-    background-image:linear-gradient(100deg,rgba(255,255,255,.7) 0%,rgba(255,255,255,.7) 40%,#fff 50%,rgba(255,255,255,.7) 60%,rgba(255,255,255,.7) 100%);
-    background-size:260% 100%;background-repeat:no-repeat;animation:hintGlint 1.15s ease-in-out}
-  @keyframes hintGlint{from{background-position:135% 0}to{background-position:-35% 0}}
+    background-image:linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.96) 50%,rgba(255,255,255,0) 60%),linear-gradient(rgba(255,255,255,.7),rgba(255,255,255,.7));
+    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:130% 0,0 0;animation:hintGlint 1.15s ease-in-out}
+  @keyframes hintGlint{from{background-position:130% 0,0 0}to{background-position:-30% 0,0 0}}
   .pt-btn.glass.on{background:#fff;border-color:#fff;color:var(--deep)}
   /* unfolding tempo control */
   .tempo{position:relative;display:grid;place-items:center}
@@ -1064,7 +1064,7 @@
   .ot-tempo-fab::before{content:'';position:absolute;inset:0;border-radius:50%;z-index:0;
     background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.28);
     -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 14px 30px -16px rgba(0,0,0,.55);
-    transition:transform .34s cubic-bezier(.34,1.28,.42,1), background .34s ease, border-color .34s ease}
+    transition:transform .3s cubic-bezier(.34,1.24,.42,1), background .3s ease, border-color .3s ease}
   .ot-tempo-fab .ot-tempo-cur{position:relative;z-index:1}
   .ot-tempo-cur{font-family:var(--cond);font-weight:800;font-size:17px;line-height:1;letter-spacing:.02em;
     display:inline-flex;align-items:center;gap:2px}
@@ -1095,11 +1095,11 @@
     transition:transform .46s cubic-bezier(.34,1.35,.36,1), width .46s cubic-bezier(.34,1.35,.36,1)}
   /* On select, the whole inner (thumb + picked value) glides home while the pill collapses;
      the other options fade so only the chosen circle travels to the closed-button position. */
-  .ot-tempo.collapsing .ot-topt:not(.on){opacity:0;transition:opacity .18s ease}
+  .ot-tempo.collapsing .ot-topt:not(.on){opacity:0;transition:opacity .14s ease}
   /* hand-off "grow": the closed FAB is born as the white selection at the disc's 44px size,
      then grows to the 64px button and settles into its translucent glass look */
   .ot-tempo.collapsing .ot-tempo-fab::before{transform:scale(.6875);background:#fff;border-color:#fff}
-  .ot-tempo.collapsing .ot-tempo-fab .ot-tempo-cur{color:var(--deep);transition:color .34s ease}
+  .ot-tempo.collapsing .ot-tempo-fab .ot-tempo-cur{color:var(--deep);transition:color .3s ease}
   .ot-tempo.collapsing.settling .ot-tempo-fab::before{transform:none;background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.28)}
   .ot-tempo.collapsing.settling .ot-tempo-fab .ot-tempo-cur{color:#fff}
 
@@ -3347,9 +3347,9 @@
     if(!menu||!inner||!thumb||!on){ otCloseFan(); return; }
     var tx=3-on.offsetLeft; // land the chosen value centered under the 64px closed FAB (border+padding=7)
     w.classList.add('collapsing');
-    inner.style.transition='transform .36s cubic-bezier(.4,0,.2,1)';
+    inner.style.transition='transform .3s cubic-bezier(.32,.72,0,1)';
     inner.style.transform='translateX('+tx+'px)';
-    menu.style.transition='width .36s cubic-bezier(.4,0,.2,1), opacity .22s ease, visibility .44s';
+    menu.style.transition='width .3s cubic-bezier(.32,.72,0,1), opacity .2s ease, visibility .4s';
     menu.style.width='64px';
     clearTimeout(otTmT);
     otTmT=setTimeout(function(){ // disc arrived home → hand off to the FAB, born at the disc's 44px size
@@ -3368,9 +3368,9 @@
           if(m){ m.style.transition=''; m.style.width=''; }
           if(inn){ inn.style.transition=''; inn.style.transform=''; }
           if(th){ th.style.transition=''; th.style.transform=''; th.style.width=''; }
-        }, 380);
-      }, 180);
-    }, 380);
+        }, 300);
+      }, 80);
+    }, 300);
   }
   /* Periodically glint the "tik om te starten" prompt to invite the first tap — only while the timer
      sits idle (never mid-count), matching the sheen on the Vandaag Start-training CTA. */
@@ -3389,11 +3389,11 @@
   function otSpeed(v){
     otState.speed=parseFloat(v); otSyncControls();
     var thumb=timerScreen&&timerScreen.querySelector('.ot-tthumb');
-    if(thumb) thumb.style.transition='transform .24s cubic-bezier(.34,1.28,.4,1), width .24s cubic-bezier(.34,1.28,.4,1)';
+    if(thumb) thumb.style.transition='transform .2s cubic-bezier(.34,1.28,.4,1), width .2s cubic-bezier(.34,1.28,.4,1)';
     moveTempoThumb(true); // beat 1: snap the circle under the picked value
     if(otState.running) otSchedule();
     clearTimeout(otTmT);
-    otTmT=setTimeout(otCollapseTempo, 250); // beat 2: glide it home as the pill collapses
+    otTmT=setTimeout(otCollapseTempo, 160); // beat 2: glide it home as the pill collapses (overlaps beat 1)
   }
   function otStop(){ if(otState.iv){ clearTimeout(otState.iv); otState.iv=null; } clearTimeout(otState._wrapT); otState.running=false; }
   /* When a set finishes, now and then a mascot rises from the bottom to greet Jayden — large face,
