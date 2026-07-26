@@ -1047,7 +1047,7 @@
     display:flex;align-items:center;justify-content:space-between}
   .ot-left{display:flex;align-items:center;gap:12px}
   .ot-tempo{position:relative;width:64px;height:64px}
-  .ot-tempo-fab{position:absolute;left:0;bottom:0;z-index:1;transition:opacity .16s ease}
+  .ot-tempo-fab{position:absolute;left:0;bottom:0;z-index:1;transition:opacity .24s ease}
   .ot-tempo-cur{font-family:var(--cond);font-weight:800;font-size:17px;line-height:1;letter-spacing:.02em;
     display:inline-flex;align-items:center;gap:2px}
   .ot-tempo-cur .ot-tx,.ot-topt .ot-tx{font-size:.94em}
@@ -1075,6 +1075,9 @@
   .ot-tthumb{position:absolute;top:0;left:0;height:44px;width:44px;z-index:0;border-radius:50%;
     background:#fff;box-shadow:0 5px 14px -5px rgba(0,0,0,.5);
     transition:transform .46s cubic-bezier(.34,1.35,.36,1), width .46s cubic-bezier(.34,1.35,.36,1)}
+  /* On select, the whole inner (thumb + picked value) glides home while the pill collapses;
+     the other options fade so only the chosen circle travels to the closed-button position. */
+  .ot-tempo.collapsing .ot-topt:not(.on){opacity:0;transition:opacity .18s ease}
 
   /* ===== Korean visual motifs ===== */
   .stage{
@@ -2996,6 +2999,7 @@
                     {v:1,s:'1',name:'Normaal'}, {v:2,s:'2',name:'Snel'} ];
   var OT_BASE = 850, OT_READY = 3, OT_DRAIN = 520;
   var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, loop:false, _lastFrac:0, _wrapT:null };
+  var otTmT=null; // tempo fold-out collapse/close timer
   function buzz(ms){ if(navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
 
   /* ---- Daily wisdom: shake (or tap) the greeting quote to draw a new one ---- */
@@ -3286,15 +3290,59 @@
   }
   function otCloseFan(){
     var host=timerScreen; if(!host) return;
-    var w=host.querySelector('.ot-tempo'); if(!w||!w.classList.contains('open')) return;
+    var w=host.querySelector('.ot-tempo'); if(!w) return;
+    var collapsing=w.classList.contains('collapsing');
+    if(!w.classList.contains('open') && !collapsing) return;
+    clearTimeout(otTmT);
+    w.classList.remove('open','collapsing');
     var menu=w.querySelector('.ot-tmenu');
-    w.classList.remove('open');
-    if(menu) menu.style.width='';
+    if(menu){ menu.style.transition=''; menu.style.width=''; }
+    if(collapsing){ // aborted mid-glide: also clear the inline travel transforms
+      var inner=w.querySelector('.ot-tmenu-inner'), thumb=w.querySelector('.ot-tthumb');
+      if(inner){ inner.style.transition=''; inner.style.transform=''; }
+      if(thumb){ thumb.style.transition=''; thumb.style.transform=''; thumb.style.width=''; }
+    }
+  }
+  /* Selecting a tempo: the picked circle+value glide LEFT to the closed-button home position while the
+     pill collapses (thumb rides the inner, so the white disc stays under the chosen value the whole way),
+     then a short crossfade hands off to the closed FAB showing the new value. */
+  function otCollapseTempo(){
+    var host=timerScreen; if(!host) return;
+    var w=host.querySelector('.ot-tempo'); if(!w||!w.classList.contains('open')) return;
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ otCloseFan(); return; }
+    var menu=w.querySelector('.ot-tmenu'), inner=w.querySelector('.ot-tmenu-inner'),
+        thumb=w.querySelector('.ot-tthumb'), on=inner&&inner.querySelector('.ot-topt.on');
+    if(!menu||!inner||!thumb||!on){ otCloseFan(); return; }
+    var tx=4-on.offsetLeft; // land the chosen value centered under the 64px closed FAB
+    w.classList.add('collapsing');
+    inner.style.transition='transform .36s cubic-bezier(.4,0,.2,1)';
+    inner.style.transform='translateX('+tx+'px)';
+    menu.style.transition='width .36s cubic-bezier(.4,0,.2,1), opacity .22s ease, visibility .44s';
+    menu.style.width='64px';
+    clearTimeout(otTmT);
+    otTmT=setTimeout(function(){ // disc has arrived home → crossfade the pill out / FAB in
+      if(!timerScreen) return;
+      var w2=timerScreen.querySelector('.ot-tempo'); if(!w2) return;
+      w2.classList.remove('open'); // keep .collapsing + transforms so the disc stays home during the fade
+      otTmT=setTimeout(function(){ // pill fully faded → wipe the inline travel styles invisibly
+        if(!timerScreen) return;
+        var w3=timerScreen.querySelector('.ot-tempo'); if(!w3) return;
+        w3.classList.remove('collapsing');
+        var m=w3.querySelector('.ot-tmenu'), inn=w3.querySelector('.ot-tmenu-inner'), th=w3.querySelector('.ot-tthumb');
+        if(m){ m.style.transition=''; m.style.width=''; }
+        if(inn){ inn.style.transition=''; inn.style.transform=''; }
+        if(th){ th.style.transition=''; th.style.transform=''; th.style.width=''; }
+      }, 300);
+    }, 380);
   }
   function otSpeed(v){
-    otState.speed=parseFloat(v); otSyncControls(); moveTempoThumb(true);
+    otState.speed=parseFloat(v); otSyncControls();
+    var thumb=timerScreen&&timerScreen.querySelector('.ot-tthumb');
+    if(thumb) thumb.style.transition='transform .24s cubic-bezier(.34,1.28,.4,1), width .24s cubic-bezier(.34,1.28,.4,1)';
+    moveTempoThumb(true); // beat 1: snap the circle under the picked value
     if(otState.running) otSchedule();
-    setTimeout(otCloseFan, 480);
+    clearTimeout(otTmT);
+    otTmT=setTimeout(otCollapseTempo, 250); // beat 2: glide it home as the pill collapses
   }
   function otStop(){ if(otState.iv){ clearTimeout(otState.iv); otState.iv=null; } clearTimeout(otState._wrapT); otState.running=false; }
   /* When a set finishes, now and then a mascot rises from the bottom to greet Jayden — large face,
