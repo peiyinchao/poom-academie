@@ -131,12 +131,12 @@
   .fmeta{display:flex;align-items:center;gap:14px;margin-top:16px;
     font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:rgba(255,255,255,.78)}
   .fmeta .d{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.45)}
-  .startbtn{position:relative;overflow:hidden;
+  .startbtn{position:relative;overflow:hidden;isolation:isolate;
     margin-top:8px;width:100%;border:1.5px solid rgba(20,40,90,.18);box-sizing:border-box;border-radius:15px;background:#fff;color:#000;
     font-family:var(--cond);text-transform:uppercase;font-weight:800;letter-spacing:.03em;font-size:16.5px;
     height:64px;padding:0 16px;display:flex;align-items:center;justify-content:center;gap:10px;
     box-shadow:0 10px 22px -14px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.95), inset 0 -2px 3px rgba(20,40,90,.07);transition:transform .12s}
-  .startbtn::before{content:'';position:absolute;top:-60%;bottom:-60%;left:0;width:48%;pointer-events:none;
+  .startbtn::before{content:'';position:absolute;top:-60%;bottom:-60%;left:0;width:48%;pointer-events:none;z-index:3;
     background:linear-gradient(100deg,rgba(40,60,100,0) 0%,rgba(40,60,100,.02) 24%,rgba(255,255,255,.5) 50%,rgba(40,60,100,.02) 76%,rgba(40,60,100,0) 100%);
     filter:blur(3.5px);will-change:transform;
     transform:translateX(-300%) skewX(-16deg)}
@@ -911,7 +911,7 @@
     padding:24px 20px 26px;position:relative;z-index:1}
   .ux-swipe .qc-count{display:inline-block;font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;
     font-size:11px;color:var(--gray);font-weight:700;margin-bottom:12px}
-  /* reflect: coiled belt lying between the cards and the button (rotated 90deg CCW -> label on the right) */
+  /* reflect: coiled belt lying between the title and the question cards (rotated 90deg CCW -> label on the right) */
   .ci-beltband{flex:none;position:relative;z-index:1;height:118px;pointer-events:none}
   .bb-belt{position:absolute;left:157px;top:50%;width:99px;height:270px;transform:translate(-50%,-50%) rotate(-90deg)}
   .bb-belt .cb{position:absolute;inset:0}
@@ -3782,12 +3782,12 @@
     if(_ciCompare){ var d=document.createElement('div'); d.className='uxswitch'; d.innerHTML=ciSwitcherInner(); reflect.insertBefore(d, bodyEl); }
     bodyEl.innerHTML = CI_UX==='accordion' ? renderAccordion() : CI_UX==='swipe' ? renderSwipe() : renderPage();
     bodyEl.scrollTop=0;
-    // reflect: a coiled belt lies in the band between the cards and the button
+    // reflect: a coiled belt lies in the band between the title and the question cards
     // (rotated 90deg CCW so the white label tag sits on the right); recolours to the current grade
     if(rfMode!=='goal'){
       var band=document.createElement('div'); band.className='ci-beltband'; band.setAttribute('aria-hidden','true');
       band.innerHTML='<div class="bb-belt"><span class="cb cb-main"></span><span class="cb cb-dark"></span><span class="cb cb-ink"></span></div>';
-      reflect.insertBefore(band, footEl);
+      reflect.insertBefore(band, bodyEl);
       ciPaintBelt(band.querySelector('.bb-belt'));
     }
     if(CI_UX==='accordion') requestAnimationFrame(accInit);
