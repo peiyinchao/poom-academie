@@ -583,6 +583,14 @@
   .why.show{display:block;animation:stepin .35s both}
 
   /* ---- Proefexamen (meerkeuze-examen) ---- */
+  /* Quiet close button like the Oefentimer, adapted to the light exam bg */
+  #exam .shead{justify-content:flex-end}
+  #exam .shead .sx{width:64px;height:64px;flex:none;margin:0;border:0;border-radius:50%;
+    background:transparent;color:var(--gray);display:grid;place-items:center;
+    transition:transform .16s ease, background .2s ease, color .2s ease}
+  #exam .shead .sx:hover{background:rgba(20,23,18,.05);color:var(--ink)}
+  #exam .shead .sx:active{transform:scale(.9)}
+  #exam .shead .sx svg{width:24px;height:24px}
   .exam .ex-meta{display:flex;align-items:center;gap:8px;margin:14px 2px 0}
   .ex-chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--cond);text-transform:uppercase;
     letter-spacing:.04em;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;line-height:1}
@@ -590,13 +598,16 @@
   .ex-chip svg{width:13px;height:13px}
   .ex-chip.ok{background:#ECFDF3;color:#12B76A}
   .ex-chip.bad{background:#FEF3F2;color:#F04438}
-  .ex-cat{margin-left:auto;font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;
-    font-size:10.5px;color:var(--gray)}
+  .ex-qcat{font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;
+    font-size:.82em;font-weight:800;color:var(--el)}
   .ex-q{margin-top:14px;font-size:18px;font-weight:600;color:var(--ink);line-height:1.4}
   .exam .opts{margin-top:16px}
   .ex-result{text-align:center;padding:26px 8px 0}
-  .ex-mascot{width:172px;height:auto;margin:0 auto -6px;display:block;filter:drop-shadow(0 12px 20px rgba(0,0,0,.14))}
-  .ex-flags{width:100%;max-width:320px;height:auto;margin:22px auto 0;display:block}
+  .ex-masc{position:relative;display:inline-block;margin:0 auto -6px;filter:drop-shadow(0 12px 20px rgba(0,0,0,.14))}
+  .ex-mascot{width:236px;height:auto;display:block}
+  .ex-mascot.blinklay{position:absolute;left:0;top:0;opacity:0;filter:none}
+  .ex-result.pass .ex-mascot.blinklay{animation:exBlink 4.8s ease-in-out infinite}
+  @keyframes exBlink{0%,86%,100%{opacity:0}88%,90%{opacity:1}92%{opacity:0}94%,96%{opacity:1}}
   .ex-badge{width:78px;height:78px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-size:34px}
   .ex-badge svg{width:40px;height:40px}
   .ex-result.pass .ex-badge{background:#ECFDF3;color:#12B76A}
@@ -604,8 +615,6 @@
   .ex-rk{margin-top:16px;font-family:var(--cond);text-transform:uppercase;letter-spacing:.16em;font-size:12px;color:var(--gray)}
   .ex-rt{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:40px;line-height:1;margin:8px 0 0;color:var(--ink)}
   .ex-rs{max-width:300px;margin:14px auto 0;font-size:14.5px;line-height:1.5;color:var(--gray)}
-  .ex-scorebar{max-width:220px;height:8px;border-radius:5px;background:var(--soft);overflow:hidden;margin:20px auto 0}
-  .ex-scorebar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--el),var(--deep))}
 
   /* done */
   .done{text-align:center;padding:20px 6px 0}
@@ -2529,8 +2538,6 @@
     el.innerHTML =
       '<div class="shead">'+
         '<button class="sx" data-act="exclose" aria-label="Sluiten">'+IC.x+'</button>'+
-        '<div class="sprog"><i id="ex-fill"></i></div>'+
-        '<span class="sstep" id="ex-step"></span>'+
       '</div>'+
       '<div class="sbody" id="ex-body"></div>'+
       '<div class="sfoot" id="ex-foot"></div>';
@@ -2553,8 +2560,6 @@
     var q = s.qs[s.i];
     var body = examEl.querySelector('#ex-body');
     var foot = examEl.querySelector('#ex-foot');
-    examEl.querySelector('#ex-fill').style.width = Math.round(s.i/s.qs.length*100)+'%';
-    examEl.querySelector('#ex-step').textContent = (s.i+1)+'/'+s.qs.length;
     var letters=['A','B','C','D','E','F'];
     var opts = q.o.map(function(o,i){
       return '<button class="opt" data-act="exanswer" data-i="'+i+'" data-a="'+q.a+'">'+
@@ -2563,9 +2568,8 @@
     body.innerHTML = '<div class="stepin">'+
       sHead('Proef examen','Vraag '+(s.i+1)+' van '+s.qs.length,'Geslaagd vanaf '+s.pass+' goed · max '+s.maxFout+' fout')+
       '<div class="ex-meta"><span class="ex-chip ok">'+IC.check+'<b>'+s.goed+'</b></span>'+
-        '<span class="ex-chip bad"><b>'+s.fout+'</b> fout</span>'+
-        (q.cat?'<span class="ex-cat">'+esc(q.cat)+'</span>':'')+'</div>'+
-      '<div class="ex-q">'+esc(q.v)+'</div>'+
+        '<span class="ex-chip bad"><b>'+s.fout+'</b> fout</span></div>'+
+      '<div class="ex-q">'+(q.cat?'<span class="ex-qcat">'+esc(q.cat)+': </span>':'')+esc(q.v)+'</div>'+
       '<div class="opts" id="ex-opts">'+opts+'</div>'+
       (q.why?'<div class="why" id="ex-why">'+esc(q.why)+'</div>':'')+
     '</div>';
@@ -2597,12 +2601,10 @@
     var passed = s.fout <= s.maxFout;
     var body = examEl.querySelector('#ex-body');
     var foot = examEl.querySelector('#ex-foot');
-    examEl.querySelector('#ex-fill').style.width='100%';
-    examEl.querySelector('#ex-step').textContent='';
     if(passed && ('examen' in missionDone)) missionDone.examen = true;
-    var pct = Math.round(s.goed/s.total*100);
     var hero = passed
-      ? '<img class="ex-mascot" src="assets/mascot/kid-medal.png" alt="" aria-hidden="true">'
+      ? '<span class="ex-masc"><img class="ex-mascot" src="assets/mascot/kid-medal.png" alt="" aria-hidden="true">'+
+          '<img class="ex-mascot blinklay" src="assets/mascot/kid-medal-blink.png" alt="" aria-hidden="true"></span>'
       : '<div class="ex-badge">💪</div>';
     body.innerHTML = '<div class="stepin"><div class="ex-result '+(passed?'pass':'fail')+'">'+
       hero+
@@ -2611,11 +2613,12 @@
       '<div class="ex-rs">'+(passed
          ? 'Sterk gedaan — je haalde de norm ('+s.pass+' goed, max '+s.maxFout+' fout). Klaar voor het echte examen!'
          : 'Je had '+s.fout+' fout; op het examen mag dat er max '+s.maxFout+' zijn. Oefen nog even en probeer opnieuw.')+'</div>'+
-      '<div class="ex-scorebar"><i style="width:'+pct+'%"></i></div>'+
-      (passed?'<img class="ex-flags" src="assets/mascot/celebrate-flags.png" alt="" aria-hidden="true">':'')+
     '</div></div>';
-    foot.innerHTML = '<button class="nextbtn" data-act="exretry">'+IC.reset+' Opnieuw proberen</button>'+
-      '<button class="nextbtn ghost" data-act="exclose" style="margin-top:10px">Terug naar vandaag</button>';
+    foot.innerHTML = passed
+      ? '<button class="nextbtn" data-act="exclose">Terug naar vandaag</button>'+
+        '<button class="nextbtn ghost" data-act="exretry" style="margin-top:10px">'+IC.reset+' Opnieuw proberen</button>'
+      : '<button class="nextbtn" data-act="exretry">'+IC.reset+' Opnieuw proberen</button>'+
+        '<button class="nextbtn ghost" data-act="exclose" style="margin-top:10px">Terug naar vandaag</button>';
     if(passed) confetti();
   }
   function examRetry(){ closeExam(); openExam(); }
