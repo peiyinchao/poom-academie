@@ -147,6 +147,9 @@
   .startbtn-ic{width:44px;height:44px;flex:none;background:currentColor;transform:translateZ(0);backface-visibility:hidden;
     -webkit-mask:url(assets/icons/Coach1.png) center/contain no-repeat;
     mask:url(assets/icons/Coach1.png) center/contain no-repeat}
+  /* compact whistle-only CTA in the training-card header (keeps the sheen sweep) */
+  .startbtn.compact{width:54px;height:54px;flex:none;margin:0;padding:0;border-radius:16px;gap:0}
+  .startbtn.compact .startbtn-ic{width:34px;height:34px}
 
   /* ---------- Up next (secondary) ---------- */
   .upnext{display:flex;align-items:center;gap:13px;margin-top:14px;background:var(--surface);
@@ -809,6 +812,7 @@
   .fchip.on{border-color:var(--el);background:var(--tint);color:var(--deep)}
   .fchip.on .fck{display:grid}
   .fchip:active{transform:scale(.96)}
+  .fchip.disabled,.fchip:disabled{opacity:.36;pointer-events:none;filter:saturate(.6)}
   .rhint{margin-top:16px;font-size:13px;color:var(--gray);text-align:center}
   .rdone-ic{width:88px;height:88px;margin:14px auto 4px;border-radius:50%;display:grid;place-items:center;
     background:var(--tint);color:var(--el)}
@@ -1990,9 +1994,7 @@
     }).join('');
     var quote = curQuote();
     var wfSet = WEEK_FOCUS.length>0;
-    var greetLine = wfSet
-      ? 'Deze week letten we extra op <b>'+esc(weekFocusText())+'</b>. Vandaag maken we <b>'+esc(f.korean)+'</b> sterker.'
-      : 'Vandaag maken we <b>'+esc(f.korean)+'</b> sterker — klaar voor je training?';
+    var greetLine = 'Vandaag maken we <b>'+esc(f.korean)+'</b> sterker — klaar voor je training?';
     var ciWk = 'wk '+weekNo();
     var checkin;
     if(weekPhase()==='reflect'){
@@ -2060,9 +2062,9 @@
               '<img class="td-kanji" src="assets/brand/taekwondo-brush-white.png" alt="" aria-hidden="true">'+
               '<div class="td-title">Training van vandaag</div>'+
             '</div>'+
+            '<button class="startbtn compact" data-act="start" aria-label="Start geleide training" title="Start geleide training"><span class="startbtn-ic" aria-hidden="true"></span></button>'+
           '</div>'+
           '<div class="td-list">'+missionCols+'</div>'+
-          '<button class="startbtn" data-act="start"><span class="startbtn-ic" aria-hidden="true"></span> Start geleide training</button>'+
         '</div>'+ ddBanner +
 
       '</div>'+
@@ -3654,13 +3656,18 @@
   function togglePick(id){
     var i = rfPick.indexOf(id);
     if(i>=0){ rfPick.splice(i,1); }
-    else { if(rfPick.length>=FOCUS_MAX) rfPick.shift(); rfPick.push(id); }
+    else if(rfPick.length < FOCUS_MAX){ rfPick.push(id); }
+    // at FOCUS_MAX the unselected chips are disabled, so extra picks are ignored
   }
   function syncFocusChips(){
     if(!reflect) return;
     var wrap=reflect.querySelector('.fchips'); if(!wrap) return;
+    var full = rfPick.length>=FOCUS_MAX;
     [].forEach.call(wrap.querySelectorAll('.fchip'), function(btn){
-      btn.classList.toggle('on', rfPick.indexOf(btn.getAttribute('data-id'))>=0);
+      var on = rfPick.indexOf(btn.getAttribute('data-id'))>=0;
+      btn.classList.toggle('on', on);
+      btn.classList.toggle('disabled', full && !on);
+      btn.disabled = full && !on;
     });
     var hint=reflect.querySelector('.rhint');
     if(hint) hint.textContent = focusHint();
@@ -3707,9 +3714,9 @@
         answered:function(){ return !!rfMood; },
         summary:function(){ var m=moodInfo(rfMood); return m?m.em+' '+m.t:''; } },
       { id:'focus', q:'Waar wil je op letten?', hint:'Kies er 1 tot 5 om deze week centraal te zetten.',
-        opts:function(){ return '<div class="fchips">'+FOCUS_AREAS.map(function(fa){
-            var on=rfPick.indexOf(fa.id)>=0;
-            return '<button class="fchip'+(on?' on':'')+'" data-act="pickfocus" data-id="'+fa.id+'">'+
+        opts:function(){ var full=rfPick.length>=FOCUS_MAX; return '<div class="fchips">'+FOCUS_AREAS.map(function(fa){
+            var on=rfPick.indexOf(fa.id)>=0, dis=full&&!on;
+            return '<button class="fchip'+(on?' on':'')+(dis?' disabled':'')+'"'+(dis?' disabled':'')+' data-act="pickfocus" data-id="'+fa.id+'">'+
               '<span class="fe">'+fa.em+'</span><span>'+fa.label+'</span><span class="fck">'+IC.check+'</span></button>';
           }).join('')+'</div><div class="rhint">'+focusHint()+'</div>'; },
         answered:function(){ return rfPick.length>0; },
