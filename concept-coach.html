@@ -1064,7 +1064,7 @@
   .ot-tempo-fab::before{content:'';position:absolute;inset:0;border-radius:50%;z-index:0;
     background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.28);
     -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 14px 30px -16px rgba(0,0,0,.55);
-    transition:transform .22s cubic-bezier(.34,1.3,.42,1), background .22s ease, border-color .22s ease}
+    transition:transform .24s cubic-bezier(.32,.66,.4,1), background .44s ease, border-color .44s ease}
   .ot-tempo-fab .ot-tempo-cur{position:relative;z-index:1}
   .ot-tempo-cur{font-family:var(--cond);font-weight:800;font-size:17px;line-height:1;letter-spacing:.02em;
     display:inline-flex;align-items:center;gap:2px}
@@ -1099,7 +1099,7 @@
   /* hand-off "grow": the closed FAB is born as the white selection at the disc's 44px size,
      then grows to the 64px button and settles into its translucent glass look */
   .ot-tempo.collapsing .ot-tempo-fab::before{transform:scale(.6875);background:#fff;border-color:#fff}
-  .ot-tempo.collapsing .ot-tempo-fab .ot-tempo-cur{color:var(--deep);transition:color .22s ease}
+  .ot-tempo.collapsing .ot-tempo-fab .ot-tempo-cur{color:var(--deep);transition:color .38s ease}
   .ot-tempo.collapsing.settling .ot-tempo-fab::before{transform:none;background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.28)}
   .ot-tempo.collapsing.settling .ot-tempo-fab .ot-tempo-cur{color:#fff}
 
@@ -3368,7 +3368,7 @@
           if(m){ m.style.transition=''; m.style.width=''; }
           if(inn){ inn.style.transition=''; inn.style.transform=''; }
           if(th){ th.style.transition=''; th.style.transform=''; th.style.width=''; }
-        }, 280); // ≥ the (now faster) grow so styles aren't wiped mid-grow
+        }, 480); // ≥ the softened white→glass fade so styles aren't wiped mid-morph
       }, 180);
     }, 380);
   }
