@@ -370,8 +370,8 @@
     transition:opacity .25s, transform .25s, color .2s ease, background .2s ease}
   .fab-timer svg{width:25px;height:25px}
   .fab-timer-ic{width:42px;height:42px;background:currentColor;
-    -webkit-mask:url(assets/icons/Timer.png) center/contain no-repeat;
-    mask:url(assets/icons/Timer.png) center/contain no-repeat}
+    -webkit-mask:url(assets/icons/Timer2.png) center/contain no-repeat;
+    mask:url(assets/icons/Timer2.png) center/contain no-repeat}
   .fab-timer:hover{color:rgba(30,22,16,.9)}
   .fab-timer:active{transform:scale(.93)}
   .fnav.hide ~ .fab-timer{opacity:0;pointer-events:none;transform:translateY(10px)}
@@ -941,6 +941,11 @@
      (a tall Q2 fits on one screen). On scroll the mascot leaves, but the title text shrinks and
      rises into the top bar and STAYS visible as a compact header. --cic (0=Q1 -> 1=collapsed). */
   .ux-swipe .ci-topttl{position:absolute;left:0;right:0;top:82px;z-index:6;pointer-events:none;will-change:transform}
+  /* The mascot/belt now lives in its own z-0 layer, but the title used to borrow its height: as a
+     tall flex box (align-items:flex-end) the text started low, near the mascot's base, so the -150px
+     dock parked it in the top bar. Re-add that height here so the start position and the docking
+     animation match the pre-split behaviour (instead of starting high and scrolling off-screen). */
+  .ux-swipe .ci-topttl.has-masc,.ux-swipe .ci-topttl.has-belt{min-height:201px}
   .ux-swipe .ci-topttl .ci-tt-txt{transform-origin:left top;
     transform:translateY(calc(var(--cic,0) * -150px)) scale(calc(1 - var(--cic,0) * .34))}
   /* leave room on the right for the mascot/belt layer so the title never runs under it (matches the old flex gutter) */
