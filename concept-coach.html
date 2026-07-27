@@ -712,6 +712,9 @@
   .td-wm{position:absolute;right:-26px;top:50%;transform:translateY(-50%);height:122%;width:auto;
     opacity:.16;pointer-events:none;user-select:none;z-index:-1}
   .td-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+  .td-titlewrap{display:flex;flex-direction:column;gap:9px;min-width:0}
+  .td-kanji{height:32px;width:auto;align-self:flex-start;opacity:.92;
+    filter:drop-shadow(0 2px 7px rgba(16,24,40,.28))}
   .td-title{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:20px;line-height:1;letter-spacing:.01em}
   .td-count{flex:none;font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:11.5px;font-weight:700;
     color:rgba(255,255,255,.72);line-height:1}
@@ -2053,7 +2056,10 @@
         '<div class="trainday" style="--el:'+t.el+';--deep:'+t.deep+';--accent:'+beltStroke(geupInfo(GEUP_I))+'">'+
           '<img class="td-wm" src="assets/wm-kick.png" alt="" aria-hidden="true">'+
           '<div class="td-head">'+
-            '<div class="td-title">Training van vandaag</div>'+
+            '<div class="td-titlewrap">'+
+              '<img class="td-kanji" src="assets/brand/taekwondo-brush-white.png" alt="" aria-hidden="true">'+
+              '<div class="td-title">Training van vandaag</div>'+
+            '</div>'+
           '</div>'+
           '<div class="td-list">'+missionCols+'</div>'+
           '<button class="startbtn" data-act="start"><span class="startbtn-ic" aria-hidden="true"></span> Start geleide training</button>'+
