@@ -576,9 +576,9 @@
   /* check (quiz) */
   .opts{margin-top:22px;display:grid;gap:11px}
   .opt{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:var(--surface);
-    border:1.5px solid var(--line);border-radius:15px;padding:16px 17px;font-size:15.5px;font-weight:600;color:var(--ink);
+    border:1.5px solid var(--line);border-radius:999px;padding:16px 20px;font-size:15.5px;font-weight:600;color:var(--ink);
     transition:.16s}
-  .opt .ol{width:26px;height:26px;flex:none;border-radius:8px;background:var(--soft);color:var(--gray);
+  .opt .ol{width:26px;height:26px;flex:none;border-radius:50%;background:var(--soft);color:var(--gray);
     display:grid;place-items:center;font-family:var(--cond);font-weight:700;font-size:14px}
   .opt.correct{border-color:#12B76A;background:#ECFDF3}
   .opt.correct .ol{background:#12B76A;color:#fff}
@@ -601,17 +601,15 @@
   #exam .shead .sx:hover, #drill .shead .sx:hover{background:rgba(20,23,18,.05);color:var(--ink)}
   #exam .shead .sx:active, #drill .shead .sx:active{transform:scale(.9)}
   #exam .shead .sx svg, #drill .shead .sx svg{width:24px;height:24px}
-  .ex-track{display:flex;align-items:center;justify-content:center;gap:var(--eg,6px);margin:18px 0 4px;padding:8px 0}
+  .ex-track{display:flex;align-items:center;justify-content:flex-start;gap:var(--eg,6px);margin:18px 0 4px;padding:8px 0}
   .exd{flex:none;width:var(--ez,12px);height:var(--ez,12px);border-radius:50%;background:rgba(20,23,18,.12);
     transition:background-color .3s ease,transform .3s ease}
   .exd.ok{background:#12B76A}
   .exd.bad{background:#F04438}
   .exd.dpop{animation:exdpop .42s ease}
   @keyframes exdpop{0%{transform:scale(1)}42%{transform:scale(1.55)}100%{transform:scale(1)}}
-  .ex-cut{flex:none;align-self:center;width:2px;height:22px;background:rgba(20,23,18,.24);border-radius:2px;position:relative;margin:0}
-  .ex-cut-b{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:17px;height:17px;border-radius:50%;
-    background:#12B76A;color:#fff;display:grid;place-items:center;box-shadow:0 1px 3px rgba(16,25,40,.22)}
-  .ex-cut-b svg{width:10px;height:10px}
+  /* pass-threshold marker: a subtle separator dot (like the ko·nl mid-dot), not a line + badge */
+  .ex-cut{flex:none;align-self:center;width:4px;height:4px;border-radius:50%;background:rgba(20,23,18,.26);margin:0 2px}
   .ex-q{margin-top:14px;font-size:18px;font-weight:600;color:var(--ink);line-height:1.4}
   .exam .opts{margin-top:16px}
   .ex-result{text-align:center;padding:26px 8px 0}
@@ -2763,7 +2761,7 @@
   function examTrackInner(s){
     var out='';
     for(var i=1;i<=s.total;i++){
-      if(i===s.pass+1) out+='<span class="ex-cut" aria-hidden="true"><span class="ex-cut-b">'+IC.check+'</span></span>';
+      if(i===s.pass+1) out+='<span class="ex-cut" aria-hidden="true"></span>';
       var cls=(i<=s.goed)?' ok':(i>s.total-s.fout)?' bad':'';
       out+='<i class="exd'+cls+'" data-d="'+i+'"></i>';
     }
