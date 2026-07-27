@@ -863,7 +863,8 @@
   .acc-bin .rate{margin-top:2px}
   .acc-bin .fchips{margin-top:2px}
   /* variant C — vertical swipe cards */
-  .ux-swipe .sbody{padding:0;scroll-snap-type:y mandatory;scroll-behavior:smooth}
+  .ux-swipe .sbody{padding:0;scroll-snap-type:y mandatory;scroll-behavior:smooth;
+    -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 34px);mask-image:linear-gradient(180deg,transparent 0,#000 34px)}
   .qcard{scroll-snap-align:center;scroll-snap-stop:always;min-height:100%;display:flex;flex-direction:column;
     justify-content:center;padding:14px 24px 22px;box-sizing:border-box}
   .qcard-in{width:100%}
@@ -909,10 +910,20 @@
   .ci-topttl .ci-tt-belt{flex:0 0 auto;position:relative;width:104px;height:199px;margin:0 -6px -12px 0;
     display:block;pointer-events:none;filter:drop-shadow(0 12px 16px rgba(20,23,18,.18))}
   .ci-topttl .ci-tt-belt .bb-belt{position:absolute;inset:0;left:0;top:0;width:100%;height:100%;transform:none}
-  .ux-swipe .qcard{padding:10px 22px 20px}
+  /* Kaarten (swipe): the title overlays the scroll body so every card gets the full height
+     (a tall Q2 fits on one screen). On scroll the mascot leaves, but the title text shrinks and
+     rises into the top bar and STAYS visible as a compact header. --cic (0=Q1 -> 1=collapsed). */
+  .ux-swipe .ci-topttl{position:absolute;left:0;right:0;top:82px;z-index:6;pointer-events:none;will-change:transform}
+  .ux-swipe .ci-topttl .ci-tt-txt{transform-origin:left top;
+    transform:translateY(calc(var(--cic,0) * -150px)) scale(calc(1 - var(--cic,0) * .34))}
+  .ux-swipe .ci-topttl .ci-tt-masc,.ux-swipe .ci-topttl .ci-tt-belt{
+    transform:scale(calc(1 - var(--cic,0) * .5));transform-origin:50% 50%;opacity:calc(1 - var(--cic,0) * 1.5)}
+  .ux-swipe .qcard{padding:8px 22px 12px}
+  /* first card sits below the overlaid title; later cards use the full height */
+  .ux-swipe .qcard:first-child{justify-content:flex-start;padding-top:224px}
   .ux-swipe .qcard-in{background:var(--surface);border:1.5px solid var(--line);border-radius:22px;
     box-shadow:0 22px 46px -26px rgba(20,23,18,.42),inset 0 1px 0 rgba(255,255,255,.7);
-    padding:24px 20px 26px;position:relative;z-index:1}
+    padding:22px 20px 22px;position:relative;z-index:1}
   .ux-swipe .qc-count{display:inline-block;font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;
     font-size:11px;color:var(--gray);font-weight:700;margin-bottom:12px}
   /* reflect: coiled belt lying between the title and the question cards (rotated 90deg CCW -> label on the right) */
@@ -1097,11 +1108,16 @@
      the other options fade so only the chosen circle travels to the closed-button position. */
   .ot-tempo.collapsing .ot-topt:not(.on){opacity:0;transition:opacity .18s ease}
   /* hand-off "grow": the closed FAB is born as the white selection at the disc's 44px size,
-     then grows to the 64px button and settles into its translucent glass look */
+     then grows to the 64px button. The white->glass recolour is SPLIT across the two beats:
+     ~50% as the menu finishes closing (.handoff), the remaining 50% as it grows home (.settling). */
   .ot-tempo.collapsing .ot-tempo-fab::before{transform:scale(.6875);background:#fff;border-color:#fff}
-  .ot-tempo.collapsing .ot-tempo-fab .ot-tempo-cur{color:var(--deep);transition:color .38s ease}
-  .ot-tempo.collapsing.settling .ot-tempo-fab::before{transform:none;background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.28)}
-  .ot-tempo.collapsing.settling .ot-tempo-fab .ot-tempo-cur{color:#fff}
+  .ot-tempo.collapsing .ot-tempo-fab .ot-tempo-cur{color:var(--deep);transition:color .2s ease}
+  .ot-tempo.collapsing.handoff .ot-tempo-fab::before{background:rgba(255,255,255,.739);border-color:rgba(255,255,255,.784);
+    transition:background .2s ease, border-color .2s ease}
+  .ot-tempo.collapsing.handoff .ot-tempo-fab .ot-tempo-cur{color:color-mix(in srgb, var(--deep), #fff 30%)}
+  .ot-tempo.collapsing.settling .ot-tempo-fab::before{transform:none;background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.28);
+    transition:transform .28s cubic-bezier(.32,.72,0,1), background .28s ease, border-color .28s ease}
+  .ot-tempo.collapsing.settling .ot-tempo-fab .ot-tempo-cur{color:#fff;transition:color .28s ease}
 
   /* ===== Korean visual motifs ===== */
   .stage{
@@ -3326,7 +3342,7 @@
     var collapsing=w.classList.contains('collapsing');
     if(!w.classList.contains('open') && !collapsing) return;
     clearTimeout(otTmT);
-    w.classList.remove('open','collapsing','settling');
+    w.classList.remove('open','collapsing','settling','handoff');
     var menu=w.querySelector('.ot-tmenu');
     if(menu){ menu.style.transition=''; menu.style.width=''; }
     if(collapsing){ // aborted mid-glide: also clear the inline travel transforms
@@ -3352,24 +3368,26 @@
     menu.style.transition='width .36s cubic-bezier(.4,0,.2,1), opacity .22s ease, visibility .44s';
     menu.style.width='64px';
     clearTimeout(otTmT);
-    otTmT=setTimeout(function(){ // disc arrived home → hand off to the FAB, born at the disc's 44px size
+    otTmT=setTimeout(function(){ // disc arrived home → hand off to the FAB, born WHITE at the disc's 44px size
       if(!timerScreen) return;
       var w2=timerScreen.querySelector('.ot-tempo'); if(!w2) return;
       w2.classList.remove('open'); // FAB fades in as the white 44px selection over the disc; pill fades out
-      otTmT=setTimeout(function(){ // pill gone → grow the FAB circle 44→64 + settle to translucent glass
+      void w2.offsetWidth;         // commit the white state, then fade the FAB HALF-way to glass as the menu finishes closing
+      w2.classList.add('handoff');
+      otTmT=setTimeout(function(){ // ~50% recoloured → grow the FAB 44→64 while finishing the remaining 50% to glass
         if(!timerScreen) return;
         var w3=timerScreen.querySelector('.ot-tempo'); if(!w3) return;
         w3.classList.add('settling');
         otTmT=setTimeout(function(){ // grown → wipe the inline travel styles + collapse classes invisibly
           if(!timerScreen) return;
           var w4=timerScreen.querySelector('.ot-tempo'); if(!w4) return;
-          w4.classList.remove('collapsing','settling');
+          w4.classList.remove('collapsing','settling','handoff');
           var m=w4.querySelector('.ot-tmenu'), inn=w4.querySelector('.ot-tmenu-inner'), th=w4.querySelector('.ot-tthumb');
           if(m){ m.style.transition=''; m.style.width=''; }
           if(inn){ inn.style.transition=''; inn.style.transform=''; }
           if(th){ th.style.transition=''; th.style.transform=''; th.style.width=''; }
-        }, 480); // ≥ the softened white→glass fade so styles aren't wiped mid-morph
-      }, 180);
+        }, 480); // ≥ the settling grow+fade so styles aren't wiped mid-morph
+      }, 200); // 50% fade completes right as the grow begins
     }, 380);
   }
   /* Periodically glint the "tik om te starten" prompt to invite the first tap — only while the timer
@@ -3829,13 +3847,32 @@
         '<span class="qc-count">Vraag '+(i+1)+' / '+n+'</span>'+
         '<h2 class="qc-q">'+x.q+'</h2>'+(x.hint?'<p class="qc-sub">'+x.hint+'</p>':'')+
         '<div class="qc-opts">'+x.opts()+'</div>'+
+      '</div>'+
         (i<n-1?'<div class="qc-swipehint">'+IC.chev+' veeg omhoog</div>':'')+
-      '</div></section>';
+      '</section>';
     }).join('');
   }
   function swipeInit(){
-    /* Pagination dots removed: the per-card "Vraag n / 2" counter shows position and the animated
-       "veeg omhoog" hint (higher-contrast, matches the app's swipe-up pattern) guides the swipe. */
+    /* Overlaid title collapses as you scroll toward the next card: drives --cic (0 -> 1) from the
+       scroll position so the title lifts/shrinks/fades and each question card gets the full height.
+       No pagination dots: the per-card "Vraag n / N" counter + animated "veeg omhoog" hint guide it. */
+    if(CI_UX!=='swipe' || !reflect) return;
+    var body=reflect.querySelector('#rfbody'), ttl=reflect.querySelector('.ci-topttl'),
+        shead=reflect.querySelector('.shead');
+    if(!body || !ttl) return;
+    if(shead) ttl.style.top=shead.offsetHeight+'px';
+    reflect.style.setProperty('--cic','0');
+    // Title docks 1:1 with the scroll (denom matches the title's -150px translate) so a rising
+    // card can't sneak under it; past 150px it's parked as the compact header in the top bar.
+    var denom=150;
+    function upd(){
+      var c=body.scrollTop/denom; c=c<0?0:c>1?1:c;
+      reflect.style.setProperty('--cic', c.toFixed(3));
+    }
+    if(body._ciScroll) body.removeEventListener('scroll', body._ciScroll);
+    body._ciScroll=upd;
+    body.addEventListener('scroll', upd, {passive:true});
+    upd();
   }
   function swipeAdvance(qid){
     var body=reflect.querySelector('#rfbody'), cards=[].slice.call(body.querySelectorAll('.qcard'));
