@@ -588,14 +588,14 @@
   .why.show{display:block;animation:stepin .35s both}
 
   /* ---- Proefexamen (meerkeuze-examen) ---- */
-  /* Quiet close button like the Oefentimer, adapted to the light exam bg */
-  #exam .shead{justify-content:flex-end}
-  #exam .shead .sx{width:64px;height:64px;flex:none;margin:0;border:0;border-radius:50%;
+  /* Quiet close button like the Oefentimer, adapted to the light exam/drill bg */
+  #exam .shead, #drill .shead{justify-content:flex-end}
+  #exam .shead .sx, #drill .shead .sx{width:64px;height:64px;flex:none;margin:0;border:0;border-radius:50%;
     background:transparent;color:var(--gray);display:grid;place-items:center;
     transition:transform .16s ease, background .2s ease, color .2s ease}
-  #exam .shead .sx:hover{background:rgba(20,23,18,.05);color:var(--ink)}
-  #exam .shead .sx:active{transform:scale(.9)}
-  #exam .shead .sx svg{width:24px;height:24px}
+  #exam .shead .sx:hover, #drill .shead .sx:hover{background:rgba(20,23,18,.05);color:var(--ink)}
+  #exam .shead .sx:active, #drill .shead .sx:active{transform:scale(.9)}
+  #exam .shead .sx svg, #drill .shead .sx svg{width:24px;height:24px}
   .exam .ex-meta{display:flex;align-items:center;gap:8px;margin:14px 2px 0}
   .ex-chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--cond);text-transform:uppercase;
     letter-spacing:.04em;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;line-height:1}
@@ -758,8 +758,8 @@
     30%{opacity:1;transform:translate(var(--hdx),var(--hdy)) scale(calc(1.15*var(--hsc))) rotate(var(--hrot))}
     60%{opacity:1;transform:translate(var(--hdx),var(--hdy)) scale(calc(1*var(--hsc))) rotate(var(--hrot))}
     100%{opacity:0;transform:translate(var(--hdx),var(--hdy)) scale(calc(1.08*var(--hsc))) rotate(var(--hrot))}}
-  /* exam row launches instead of toggling → play affordance */
-  .ti-go{flex:none;width:27px;height:27px;border-radius:50%;background:rgba(255,255,255,.2);
+  /* mission rows launch their drill → play affordance (ringed like the idle checkbox) */
+  .ti-go{flex:none;width:27px;height:27px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:rgba(255,255,255,.14);
     display:grid;place-items:center;color:#fff}
   .ti-go svg{width:12px;height:12px;margin-left:1px}
   .td-item.done .ti-ck{background:#fff;border-color:#fff;color:var(--accent,var(--deep))}
@@ -886,6 +886,7 @@
   .qcard{scroll-snap-align:center;scroll-snap-stop:always;min-height:100%;display:flex;flex-direction:column;
     justify-content:center;padding:14px 24px 22px;box-sizing:border-box}
   .qcard-in{width:100%}
+  .qcard.locked{display:none}
   .qc-top{display:flex;align-items:center;gap:11px;margin-bottom:16px}
   .qc-count{font-family:var(--cond);text-transform:uppercase;letter-spacing:.09em;font-size:11.5px;color:var(--el);font-weight:700}
   .qc-q{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:27px;line-height:1.03;
@@ -1899,6 +1900,18 @@
   }
   function todayMissionIds(){ return ['poomsae'].concat(pickExtras()); }
   function todaysMissions(){ var meta=missionMeta(); return todayMissionIds().map(function(id){return meta[id];}); }
+  // Begeleide inhoud voor de sparring-/zelfverdedigingsmissies (alleen aantallen in curriculum → korte oefengids).
+  var SPAR_INFO = {
+    ilbo: { ko:'일보 대련', tag:'Één-stap sparring',
+      wat:'Je partner valt één keer aan. Jij stapt in, blokkeert en zet meteen je tegenaanval.',
+      cues:['Sterke, lage stand — blijf in balans','Blokkeer precies op tijd','Tegenaanval raak en gericht','Kiap bij je laatste techniek'] },
+    ibo: { ko:'이보 대련', tag:'Twee-stap sparring',
+      wat:'Je partner valt twee keer achter elkaar aan. Jij blokkeert allebei en sluit af met een counter.',
+      cues:['Twee blokken vloeiend na elkaar','Houd steeds de juiste afstand','De laatste beweging is je counter','Kiap op het einde'] },
+    hosinsul: { ko:'호신술', tag:'Zelfverdediging',
+      wat:'Maak je los uit polsgrepen en omklemmingen met een hefboom- of controletechniek.',
+      cues:['Blijf rustig en adem door','Draai naar het zwakke punt van de greep','Gebruik een hefboom, niet alleen kracht','Houd controle tot je klaar bent'] }
+  };
 
   function allTerms(){ var a=[]; (C.termen||[]).forEach(function(g){ (g.items||[]).forEach(function(i){ a.push(i); }); }); return a; }
   function termOfDay(){ var a=allTerms(); if(!a.length) return null; return a[new Date().getDate() % a.length]; }
@@ -2019,15 +2032,16 @@
     }
     var missions = todaysMissions();
     var doneN = missions.filter(function(m){return missionDone[m.id];}).length;
-    var missionCols = missions.map(function(m,i){
+    var missionCols = missions.map(function(m){
       var dn = missionDone[m.id];
-      var isExam = m.id==='examen';
-      var lead = (isExam && !dn)
-        ? '<span class="ti-go">'+IC.play+'</span>'
-        : '<span class="ti-ck">'+IC.check+'</span>';
-      return '<button class="td-item'+(dn?' done':'')+(isExam?' exam':'')+'" '+
+      // elke rij opent zijn oefening (poomsae → geleide sessie, examen → proefexamen, rest → drill)
+      var act = m.id==='poomsae' ? 'start' : (m.id==='examen' ? 'startexam' : 'drill');
+      var lead = dn
+        ? '<span class="ti-ck">'+IC.check+'</span>'
+        : '<span class="ti-go">'+IC.play+'</span>';
+      return '<button class="td-item'+(dn?' done':'')+(m.id==='examen'?' exam':'')+'" '+
           (dn?'style="--sk:'+strikeVar()+'" ':'')+
-          'data-act="'+(isExam?'startexam':'mission')+'" data-id="'+m.id+'">'+
+          'data-act="'+act+'" data-id="'+m.id+'">'+
           lead+
           '<span class="ti-txt"><span class="ti-t">'+esc(m.label)+'</span>'+
             '<span class="ti-s">'+m.sub+'</span></span>'+
@@ -2508,6 +2522,107 @@
     fnav.classList.remove('hide');
     var s = session; session=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 380);
+  }
+
+  /* =======================================================
+     MISSIE-DRILL — één scherm per missie (woorden / sparring).
+     Tik op de rij → oefen de inhoud → "Gedaan" streept 'm af,
+     net als het proefexamen (i.p.v. meteen aanvinken).
+     ======================================================= */
+  var drillEl = null, drillId = null;
+  function openDrill(id){
+    if(drillEl || session || examEl) return;
+    drillId = id;
+    var el = document.createElement('div');
+    el.className='session drill'; el.id='drill';
+    applyTheme(el, CUR);
+    el.innerHTML =
+      '<div class="shead">'+
+        '<button class="sx" data-act="drillclose" aria-label="Sluiten">'+IC.x+'</button>'+
+      '</div>'+
+      '<div class="sbody" id="drill-body"></div>'+
+      '<div class="sfoot" id="drill-foot"></div>';
+    stage.appendChild(el);
+    drillEl = el;
+    fnav.classList.add('hide');
+    requestAnimationFrame(function(){ el.classList.add('show'); });
+    renderDrill();
+  }
+  function renderDrill(){
+    if(!drillEl) return;
+    var body = drillEl.querySelector('#drill-body');
+    var foot = drillEl.querySelector('#drill-foot');
+    var meta = missionMeta()[drillId] || {};
+    var html='', footHtml='';
+    if(drillId==='woorden'){
+      var vd = vocabOfDay();
+      var rows = vd.terms.map(function(it){
+        return '<div class="tvrow"><div class="tv-txt"><div class="tv-ko">'+esc(it.ko)+'</div>'+
+          '<div class="tv-ro">'+esc(it.roman)+'</div><div class="tv-nl">'+esc(it.nl)+'</div></div>'+
+          '<button class="spk sm" data-act="say" data-ko="'+esc(it.ko)+'">'+IC.speak+'</button></div>';
+      }).join('');
+      html = sHead('Koreaanse woorden','Zeg ze hardop','Tik op 🔊 en herhaal elk woord. Ken je ze allemaal? Dan ben je klaar.')+
+        '<div class="tveye"><span>'+vd.n+' begrippen</span><span class="d"></span><span>'+esc(clusterShort(vd.label))+'</span></div>'+
+        '<div class="tvlist"><div class="tvgroup">'+rows+'</div></div>';
+      footHtml = '<button class="nextbtn" data-act="drilldone">Woorden geoefend '+IC.check+'</button>';
+    } else {
+      var info = SPAR_INFO[drillId];
+      if(info){
+        var cues = info.cues.map(function(c,i){
+          return '<li'+(i===0?' class="main"':'')+'><span class="sq"></span><span>'+
+            (i===0?'<span class="mtag">Let vooral op</span>':'')+esc(c)+'</span></li>';
+        }).join('');
+        html = sHead(meta.label||info.tag, info.ko+' · '+info.tag, info.wat)+
+          '<div class="tveye"><span>'+(meta.n||'')+' oefeningen</span><span class="d"></span><span>rustig doorlopen</span></div>'+
+          '<ul class="flist">'+cues+'</ul>';
+        footHtml = '<button class="nextbtn" data-act="drilldone">Gedaan '+IC.check+'</button>';
+      }
+    }
+    body.innerHTML = '<div class="stepin">'+html+'</div>';
+    foot.innerHTML = footHtml;
+    body.scrollTop = 0;
+  }
+  function closeDrill(){
+    if(!drillEl) return;
+    drillEl.classList.remove('show');
+    fnav.classList.remove('hide');
+    var d = drillEl; drillEl=null; drillId=null;
+    setTimeout(function(){ if(d&&d.parentNode) d.parentNode.removeChild(d); }, 380);
+  }
+  function drillDone(){
+    var id = drillId;
+    closeDrill();
+    finishMission(id);
+  }
+  // Zet een missie op done + speelt dezelfde feedback als een tik op de rij (geluid, hit-pop, confetti).
+  function finishMission(id){
+    if(!(id in missionDone)) return;
+    var todayIds = todayMissionIds();
+    var before = todayIds.every(function(x){return missionDone[x];});
+    var was = missionDone[id];
+    missionDone[id] = true;
+    var after = todayIds.every(function(x){return missionDone[x];});
+    var allDone = after && !before;
+    if(!was){ buzz(12); sfx(allDone ? 'complete' : 'check'); }
+    showScreen('today');
+    if(!was){
+      var row = stage.querySelector('.td-item[data-id="'+id+'"]');
+      if(row){
+        row.classList.add('just');
+        var ck = row.querySelector('.ti-ck');
+        if(ck){
+          var pop=document.createElement('span'); var hp=hitPick(); pop.className='hit-pop hp-'+hp.replace('hit-','');
+          pop.style.setProperty('--hit', 'url(assets/icons/'+hp+'.png)');
+          ck.appendChild(pop);
+          pop.addEventListener('animationend', function(){ if(pop.parentNode) pop.parentNode.removeChild(pop); });
+          setTimeout(function(){ if(pop.parentNode) pop.parentNode.removeChild(pop); }, 900);
+        }
+      }
+    }
+    if(allDone){
+      var chip = stage.querySelector('#streakchip'); if(chip){ chip.classList.remove('flare'); void chip.offsetWidth; chip.classList.add('flare'); }
+      confetti();
+    }
   }
 
   /* =======================================================
@@ -3556,6 +3671,9 @@
     var a = act.getAttribute('data-act');
     if(a==='start'){ openSession(); }
     else if(a==='startexam'){ openExam(); }
+    else if(a==='drill'){ openDrill(act.getAttribute('data-id')); }
+    else if(a==='drilldone'){ drillDone(); }
+    else if(a==='drillclose'){ closeDrill(); }
     else if(a==='exanswer'){ examAnswer(act); }
     else if(a==='exnext'){ examNext(); }
     else if(a==='exretry'){ examRetry(); }
@@ -3867,14 +3985,14 @@
         '<h2 class="qc-q">'+x.q+'</h2>'+(x.hint?'<p class="qc-sub">'+x.hint+'</p>':'')+
         '<div class="qc-opts">'+x.opts()+'</div>'+
       '</div>'+
-        (i<n-1?'<div class="qc-swipehint">'+IC.chev+' veeg omhoog</div>':'')+
       '</section>';
     }).join('');
   }
   function swipeInit(){
     /* Overlaid title collapses as you scroll toward the next card: drives --cic (0 -> 1) from the
        scroll position so the title lifts/shrinks/fades and each question card gets the full height.
-       No pagination dots: the per-card "Vraag n / N" counter + animated "veeg omhoog" hint guide it. */
+       Forward is gated (swipeSyncLocks): the next card stays hidden until this one is answered, so
+       there's no "swipe up" guidance to show — answering auto-advances. Swiping back is always free. */
     if(CI_UX!=='swipe' || !reflect) return;
     var body=reflect.querySelector('#rfbody'), ttl=reflect.querySelector('.ci-topttl'),
         shead=reflect.querySelector('.shead');
@@ -3892,6 +4010,19 @@
     body._ciScroll=upd;
     body.addEventListener('scroll', upd, {passive:true});
     upd();
+    swipeSyncLocks();
+  }
+  // Progressive gating: a question card is reachable only once every EARLIER question is answered.
+  // Locked cards are display:none, so scroll-snap can't reach them (the user must answer Q1 before
+  // Q2). Earlier cards stay visible, so swiping back to a previous question always works.
+  function swipeSyncLocks(){
+    if(CI_UX!=='swipe' || !reflect) return;
+    var body=reflect.querySelector('#rfbody'); if(!body) return;
+    var qs=ciQuestions(), cards=[].slice.call(body.querySelectorAll('.qcard')), locked=false;
+    for(var i=0;i<cards.length;i++){
+      cards[i].classList.toggle('locked', locked);
+      if(!qs[i] || !qs[i].answered()) locked=true; // everything past the first unanswered question is locked
+    }
   }
   function swipeAdvance(qid){
     var body=reflect.querySelector('#rfbody'), cards=[].slice.call(body.querySelectorAll('.qcard'));
@@ -3902,12 +4033,13 @@
   function ciAfterPick(qid, el){
     if(el) ciSel(el);
     if(CI_UX==='accordion') accAdvance(qid);
-    else if(CI_UX==='swipe') swipeAdvance(qid);
+    else if(CI_UX==='swipe'){ swipeSyncLocks(); swipeAdvance(qid); }
     syncSubmit();
   }
   function ciAfterFocus(){
     syncFocusChips();
     if(CI_UX==='accordion') accResize('focus');
+    else if(CI_UX==='swipe') swipeSyncLocks();
     syncSubmit();
   }
   // corner belt graphic recolours to the current grade (solid primary; poom stays black)
