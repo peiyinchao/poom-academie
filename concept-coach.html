@@ -137,8 +137,8 @@
     height:64px;padding:0 16px;display:flex;align-items:center;justify-content:center;gap:10px;
     box-shadow:0 10px 22px -14px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.95), inset 0 -2px 3px rgba(20,40,90,.07);transition:transform .12s}
   .startbtn::before,.nextbtn:not(.ghost)::before{content:'';position:absolute;top:-60%;bottom:-60%;left:0;width:48%;pointer-events:none;z-index:3;
-    background:linear-gradient(100deg,rgba(40,60,100,0) 0%,rgba(40,60,100,.02) 24%,rgba(255,255,255,.5) 50%,rgba(40,60,100,.02) 76%,rgba(40,60,100,0) 100%);
-    filter:blur(3.5px);will-change:transform;
+    background:linear-gradient(100deg,rgba(40,60,100,0) 0%,rgba(40,60,100,.015) 24%,rgba(255,255,255,.24) 50%,rgba(40,60,100,.015) 76%,rgba(40,60,100,0) 100%);
+    filter:blur(4.5px);will-change:transform;
     transform:translateX(-300%) skewX(-16deg)}
   .startbtn.sheen::before,.nextbtn.sheen:not(.ghost)::before{animation:ctaSheen 6.25s ease-in-out}
   @keyframes ctaSheen{from{transform:translateX(-300%) skewX(-16deg)}to{transform:translateX(560%) skewX(-16deg)}}
@@ -471,12 +471,15 @@
   .sbody{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;padding:6px 24px 20px}
   .sbody::-webkit-scrollbar{display:none}
   .sfoot{padding:12px 22px calc(env(safe-area-inset-bottom) + 20px);background:linear-gradient(transparent,var(--page) 26%)}
-  .nextbtn{position:relative;overflow:hidden;isolation:isolate;width:100%;border:0;border-radius:16px;background:var(--el);color:#fff;
+  .nextbtn{position:relative;overflow:hidden;isolation:isolate;width:100%;border:0;border-radius:999px;background:var(--el);color:#fff;
     font-family:var(--cond);text-transform:uppercase;font-weight:800;letter-spacing:.03em;font-size:17px;padding:17px;
     display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .12s, filter .12s;
     box-shadow:0 14px 26px -16px var(--el)}
   .nextbtn:active{transform:scale(.98);filter:brightness(.97)}
   .nextbtn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:none}
+  /* accent (blue) submit buttons get the same subtle glass edge as the white CTA */
+  .nextbtn:not(.ghost){border:1px solid rgba(255,255,255,.32);box-shadow:0 14px 26px -16px var(--el),
+    inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 4px rgba(8,18,48,.16)}
   .nextbtn svg{width:19px;height:19px}
   .stepin{animation:stepin .42s cubic-bezier(.32,.72,0,1) both}
   @keyframes stepin{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
@@ -661,7 +664,7 @@
   @keyframes fall{to{transform:translateY(900px) rotate(var(--r));opacity:0}}
 
   /* ---- Weekly check-in (personalisation) ---- */
-  .checkin{display:flex;align-items:center;gap:14px;margin-top:16px;border-radius:18px;padding:14px 16px;cursor:pointer;
+  .checkin{display:flex;align-items:center;gap:14px;margin-top:16px;border-radius:26px;padding:14px 16px;cursor:pointer;
     background:var(--surface);border:1px solid var(--line);transition:transform .12s}
   .checkin:active{transform:scale(.99)}
   .checkin .ci-ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;
@@ -923,23 +926,29 @@
   .ci-topttl .k{font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--el);font-weight:700}
   .ci-topttl h2{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:34px;line-height:.96;
     letter-spacing:-.01em;margin:8px 0 0;color:var(--ink)}
-  .ci-topttl .ci-tt-masc{flex:0 0 auto;width:104px;margin:0 -6px -12px 0;display:block;
+  .ci-tt-masc{flex:0 0 auto;width:104px;margin:0 -6px -12px 0;display:block;
     filter:drop-shadow(0 12px 16px rgba(20,23,18,.18));pointer-events:none}
-  .ci-topttl .ci-tt-masc .gm-b{position:relative;display:block;width:100%}
-  .ci-topttl .ci-tt-masc .gm-i{display:block;width:100%;height:auto}
-  .ci-topttl .ci-tt-masc .gm-blink{position:absolute;inset:0;height:100%;opacity:0}
-  .ci-topttl .ci-tt-masc .gm-b.blink .gm-blink{opacity:1}
+  .ci-tt-masc .gm-b{position:relative;display:block;width:100%}
+  .ci-tt-masc .gm-i{display:block;width:100%;height:auto}
+  .ci-tt-masc .gm-blink{position:absolute;inset:0;height:100%;opacity:0}
+  .ci-tt-masc .gm-b.blink .gm-blink{opacity:1}
   /* reflect: the coiled belt shrinks into the SAME slot as the goal mascot, beside the title */
-  .ci-topttl .ci-tt-belt{flex:0 0 auto;position:relative;width:104px;height:199px;margin:0 -6px -12px 0;
+  .ci-tt-belt{flex:0 0 auto;position:relative;width:104px;height:199px;margin:0 -6px -12px 0;
     display:block;pointer-events:none;filter:drop-shadow(0 12px 16px rgba(20,23,18,.18))}
-  .ci-topttl .ci-tt-belt .bb-belt{position:absolute;inset:0;left:0;top:0;width:100%;height:100%;transform:none}
+  .ci-tt-belt .bb-belt{position:absolute;inset:0;left:0;top:0;width:100%;height:100%;transform:none}
   /* Kaarten (swipe): the title overlays the scroll body so every card gets the full height
      (a tall Q2 fits on one screen). On scroll the mascot leaves, but the title text shrinks and
      rises into the top bar and STAYS visible as a compact header. --cic (0=Q1 -> 1=collapsed). */
   .ux-swipe .ci-topttl{position:absolute;left:0;right:0;top:82px;z-index:6;pointer-events:none;will-change:transform}
   .ux-swipe .ci-topttl .ci-tt-txt{transform-origin:left top;
     transform:translateY(calc(var(--cic,0) * -150px)) scale(calc(1 - var(--cic,0) * .34))}
-  .ux-swipe .ci-topttl .ci-tt-masc,.ux-swipe .ci-topttl .ci-tt-belt{
+  /* leave room on the right for the mascot/belt layer so the title never runs under it (matches the old flex gutter) */
+  .ux-swipe .ci-topttl.has-masc .ci-tt-txt,.ux-swipe .ci-topttl.has-belt .ci-tt-txt{padding-right:112px}
+  /* mascot/belt live in their OWN layer BEHIND the cards (z-0) so a rising question card scrolls
+     OVER them (correct layering); the title text stays on top at z-6 and docks as a compact header. */
+  .ux-swipe .ci-topmasc{position:absolute;left:0;right:0;top:82px;z-index:0;pointer-events:none;
+    display:flex;justify-content:flex-end;align-items:flex-start;padding:0 24px 14px}
+  .ux-swipe .ci-tt-masc,.ux-swipe .ci-tt-belt{
     transform:scale(calc(1 - var(--cic,0) * .5));transform-origin:50% 50%;opacity:calc(1 - var(--cic,0) * 1.5)}
   .ux-swipe .qcard{padding:8px 22px 12px}
   /* first card sits below the overlaid title; later cards use the full height */
@@ -1908,19 +1917,22 @@
       examen:  {id:'examen',  short:'Examen',  n:ex.total,        label:'Proef examen',      sub:ex.total+' vragen'}
     };
   }
-  // Vast: poomsae. Daarnaast 2 wisselende missies — gekozen op weekfocus + dagrotatie.
+  // Vast: poomsae + proefexamen (hoort standaard bij de begeleide training).
+  // Daartussen 1 wisselende missie — gekozen op weekfocus + dagrotatie.
   function pickExtras(){
     // Hosinsul verschijnt pas vanaf 4e geup; ilbo pas als er eisen zijn (8e geup+).
-    var all=['woorden','examen'];
+    var all=['woorden'];
     if(ilboCount()>0)     all.push('ilbo');
     if(iboCount()>0)      all.push('ibo');
     if(hosinsulCount()>0) all.push('hosinsul');
     var chosen=[];
     if(WEEK_FOCUS.indexOf('termen')>=0) chosen.push('woorden');   // check-in focus op termen → woorden staat vast
     var rot=all.filter(function(m){return chosen.indexOf(m)<0;});
-    var start=dseed()%rot.length;
-    for(var k=0; chosen.length<2 && k<rot.length; k++) chosen.push(rot[(start+k)%rot.length]);
-    return chosen.slice(0,2);
+    if(rot.length){ var start=dseed()%rot.length;
+      for(var k=0; chosen.length<1 && k<rot.length; k++) chosen.push(rot[(start+k)%rot.length]); }
+    chosen=chosen.slice(0,1);
+    chosen.push('examen');   // proefexamen sluit de dag af (de 'test' na het oefenen)
+    return chosen;
   }
   function todayMissionIds(){ return ['poomsae'].concat(pickExtras()); }
   function todaysMissions(){ var meta=missionMeta(); return todayMissionIds().map(function(id){return meta[id];}); }
@@ -2597,7 +2609,7 @@
           '<button class="spk sm" data-act="say" data-ko="'+esc(it.ko)+'">'+IC.speak+'</button></div>';
       }).join('');
       return { k:'Koreaanse woorden', h:'Zeg ze hardop',
-        sub:'Tik op '+iic(IC.speak)+' en herhaal elk woord. Ken je ze allemaal? Dan ben je klaar.',
+        sub:'',
         eye:'<div class="tveye"><span>'+vd.n+' begrippen</span><span class="d"></span><span>'+esc(clusterShort(vd.label))+'</span></div>',
         list:'<div class="tvlist"><div class="tvgroup">'+rows+'</div></div>',
         done:'Woorden geoefend '+IC.check };
@@ -2627,8 +2639,8 @@
     var foot = drillEl.querySelector('#drill-foot');
     var p = drillParts(drillId);
     if(!p){ if(head) head.innerHTML=''; body.innerHTML=''; foot.innerHTML=''; return; }
-    // Vaste kop: kicker + titel + telling + uitleg (scrollt niet mee). Alleen de lijst scrollt.
-    head.innerHTML = '<div class="k">'+p.k+'</div><h2>'+p.h+'</h2>'+p.eye+'<p class="sub">'+p.sub+'</p>';
+    // Vaste kop: kicker + grijze telling (direct achter het blauw) + titel (scrollt niet mee). Alleen de lijst scrollt.
+    head.innerHTML = '<div class="k">'+p.k+'</div>'+p.eye+'<h2>'+p.h+'</h2>'+(p.sub?'<p class="sub">'+p.sub+'</p>':'');
     body.innerHTML = '<div class="stepin dr-in">'+p.list+'</div>';
     // Knop start als 'ghost' + disabled; komt pas vrij (accent-blauw + glint) als je de lijst hebt doorlopen.
     foot.innerHTML = '<button class="nextbtn ghost" id="drill-done" data-act="drilldone" disabled aria-disabled="true">'+p.done+'</button>';
@@ -4150,25 +4162,27 @@
     if(!reflect) return;
     var m=ciMeta();
     reflect.classList.remove('ux-page','ux-accordion','ux-swipe'); reflect.classList.add('ux-'+CI_UX);
-    ['.swipedots','.uxswitch','.ci-topttl','.ci-beltband'].forEach(function(sel){ var e=reflect.querySelector(sel); if(e) e.parentNode.removeChild(e); });
+    ['.swipedots','.uxswitch','.ci-topttl','.ci-topmasc','.ci-beltband'].forEach(function(sel){ var e=reflect.querySelector(sel); if(e) e.parentNode.removeChild(e); });
     var bodyEl=reflect.querySelector('#rfbody'), footEl=reflect.querySelector('#rffoot');
-    // greeting-style title at the top (like Vandaag); goal shows the cheering kid beside it
+    // greeting-style title at the top (like Vandaag); goal shows the cheering kid, reflect the coiled belt
+    var mascHtml = rfMode==='goal'
+      ? '<span class="ci-tt-masc"><span class="gm-b">'+
+          '<img class="gm-i" src="assets/img/goal-kid.png" alt="" aria-hidden="true">'+
+          '<img class="gm-i gm-blink" src="assets/img/goal-kid-blink.png" alt="" aria-hidden="true">'+
+        '</span></span>'
+      : '<span class="ci-tt-belt" aria-hidden="true"><span class="bb-belt">'+
+          '<span class="cb cb-main"></span><span class="cb cb-dark"></span><span class="cb cb-ink"></span>'+
+        '</span></span>';
     var ttl=document.createElement('div'); ttl.className='ci-topttl'+(rfMode==='goal'?' has-masc':' has-belt');
-    ttl.innerHTML='<div class="ci-tt-txt"><div class="k">'+m.k+'</div><h2>'+m.h+'</h2></div>'+
-      (rfMode==='goal'
-        ? '<span class="ci-tt-masc"><span class="gm-b">'+
-            '<img class="gm-i" src="assets/img/goal-kid.png" alt="" aria-hidden="true">'+
-            '<img class="gm-i gm-blink" src="assets/img/goal-kid-blink.png" alt="" aria-hidden="true">'+
-          '</span></span>'
-        : '<span class="ci-tt-belt" aria-hidden="true"><span class="bb-belt">'+
-            '<span class="cb cb-main"></span><span class="cb cb-dark"></span><span class="cb cb-ink"></span>'+
-          '</span></span>');
+    // In swipe the mascot/belt lives in its OWN layer behind the cards so cards scroll over it; the title stays on top.
+    ttl.innerHTML='<div class="ci-tt-txt"><div class="k">'+m.k+'</div><h2>'+m.h+'</h2></div>'+(CI_UX==='swipe'?'':mascHtml);
     reflect.insertBefore(ttl, bodyEl);
+    if(CI_UX==='swipe'){ var mL=document.createElement('div'); mL.className='ci-topmasc'+(rfMode==='goal'?' has-masc':' has-belt'); mL.innerHTML=mascHtml; reflect.insertBefore(mL, bodyEl); }
     if(_ciCompare){ var d=document.createElement('div'); d.className='uxswitch'; d.innerHTML=ciSwitcherInner(); reflect.insertBefore(d, bodyEl); }
     bodyEl.innerHTML = CI_UX==='accordion' ? renderAccordion() : CI_UX==='swipe' ? renderSwipe() : renderPage();
     bodyEl.scrollTop=0;
-    // reflect: the coiled belt sits beside the title (goal-mascot slot); recolours to the current grade
-    if(rfMode!=='goal'){ var bb=ttl.querySelector('.bb-belt'); if(bb) ciPaintBelt(bb); }
+    // reflect: the coiled belt recolours to the current grade (belt lives in ttl for page/accordion, in the mascot layer for swipe)
+    if(rfMode!=='goal'){ var bb=reflect.querySelector('.bb-belt'); if(bb) ciPaintBelt(bb); }
     if(CI_UX==='accordion') requestAnimationFrame(accInit);
     if(CI_UX==='swipe') requestAnimationFrame(swipeInit);
     if(rfMode==='goal') ciScheduleBlink(); else ciStopBlink();
