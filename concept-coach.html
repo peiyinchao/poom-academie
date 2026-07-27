@@ -147,10 +147,11 @@
   .startbtn-ic{width:44px;height:44px;flex:none;background:currentColor;transform:translateZ(0);backface-visibility:hidden;
     -webkit-mask:url(assets/icons/Coach1.png) center/contain no-repeat;
     mask:url(assets/icons/Coach1.png) center/contain no-repeat}
-  /* quiet circular whistle-only CTA in the training-card header (keeps the sheen sweep) */
-  .startbtn.compact{width:50px;height:50px;flex:none;margin:0;padding:0;border-radius:50%;gap:0;
+  /* quiet circular whistle-only CTA pinned to the training-card top-right */
+  .startbtn.compact{position:absolute;top:20px;right:20px;z-index:4;
+    width:60px;height:60px;flex:none;margin:0;padding:0;border-radius:50%;gap:0;
     background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);box-shadow:none}
-  .startbtn.compact .startbtn-ic{width:28px;height:28px}
+  .startbtn.compact .startbtn-ic{width:34px;height:34px}
 
   /* ---------- Up next (secondary) ---------- */
   .upnext{display:flex;align-items:center;gap:13px;margin-top:14px;background:var(--surface);
@@ -713,7 +714,7 @@
     box-shadow:0 20px 40px -26px rgba(16,24,40,.5);padding:26px 22px 20px}
   .trainday::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.18;mix-blend-mode:overlay;
     background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="140" height="140" filter="url(%23n)" opacity="0.5"/></svg>')}
-  .td-wm{position:absolute;right:14px;top:62%;transform:translateY(-50%);height:122%;width:auto;
+  .td-wm{position:absolute;right:14px;top:68%;transform:translateY(-50%);height:122%;width:auto;
     opacity:.16;pointer-events:none;user-select:none;z-index:-1}
   .td-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
   .td-titlewrap{display:flex;flex-direction:column;gap:9px;min-width:0}
