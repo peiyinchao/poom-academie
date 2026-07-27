@@ -181,7 +181,7 @@
     display:inline-flex;align-items:center;gap:5px}
   .ribbon .rb-foot .go svg{width:14px;height:14px}
 
-  .greet .gday{margin-top:11px;padding-left:16px;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .greet .gday{margin-top:31px;padding-left:16px;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .greet .gday::before{content:'';position:absolute;left:0;top:.18em;bottom:.18em;width:6px;
     border-radius:3px;background:var(--gd,var(--el));opacity:.9}
   .greet .gday q{font-style:italic;font-weight:600;font-size:14.5px;line-height:1.5;
@@ -366,7 +366,7 @@
     color:rgba(30,22,16,.56);display:grid;place-items:center;
     transition:opacity .25s, transform .25s, color .2s ease, background .2s ease}
   .fab-timer svg{width:25px;height:25px}
-  .fab-timer-ic{width:40px;height:40px;background:currentColor;
+  .fab-timer-ic{width:42px;height:42px;background:currentColor;
     -webkit-mask:url(assets/icons/Timer.png) center/contain no-repeat;
     mask:url(assets/icons/Timer.png) center/contain no-repeat}
   .fab-timer:hover{color:rgba(30,22,16,.9)}
@@ -718,7 +718,7 @@
     box-shadow:0 20px 40px -26px rgba(16,24,40,.5);padding:26px 22px 20px}
   .trainday::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.18;mix-blend-mode:overlay;
     background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="140" height="140" filter="url(%23n)" opacity="0.5"/></svg>')}
-  .td-wm{position:absolute;right:14px;top:68%;transform:translateY(-50%);height:122%;width:auto;
+  .td-wm{position:absolute;right:14px;top:68%;transform:translateY(-50%);height:150%;width:auto;
     opacity:.16;pointer-events:none;user-select:none;z-index:-1}
   .td-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
   .td-titlewrap{display:flex;flex-direction:column;gap:9px;min-width:0}
@@ -961,6 +961,21 @@
     mask:url(assets/img/reflect-belt-dark.png) no-repeat center/contain}
   .bb-belt .cb-ink{background:url(assets/img/reflect-belt-ink.png) no-repeat center/contain}
 
+  /* Begeleide drill (woorden/sparring): vaste kop (kicker + titel + telling + uitleg) die NIET
+     meescrollt. Alleen de lijst scrollt eronder door, met een zachte fade aan de bovenkant.
+     'Klaar' komt pas vrij als je de hele lijst hebt doorlopen. */
+  #drill{overflow:hidden}
+  .dr-fixhead{flex:none;padding:2px 24px 6px;position:relative;z-index:5}
+  .dr-fixhead .k{font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--el);font-weight:700}
+  .dr-fixhead h2{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:29px;line-height:1;
+    letter-spacing:-.01em;margin:7px 0 0;color:var(--ink)}
+  .dr-fixhead .tveye{margin-top:12px}
+  .dr-fixhead .sub{color:var(--gray);font-size:14px;line-height:1.5;margin:10px 0 0;max-width:332px}
+  #drill .sbody{position:relative;z-index:1;padding-top:2px;
+    -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 20px);mask-image:linear-gradient(180deg,transparent 0,#000 20px)}
+  #drill .sfoot{position:relative;z-index:3}
+  #drill .nextbtn[disabled]{opacity:.5;pointer-events:none}
+
   /* ===== Technique vocabulary ===== */
   .tveye{display:flex;align-items:center;gap:12px;margin:16px 2px 0;
     font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:var(--gray)}
@@ -973,6 +988,8 @@
   .tv-glabel::after{content:"";flex:1;height:1px;background:var(--line)}
   .tvrow{display:flex;align-items:center;gap:14px;padding:15px 2px}
   .tvrow + .tvrow{border-top:1px solid var(--line)}
+  .tv-num{flex:none;align-self:flex-start;width:20px;margin-top:2px;font-family:var(--cond);font-weight:700;
+    font-size:13px;color:#B7AE9C;text-align:right;font-variant-numeric:tabular-nums}
   .tvrow.isnew{background:var(--tint);border:1px solid var(--elline);border-radius:14px;padding:15px 16px;margin-top:6px}
   .tvrow.isnew + .tvrow{border-top:0}
   .tv-txt{flex:1;min-width:0}
@@ -2559,6 +2576,7 @@
       '<div class="shead">'+
         '<button class="sx" data-act="drillclose" aria-label="Sluiten">'+IC.x+'</button>'+
       '</div>'+
+      '<div class="dr-fixhead" id="drill-head"></div>'+
       '<div class="sbody" id="drill-body"></div>'+
       '<div class="sfoot" id="drill-foot"></div>';
     stage.appendChild(el);
@@ -2573,8 +2591,8 @@
     var meta = missionMeta()[id] || {};
     if(id==='woorden'){
       var vd = vocabOfDay();
-      var rows = vd.terms.map(function(it){
-        return '<div class="tvrow"><div class="tv-txt"><div class="tv-ko">'+esc(it.ko)+'</div>'+
+      var rows = vd.terms.map(function(it,i){
+        return '<div class="tvrow"><span class="tv-num">'+(i+1)+'</span><div class="tv-txt"><div class="tv-ko">'+esc(it.ko)+'</div>'+
           '<div class="tv-ro">'+esc(it.roman)+'</div><div class="tv-nl">'+esc(it.nl)+'</div></div>'+
           '<button class="spk sm" data-act="say" data-ko="'+esc(it.ko)+'">'+IC.speak+'</button></div>';
       }).join('');
@@ -2604,13 +2622,34 @@
   }
   function renderDrill(){
     if(!drillEl) return;
+    var head = drillEl.querySelector('#drill-head');
     var body = drillEl.querySelector('#drill-body');
     var foot = drillEl.querySelector('#drill-foot');
     var p = drillParts(drillId);
-    if(!p){ body.innerHTML=''; foot.innerHTML=''; return; }
-    body.innerHTML = '<div class="stepin">'+sHead(p.k,p.h,p.sub)+p.eye+p.list+'</div>';
-    foot.innerHTML = '<button class="nextbtn" data-act="drilldone">'+p.done+'</button>';
+    if(!p){ if(head) head.innerHTML=''; body.innerHTML=''; foot.innerHTML=''; return; }
+    // Vaste kop: kicker + titel + telling + uitleg (scrollt niet mee). Alleen de lijst scrollt.
+    head.innerHTML = '<div class="k">'+p.k+'</div><h2>'+p.h+'</h2>'+p.eye+'<p class="sub">'+p.sub+'</p>';
+    body.innerHTML = '<div class="stepin dr-in">'+p.list+'</div>';
+    // Knop start als 'ghost' + disabled; komt pas vrij (accent-blauw + glint) als je de lijst hebt doorlopen.
+    foot.innerHTML = '<button class="nextbtn ghost" id="drill-done" data-act="drilldone" disabled aria-disabled="true">'+p.done+'</button>';
     body.scrollTop = 0;
+    requestAnimationFrame(drillInit);
+  }
+  // 'Klaar' pas vrij als je de hele lijst hebt doorlopen (of als de lijst niet scrollbaar is, bv. korte spar-drill).
+  function drillInit(){
+    if(!drillEl) return;
+    var body=drillEl.querySelector('#drill-body'), doneBtn=drillEl.querySelector('#drill-done');
+    if(!body) return;
+    function gate(){
+      if(!doneBtn || !doneBtn.disabled) return;
+      if(body.scrollTop+body.clientHeight >= body.scrollHeight-6){
+        doneBtn.disabled=false; doneBtn.removeAttribute('aria-disabled'); doneBtn.classList.remove('ghost');
+      }
+    }
+    if(body._drScroll) body.removeEventListener('scroll', body._drScroll);
+    body._drScroll=gate;
+    body.addEventListener('scroll', gate, {passive:true});
+    gate();
   }
   function closeDrill(){
     if(!drillEl) return;
