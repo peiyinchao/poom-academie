@@ -136,11 +136,11 @@
     font-family:var(--cond);text-transform:uppercase;font-weight:800;letter-spacing:.03em;font-size:16.5px;
     height:64px;padding:0 16px;display:flex;align-items:center;justify-content:center;gap:10px;
     box-shadow:0 10px 22px -14px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.95), inset 0 -2px 3px rgba(20,40,90,.07);transition:transform .12s}
-  .startbtn::before{content:'';position:absolute;top:-60%;bottom:-60%;left:0;width:48%;pointer-events:none;z-index:3;
+  .startbtn::before,.nextbtn:not(.ghost)::before{content:'';position:absolute;top:-60%;bottom:-60%;left:0;width:48%;pointer-events:none;z-index:3;
     background:linear-gradient(100deg,rgba(40,60,100,0) 0%,rgba(40,60,100,.02) 24%,rgba(255,255,255,.5) 50%,rgba(40,60,100,.02) 76%,rgba(40,60,100,0) 100%);
     filter:blur(3.5px);will-change:transform;
     transform:translateX(-300%) skewX(-16deg)}
-  .startbtn.sheen::before{animation:ctaSheen 6.25s ease-in-out}
+  .startbtn.sheen::before,.nextbtn.sheen:not(.ghost)::before{animation:ctaSheen 6.25s ease-in-out}
   @keyframes ctaSheen{from{transform:translateX(-300%) skewX(-16deg)}to{transform:translateX(560%) skewX(-16deg)}}
   .startbtn:active{transform:scale(.975)}
   .startbtn svg{width:19px;height:19px}
@@ -471,7 +471,7 @@
   .sbody{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;padding:6px 24px 20px}
   .sbody::-webkit-scrollbar{display:none}
   .sfoot{padding:12px 22px calc(env(safe-area-inset-bottom) + 20px);background:linear-gradient(transparent,var(--page) 26%)}
-  .nextbtn{width:100%;border:0;border-radius:16px;background:var(--el);color:#fff;
+  .nextbtn{position:relative;overflow:hidden;isolation:isolate;width:100%;border:0;border-radius:16px;background:var(--el);color:#fff;
     font-family:var(--cond);text-transform:uppercase;font-weight:800;letter-spacing:.03em;font-size:17px;padding:17px;
     display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .12s, filter .12s;
     box-shadow:0 14px 26px -16px var(--el)}
@@ -510,6 +510,8 @@
   .sh h2{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:29px;line-height:1;letter-spacing:-.01em;
     margin:7px 0 0;color:var(--ink)}
   .sh p.sub{color:var(--gray);font-size:14px;margin:9px 0 0;line-height:1.5}
+  .iic{display:inline-block;width:1.05em;height:1.05em;vertical-align:-.16em}
+  .iic svg{width:100%;height:100%;display:block}
 
   /* meaning / lead */
   .lead{font-size:17px;line-height:1.62;color:#26303E;margin:18px 0 0}
@@ -596,15 +598,17 @@
   #exam .shead .sx:hover, #drill .shead .sx:hover{background:rgba(20,23,18,.05);color:var(--ink)}
   #exam .shead .sx:active, #drill .shead .sx:active{transform:scale(.9)}
   #exam .shead .sx svg, #drill .shead .sx svg{width:24px;height:24px}
-  .exam .ex-meta{display:flex;align-items:center;gap:8px;margin:14px 2px 0}
-  .ex-chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--cond);text-transform:uppercase;
-    letter-spacing:.04em;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;line-height:1}
-  .ex-chip b{font-weight:800}
-  .ex-chip svg{width:13px;height:13px}
-  .ex-chip.ok{background:#ECFDF3;color:#12B76A}
-  .ex-chip.bad{background:#FEF3F2;color:#F04438}
-  .ex-qcat{font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;
-    font-size:.82em;font-weight:800;color:var(--el)}
+  .ex-track{display:flex;align-items:center;justify-content:center;gap:var(--eg,6px);margin:18px 0 4px;padding:8px 0}
+  .exd{flex:none;width:var(--ez,12px);height:var(--ez,12px);border-radius:50%;background:rgba(20,23,18,.12);
+    transition:background-color .3s ease,transform .3s ease}
+  .exd.ok{background:#12B76A}
+  .exd.bad{background:#F04438}
+  .exd.dpop{animation:exdpop .42s ease}
+  @keyframes exdpop{0%{transform:scale(1)}42%{transform:scale(1.55)}100%{transform:scale(1)}}
+  .ex-cut{flex:none;align-self:center;width:2px;height:22px;background:rgba(20,23,18,.24);border-radius:2px;position:relative;margin:0}
+  .ex-cut-b{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:17px;height:17px;border-radius:50%;
+    background:#12B76A;color:#fff;display:grid;place-items:center;box-shadow:0 1px 3px rgba(16,25,40,.22)}
+  .ex-cut-b svg{width:10px;height:10px}
   .ex-q{margin-top:14px;font-size:18px;font-weight:600;color:var(--ink);line-height:1.4}
   .exam .opts{margin-top:16px}
   .ex-result{text-align:center;padding:26px 8px 0}
@@ -1817,8 +1821,11 @@
   // subtle CTA glint — a light sweep across the accent button at random 0–5s intervals
   (function ctaGlint(){
     function tick(){
-      var el=document.querySelector('.startbtn');
-      if(el){ el.classList.remove('sheen'); void el.offsetWidth; el.classList.add('sheen'); }
+      var els=document.querySelectorAll('.startbtn, .nextbtn:not(.ghost)');
+      for(var i=0;i<els.length;i++){ var el=els[i];
+        if(el.offsetParent===null || el.disabled) continue;
+        el.classList.remove('sheen'); void el.offsetWidth; el.classList.add('sheen');
+      }
       setTimeout(tick, 4000 + Math.random()*5000);
     }
     setTimeout(tick, 1600 + Math.random()*2600);
@@ -1962,6 +1969,7 @@
   function techCount(f){ return techniekenFor(f).reduce(function(n,g){return n+g.items.length;},0); }
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+  function iic(svg){ return '<span class="iic">'+svg+'</span>'; }
 
   /* ---- Speech ---- */
   var koVoice=null;
@@ -2034,10 +2042,12 @@
     var doneN = missions.filter(function(m){return missionDone[m.id];}).length;
     var missionCols = missions.map(function(m){
       var dn = missionDone[m.id];
-      // elke rij opent zijn oefening (poomsae → geleide sessie, examen → proefexamen, rest → drill)
-      var act = m.id==='poomsae' ? 'start' : (m.id==='examen' ? 'startexam' : 'drill');
-      var lead = dn
-        ? '<span class="ti-ck">'+IC.check+'</span>'
+      var isPoom = m.id==='poomsae';
+      // poomsae is een gewone afvink-actie (kind oefent de vorm zelf, geen app-begeleiding nodig);
+      // examen → proefexamen, rest → woorden/ilbo drill
+      var act = isPoom ? 'mission' : (m.id==='examen' ? 'startexam' : 'drill');
+      var lead = (dn || isPoom)
+        ? '<span class="ti-ck">'+(dn?IC.check:'')+'</span>'
         : '<span class="ti-go">'+IC.play+'</span>';
       return '<button class="td-item'+(dn?' done':'')+(m.id==='examen'?' exam':'')+'" '+
           (dn?'style="--sk:'+strikeVar()+'" ':'')+
@@ -2492,7 +2502,16 @@
   var session = null, sIndex = 0, sSteps = [];
   var timerScreen = null;
   function buildSteps(f){
-    return ['intro','warmup','meaning','focus','technique','practice','remember','check','done'];
+    // Begeleide training = alle drie de dagacties in één flow. Poomsae wordt gedekt
+    // door meaning..remember; de andere twee dagmissies komen daarachter als eigen stap.
+    var steps=['intro','warmup','meaning','focus','technique','practice','remember'];
+    todayMissionIds().forEach(function(id){
+      if(id==='poomsae') return;                 // al gedekt door de vorm-stappen
+      if(id==='examen'){ steps.push('check'); return; }   // snelle check-vraag
+      steps.push('drill:'+id);                   // woorden / ilbo / ibo / hosinsul
+    });
+    steps.push('done');
+    return steps;
   }
   function openSession(startType){
     var f = byId(CUR);
@@ -2548,38 +2567,49 @@
     requestAnimationFrame(function(){ el.classList.add('show'); });
     renderDrill();
   }
-  function renderDrill(){
-    if(!drillEl) return;
-    var body = drillEl.querySelector('#drill-body');
-    var foot = drillEl.querySelector('#drill-foot');
-    var meta = missionMeta()[drillId] || {};
-    var html='', footHtml='';
-    if(drillId==='woorden'){
+  // Inhoud van een missie-drill als losse onderdelen (titel/uitleg/lijst), zodat zowel
+  // de losse drill als de begeleide training (als stap) dezelfde bron gebruiken.
+  function drillParts(id){
+    var meta = missionMeta()[id] || {};
+    if(id==='woorden'){
       var vd = vocabOfDay();
       var rows = vd.terms.map(function(it){
         return '<div class="tvrow"><div class="tv-txt"><div class="tv-ko">'+esc(it.ko)+'</div>'+
           '<div class="tv-ro">'+esc(it.roman)+'</div><div class="tv-nl">'+esc(it.nl)+'</div></div>'+
           '<button class="spk sm" data-act="say" data-ko="'+esc(it.ko)+'">'+IC.speak+'</button></div>';
       }).join('');
-      html = sHead('Koreaanse woorden','Zeg ze hardop','Tik op 🔊 en herhaal elk woord. Ken je ze allemaal? Dan ben je klaar.')+
-        '<div class="tveye"><span>'+vd.n+' begrippen</span><span class="d"></span><span>'+esc(clusterShort(vd.label))+'</span></div>'+
-        '<div class="tvlist"><div class="tvgroup">'+rows+'</div></div>';
-      footHtml = '<button class="nextbtn" data-act="drilldone">Woorden geoefend '+IC.check+'</button>';
-    } else {
-      var info = SPAR_INFO[drillId];
-      if(info){
-        var cues = info.cues.map(function(c,i){
-          return '<li'+(i===0?' class="main"':'')+'><span class="sq"></span><span>'+
-            (i===0?'<span class="mtag">Let vooral op</span>':'')+esc(c)+'</span></li>';
-        }).join('');
-        html = sHead(meta.label||info.tag, info.ko+' · '+info.tag, info.wat)+
-          '<div class="tveye"><span>'+(meta.n||'')+' oefeningen</span><span class="d"></span><span>rustig doorlopen</span></div>'+
-          '<ul class="flist">'+cues+'</ul>';
-        footHtml = '<button class="nextbtn" data-act="drilldone">Gedaan '+IC.check+'</button>';
-      }
+      return { k:'Koreaanse woorden', h:'Zeg ze hardop',
+        sub:'Tik op '+iic(IC.speak)+' en herhaal elk woord. Ken je ze allemaal? Dan ben je klaar.',
+        eye:'<div class="tveye"><span>'+vd.n+' begrippen</span><span class="d"></span><span>'+esc(clusterShort(vd.label))+'</span></div>',
+        list:'<div class="tvlist"><div class="tvgroup">'+rows+'</div></div>',
+        done:'Woorden geoefend '+IC.check };
     }
-    body.innerHTML = '<div class="stepin">'+html+'</div>';
-    foot.innerHTML = footHtml;
+    var info = SPAR_INFO[id];
+    if(info){
+      var cues = info.cues.map(function(c,i){
+        return '<li'+(i===0?' class="main"':'')+'><span class="sq"></span><span>'+
+          (i===0?'<span class="mtag">Let vooral op</span>':'')+esc(c)+'</span></li>';
+      }).join('');
+      return { k:meta.label||info.tag, h:info.ko+' · '+info.tag, sub:info.wat,
+        eye:'<div class="tveye"><span>'+(meta.n||'')+' oefeningen</span><span class="d"></span><span>rustig doorlopen</span></div>',
+        list:'<ul class="flist">'+cues+'</ul>',
+        done:'Gedaan '+IC.check };
+    }
+    return null;
+  }
+  // Volledige drill-inhoud (met titel) voor gebruik als stap in de begeleide training.
+  function drillStepHtml(id){
+    var p = drillParts(id); if(!p) return '';
+    return sHead(p.k,p.h,p.sub)+p.eye+p.list;
+  }
+  function renderDrill(){
+    if(!drillEl) return;
+    var body = drillEl.querySelector('#drill-body');
+    var foot = drillEl.querySelector('#drill-foot');
+    var p = drillParts(drillId);
+    if(!p){ body.innerHTML=''; foot.innerHTML=''; return; }
+    body.innerHTML = '<div class="stepin">'+sHead(p.k,p.h,p.sub)+p.eye+p.list+'</div>';
+    foot.innerHTML = '<button class="nextbtn" data-act="drilldone">'+p.done+'</button>';
     body.scrollTop = 0;
   }
   function closeDrill(){
@@ -2679,6 +2709,25 @@
     var s = examEl; examEl=null; examState=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 380);
   }
+  function examTrackInner(s){
+    var out='';
+    for(var i=1;i<=s.total;i++){
+      if(i===s.pass+1) out+='<span class="ex-cut" aria-hidden="true"><span class="ex-cut-b">'+IC.check+'</span></span>';
+      var cls=(i<=s.goed)?' ok':(i>s.total-s.fout)?' bad':'';
+      out+='<i class="exd'+cls+'" data-d="'+i+'"></i>';
+    }
+    return out;
+  }
+  function examTrack(s){
+    var st = s.total>18 ? '--ez:9px;--eg:4px' : '--ez:12px;--eg:6px';
+    return '<div class="ex-track" id="ex-track" style="'+st+'">'+examTrackInner(s)+'</div>';
+  }
+  function examFillDot(s, ok){
+    var track = examEl && examEl.querySelector('#ex-track'); if(!track) return;
+    var idx = ok ? s.goed : (s.total - s.fout + 1);
+    var dot = track.querySelector('.exd[data-d="'+idx+'"]');
+    if(dot){ dot.classList.remove('dpop'); void dot.offsetWidth; dot.classList.add(ok?'ok':'bad','dpop'); }
+  }
   function renderExamQ(){
     var s = examState; if(!s) return;
     if(s.i >= s.qs.length){ return renderExamDone(); }
@@ -2691,10 +2740,9 @@
         '<span class="ol">'+letters[i]+'</span>'+esc(o)+'</button>';
     }).join('');
     body.innerHTML = '<div class="stepin">'+
-      sHead('Proef examen','Vraag '+(s.i+1)+' van '+s.qs.length,'Geslaagd vanaf '+s.pass+' goed · max '+s.maxFout+' fout')+
-      '<div class="ex-meta"><span class="ex-chip ok">'+IC.check+'<b>'+s.goed+'</b></span>'+
-        '<span class="ex-chip bad"><b>'+s.fout+'</b> fout</span></div>'+
-      '<div class="ex-q">'+(q.cat?'<span class="ex-qcat">'+esc(q.cat)+': </span>':'')+esc(q.v)+'</div>'+
+      sHead('Proef examen','Vraag '+(s.i+1)+' van '+s.qs.length,'')+
+      examTrack(s)+
+      '<div class="ex-q">'+esc(q.v)+'</div>'+
       '<div class="opts" id="ex-opts">'+opts+'</div>'+
       (q.why?'<div class="why" id="ex-why">'+esc(q.why)+'</div>':'')+
     '</div>';
@@ -2711,7 +2759,7 @@
     var chosen=+btn.getAttribute('data-i'), correct=+btn.getAttribute('data-a');
     var all = opts.querySelectorAll('.opt');
     all[correct].classList.add('correct');
-    if(chosen!==correct){ btn.classList.add('wrong'); s.fout++; } else { s.goed++; }
+    if(chosen!==correct){ btn.classList.add('wrong'); s.fout++; examFillDot(s,false); } else { s.goed++; examFillDot(s,true); }
     var why = examEl.querySelector('#ex-why'); if(why) why.classList.add('show');
     var nb = examEl.querySelector('#ex-next');
     if(nb){ nb.disabled=false; nb.style.opacity='1'; nb.classList.remove('ghost');
@@ -2859,23 +2907,27 @@
     var html='', footHtml='';
 
     if(type==='intro'){
+      var pi='', pn=1;
+      pi += planItem(String(pn++),'Opwarmen','Tel mee in het Koreaans');
+      pi += planItem(String(pn++),'De vorm','Wat '+esc(f.trigramNaam)+' betekent');
+      pi += planItem(String(pn++),'Jouw focus','Waar je vandaag op let');
+      pi += planItem(String(pn++),'Nieuwe techniek','Leer '+esc((f.nieuw&&f.nieuw[0]?f.nieuw[0].roman:'een beweging')));
+      pi += planItem(String(pn++),'Oefen mee','Loop de vorm op tempo');
+      pi += planItem(String(pn++),'Onthoud','Woord van vandaag');
+      // de andere twee dagacties zitten óók in deze begeleide training
+      todayMissionIds().forEach(function(id){
+        if(id==='poomsae') return;
+        var m = missionMeta()[id]; if(m) pi += planItem(String(pn++), esc(m.label), m.sub);
+      });
       html =
         '<div class="s-intro">'+
           '<div class="fwm">'+(f.trigramHangul||'').charAt(0)+'</div>'+
           '<div class="trigbox">'+trigramSVG(f.trigram)+'</div>'+
           '<div class="ieye">Training van vandaag · '+esc(f.element)+' '+esc(f.trigramHangul||'')+'</div>'+
           '<h1>'+esc(f.korean).replace(' ','<br>')+'</h1>'+
-          '<div class="isub">'+esc(f.betekenis)+'</div>'+
+          '<div class="isub">Alles van vandaag in één begeleide training.</div>'+
         '</div>'+
-        '<div class="s-plan">'+
-          planItem('1','Opwarmen','Tel mee in het Koreaans')+
-          planItem('2','De vorm','Wat '+esc(f.trigramNaam)+' betekent')+
-          planItem('3','Jouw focus','Waar je vandaag op let')+
-          planItem('4','Nieuwe techniek','Leer '+esc((f.nieuw&&f.nieuw[0]?f.nieuw[0].roman:'een beweging')))+
-          planItem('5','Oefen mee','Loop de vorm op tempo')+
-          planItem('6','Onthoud','Woord van vandaag')+
-          planItem('7','Snelle check','Eén vraag')+
-        '</div>';
+        '<div class="s-plan">'+pi+'</div>';
       footHtml = '<button class="nextbtn" data-act="next">'+IC.play+' Begin</button>';
     }
 
@@ -2953,7 +3005,7 @@
         return '<div class="tvgroup"><div class="tv-glabel">'+esc(g.groep)+'</div>'+rows+'</div>';
       }).join('');
       html = sHead('Technieken','De namen leren','Alle technieken van '+esc(f.korean)+'. Tik op '+
-          '<span style="white-space:nowrap">🔊</span> en zeg ze hardop mee.')+
+          iic(IC.speak)+' en zeg ze hardop mee.')+
         '<div class="tveye"><span>'+techCount(f)+' technieken</span><span class="d"></span><span>'+groups.length+' groepen</span></div>'+
         '<div class="tvlist">'+groupsHtml+'</div>';
       footHtml = '<button class="nextbtn" data-act="next">Volgende '+IC.arrow+'</button>';
@@ -3014,6 +3066,12 @@
       footHtml = '<button class="nextbtn ghost" id="checknext" data-act="next" disabled style="opacity:.45">Kies een antwoord</button>';
     }
 
+    else if(type.indexOf('drill:')===0){
+      // Een dagmissie (woorden / sparring) als begeleide stap — zelfde inhoud als de losse drill.
+      html = drillStepHtml(type.slice(6));
+      footHtml = '<button class="nextbtn" data-act="next">Volgende '+IC.arrow+'</button>';
+    }
+
     else if(type==='done'){
       html =
         '<div class="done">'+
@@ -3026,7 +3084,7 @@
           '</div>'+
           '<div class="donek han-lab">오늘의 도장 · vandaag behaald</div>'+
           '<h1>Sterk gedaan!</h1>'+
-          '<div class="dl">Je hebt <b>'+esc(f.korean)+'</b> getraind en je stempel verdiend. Weer een stap hoger op de berg.</div>'+
+          '<div class="dl">Je liep je hele training van vandaag door en verdiende je stempel. Weer een stap hoger op de berg.</div>'+
           '<div class="streakup"><span class="fl">🔥</span>Streak '+STREAK+' → '+(STREAK+1)+'</div>'+
           tomorrowCard()+
         '</div>';
@@ -3039,7 +3097,8 @@
 
     if(type==='done'){
       DONE[CUR]=true;
-      missionDone.poomsae=true;
+      // Begeleide training rondt ALLE dagacties af → vink ze alle drie af.
+      todayMissionIds().forEach(function(id){ if(id in missionDone) missionDone[id]=true; });
       var seal = body.querySelector('#stampseal');
       requestAnimationFrame(function(){ setTimeout(function(){
         var rf = body.querySelector('#rf'); if(rf) rf.style.strokeDashoffset='0';
