@@ -656,7 +656,7 @@
   .checkin .ci-t small .ci-compass{width:14px;height:14px;flex:none;background:var(--el);
     -webkit-mask:url(assets/icons/Compass2.png) center/contain no-repeat;
     mask:url(assets/icons/Compass2.png) center/contain no-repeat}
-  .checkin .ci-t small .ci-mini{width:19px;height:19px;flex:none;background:var(--el);
+  .checkin .ci-t small .ci-mini{width:19px;height:19px;flex:none;background:var(--beltfill,var(--el));
     -webkit-mask:center/contain no-repeat;mask:center/contain no-repeat}
   .checkin .ci-t small .ci-mini.reflectie{-webkit-mask-image:url(assets/icons/Check-In%20-%20Reflectie.png);
     mask-image:url(assets/icons/Check-In%20-%20Reflectie.png)}
@@ -1608,8 +1608,9 @@
   // Colour the active-tab highlight + label to match the student's belt grade (adaptive ink for legibility)
   function paintNav(){
     var g = geupInfo(GEUP_I), hl = document.getElementById('fnav-hl');
-    if(!hl || !fnav) return;
     var fill = beltFill(g);                             // dual belts → advanced colour; green deepened for AA
+    document.documentElement.style.setProperty('--beltfill', fill);  // active-tab accent, shared app-wide
+    if(!hl || !fnav) return;
     var ink  = (contrast('#FFFFFF',fill) >= contrast(shade(g.col2||g.col,-66),fill)) ? '#FFFFFF' : shade(g.col2||g.col,-66);
     hl.style.background  = fill;
     hl.style.borderColor = (ink==='#FFFFFF') ? 'rgba(255,255,255,.82)' : 'rgba(40,28,18,.24)';
