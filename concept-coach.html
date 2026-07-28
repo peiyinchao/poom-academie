@@ -369,7 +369,7 @@
     color:rgba(30,22,16,.56);display:grid;place-items:center;
     transition:opacity .25s, transform .25s, color .2s ease, background .2s ease}
   .fab-timer svg{width:25px;height:25px}
-  .fab-timer-ic{width:42px;height:42px;background:currentColor;
+  .fab-timer-ic{width:40px;height:40px;background:currentColor;
     -webkit-mask:url(assets/icons/Timer2.png) center/contain no-repeat;
     mask:url(assets/icons/Timer2.png) center/contain no-repeat}
   .fab-timer:hover{color:rgba(30,22,16,.9)}
@@ -980,14 +980,20 @@
      meescrollt. Alleen de lijst scrollt eronder door, met een zachte fade aan de bovenkant.
      'Klaar' komt pas vrij als je de hele lijst hebt doorlopen. */
   #drill{overflow:hidden}
-  .dr-fixhead{flex:none;padding:2px 24px 6px;position:relative;z-index:5}
+  /* Overlaid drill title docks on scroll — same principle as the check-in swipe: the header
+     lifts + shrinks into a compact top-bar title and STAYS visible while only the word list
+     scrolls, so the list gets the full height. --dcic (0 rest -> 1 docked) is driven from the
+     list scroll in drillInit; --ddock (travel) is set per-drill from the header height. */
+  .dr-fixhead{position:absolute;left:0;right:0;top:0;z-index:6;pointer-events:none;padding:2px 24px 6px;will-change:transform}
+  .dr-fixhead .dr-tt-txt{transform-origin:left top;
+    transform:translateY(calc(var(--dcic,0) * var(--ddock,-84px))) scale(calc(1 - var(--dcic,0) * .32));will-change:transform}
   .dr-fixhead .k{font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--el);font-weight:700}
   .dr-fixhead h2{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:29px;line-height:1;
     letter-spacing:-.01em;margin:7px 0 0;color:var(--ink)}
   .dr-fixhead .tveye{margin-top:12px}
   .dr-fixhead .sub{color:var(--gray);font-size:14px;line-height:1.5;margin:10px 0 0;max-width:332px}
   #drill .sbody{position:relative;z-index:1;padding-top:2px;
-    -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 20px);mask-image:linear-gradient(180deg,transparent 0,#000 20px)}
+    -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 44px);mask-image:linear-gradient(180deg,transparent 0,#000 44px)}
   #drill .sfoot{position:relative;z-index:3}
   #drill .nextbtn[disabled]{opacity:.5;pointer-events:none}
 
@@ -1920,7 +1926,7 @@
       hosinsul:{id:'hosinsul',short:'Hosinsul',n:hosinsulCount(), label:'Hosinsul',          sub:hosinsulCount()+' zelfverdedigingen'},
       ilbo:    {id:'ilbo',    short:'Ilbo',    n:ilboCount(),     label:'Ilbo Taeryon',      sub:ilboCount()+' één-stap sparringen'},
       ibo:     {id:'ibo',     short:'Ibo',     n:iboCount(),      label:'Ibo Taeryon',       sub:iboCount()+' twee-stap sparringen'},
-      examen:  {id:'examen',  short:'Examen',  n:ex.total,        label:'Proef examen',      sub:ex.total+' vragen'}
+      examen:  {id:'examen',  short:'Examen',  n:ex.total,        label:'Slaag voor een proefexamen', sub:ex.total+' vragen'}
     };
   }
   // Vast: poomsae + proefexamen (hoort standaard bij de begeleide training).
@@ -2645,8 +2651,9 @@
     var foot = drillEl.querySelector('#drill-foot');
     var p = drillParts(drillId);
     if(!p){ if(head) head.innerHTML=''; body.innerHTML=''; foot.innerHTML=''; return; }
-    // Vaste kop: kicker + grijze telling (direct achter het blauw) + titel (scrollt niet mee). Alleen de lijst scrollt.
-    head.innerHTML = '<div class="k">'+p.k+'</div>'+p.eye+'<h2>'+p.h+'</h2>'+(p.sub?'<p class="sub">'+p.sub+'</p>':'');
+    // Vaste kop: kicker + grijze telling + titel dokt bij het scrollen (zelfde principe als de
+    // wekelijkse check-in). Alleen de lijst scrollt; de titel krimpt en blijft als compacte kop staan.
+    head.innerHTML = '<div class="dr-tt-txt"><div class="k">'+p.k+'</div>'+p.eye+'<h2>'+p.h+'</h2>'+(p.sub?'<p class="sub">'+p.sub+'</p>':'')+'</div>';
     body.innerHTML = '<div class="stepin dr-in">'+p.list+'</div>';
     // Knop start als 'ghost' + disabled; komt pas vrij (accent-blauw + glint) als je de lijst hebt doorlopen.
     foot.innerHTML = '<button class="nextbtn ghost" id="drill-done" data-act="drilldone" disabled aria-disabled="true">'+p.done+'</button>';
@@ -2654,10 +2661,24 @@
     requestAnimationFrame(drillInit);
   }
   // 'Klaar' pas vrij als je de hele lijst hebt doorlopen (of als de lijst niet scrollbaar is, bv. korte spar-drill).
+  // Daarnaast: de overlay-titel dokt mee met de scroll (zelfde principe als de check-in swipe).
   function drillInit(){
     if(!drillEl) return;
-    var body=drillEl.querySelector('#drill-body'), doneBtn=drillEl.querySelector('#drill-done');
+    var body=drillEl.querySelector('#drill-body'), doneBtn=drillEl.querySelector('#drill-done'),
+        head=drillEl.querySelector('#drill-head'), shead=drillEl.querySelector('.shead'),
+        inEl=body&&body.querySelector('.dr-in');
     if(!body) return;
+    // Dok-geometrie: de titel overlapt de lijst; de lijst begint er in rust onder en scrollt eronder door.
+    var sH = shead ? shead.offsetHeight : 0;
+    if(head) head.style.top = sH+'px';
+    var hH = head ? head.offsetHeight : 0;
+    if(inEl) inEl.style.paddingTop = (hH + 12)+'px';
+    var dock = Math.max(56, Math.round(hH*0.5));    // afstand die de titel omhoog dokt
+    if(head) head.style.setProperty('--ddock', (-dock)+'px');
+    drillEl.style.setProperty('--dcic','0');
+    function dockUpd(){ var c=body.scrollTop/dock; c=c<0?0:c>1?1:c; drillEl.style.setProperty('--dcic', c.toFixed(3)); }
+    if(body._drDock) body.removeEventListener('scroll', body._drDock);
+    body._drDock=dockUpd; body.addEventListener('scroll', dockUpd, {passive:true}); dockUpd();
     function gate(){
       if(!doneBtn || !doneBtn.disabled) return;
       if(body.scrollTop+body.clientHeight >= body.scrollHeight-6){
@@ -2816,7 +2837,7 @@
     var chosen=+btn.getAttribute('data-i'), correct=+btn.getAttribute('data-a');
     var all = opts.querySelectorAll('.opt');
     all[correct].classList.add('correct');
-    if(chosen!==correct){ btn.classList.add('wrong'); s.fout++; examFillDot(s,false); } else { s.goed++; examFillDot(s,true); }
+    if(chosen!==correct){ btn.classList.add('wrong'); s.fout++; examFillDot(s,false); sfx('wrong'); } else { s.goed++; examFillDot(s,true); sfx('correct'); }
     var why = examEl.querySelector('#ex-why'); if(why) why.classList.add('show');
     var nb = examEl.querySelector('#ex-next');
     if(nb){ nb.disabled=false; nb.style.opacity='1'; nb.classList.remove('ghost');
@@ -2849,7 +2870,7 @@
         '<button class="nextbtn ghost" data-act="exretry" style="margin-top:10px">'+IC.reset+' Opnieuw proberen</button>'
       : '<button class="nextbtn" data-act="exretry">'+IC.reset+' Opnieuw proberen</button>'+
         '<button class="nextbtn ghost" data-act="exclose" style="margin-top:10px">Terug naar vandaag</button>';
-    if(passed) confetti();
+    if(passed){ confetti(); sfx('exampass'); } else { sfx('examfail'); }
   }
   function examRetry(){ closeExam(); openExam(); }
 
@@ -3370,9 +3391,13 @@
   var SFX_SAMPLES={
     check:   'assets/sounds/freesound_community-pencil_check_mark_2-105940.mp3',
     complete:'assets/sounds/soundshelfstudio-mission-complete-chime-534595.mp3',
-    chime:   'assets/sounds/updatepelgo-success-221935.mp3'
+    chime:   'assets/sounds/updatepelgo-success-221935.mp3',
+    correct: 'assets/sounds/chrisiex1-correct-156911.mp3',
+    wrong:   'assets/sounds/vadim_makes_sound-ui-error-denied-sound-2-547856.mp3',
+    exampass:'assets/sounds/soundshelfstudio-mission-complete-chime-534595.mp3',
+    examfail:'assets/sounds/freesound_community-negative_beeps-6008.mp3'
   };
-  var SFX_GAIN={check:0.95, complete:0.85, chime:0.85};
+  var SFX_GAIN={check:0.95, complete:0.85, chime:0.85, correct:0.9, wrong:0.85, exampass:0.9, examfail:0.85};
   var _sfxBuf={}, _sfxLoading={};
   function sfxLoad(name){
     var ac=sfxCtx(); if(!ac) return;
@@ -3406,6 +3431,10 @@
       if(name==='check'){ if(!sfxSample('check')){ sfxTone(1760,0,0.045,'triangle',0.08); sfxTone(1046.5,0.02,0.10,'sine',0.17); sfxTone(1568,0.10,0.22,'sine',0.17); sfxTone(2093,0.10,0.15,'sine',0.05); } }
       else if(name==='uncheck'){ sfxTone(420,0,0.11,'sine',0.12); }
       else if(name==='complete'){ if(!sfxSample('complete')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
+      else if(name==='correct'){ if(!sfxSample('correct')){ sfxTone(880,0,0.09,'sine',0.16); sfxTone(1318.5,0.08,0.16,'sine',0.16); } }
+      else if(name==='wrong'){ if(!sfxSample('wrong')){ sfxTone(311,0,0.14,'sawtooth',0.10); sfxTone(233,0.10,0.20,'sawtooth',0.10); } }
+      else if(name==='exampass'){ if(!sfxSample('exampass')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
+      else if(name==='examfail'){ if(!sfxSample('examfail')){ sfxTone(392,0,0.16,'sine',0.13); sfxTone(311,0.14,0.16,'sine',0.13); sfxTone(233,0.28,0.28,'sine',0.13); } }
     }catch(e){}
   }
   function otTempoLabel(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].s+'<span class="ot-tx">×</span>'; } return '1<span class="ot-tx">×</span>'; }
