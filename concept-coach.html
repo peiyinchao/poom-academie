@@ -991,6 +991,9 @@
   .dr-fixhead h2{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:29px;line-height:1;
     letter-spacing:-.01em;margin:7px 0 0;color:var(--ink)}
   .dr-fixhead .tveye{margin-top:12px}
+  .dr-fixhead .dr-kickrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .dr-fixhead .dr-kickrow .tveye{margin:0}
+  .dr-fixhead .dr-sep{width:1px;height:12px;background:#CBC2B0;border-radius:1px;flex:none}
   .dr-fixhead .sub{color:var(--gray);font-size:14px;line-height:1.5;margin:10px 0 0;max-width:332px}
   #drill .sbody{position:relative;z-index:1;padding-top:2px;
     -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 44px);mask-image:linear-gradient(180deg,transparent 0,#000 44px)}
@@ -2653,7 +2656,7 @@
     if(!p){ if(head) head.innerHTML=''; body.innerHTML=''; foot.innerHTML=''; return; }
     // Vaste kop: kicker + grijze telling + titel dokt bij het scrollen (zelfde principe als de
     // wekelijkse check-in). Alleen de lijst scrollt; de titel krimpt en blijft als compacte kop staan.
-    head.innerHTML = '<div class="dr-tt-txt"><div class="k">'+p.k+'</div>'+p.eye+'<h2>'+p.h+'</h2>'+(p.sub?'<p class="sub">'+p.sub+'</p>':'')+'</div>';
+    head.innerHTML = '<div class="dr-tt-txt"><div class="dr-kickrow"><div class="k">'+p.k+'</div><span class="dr-sep"></span>'+p.eye+'</div><h2>'+p.h+'</h2>'+(p.sub?'<p class="sub">'+p.sub+'</p>':'')+'</div>';
     body.innerHTML = '<div class="stepin dr-in">'+p.list+'</div>';
     // Knop start als 'ghost' + disabled; komt pas vrij (accent-blauw + glint) als je de lijst hebt doorlopen.
     foot.innerHTML = '<button class="nextbtn ghost" id="drill-done" data-act="drilldone" disabled aria-disabled="true">'+p.done+'</button>';
