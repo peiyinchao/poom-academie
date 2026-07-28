@@ -626,6 +626,7 @@
   .ex-result.pass .ex-badge{background:#ECFDF3;color:#12B76A}
   .ex-result.fail .ex-badge{background:var(--soft);color:var(--gray)}
   .ex-rk{margin-top:16px;font-family:var(--cond);text-transform:uppercase;letter-spacing:.16em;font-size:12px;color:var(--gray)}
+  .ex-result.pass .ex-rk{font-size:23px;font-weight:800;letter-spacing:.1em;color:#12B76A;margin-top:18px}
   .ex-rt{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:40px;line-height:1;margin:8px 0 0;color:var(--ink)}
   .ex-rs{max-width:300px;margin:14px auto 0;font-size:14.5px;line-height:1.5;color:var(--gray)}
 
@@ -2868,11 +2869,9 @@
          ? 'Sterk gedaan — je haalde de norm ('+s.pass+' goed, max '+s.maxFout+' fout). Klaar voor het echte examen!'
          : 'Je had '+s.fout+' fout; op het examen mag dat er max '+s.maxFout+' zijn. Oefen nog even en probeer opnieuw.')+'</div>'+
     '</div></div>';
-    foot.innerHTML = passed
-      ? '<button class="nextbtn" data-act="exclose">Terug naar vandaag</button>'+
-        '<button class="nextbtn ghost" data-act="exretry" style="margin-top:10px">'+IC.reset+' Opnieuw proberen</button>'
-      : '<button class="nextbtn" data-act="exretry">'+IC.reset+' Opnieuw proberen</button>'+
-        '<button class="nextbtn ghost" data-act="exclose" style="margin-top:10px">Terug naar vandaag</button>';
+    foot.innerHTML =
+      '<button class="nextbtn'+(passed?' ghost':'')+'" data-act="exretry">'+IC.reset+' Opnieuw proberen</button>'+
+      '<button class="nextbtn'+(passed?'':' ghost')+'" data-act="exclose" style="margin-top:10px">Terug naar vandaag</button>';
     if(passed){ confetti(); sfx('exampass'); } else { sfx('examfail'); }
   }
   function examRetry(){ closeExam(); openExam(); }
