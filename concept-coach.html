@@ -257,6 +257,11 @@
   @keyframes bpEnterL{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
   @keyframes bpExitL{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-24px)}}
   @keyframes bpExitR{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(24px)}}
+  /* Rate-icon set: a full-width carousel (whole set + highlight slides fully out/in, no crossfade). */
+  @keyframes rateEnterR{from{transform:translateX(100%)}to{transform:translateX(0)}}
+  @keyframes rateEnterL{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+  @keyframes rateExitL{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+  @keyframes rateExitR{from{transform:translateX(0)}to{transform:translateX(100%)}}
   .bp-meta-cur.enter-r{animation:bpEnterR .38s cubic-bezier(.22,.9,.3,1)}
   .bp-meta-cur.enter-l{animation:bpEnterL .38s cubic-bezier(.22,.9,.3,1)}
   .bp-meta-ghost.exit-l{animation:bpExitL .38s cubic-bezier(.22,.9,.3,1) forwards}
@@ -1456,10 +1461,10 @@
   /* …and the confidence-selector icons (three glyphs + highlight) slide with it; the question stays. */
   .wcat .cs-rate-optswrap{position:relative;overflow:hidden}
   .wcat .cs-rate-opts-ghost{position:absolute;left:0;top:0;width:100%;pointer-events:none}
-  .wcat .cs-rate-opts.enter-r{animation:bpEnterR .38s cubic-bezier(.22,.9,.3,1)}
-  .wcat .cs-rate-opts.enter-l{animation:bpEnterL .38s cubic-bezier(.22,.9,.3,1)}
-  .wcat .cs-rate-opts-ghost.exit-l{animation:bpExitL .38s cubic-bezier(.22,.9,.3,1) forwards}
-  .wcat .cs-rate-opts-ghost.exit-r{animation:bpExitR .38s cubic-bezier(.22,.9,.3,1) forwards}
+  .wcat .cs-rate-opts.enter-r{animation:rateEnterR .42s cubic-bezier(.22,.9,.3,1)}
+  .wcat .cs-rate-opts.enter-l{animation:rateEnterL .42s cubic-bezier(.22,.9,.3,1)}
+  .wcat .cs-rate-opts-ghost.exit-l{animation:rateExitL .42s cubic-bezier(.22,.9,.3,1) forwards}
+  .wcat .cs-rate-opts-ghost.exit-r{animation:rateExitR .42s cubic-bezier(.22,.9,.3,1) forwards}
   .wcat .cs-note{transition:opacity .17s ease}
   .wcat .cs-note.cs-fading{opacity:0}
   /* List frame (card bg/border/radius) stays put; only the rows crossfade, and the card
@@ -2798,9 +2803,9 @@
       if(st===2){ btn.style.setProperty('--ic', b.col); var gi=btn.querySelector('.gicon'); if(gi) gi.setAttribute('style', bloomStyle(b)); }
     }
   }
-  // Paging: the three confidence icons + their highlight cross-slide out/in with the page while the
-  // "Hoe goed ken je…" label stays put. Ghost-clones the old set sliding out; the new set snaps its
-  // highlight (so it rides in WITH the icons) and slides in. Same dir mapping as csTitleSwap.
+  // Paging: the three confidence icons + their highlight slide fully out/in as one set (a carousel)
+  // while the "Hoe goed ken je…" label stays put. Ghost-clones the old set sliding out; the new set
+  // snaps its highlight (so it rides in WITH the icons) and slides in. Same dir mapping as csTitleSwap.
   function csRateSwap(sheet, name, dir){
     if(!sheet) return;
     var rate=sheet.querySelector('.cs-rate'); if(!rate) return;
