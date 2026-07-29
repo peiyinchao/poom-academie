@@ -101,8 +101,6 @@
   .greet .hello{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:42px;
     letter-spacing:-.015em;line-height:.98;color:var(--ink)}
   .greet .hello .wave{-webkit-text-fill-color:initial}
-  .greet .line{margin-top:8px;font-size:15px;line-height:1.5;color:#48505E;max-width:32ch;
-    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;min-height:4.5em}
 
   /* section eyebrow */
   .eye{display:flex;align-items:center;gap:10px;margin:26px 2px 12px}
@@ -780,7 +778,7 @@
     box-shadow:0 20px 40px -26px rgba(16,24,40,.5);padding:26px 22px 20px}
   .trainday::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.18;mix-blend-mode:overlay;
     background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="140" height="140" filter="url(%23n)" opacity="0.5"/></svg>')}
-  .td-wm{position:absolute;right:14px;top:68%;transform:translateY(-50%);height:150%;width:auto;
+  .td-wm{position:absolute;right:-70px;top:68%;transform:translateY(-50%);height:150%;width:auto;
     opacity:.16;pointer-events:none;user-select:none;z-index:-1}
   .td-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
   .td-titlewrap{display:flex;flex-direction:column;gap:9px;min-width:0}
@@ -789,8 +787,7 @@
   .td-title{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:20px;line-height:1;letter-spacing:.01em}
   .td-count{flex:none;font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:11.5px;font-weight:700;
     color:rgba(255,255,255,.72);line-height:1}
-  .td-goal{font-size:14px;line-height:1.42;color:rgba(255,255,255,.94);margin:0 0 2px}
-  .td-goal b{font-weight:800}
+  .td-goal{font-size:12.5px;line-height:1.3;color:rgba(255,255,255,.72);margin:-6px 0 0}
   .td-list{display:flex;flex-direction:column;flex:1;justify-content:center}
   .td-item{display:flex;align-items:center;gap:16px;width:100%;background:transparent;border:0;color:#fff;
     cursor:pointer;text-align:left;padding:12px 2px;-webkit-tap-highlight-color:transparent;
@@ -2385,7 +2382,7 @@
     }).join('');
     var quote = curQuote();
     var wfSet = WEEK_FOCUS.length>0;
-    var greetLine = 'Vandaag maken we <b>'+esc(f.korean)+'</b> sterker — klaar voor je training?';
+    var trainSub = 'We maken '+esc(f.korean)+' sterker';
     var ciWk = 'wk '+weekNo();
     var checkin;
     if(weekPhase()==='reflect'){
@@ -2435,7 +2432,6 @@
           '<div class="greet-txt">'+
             '<div class="hello">'+greetingWord()+',<br>Jayden</div>'+
             '<div class="gday" data-act="shufflequote" title="Schud je toestel voor een nieuwe wijsheid" style="--gd:'+beltStroke(geupInfo(GEUP_I))+'"><q>'+esc(quote)+'</q></div>'+
-            '<div class="line">'+greetLine+'</div>'+
           '</div>'+
           '<span class="greet-masc" data-act="mascwink" title="Tik op me"><span class="gm-b">'+
             '<img class="gm-i" src="'+dayMascot()+'" alt="" aria-hidden="true">'+
@@ -2451,6 +2447,7 @@
             '<div class="td-titlewrap">'+
               '<img class="td-kanji" src="assets/brand/taekwondo-brush-white.png" alt="" aria-hidden="true">'+
               '<div class="td-title">Training van vandaag</div>'+
+              '<div class="td-goal">'+trainSub+'</div>'+
             '</div>'+
             '<button class="startbtn compact" data-act="start" aria-label="Start geleide training" title="Start geleide training"><span class="startbtn-ic" aria-hidden="true"></span></button>'+
           '</div>'+
@@ -5077,8 +5074,54 @@
     }
   }
   function swipeAdvance(qid){
-    var body=reflect.querySelector('#rfbody'), cards=[].slice.call(body.querySelectorAll('.qcard'));
-    for(var i=0;i<cards.length;i++){ if(cards[i].getAttribute('data-q')===qid){ if(cards[i+1]) setTimeout(function(c){ return function(){ c.scrollIntoView({behavior:'smooth',block:'start'}); }; }(cards[i+1]),180); break; } }
+    if(!reflect) return;
+    var body=reflect.querySelector('#rfbody'); if(!body) return;
+    var cards=[].slice.call(body.querySelectorAll('.qcard'));
+    for(var i=0;i<cards.length;i++){
+      if(cards[i].getAttribute('data-q')===qid){
+        var next=cards[i+1]; if(!next) break;
+        setTimeout(function(c){ return function(){
+          // centre the next card (matches scroll-snap-align:center) with a slow, manual-like glide
+          var br=body.getBoundingClientRect(), cr=c.getBoundingClientRect();
+          var target=body.scrollTop + (cr.top+cr.height/2) - (br.top+body.clientHeight/2);
+          rfGlide(body, Math.max(0, Math.round(target)), 820);
+        }; }(next), 180);
+        break;
+      }
+    }
+  }
+  // Slow, eased scroll for the check-in swipe flow. Native smooth-scroll is fixed and snappy, so
+  // this rAF tween stretches the duration and softens the easing to feel like a gentle manual
+  // scroll. Snap + CSS smooth-scroll are disabled during the tween so they don't fight it, then
+  // restored — we land exactly on the card's centre snap point, so re-enabling snap won't jump.
+  function rfGlide(body, target, dur){
+    if(!body) return;
+    if(body._rfRAF){ cancelAnimationFrame(body._rfRAF); if(body._rfDone) body._rfDone(); }
+    var start=body.scrollTop, dist=target-start;
+    var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce || Math.abs(dist)<2){ var pb0=body.style.scrollBehavior; body.style.scrollBehavior='auto'; body.scrollTop=target; body.style.scrollBehavior=pb0; return; }
+    var prevBeh=body.style.scrollBehavior, prevSnap=body.style.scrollSnapType, done=false;
+    body.style.scrollBehavior='auto'; body.style.scrollSnapType='none';
+    function finish(){
+      if(done) return; done=true;
+      body.style.scrollBehavior=prevBeh; body.style.scrollSnapType=prevSnap;
+      body.removeEventListener('touchstart',onGrab); body.removeEventListener('wheel',onGrab);
+      body._rfRAF=0; body._rfDone=null;
+    }
+    body._rfDone=finish;
+    function onGrab(){ if(body._rfRAF) cancelAnimationFrame(body._rfRAF); finish(); } // user takes over → hand back to native snap
+    body.addEventListener('touchstart',onGrab,{passive:true});
+    body.addEventListener('wheel',onGrab,{passive:true});
+    function ease(t){ return t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; } // easeInOutCubic
+    var t0=0;
+    function frame(ts){
+      if(!t0) t0=ts;
+      var p=(ts-t0)/dur; if(p>1) p=1;
+      body.scrollTop=start+dist*ease(p);
+      if(p<1){ body._rfRAF=requestAnimationFrame(frame); }
+      else { body.scrollTop=target; finish(); }
+    }
+    body._rfRAF=requestAnimationFrame(frame);
   }
 
   // shared post-pick behaviour across the three layouts
