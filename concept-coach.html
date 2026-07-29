@@ -48,6 +48,13 @@
   .surface{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;
     -webkit-overflow-scrolling:touch}
   .surface::-webkit-scrollbar{display:none}
+  /* Transient overlay scrollbar — auto-shows while scrolling, fades out after a short pause.
+     A JS-driven thumb (.vsb) is injected into each scroll container so the length of the list
+     is legible on touch + desktop without a persistent bar. */
+  .vsb{position:absolute;top:0;right:3px;width:5px;border-radius:3px;background:rgba(30,22,16,.32);
+    opacity:0;pointer-events:none;z-index:6;transition:opacity .35s ease;will-change:transform}
+  .vsb.on{opacity:1}
+  @media (prefers-reduced-motion:reduce){ .vsb{transition:none} }
   .pad{padding:0 22px 130px}
   #today-surface .pad{padding-bottom:84px}
   @media (max-width:440px){
@@ -135,14 +142,14 @@
     margin-top:8px;width:100%;border:1.5px solid rgba(20,40,90,.18);box-sizing:border-box;border-radius:15px;background:#fff;color:#000;
     font-family:var(--cond);text-transform:uppercase;font-weight:800;letter-spacing:.03em;font-size:16.5px;
     height:64px;padding:0 16px;display:flex;align-items:center;justify-content:center;gap:10px;
-    box-shadow:0 10px 22px -14px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.95), inset 0 -2px 3px rgba(20,40,90,.07);transition:transform .12s}
+    box-shadow:0 10px 22px -14px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.95), inset 0 -2px 3px rgba(20,40,90,.07);transition:transform .12s, background .2s ease, border-color .2s ease}
   .startbtn::before,.nextbtn:not(.ghost)::before{content:'';position:absolute;top:-60%;bottom:-60%;left:0;width:48%;pointer-events:none;z-index:3;
     filter:blur(4.5px);will-change:transform;
     transform:translateX(-300%) skewX(-16deg)}
   /* White CTA: a neutral gloss (a colour cast would read as a smudge on white). */
   .startbtn::before{background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.02) 24%,rgba(255,255,255,.24) 50%,rgba(255,255,255,.02) 76%,transparent 100%)}
   /* Colour CTAs: shimmer tinted with the theme's own glow, not white. */
-  .nextbtn:not(.ghost)::before{background:linear-gradient(100deg,transparent 0%,color-mix(in srgb,var(--glow) 4%,transparent) 24%,color-mix(in srgb,var(--glow) 32%,transparent) 50%,color-mix(in srgb,var(--glow) 4%,transparent) 76%,transparent 100%)}
+  .nextbtn:not(.ghost)::before{background:linear-gradient(100deg,transparent 0%,color-mix(in srgb,var(--glow) 2%,transparent) 24%,color-mix(in srgb,var(--glow) 18%,transparent) 50%,color-mix(in srgb,var(--glow) 2%,transparent) 76%,transparent 100%)}
   .startbtn.sheen::before,.nextbtn.sheen:not(.ghost)::before{animation:ctaSheen 6.25s ease-in-out}
   @keyframes ctaSheen{from{transform:translateX(-300%) skewX(-16deg)}to{transform:translateX(560%) skewX(-16deg)}}
   .startbtn:active{transform:scale(.975)}
@@ -155,6 +162,10 @@
     width:60px;height:60px;flex:none;margin:0;padding:0;border-radius:50%;gap:0;
     background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);box-shadow:none}
   .startbtn.compact .startbtn-ic{width:34px;height:34px}
+  /* Pointer-only hover: intensify the frost like the round timer button (no sticky state on touch) */
+  @media (hover:hover){
+    .startbtn.compact:hover{background:rgba(255,255,255,.34);border-color:rgba(255,255,255,.55)}
+  }
 
   /* ---------- Up next (secondary) ---------- */
   .upnext{display:flex;align-items:center;gap:13px;margin-top:14px;background:var(--surface);
@@ -253,7 +264,7 @@
   /* Belt-picker bottom sheet (opened from the profile avatar) */
   .beltsheet-ov{position:absolute;inset:0;z-index:120;display:flex;align-items:flex-end;
     background:rgba(16,20,26,0);transition:background .28s;pointer-events:none}
-  .beltsheet-ov.show{background:rgba(16,20,26,.44);pointer-events:auto}
+  .beltsheet-ov.show{background:rgba(16,20,26,.58);pointer-events:auto}
   .bs-backdrop{position:absolute;inset:0;cursor:pointer}
   .beltsheet{position:relative;z-index:1;width:100%;background:var(--page);border-radius:26px 26px 0 0;
     padding:10px 22px 30px;box-shadow:0 -10px 40px rgba(0,0,0,.22);
@@ -347,9 +358,14 @@
     box-shadow:0 14px 32px -16px rgba(40,24,12,.4), 0 1px 0 rgba(255,255,255,.75) inset}
   .fnav button{position:relative;z-index:1;flex:1 1 0;border:0;background:transparent;color:rgba(30,22,16,.56);border-radius:17px;
     padding:6px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-family:var(--cond);text-transform:uppercase;
-    font-weight:700;letter-spacing:.03em;font-size:8.5px;line-height:1;transition:color .32s ease}
+    font-weight:700;letter-spacing:.03em;font-size:8.5px;line-height:1;transition:color .32s ease, transform .14s ease}
   .fnav button svg{width:24px;height:24px}
   .fnav button.on{color:var(--beltink,var(--elink))}
+  /* Pointer-only hover: darken the icon+label like the round timer button (no sticky state on touch) */
+  @media (hover:hover){
+    .fnav button:not(.on):hover{color:rgba(30,22,16,.9)}
+    .fnav button:active{transform:scale(.92)}
+  }
   /* Sliding frosted-glass highlight behind the active tab */
   .fnav-hl{position:absolute;top:5px;bottom:5px;left:0;width:0;z-index:0;pointer-events:none;border-radius:999px;
     background:linear-gradient(180deg,#ffffff,#fff3ec);
@@ -379,7 +395,9 @@
     font-size:15px;font-weight:800;color:var(--ink)}
   .tmr-body{display:flex;flex-direction:column;justify-content:center}
   /* ===== Fullscreen Oefentimer ===== */
+  /* Dark base (not the cream --page) so no white can peek through at a subpixel edge seam */
   .timerscreen{color:#fff}
+  .session.timerscreen{background:var(--deep)}
   .timerscreen .shead{position:relative;z-index:7;justify-content:space-between;align-items:center;gap:12px}
   .tmr-eye{flex:1;font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;
     font-size:12.5px;font-weight:700;color:rgba(255,255,255,.92)}
@@ -401,14 +419,17 @@
   /* Counter uses the lexicon Korean display face (Black Han Sans) */
   .timerscreen .pt-num{font-family:var(--kor);font-size:120px;line-height:.9;font-weight:400;display:flex;align-items:center;justify-content:center;height:108px}
   .timerscreen .pt-word{margin-top:4px;gap:10px}
-  .timerscreen .pt-word .w-ko{font-family:var(--kor);font-size:32px;font-weight:400}
+  .timerscreen .pt-word .w-ko{font-family:'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;font-size:32px;font-weight:400}
   .timerscreen .pt-word .w-ro{font-size:15px}
   /* Only number + character + romanisation live inside the ring; hint sits BELOW it */
   .timerscreen .ptimer.bare{justify-content:center;align-items:center;gap:24px;padding:0}
-  .timerscreen .pt-dial{flex:none;margin:0}
+  .timerscreen .pt-dial{flex:none;margin:0;transition:opacity .3s}
   .timerscreen .pt-hint{margin-top:0;font-size:12px;letter-spacing:.14em}
+  /* Paused: dim the dial to signal hold; show the tap-to-continue hint fully opaque */
+  .timerscreen.ot-paused .pt-dial{opacity:.34}
+  .timerscreen.ot-paused .pt-hint{color:#fff;-webkit-text-fill-color:#fff;opacity:1}
   /* Circular soft light orbs — bigger, softer, and arranged per element (see [data-el] below) */
-  .timerscreen .pt-bg{background:linear-gradient(158deg, var(--el) 4%, var(--deep) 60%, var(--elink) 128%);filter:saturate(1.06)}
+  .timerscreen .pt-bg{background:linear-gradient(158deg, var(--el) 4%, var(--deep) 60%, var(--elink) 128%);filter:saturate(1.06);inset:-3px}
   .timerscreen .pt-orbs{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
   .timerscreen .orb{position:absolute;border-radius:50%;filter:blur(24px);opacity:.55;will-change:transform}
   .timerscreen .orb.o1{width:360px;height:360px;left:-78px;top:-2%;background:radial-gradient(circle at 50% 50%, var(--glow), transparent 70%)}
@@ -429,7 +450,7 @@
   .timerscreen .orb{animation:orbFloat 12s ease-in-out infinite}
   .timerscreen .orb.o2{animation-duration:16s;animation-direction:reverse}
   .timerscreen .orb.o3{animation-duration:14s;animation-delay:-3s}
-  @keyframes orbFloat{0%{transform:translate(0,0)}33%{transform:translate(16px,-20px)}66%{transform:translate(-13px,13px)}100%{transform:translate(0,0)}}
+  @keyframes orbFloat{0%{transform:translate(0,0) scale(1)}33%{transform:translate(34px,-42px) scale(1.06)}66%{transform:translate(-30px,30px) scale(.95)}100%{transform:translate(0,0) scale(1)}}
   /* Celebratory mascot that slides up from the bottom when a set completes; sits ABOVE the dial
      but BEHIND the playback controls (.ot-bar z6) for depth. Two stacked images (open eyes + blink)
      let it blink while it rests at the counter ring, then it slides back down. */
@@ -458,6 +479,10 @@
   .session{position:absolute;inset:0;z-index:90;background:var(--page);display:flex;flex-direction:column;
     transform:translateY(100%);transition:transform .38s cubic-bezier(.32,.72,0,1)}
   .session.show{transform:translateY(0)}
+  /* Category / Handboek detail: cross-fade in (fade + gentle scale), like the oefentimer — no drill-in slide */
+  .session.catsheet{transform:scale(1.04);opacity:0;
+    transition:opacity .3s ease, transform .44s cubic-bezier(.33,1,.5,1)}
+  .session.catsheet.show{transform:scale(1);opacity:1}
   /* Oefentimer materialises (fade + gentle scale) instead of sliding up as a card */
   .session.timerscreen{transform:scale(1.04);opacity:0;
     transition:opacity .3s ease, transform .44s cubic-bezier(.33,1,.5,1)}
@@ -530,10 +555,9 @@
   ul.flist{list-style:none;margin:20px 0 0;padding:0}
   ul.flist li{display:flex;gap:13px;align-items:flex-start;padding:14px 0;font-size:16px;color:#2A3342;line-height:1.4}
   ul.flist li + li{border-top:1px solid var(--line)}
-  ul.flist li.main{background:var(--tint);border:1px solid var(--elline);border-radius:14px;padding:15px 16px;margin-bottom:6px}
-  ul.flist li.main + li{border-top:0}
-  ul.flist .sq{width:9px;height:9px;flex:none;margin-top:6px;border-radius:2px;background:var(--el)}
-  ul.flist li.main .sq{width:11px;height:11px}
+  ul.flist li.main::before{content:'';flex:none;width:6px;align-self:stretch;border-radius:3px;background:var(--el);opacity:.9}
+  ul.flist .sq{width:9px;height:9px;flex:none;margin-top:6px;border-radius:50%;background:var(--el)}
+  ul.flist li.main .sq{display:none}
   ul.flist .mtag{display:block;font-family:var(--cond);text-transform:uppercase;font-size:10.5px;letter-spacing:.1em;
     color:var(--deep);font-weight:700;margin-bottom:3px}
 
@@ -550,6 +574,16 @@
   .spk svg{width:23px;height:23px}
   .spk.ring{animation:ring 1s ease infinite}
   @keyframes ring{0%{box-shadow:0 0 0 0 var(--elline)}70%{box-shadow:0 0 0 12px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  /* speaking waveform: the separate bars bounce while text-to-speech is active */
+  .wv-b{transform-box:fill-box;transform-origin:center}
+  .ring .wv-b{animation:wvb .7s ease-in-out infinite}
+  .ring .wv-b:nth-child(1){animation-duration:.62s;animation-delay:-.20s}
+  .ring .wv-b:nth-child(2){animation-duration:.78s;animation-delay:-.06s}
+  .ring .wv-b:nth-child(3){animation-duration:.54s;animation-delay:-.34s}
+  .ring .wv-b:nth-child(4){animation-duration:.70s;animation-delay:-.12s}
+  .ring .wv-b:nth-child(5){animation-duration:.60s;animation-delay:-.28s}
+  .ring .wv-b:nth-child(6){animation-duration:.72s;animation-delay:-.02s}
+  @keyframes wvb{0%,100%{transform:scaleY(.42)}50%{transform:scaleY(1.12)}}
   .thint{margin-top:14px;font-size:14px;color:var(--gray);line-height:1.5}
 
   /* warmup counting — now the fullscreen teller (.ptimer.teller), styled below */
@@ -613,13 +647,31 @@
   @keyframes exdpop{0%{transform:scale(1)}42%{transform:scale(1.55)}100%{transform:scale(1)}}
   /* pass-threshold marker: a subtle separator dot (like the ko·nl mid-dot), not a line + badge */
   .ex-cut{flex:none;align-self:center;width:4px;height:4px;border-radius:50%;background:rgba(20,23,18,.26);margin:0 2px}
+  /* Proefexamen expression companion — reacts to the running fout-marge */
+  .ex-head{display:flex;align-items:center;gap:14px;margin:14px 2px 2px}
+  .ex-head .sh{margin:0;flex:1;min-width:0}
+  #ex-sub:empty{display:none}
+  #exam .sfoot{position:relative}
+  .ex-face{position:absolute;right:22px;bottom:calc(100% - 2px);z-index:4;width:104px;height:104px;border-radius:50%;overflow:hidden;background:#fff;
+    box-shadow:0 8px 18px rgba(20,23,18,.16)}
+  .ex-face img{position:absolute;top:50%;left:50%;width:94%;height:94%;transform:translate(-50%,-50%);display:block;border-radius:50%}
+  .ex-face .ex-face-blink{opacity:0}
+  @media (prefers-reduced-motion:no-preference){.ex-face .ex-face-blink{animation:exFaceBlink 4.8s ease-in-out infinite}}
+  @keyframes exFaceBlink{0%,86%,100%{opacity:0}88%,90%{opacity:1}92%{opacity:0}94%,96%{opacity:1}}
+  .ex-face.rbob{animation:exFaceBob .55s cubic-bezier(.34,1.56,.64,1)}
+  .ex-face.rshake{animation:exFaceShake .5s ease}
+  @keyframes exFaceBob{0%,100%{transform:translateY(0) scale(1)}35%{transform:translateY(-5px) scale(1.07)}70%{transform:translateY(0) scale(1)}}
+  @keyframes exFaceShake{0%,100%{transform:translateX(0) rotate(0)}18%{transform:translateX(-3px) rotate(-5deg)}38%{transform:translateX(3px) rotate(5deg)}58%{transform:translateX(-2px) rotate(-3deg)}78%{transform:translateX(2px) rotate(2deg)}}
+  .ex-facebig .ex-mascot{width:150px;height:150px;border-radius:50%}
+  @media (prefers-reduced-motion:reduce){.ex-face.rbob,.ex-face.rshake{animation:none}}
   .ex-q{margin-top:14px;font-size:18px;font-weight:600;color:var(--ink);line-height:1.4}
   .exam .opts{margin-top:16px}
   .ex-result{text-align:center;padding:26px 8px 0}
   .ex-masc{position:relative;display:inline-block;margin:0 auto -6px;filter:drop-shadow(0 12px 20px rgba(0,0,0,.14))}
   .ex-mascot{width:236px;height:auto;display:block}
+  .ex-mascot.ex-coach{width:auto;height:392px;margin:0 auto}
   .ex-mascot.blinklay{position:absolute;left:0;top:0;opacity:0;filter:none}
-  .ex-result.pass .ex-mascot.blinklay{animation:exBlink 4.8s ease-in-out infinite}
+  .ex-result .ex-mascot.blinklay{animation:exBlink 4.8s ease-in-out infinite}
   @keyframes exBlink{0%,86%,100%{opacity:0}88%,90%{opacity:1}92%{opacity:0}94%,96%{opacity:1}}
   .ex-badge{width:78px;height:78px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-size:34px}
   .ex-badge svg{width:40px;height:40px}
@@ -693,7 +745,7 @@
   .ci-wrap .checkin{margin-top:0;margin-left:44px}
   .ci-masc{position:absolute;left:0;bottom:-2px;width:56px;height:auto;z-index:2;pointer-events:none;
     filter:drop-shadow(0 3px 5px rgba(0,0,0,.16))}
-  .checkin .dot{width:9px;height:9px;border-radius:50%;background:var(--el);flex:none;animation:blink 1.6s ease-in-out infinite}
+  .checkin .dot{width:9px;height:9px;border-radius:50%;background:var(--seal);flex:none;animation:blink 1.6s ease-in-out infinite}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
   /* ---- Daily challenges (dagdoel) ---- */
@@ -1144,7 +1196,7 @@
   .ot-tempo-fab .ot-tempo-cur{position:relative;z-index:1}
   .ot-tempo-cur{font-family:var(--cond);font-weight:800;font-size:17px;line-height:1;letter-spacing:.02em;
     display:inline-flex;align-items:center;gap:2px}
-  .ot-tempo-cur .ot-tx,.ot-topt .ot-tx{font-size:.94em}
+  .ot-tempo-cur .ot-tx,.ot-topt .ot-tx,.ot-ropt .ot-tx{font-size:.94em}
   .ot-topt .ot-tlab{display:inline-flex;align-items:center;gap:2px}
   /* Diagonal fraction (¹ ⁄ ₄) rebuilt from parts so the slash gets real breathing room left & right */
   .timerscreen .ot-fr{display:inline-block;white-space:nowrap;letter-spacing:0;font-weight:800}
@@ -1183,6 +1235,48 @@
   .ot-tempo.collapsing.settling .ot-tempo-fab::before{transform:none;background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.28);
     transition:transform .28s cubic-bezier(.32,.72,0,1), background .28s ease, border-color .28s ease}
   .ot-tempo.collapsing.settling .ot-tempo-fab .ot-tempo-cur{color:#fff;transition:color .28s ease}
+
+  /* ===== Oefentimer: Herhaal fold-out (mirrors the tempo fold-out) + repeats-left badge ===== */
+  .ot-rep{position:relative;width:64px;height:64px}
+  .ot-rep .ot-fab{position:absolute;left:0;bottom:0;z-index:1}
+  .ot-rep.open{z-index:6}
+  .ot-rep.open .ot-fab{opacity:0;pointer-events:none;transition:opacity .2s ease}
+  .ot-rep.open .ot-lab,.ot-rep.has-sel .ot-lab{opacity:1}
+  .ot-left.rep-open .ot-tempo{opacity:0;pointer-events:none;transition:opacity .2s ease}
+  /* count badge — number of repeats left (finite); tucked INSIDE the disc, beneath the loop glyph.
+     hidden for ∞ and when idle. only ever shown while the button is .on (white), so ink reads on white */
+  .ot-badge{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);
+    font-family:var(--cond);font-weight:800;font-size:14.5px;line-height:1;letter-spacing:.01em;
+    color:var(--deep);pointer-events:none;z-index:2}
+  .ot-badge.empty{display:none}
+  .ot-badge.bump{animation:otBadgeBump .34s ease}
+  @keyframes otBadgeBump{0%{transform:translateX(-50%) scale(1)}42%{transform:translateX(-50%) scale(1.34)}100%{transform:translateX(-50%) scale(1)}}
+  .ot-rep-fab svg{transition:transform .26s cubic-bezier(.34,1.4,.4,1)}
+  .ot-rep-fab.has-num svg{transform:translateY(-7px) scale(.9)}
+  .ot-rmenu{position:absolute;left:0;bottom:3px;height:58px;width:64px;z-index:2;overflow:hidden;
+    display:flex;align-items:center;justify-content:flex-start;padding:6px;box-sizing:border-box;
+    border-radius:29px;background:rgba(16,8,4,.52);border:1px solid rgba(255,255,255,.24);
+    -webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);
+    box-shadow:0 18px 44px -16px rgba(0,0,0,.72);
+    opacity:0;visibility:hidden;pointer-events:none;
+    transition:width .44s cubic-bezier(.33,1.28,.4,1), opacity .22s ease, visibility .44s}
+  .ot-rep.open .ot-rmenu{opacity:1;visibility:visible;pointer-events:auto}
+  .ot-rmenu-inner{position:relative;display:flex;align-items:center;gap:3px;height:44px}
+  .ot-ropt{position:relative;z-index:1;width:44px;height:44px;flex:none;border:0;background:transparent;
+    color:rgba(255,255,255,.82);cursor:pointer;border-radius:50%;
+    font-family:var(--cond);font-weight:800;font-size:20px;letter-spacing:0;
+    display:grid;place-items:center;transition:color .3s ease}
+  .ot-ropt.inf{font-size:0}
+  .ot-ropt.inf svg{width:31px;height:31px;display:block}
+  .ot-ropt .ot-rlab{display:inline-flex;align-items:center;gap:1px}
+  .ot-ropt.on{color:var(--deep)}
+  .ot-rthumb{position:absolute;top:0;left:0;height:44px;width:44px;z-index:0;border-radius:50%;
+    background:#fff;box-shadow:0 5px 14px -5px rgba(0,0,0,.5);opacity:0;
+    transition:transform .46s cubic-bezier(.34,1.35,.36,1), width .46s cubic-bezier(.34,1.35,.36,1), opacity .2s ease}
+  .ot-rep.has-sel .ot-rthumb{opacity:1}
+  .ot-rep.open .ot-rthumb{opacity:1}                              /* thumb shows whenever the menu is open... */
+  .ot-rep.open:not(.has-sel) .ot-ropt.inf{color:var(--deep)}     /* ...defaulting to ∞ when nothing is set yet */
+  .ot-rep.collapsing .ot-ropt:not(.on){opacity:0;transition:opacity .18s ease}  /* select-close: fade the rest, like tempo */
 
   /* ===== Korean visual motifs ===== */
   .stage{
@@ -1289,7 +1383,7 @@
   .cs-wm{position:absolute;right:4px;top:2px;z-index:-1;user-select:none;pointer-events:none;
     font-family:var(--kor);
     font-weight:800;font-size:150px;line-height:1;color:#fff;opacity:.12}
-  .cs-x{position:absolute;top:calc(env(safe-area-inset-top) + 16px);right:18px;width:38px;height:38px;border:0;
+  .cs-x{position:absolute;top:calc(env(safe-area-inset-top) + 16px);left:18px;width:38px;height:38px;border:0;
     border-radius:50%;display:grid;place-items:center;color:#fff;z-index:2;cursor:pointer;
     background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);
     border:1px solid rgba(255,255,255,.28)}
@@ -1300,58 +1394,255 @@
     letter-spacing:-.01em;margin:6px 0 0}
   .cs-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
   .cs-chip{font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;font-size:11.5px;font-weight:700;
-    padding:7px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:5px}
+    padding:7px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums}
   .cs-chip.glass{background:rgba(255,255,255,.15);-webkit-backdrop-filter:blur(12px) saturate(1.3);
     backdrop-filter:blur(12px) saturate(1.3);border:1px solid rgba(255,255,255,.26);color:#fff}
   .cs-chip.hot{background:rgba(255,255,255,.92);color:var(--deep);border-color:transparent}
   .cs-chip svg{width:13px;height:13px}
+  .cs-chip #cs-hardn{display:inline-block;min-width:.62em;text-align:center}
   .cs-body{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative;z-index:3;
     margin-top:-18px;border-radius:22px 22px 0 0;background:var(--page);
     padding:22px 20px calc(env(safe-area-inset-bottom) + 24px);box-shadow:0 -10px 24px -18px rgba(16,24,40,.4)}
   .cs-body::-webkit-scrollbar{display:none}
   .cs-note{font-size:12.5px;line-height:1.5;color:var(--gray);margin-bottom:16px}
   .cs-note svg{width:14px;height:14px;vertical-align:-2px;margin:0 1px}
+  .cs-note-i{display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:5px;background:currentColor;
+    -webkit-mask:url(assets/icons/Info.png) center/contain no-repeat;mask:url(assets/icons/Info.png) center/contain no-repeat}
+  /* Woorden + Handboek category sheets — neutral page, aligned with the list header (no coloured hero) */
+  .catsheet.wcat,.catsheet.hbcat{background:var(--page)}
+  .wcat .cs-hero,.hbcat .cs-hero{color:var(--ink);background:none;overflow:visible;isolation:auto;
+    padding:calc(env(safe-area-inset-top) + 14px) 22px 4px}
+  .wcat .cs-x,.hbcat .cs-x{top:calc(env(safe-area-inset-top) + 16px);right:20px;left:auto;width:64px;height:64px;
+    background:transparent;border:0;color:var(--ink);border-radius:50%;
+    -webkit-backdrop-filter:none;backdrop-filter:none}
+  .wcat .cs-x svg,.hbcat .cs-x svg{width:25px;height:25px}
+  @media (hover:hover){ .wcat .cs-x:hover,.hbcat .cs-x:hover{background:rgba(20,23,18,.05)} }
+  .wcat .cs-x:active,.hbcat .cs-x:active{transform:scale(.9)}
+  /* Prev/next arrows — flat, quiet ghost buttons in the TOP-LEFT corner, matching the close (X) button. */
+  .cs-pager{position:absolute;left:16px;top:calc(env(safe-area-inset-top) + 26px);z-index:60;
+    display:flex;gap:2px;background:none;border:0;box-shadow:none;padding:0;
+    -webkit-backdrop-filter:none;backdrop-filter:none}
+  .cs-pgb{width:44px;height:44px;flex:none;border:0;background:transparent;color:var(--ink);border-radius:50%;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;
+    transition:background .2s ease, color .2s ease, transform .14s ease}
+  .cs-pgb svg{width:24px;height:24px}
+  .cs-pgb-next svg{transform:scaleX(-1)}
+  @media (hover:hover){ .cs-pgb:hover{background:rgba(20,23,18,.05)} }
+  .cs-pgb:active{transform:scale(.9)}
+  /* Bottom dot navigation — small traditional page dots. Press/drag to scrub: dots grow and a
+     floating label of the target screen appears; release navigates. Auto-fades like the scrollbar. */
+  .cs-dots{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 16px);transform:translateX(-50%);
+    z-index:60;display:flex;align-items:center;gap:0;padding:6px 10px;border-radius:999px;touch-action:none;
+    background:rgba(252,250,246,.5);-webkit-backdrop-filter:blur(30px) saturate(1.9);backdrop-filter:blur(30px) saturate(1.9);
+    border:1px solid rgba(255,255,255,.55);box-shadow:0 14px 32px -16px rgba(40,24,12,.4), 0 1px 0 rgba(255,255,255,.75) inset;
+    opacity:0;pointer-events:none;transition:opacity .3s ease, padding .2s cubic-bezier(.22,.9,.3,1)}
+  .cs-dots.show{opacity:1;pointer-events:auto}
+  .cs-dots.scrubbing{padding:8px 12px}
+  .cs-dot{position:relative;width:6px;height:6px;flex:none;border:0;padding:0;margin:0 3.5px;border-radius:50%;
+    background-color:rgba(30,22,16,.26);cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:transform .2s cubic-bezier(.22,.9,.3,1), background-color .22s ease}
+  .cs-dot::before{content:"";position:absolute;top:-9px;bottom:-9px;left:-3.5px;right:-3.5px}
+  .cs-dot.on{background-color:var(--el,#3E5BD6)}
+  .cs-dots.scrubbing .cs-dot{transform:scale(1.35)}
+  .cs-dots.scrubbing .cs-dot.on{background-color:rgba(30,22,16,.26)}
+  .cs-dots.scrubbing .cs-dot.preview{background-color:var(--el,#3E5BD6);transform:scale(1.75)}
+  @media (hover:hover){ .cs-dots:not(.scrubbing) .cs-dot:not(.on):hover{background-color:rgba(30,22,16,.42)} }
+  /* Floating target label shown while scrubbing the dots */
+  .cs-dot-tip{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%);
+    max-width:180px;white-space:normal;text-align:center;line-height:1.18;
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.03em;font-weight:800;font-size:12.5px;
+    color:#fff;background:rgba(26,23,18,.94);padding:6px 11px;border-radius:9px;
+    box-shadow:0 12px 26px -10px rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .16s ease}
+  .cs-dot-tip::after{content:"";position:absolute;left:50%;bottom:-4px;transform:translateX(-50%) rotate(45deg);
+    width:8px;height:8px;background:rgba(26,23,18,.94);border-radius:2px}
+  .cs-dots.scrubbing .cs-dot-tip{opacity:1}
+  /* Paging between categories: only the TITLE moves (cross-slide, belt-picker style). Shared by
+     Woorden woordgroepen and Handboek onderdelen. */
+  .wcat .cs-titlewrap,.hbcat .cs-titlewrap{position:relative;overflow:hidden;flex:1 1 auto;min-width:0}
+  .wcat .cs-title-ghost,.hbcat .cs-title-ghost{position:absolute;left:0;bottom:0;width:100%;margin:0;pointer-events:none}
+  .wcat .cs-title-cur.enter-r,.hbcat .cs-title-cur.enter-r{animation:bpEnterR .38s cubic-bezier(.22,.9,.3,1)}
+  .wcat .cs-title-cur.enter-l,.hbcat .cs-title-cur.enter-l{animation:bpEnterL .38s cubic-bezier(.22,.9,.3,1)}
+  .wcat .cs-title-ghost.exit-l,.hbcat .cs-title-ghost.exit-l{animation:bpExitL .38s cubic-bezier(.22,.9,.3,1) forwards}
+  .wcat .cs-title-ghost.exit-r,.hbcat .cs-title-ghost.exit-r{animation:bpExitR .38s cubic-bezier(.22,.9,.3,1) forwards}
+  .wcat .cs-note{transition:opacity .17s ease}
+  .wcat .cs-note.cs-fading{opacity:0}
+  /* List frame (card bg/border/radius) stays put; only the rows crossfade, and the card
+     height eases when two groups have a different number of rows. */
+  .wcat .ct-list > :not(.vsb){transition:opacity .17s ease}
+  .wcat .ct-list.cs-fading > :not(.vsb){opacity:0}
+  .wcat .cs-head,.hbcat .cs-head{margin-top:92px}
+  .wcat .cs-eye,.hbcat .cs-eye{color:var(--gray)}
+  .wcat .cs-title,.hbcat .cs-title{color:var(--ink);font-size:32px;margin-top:0}
+  .wcat .cs-titlerow,.hbcat .cs-titlerow{display:flex;align-items:flex-end;justify-content:space-between;gap:8px 14px;flex-wrap:wrap;margin-top:6px}
+  .wcat .cs-titlerow .cs-chips,.hbcat .cs-titlerow .cs-chips{margin-top:0;padding-bottom:4px;flex:0 0 auto;display:flex;gap:7px;flex-wrap:wrap}
+  .wcat .cs-chip.glass,.hbcat .cs-chip.glass{background:var(--soft);border:1px solid var(--line);color:var(--gray);
+    -webkit-backdrop-filter:none;backdrop-filter:none}
+  .wcat .cs-chip.hot{background:color-mix(in srgb, var(--seal) 12%, #fff);color:var(--seal);border-color:transparent}
+  .wcat .cs-chip.hot svg{color:var(--seal)}
+  .wcat .cs-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;margin-top:0;border-radius:0;box-shadow:none;background:var(--page);
+    padding:14px 20px calc(env(safe-area-inset-bottom) + 56px)}
+  /* Guidance zone (rate control + note) stays fixed; only the term list scrolls underneath it */
+  .wcat .cs-rate,.wcat .cs-note{flex:none}
+  .wcat .ct-list{flex:0 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+  .wcat .ct-list::-webkit-scrollbar{display:none}
+  /* Handboek sheet: the whole body scrolls; its content crossfades on paging (no pinned zone) */
+  .hbcat .cs-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;margin-top:0;
+    border-radius:0;box-shadow:none;background:var(--page);
+    padding:16px 20px calc(env(safe-area-inset-bottom) + 78px);transition:opacity .17s ease}
+  .hbcat .cs-body::-webkit-scrollbar{display:none}
+  .hbcat .cs-body.cs-fading{opacity:0}
+  /* Handboek reference lists share the Woorden grouped-card look (dividers, no per-row cards) */
+  .hbcat .ct-list{gap:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-bottom:14px}
+  .hbcat .ct-list:last-child{margin-bottom:0}
+  .hbcat .ct-row{position:relative;background:transparent;border:0;border-radius:0;padding:13px 15px}
+  .hbcat .ct-row + .ct-row{border-top:1px solid var(--line)}
   .ct-list{display:flex;flex-direction:column;gap:9px}
   .ct-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);
     border-radius:15px;padding:12px 13px}
-  .ct-row.hard{border-color:transparent;
-    background:linear-gradient(160deg, rgba(255,255,255,.85), rgba(255,255,255,.95)), linear-gradient(160deg, var(--el), var(--deep))}
+  /* Woorden sheet: terms as one grouped list with dividers (not separate cards) */
+  .wcat .ct-list{gap:0;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+  .wcat .ct-row{position:relative;background:transparent;border:0;border-radius:0;padding:12px 15px 12px 66px;cursor:pointer}
+  .wcat .ct-row + .ct-row{border-top:1px solid var(--line)}
   .ct-tx{flex:1;min-width:0}
-  .ct-ko{font-size:19px;font-weight:700;color:var(--ink);line-height:1.16}
+  .ct-ko{display:flex;align-items:center;gap:8px;font-size:19px;font-weight:700;color:var(--ink);line-height:1.16}
   .ct-meta{font-size:13px;color:var(--gray);margin-top:2px}
   .ct-meta b{color:var(--deep);font-weight:700}
   .ct-nl{color:var(--gray)}
+  /* bookmarked terms carry the Moeilijk red accent (speaker + roman) in any woordgroep */
+  .ct-row.hard{--el:#C1121F;--deep:#830C15}
   .ct-bk{flex:none;color:var(--el);display:inline-flex}
   .ct-bk svg{width:16px;height:16px}
   .ct-say{flex:none;width:40px;height:40px;border:0;border-radius:12px;display:grid;place-items:center;cursor:pointer;
-    color:#fff;background:linear-gradient(150deg,var(--el),var(--deep))}
+    color:var(--el);background:transparent;transition:transform .12s ease}
+  .ct-say:active{transform:scale(.9)}
   .ct-say svg{width:18px;height:18px}
+  /* Woorden speaker: two-state — calm idle dots ↔ per-bar animated waveform while speaking (Woorden only, not Handboek) */
+  .wcat .ct-say .snd{width:32px;height:32px;display:block;background:currentColor;
+    -webkit-mask:url(assets/icons/Sound_Idle.png) center/contain no-repeat;mask:url(assets/icons/Sound_Idle.png) center/contain no-repeat}
+  .wcat .ct-say .wv{display:none;width:32px;height:32px}
+  .wcat .ct-say.ring .snd{display:none}
+  .wcat .ct-say.ring .wv{display:block}
   /* interactive hard-mark toggle on term rows */
-  .ct-bk-btn{flex:none;width:38px;height:38px;border:0;background:transparent;border-radius:11px;cursor:pointer;
+  .ct-bk-btn{flex:none;width:40px;height:40px;border:0;background:transparent;border-radius:12px;cursor:pointer;
     display:grid;place-items:center;color:var(--gray);transition:color .18s ease,background .18s ease,transform .12s ease}
   .ct-bk-btn svg{width:18px;height:18px}
+  .ct-bk-btn .bkmk{width:22px;height:22px}
   .ct-bk-btn.on{color:var(--el)}
   .ct-bk-btn:active{transform:scale(.86)}
   .ct-bk-btn.bkpop{animation:bkpop .34s cubic-bezier(.34,1.4,.4,1)}
+  /* Bookmark hit target = the full-height strip left of the word (Fitts's law): a tap here marks
+     the term moeilijk and NEVER triggers speech. The icon stays centered; the button just grows. */
+  .wcat .ct-bk-btn{position:absolute;left:0;top:0;bottom:0;width:66px;height:auto;margin:0;padding:0;border-radius:0;z-index:2}
+  .wcat .ct-bk-btn:active{transform:none}
+  .wcat .ct-bk-btn .bkmk{transition:transform .12s ease}
+  .wcat .ct-bk-btn:active .bkmk{transform:scale(.86)}
+  .wcat .ct-bk-btn.bkpop{animation:none}
+  .wcat .ct-bk-btn.bkpop .bkmk{animation:bkpop .34s cubic-bezier(.34,1.4,.4,1)}
   @keyframes bkpop{0%{transform:scale(1)}40%{transform:scale(1.32)}100%{transform:scale(1)}}
-  .ct-grp{display:block;margin-top:3px;font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;
-    font-size:10.5px;color:var(--el);opacity:.85}
-  /* Woorden search + filter chips */
-  .wsearch-wrap{position:relative;margin:2px 0 12px}
-  .wsearch-ic{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gray);pointer-events:none}
-  .wsearch-ic svg{width:18px;height:18px;display:block}
-  .wsearch{width:100%;box-sizing:border-box;height:46px;padding:0 16px 0 42px;border-radius:15px;
-    border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:15px;font-family:inherit;
-    -webkit-appearance:none;outline:none;transition:border-color .18s ease,box-shadow .18s ease}
-  .wsearch:focus{border-color:var(--seal);box-shadow:0 0 0 3px rgba(197,1,22,.12)}
-  .wsearch::placeholder{color:var(--gray)}
-  .wchips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-  .wchip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--surface);
-    color:var(--gray);border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;
-    font-family:var(--cond);text-transform:uppercase;letter-spacing:.03em}
-  .wchip svg{width:13px;height:13px}
-  .wchip.on{background:var(--ink);border-color:var(--ink);color:#fff}
-  .wresults .ct-list{margin-top:2px}
+  .ct-grp{flex:none;align-self:center;font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;
+    font-size:10px;font-weight:700;color:var(--gray);opacity:.85}
+  /* Woorden — clean list hub */
+  .whead{display:flex;align-items:flex-end;gap:2px;padding-top:6px}
+  .whead .jhead{flex:1 1 auto;min-width:0;padding-top:10px}
+  .whead-masc{flex:0 0 auto;position:relative;width:116px;height:142px;margin:0 -2px -6px 0;display:block;pointer-events:none}
+  .whead-masc img{width:100%;height:100%;object-fit:contain;object-position:bottom center;display:block}
+  .whead-masc .whead-blink{position:absolute;inset:0;opacity:0}
+  @media (prefers-reduced-motion:no-preference){.whead-masc .whead-blink{animation:wheadBlink 5.6s ease-in-out infinite}}
+  @keyframes wheadBlink{0%,88%,100%{opacity:0}90%,92%{opacity:1}94%{opacity:0}96%,98%{opacity:1}}
+  /* Handboek header: interactive hanging punch-bag — ceiling mount + hook stay static,
+     the bag + straps swing left↔right from the hook pivot; tap it to land a hit. */
+  .whead-masc.whead-bag{width:auto;height:178px;aspect-ratio:695/2400;margin:0 15px -6px 0;pointer-events:auto;overflow:visible}
+  .pbag{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;background:none;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent}
+  .pbag img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;object-position:center;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
+  .pbag .pbag-mount{z-index:2}
+  .pbag .pbag-swing{z-index:1;transform-origin:49.8% 12.9%;will-change:transform;transform:rotate(0deg)}
+  @media (prefers-reduced-motion:no-preference){ .pbag .pbag-swing{animation:pbagSway 3.4s ease-in-out infinite} }
+  @keyframes pbagSway{0%,100%{transform:rotate(-3.1deg)}50%{transform:rotate(3.1deg)}}
+  /* punch-bag impact sparks: near-black (scoped so the to-do completion sparks stay cream) */
+  .pbag .hit-pop{background:var(--ink)}
+  .wlist{display:flex;flex-direction:column;margin-top:16px;background:var(--surface);
+    border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .wrow{position:relative;display:flex;align-items:center;gap:13px;width:100%;text-align:left;cursor:pointer;
+    background:transparent;border:0;padding:9px 15px;transition:background .16s ease}
+  .wrow + .wrow::before{content:"";position:absolute;top:0;left:62px;right:0;height:1px;background:var(--line)}
+  .wrow:active{background:color-mix(in srgb, #6B6459 8%, transparent)}
+  @media (hover:hover){ .wrow:hover{background:color-mix(in srgb, #6B6459 5%, transparent)} }
+  .wrow-emb{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+    font-family:var(--kor);font-size:17px;line-height:1;color:var(--gray);
+    background:var(--soft)}
+  .wrow-emb svg{width:16px;height:16px}
+  /* Woorden "Moeilijk" collection emblem — book-of-bookmarks glyph in the default emblem tone */
+  .wrow-hard .wrow-emb.bkmks{background:currentColor;color:var(--seal);border-radius:0;
+    -webkit-mask:center/contain no-repeat url(assets/icons/Bookmarks1.png);
+    mask:center/contain no-repeat url(assets/icons/Bookmarks1.png)}
+  /* conventional bookmark: outline (currentColor) when idle -> filled seal on select */
+  .bkmk{display:inline-block;width:1em;height:1em;flex:none;vertical-align:middle;background:#6B6459;
+    -webkit-mask:center/contain no-repeat url(assets/icons/Bookmark-outline.png);
+    mask:center/contain no-repeat url(assets/icons/Bookmark-outline.png);transition:background .18s ease}
+  .bkmk.on{background:var(--seal);
+    -webkit-mask-image:url(assets/icons/Bookmark.png);mask-image:url(assets/icons/Bookmark.png)}
+  .bk-inline{width:1em;height:1.05em;vertical-align:-.16em}
+  .cs-chip .bk-inline{width:16px;height:16px;vertical-align:middle}
+  .wrow-tx{flex:1;min-width:0}
+  .wrow-sub{display:block;font-size:12px;color:var(--gray);margin-top:1px;line-height:1.3}
+  /* Handboek list emblem — the category han glyph tinted with its own accent */
+  /* Handboek emblem han: use the normal-weight Korean text face (NOT the subset Black Han Sans,
+     which only carries some glyphs -> made one category read far bolder than the rest) */
+  .wrow-emb.hb-emb{background:color-mix(in srgb, var(--e,#6B6459) 15%, #fff);color:var(--e,#6B6459);
+    font-family:'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;font-weight:400;font-size:18px}
+  .wrow-t{display:block;font-family:var(--cond);text-transform:uppercase;letter-spacing:.01em;
+    font-weight:800;font-size:16px;color:var(--ink);line-height:1.15}
+  .wrow-n{flex:none;font-family:var(--cond);font-weight:700;font-size:13px;color:var(--gray);min-width:16px;text-align:right}
+  .wrow-ch{flex:none;display:inline-flex;color:#C7C0B2;margin-right:-2px}
+  .wrow-ch svg{width:18px;height:18px}
+  /* Moeilijk — first row: only the badge is coloured; a full-width rule splits the filter from the groups */
+  .wrow-hard{--e:var(--seal)}
+  .wrow-hard.off{opacity:.55}
+  .wrow-hard + .wrow::before{left:0}
+  /* attention badge: pulsing seal dot just left of the count while there are moeilijke woorden */
+  .wrow-hard:not(.off) .wrow-n::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;
+    background:var(--seal);vertical-align:middle;margin:-1px 8px 0 0;animation:blink 1.6s ease-in-out infinite}
+  /* Woorden hub: fixed header, list scrolls underneath */
+  .surface.wlib{display:flex;flex-direction:column;overflow:hidden}
+  .wlib .whead{padding-left:22px;padding-right:22px;position:relative;z-index:2;background:var(--page);flex:none}
+  .wscroll{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;
+    padding:0 22px 20px;-webkit-overflow-scrolling:touch}
+  .wscroll::-webkit-scrollbar{display:none}
+  .wlib .wlist{margin-top:14px}
+  /* mastery growth icons (seed -> sprout -> bloom) */
+  .gicon{background:currentColor;-webkit-mask:center/contain no-repeat;mask:center/contain no-repeat;display:inline-block}
+  .gicon.g-seed{color:#B58C5E;-webkit-mask-image:url(assets/icons/Seed.png);mask-image:url(assets/icons/Seed.png)}
+  .gicon.g-sprout{color:#5AA46B;-webkit-mask-image:url(assets/icons/Sprout.png);mask-image:url(assets/icons/Sprout.png)}
+  .wrow-emb.gicon{background:currentColor;border-radius:0}
+  .wrow-emb.gicon{-webkit-mask-size:118%;mask-size:118%}
+  .gp{animation:gpop .42s ease}
+  @keyframes gpop{0%{transform:scale(1)}42%{transform:scale(1.2)}100%{transform:scale(1)}}
+  /* Final reward: fully-bloomed word groups gently, ambiently rotate (per-icon desynced duration + phase) */
+  @keyframes bloomSpin{to{transform:rotate(360deg)}}
+  .wrow-emb.g-bloom{animation:bloomSpin var(--spin,18s) linear infinite;transform-origin:50% 50%}
+  @media (prefers-reduced-motion: reduce){ .wrow-emb.g-bloom{animation:none} }
+  /* self-rating control in the category sheet */
+  .cs-rate{margin:0 0 14px;padding:14px 15px;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+  .cs-rate-q{font-family:var(--cond);text-transform:uppercase;letter-spacing:.03em;font-weight:800;font-size:13px;color:var(--ink);margin-bottom:11px}
+  .cs-rate-opts{display:flex;gap:9px;position:relative}
+  /* Single sliding highlight (tweens position + colour between options, like the tab bar) */
+  .cs-rate-hl{position:absolute;top:0;bottom:0;left:0;width:0;z-index:0;pointer-events:none;border-radius:13px;
+    background:color-mix(in srgb, var(--hlic,var(--el)) 14%, transparent);
+    box-shadow:0 0 0 2px var(--hlic,var(--el)) inset;
+    transform:translateX(0);opacity:0;
+    transition:transform .42s cubic-bezier(.52,.12,.14,1), width .42s cubic-bezier(.52,.12,.14,1), background-color .42s ease, box-shadow .42s ease, opacity .26s ease}
+  .cs-rate-hl.ready{opacity:1}
+  .cs-ropt{flex:1;position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px;background:transparent;
+    border:0;border-radius:13px;cursor:pointer;transition:background-color .2s ease}
+  .cs-ropt .cs-ric{width:48px;height:48px;display:grid;place-items:center}
+  .cs-ric .gicon{width:48px;height:48px;transition:background-color .2s ease}
+  .cs-rl{font-family:var(--cond);text-transform:uppercase;letter-spacing:.02em;font-weight:700;font-size:10.5px;color:var(--gray);line-height:1;text-align:center;transition:color .2s ease}
+  /* Non-selected = soft accessible gray (AA non-text ≥3:1), no outline; selected shows in colour */
+  .cs-ropt:not(.on) .cs-ric .gicon{background:#877F74}
+  .cs-ropt.on .cs-rl{color:var(--ink)}
+  @media (hover:hover){ .cs-ropt:not(.on):hover{background:color-mix(in srgb, var(--el) 5%, #fff)} .cs-ropt:not(.on):hover .cs-ric .gicon{background:#6B6459} }
+  .cs-empty{color:var(--gray);font-size:14px;line-height:1.6;text-align:center;padding:34px 8px}
+  .cs-empty svg{width:15px;height:15px;vertical-align:-2px;margin:0 1px;color:var(--el)}
   .wempty{color:var(--gray);font-size:14px;text-align:center;padding:30px 0}
   /* Handboek — interactive examenkaart checklist */
   .hb-prog{display:flex;align-items:center;gap:12px;margin:2px 2px 16px}
@@ -1372,7 +1663,7 @@
   .hb-extx{flex:1;min-width:0}
   .hb-exttl{font-family:var(--cond);text-transform:uppercase;letter-spacing:.01em;font-weight:800;font-size:16px;
     color:var(--ink);display:block;line-height:1.15}
-  .hb-exttl i{font-family:var(--kor);font-style:normal;font-weight:400;font-size:14px;color:var(--deep);margin-left:5px}
+  .hb-exttl i{font-family:'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;font-style:normal;font-weight:400;font-size:14px;color:var(--deep);margin-left:5px}
   .hb-exrow.done .hb-exttl{text-decoration:line-through;text-decoration-thickness:2px;opacity:.72}
   .hb-exnl{display:block;font-size:12.5px;color:var(--gray);margin-top:2px}
   .hb-exeis{display:block;font-size:12.5px;line-height:1.5;color:var(--ink);margin-top:7px}
@@ -1474,7 +1765,7 @@
     play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5l13 7.5-13 7.5z"/></svg>',
     arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
     check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
-    speak:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>',
+    speak:'<svg class="wv" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect class="wv-b" x="3.1" y="10.2" width="1.8" height="3.6" rx=".9"/><rect class="wv-b" x="6.3" y="7.2" width="1.8" height="9.6" rx=".9"/><rect class="wv-b" x="9.5" y="5.2" width="1.8" height="13.6" rx=".9"/><rect class="wv-b" x="12.5" y="9.5" width="1.8" height="5" rx=".9"/><rect class="wv-b" x="15.7" y="6.6" width="1.8" height="10.8" rx=".9"/><rect class="wv-b" x="18.9" y="10.4" width="1.8" height="3.2" rx=".9"/></svg>',
     x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
     idea:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18h5M10 21.5h4M12 2.5a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1V18h6v-1.8c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 2.5z"/></svg>',
@@ -1860,6 +2151,30 @@
   // hit spark — randomized per completion for variety
   var HITS = ['hit-burst','hit-star','hit-sparkle','hit-stripes','hit-chevrons','hit-rays'];
   function hitPick(){ return HITS[Math.floor(Math.random()*HITS.length)]; }
+  // Handboek header punch-bag: land a hit — random spark at the impact point + a damped
+  // left/right swing (hit from the left → swings right, and vice-versa). Mount/hook stay put.
+  function hitBag(bagBtn, ev){
+    if(!bagBtn) return;
+    var swing = bagBtn.querySelector('.pbag-swing');
+    var rect = bagBtn.getBoundingClientRect();
+    var x = (ev && ev.clientX) ? (ev.clientX - rect.left) : rect.width*0.5;
+    var y = (ev && ev.clientY) ? (ev.clientY - rect.top)  : rect.height*0.46;
+    var dir = (x < rect.width*0.5) ? 1 : -1;                 // tapped left → kicks right
+    if(swing && swing.animate){
+      var seq=[0,12,-8.5,6,-3.6,1.9,0], off=[0,.12,.32,.52,.70,.86,1];
+      swing.animate(seq.map(function(d,i){ return {transform:'rotate('+(d*dir)+'deg)', offset:off[i]}; }),
+        {duration:1450, easing:'cubic-bezier(.2,.7,.3,1)'});
+    }
+    var pop=document.createElement('span'); var hp=hitPick();
+    pop.className='hit-pop hp-'+hp.replace('hit-','');
+    pop.style.setProperty('--hit', 'url(assets/icons/'+hp+'.png)');
+    pop.style.setProperty('--hsc', '1.4');
+    pop.style.left=(x-8)+'px'; pop.style.top=(y-8)+'px';
+    bagBtn.appendChild(pop);
+    pop.addEventListener('animationend', function(){ if(pop.parentNode) pop.parentNode.removeChild(pop); });
+    setTimeout(function(){ if(pop.parentNode) pop.parentNode.removeChild(pop); }, 900);
+    buzz(15); sfx('thud');
+  }
   // subtle CTA glint — a light sweep across the accent button at random 0–5s intervals
   (function ctaGlint(){
     function tick(){
@@ -2052,6 +2367,13 @@
     var MO=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
     var d=new Date(); return WD[d.getDay()]+' '+d.getDate()+' '+MO[d.getMonth()];
   }
+  function statusBar(){
+    return '<div class="status"><span class="date">'+esc(dateStr())+'</span>'+
+      '<span class="status-end">'+
+        '<span class="avatar" title="Kies je graad" role="button" data-act="beltsheet" style="background:'+beltRingCss(geupInfo(GEUP_I))+'"><img src="assets/avatar/jayden.png" alt="Profiel"></span>'+
+        '<span class="streakchip" id="streakchip"><span class="fl">🔥</span>'+STREAK+' dagen</span>'+
+      '</span></div>';
+  }
   function renderToday(){
     var f = byId(CUR), t = th(CUR);
     var doneCount = JOURNEY.filter(function(id){return DONE[id];}).length;
@@ -2106,11 +2428,7 @@
 
     var html =
     '<div class="surface" id="today-surface"><div>'+
-      '<div class="status"><span class="date">'+esc(dateStr())+'</span>'+
-        '<span class="status-end">'+
-          '<span class="avatar" title="Kies je graad" role="button" data-act="beltsheet" style="background:'+beltRingCss(geupInfo(GEUP_I))+'"><img src="assets/avatar/jayden.png" alt="Profiel"></span>'+
-          '<span class="streakchip" id="streakchip"><span class="fl">🔥</span>'+STREAK+' dagen</span>'+
-        '</span></div>'+
+      statusBar()+
       '<div class="pad">'+
         '<div class="greet">'+
           '<div class="greet-txt">'+
@@ -2230,67 +2548,56 @@
   }
   function renderLibrary(){
     var cats = TERMEN.filter(function(g){ return g.items && g.items.length>=2; });
-    var featured = cats.slice().sort(function(a,b){ return catHard(b).length - catHard(a).length; })[0];
     var totalHard = cats.reduce(function(n,g){ return n+catHard(g).length; }, 0);
-    var cards = '';
-    if(featured) cards += catCard(featured, true);
-    cats.forEach(function(g){ if(g!==featured) cards += catCard(g, false); });
-    var html =
-    '<div class="surface"><div class="pad">'+
-      '<div class="jhead"><div class="jk"><span class="han-lab">낱말 · Natmal</span></div>'+
-        '<h1>Woordenschat</h1>'+
-        '<div class="js">'+cats.length+' groepen · '+totalHard+' termen die aandacht vragen. Zoek een woord of kies een groep.</div></div>'+
-      '<div class="wsearch-wrap"><span class="wsearch-ic">'+IC.search+'</span>'+
-        '<input class="wsearch" id="wsearch" type="search" inputmode="search" autocomplete="off" placeholder="Zoek een woord of vertaling…"></div>'+
-      '<div class="wchips">'+
-        '<button class="wchip on" data-wfilter="all">Alle groepen</button>'+
-        '<button class="wchip" data-wfilter="hard">'+IC.bookmark+' Moeilijk · <b id="w-hardn">'+totalHard+'</b></button>'+
-      '</div>'+
-      '<div class="catgrid" id="wgrid">'+cards+'</div>'+
-      '<div class="wresults" id="wresults" style="display:none"></div>'+
-    '</div></div>';
-    stage.insertAdjacentHTML('beforeend', wrapScreen(html));
-    var node = stage.lastElementChild;
-    node.__wmode = 'all';
-    var input = node.querySelector('#wsearch');
-    if(input) input.addEventListener('input', function(){ wRender(node); });
-    node.addEventListener('click', function(e){
-      var chip = e.target.closest && e.target.closest('.wchip'); if(!chip) return;
-      node.__wmode = chip.getAttribute('data-wfilter');
-      node.querySelectorAll('.wchip').forEach(function(c){ c.classList.toggle('on', c===chip); });
-      wRender(node);
+    var hardRow =
+      '<button class="wrow wrow-hard'+(totalHard?'':' off')+'" data-act="openhard" aria-label="Moeilijke woorden">'+
+        '<span class="wrow-emb bkmks" aria-hidden="true"></span>'+
+        '<span class="wrow-tx"><span class="wrow-t">Moeilijk</span></span>'+
+        '<span class="wrow-n" id="w-hardn">'+totalHard+'</span>'+
+        '<span class="wrow-ch">'+IC.chev+'</span>'+
+      '</button>';
+    var rows = '';
+    cats.forEach(function(g){
+      rows +=
+        '<button class="wrow" data-act="opencat" data-groep="'+esc(g.groep)+'">'+
+          growIcon(g.groep)+
+          '<span class="wrow-tx"><span class="wrow-t">'+esc(g.groep)+'</span></span>'+
+          '<span class="wrow-n">'+g.items.length+'</span>'+
+          '<span class="wrow-ch">'+IC.chev+'</span>'+
+        '</button>';
     });
-    return node;
+    var html =
+    '<div class="surface wlib">'+statusBar()+
+      '<div class="whead">'+
+        '<div class="jhead"><div class="jk"><span class="han-lab">낱말 · Natmal</span></div>'+
+          '<h1>Woordenschat</h1>'+
+          '<div class="js">Kies een groep en oefen uitspraak én betekenis.</div></div>'+
+        '<span class="whead-masc" aria-hidden="true"><img src="assets/mascot/coach-read.png" alt=""><img class="whead-blink" src="assets/mascot/coach-read-blink.png" alt=""></span>'+
+      '</div>'+
+      '<div class="wscroll">'+
+        '<div class="wlist wlist-hard">'+hardRow+'</div>'+
+        '<div class="wlist">'+rows+'</div>'+
+      '</div>'+
+    '</div>';
+    stage.insertAdjacentHTML('beforeend', wrapScreen(html));
+    return stage.lastElementChild;
+  }
+  /* conventional bookmark icon: outline when idle, filled seal when on */
+  function bkmk(o){ o=o||{};
+    return '<span class="bkmk'+(o.on?' on':'')+(o.cls?(' '+o.cls):'')+'" aria-hidden="true"></span>';
   }
   /* one reusable term row: hangul + roman·nl (+ optional group tag) + hard-mark toggle + speaker */
   function termRowHtml(it, groupName){
     var h = !!HARD[it.roman];
-    return '<div class="ct-row'+(h?' hard':'')+'" data-term="'+esc(it.roman)+'">'+
-      '<div class="ct-tx"><div class="ct-ko">'+esc(it.ko)+'</div>'+
-        '<div class="ct-meta"><b>'+esc(it.roman)+'</b><span class="ct-nl"> · '+esc(it.nl)+'</span>'+
-          (groupName?'<span class="ct-grp">'+esc(groupName)+'</span>':'')+'</div></div>'+
+    return '<div class="ct-row'+(h?' hard':'')+'" data-term="'+esc(it.roman)+'" data-act="say" data-ko="'+esc(it.ko)+'">'+
       '<button class="ct-bk-btn'+(h?' on':'')+'" data-act="hardterm" data-k="'+esc(it.roman)+'" '+
-        'aria-pressed="'+(h?'true':'false')+'" aria-label="Markeer als moeilijk">'+(h?IC.bookmark:IC.bookmarkO)+'</button>'+
-      '<button class="ct-say" data-act="say" data-ko="'+esc(it.ko)+'" aria-label="Uitspraak">'+IC.speak+'</button>'+
+        'aria-pressed="'+(h?'true':'false')+'" aria-label="Markeer als moeilijk">'+bkmk({on:h})+'</button>'+
+      '<div class="ct-tx"><div class="ct-ko">'+esc(it.ko)+(groupName?'<span class="ct-grp">'+esc(groupName)+'</span>':'')+'</div>'+
+        '<div class="ct-meta"><b>'+esc(it.roman)+'</b><span class="ct-nl"> · '+esc(it.nl)+'</span></div></div>'+
+      '<button class="ct-say" data-act="say" data-ko="'+esc(it.ko)+'" aria-label="Uitspraak"><span class="snd" aria-hidden="true"></span>'+IC.speak+'</button>'+
     '</div>';
   }
-  function wRender(node){
-    var input = node.querySelector('#wsearch');
-    var q = ((input&&input.value)||'').trim().toLowerCase();
-    var mode = node.__wmode||'all';
-    var grid = node.querySelector('#wgrid'), res = node.querySelector('#wresults');
-    if(!grid||!res) return;
-    if(!q && mode==='all'){ grid.style.display=''; res.style.display='none'; res.innerHTML=''; return; }
-    var list=[];
-    TERMEN.forEach(function(g){ (g.items||[]).forEach(function(it){
-      if(mode==='hard' && !HARD[it.roman]) return;
-      if(q){ var hay=((it.ko||'')+' '+(it.roman||'')+' '+(it.nl||'')).toLowerCase(); if(hay.indexOf(q)<0) return; }
-      list.push({it:it, groep:g.groep});
-    }); });
-    grid.style.display='none'; res.style.display='';
-    if(!list.length){ res.innerHTML='<div class="wempty">Geen woorden gevonden.</div>'; return; }
-    res.innerHTML='<div class="ct-list">'+list.map(function(r){ return termRowHtml(r.it, r.groep); }).join('')+'</div>';
-  }
+  function wRender(){ /* removed: search + filter replaced by the Moeilijk list row */ }
   /* toggle a term's "moeilijk" mark (in-memory) + update the row, chips and counts in place */
   function toggleHardTerm(roman, btn){
     if(!roman) return;
@@ -2299,7 +2606,7 @@
     if(btn){
       btn.classList.toggle('on', on);
       btn.setAttribute('aria-pressed', on?'true':'false');
-      btn.innerHTML = on?IC.bookmark:IC.bookmarkO;
+      var tg=btn.querySelector('.bkmk'); if(tg) tg.classList.toggle('on', on);
       btn.classList.remove('bkpop'); void btn.offsetWidth; btn.classList.add('bkpop');
       var row = btn.closest('.ct-row'); if(row) row.classList.toggle('hard', on);
     }
@@ -2318,61 +2625,406 @@
     var el = document.querySelector('#w-hardn'); if(el) el.textContent=total;
   }
 
+  /* ---- mastery growth (seed -> sprout -> bloom, per category) ---- */
+  var MASTERY = {};   /* category name -> 1 (sprout) | 2 (bloom); absent = 0 (seed) */
+  var BLOOM_FILES=['Bloom1','Bloom3','Bloom4','Bloom5','Bloom6','Bloom7','Bloom8','Bloom9'];
+  // Bloom colours — deliberately NEVER green (vs the sprout) and NEVER red (vs the red bookmarks).
+  var BLOOM_COLS =['#D06BA8','#EE7A3D','#3E86D6','#E4A62C','#9B5FD0','#C94DA6','#6A63DB','#B0568F'];
+  var BLOOMS=null;
+  function buildBlooms(){
+    BLOOMS={};
+    var n=BLOOM_FILES.length;
+    TERMEN.filter(function(g){ return g.items && g.items.length>=2; }).forEach(function(g,i){
+      BLOOMS[g.groep]={ img:'assets/icons/'+BLOOM_FILES[i%n]+'.png', col:BLOOM_COLS[i%n] };
+    });
+  }
+  function bloomFor(name){ if(!BLOOMS) buildBlooms(); return BLOOMS[name] || {img:'assets/icons/Bloom1.png', col:'#D06BA8'}; }
+  function catStage(name){ return MASTERY[name]|0; }
+  function bloomStyle(b){ return 'color:'+b.col+';-webkit-mask-image:url('+b.img+');mask-image:url('+b.img+')'; }
+  function growIcon(name){
+    var s=catStage(name);
+    if(s>=2){
+      var dur=16+Math.random()*7, ph=(Math.random()*dur).toFixed(1);   // 16–23s, random start phase → organic drift
+      return '<span class="wrow-emb gicon g-bloom" style="'+bloomStyle(bloomFor(name))+';--spin:'+dur.toFixed(1)+'s;animation-delay:-'+ph+'s"></span>';
+    }
+    return '<span class="wrow-emb gicon '+(s===1?'g-sprout':'g-seed')+'"></span>';
+  }
+  function growGlyph(kind, b){
+    if(kind==='bloom') return '<span class="gicon" style="'+bloomStyle(b)+'"></span>';
+    return '<span class="gicon '+(kind==='sprout'?'g-sprout':'g-seed')+'"></span>';
+  }
+  function rateHtml(name){
+    var s=catStage(name), b=bloomFor(name);
+    function opt(st,kind,label,glyph,col){
+      return '<button class="cs-ropt'+(s===st?' on':'')+'" style="--ic:'+col+'" data-act="setmastery" data-groep="'+esc(name)+'" data-stage="'+st+'">'+
+        '<span class="cs-ric">'+glyph+'</span><span class="cs-rl">'+label+'</span></button>';
+    }
+    return '<div class="cs-rate">'+
+      '<div class="cs-rate-q">Hoe goed ken je deze woordgroep?</div>'+
+      '<div class="cs-rate-opts">'+
+        '<span class="cs-rate-hl" aria-hidden="true"></span>'+
+        opt(0,'seed','Nog oefenen',growGlyph('seed'),'#B58C5E')+
+        opt(1,'sprout','Bijna',growGlyph('sprout'),'#5AA46B')+
+        opt(2,'bloom','Ken ik',growGlyph('bloom',b),b.col)+
+      '</div></div>';
+  }
+  var RATE_NOTE=[
+    ['Nog oefenen','je zoekt deze woorden nog meestal op'],
+    ['Bijna','je kent deze woorden bijna allemaal'],
+    ['Ken ik','je kent al deze woorden uit je hoofd']
+  ];
+  function rateNoteHtml(name){ var r=RATE_NOTE[catStage(name)]||RATE_NOTE[0]; return '<span class="cs-note-i" aria-hidden="true"></span><b>'+r[0]+'</b>: '+r[1]+'.'; }
+  function paintHubRow(name){
+    if(!stage) return;
+    var rows=stage.querySelectorAll('.wrow[data-groep]');
+    for(var i=0;i<rows.length;i++){
+      if(rows[i].getAttribute('data-groep')===name){
+        var emb=rows[i].querySelector('.wrow-emb'); if(!emb) continue;
+        var tmp=document.createElement('div'); tmp.innerHTML=growIcon(name);
+        var nn=tmp.firstChild; if(nn) emb.parentNode.replaceChild(nn, emb);
+      }
+    }
+  }
+  function setCatStage(name, s, btn){
+    if(!name) return;
+    if(s) MASTERY[name]=s; else delete MASTERY[name];
+    if(catSheet){
+      var opts=catSheet.querySelectorAll('.cs-ropt');
+      for(var i=0;i<opts.length;i++){ opts[i].classList.toggle('on', (+opts[i].getAttribute('data-stage'))===s); }
+      moveRateHL(catSheet.querySelector('.cs-rate'), false);
+      var cnote=catSheet.querySelector('.cs-note'); if(cnote) cnote.innerHTML=rateNoteHtml(name);
+    }
+    if(btn){ sfx(s>=2?'rate2':(s===1?'rate1':'rate0')); var ic=btn.querySelector('.gicon'); if(ic){ ic.classList.remove('gp'); void ic.offsetWidth; ic.classList.add('gp'); } }
+    paintHubRow(name);
+  }
+
   /* category detail — slide-up sheet with frosted header + mountain depth */
   var catSheet=null;
+  // Build the swappable parts (accent + eyebrow + titlerow + body) for a woordgroep or the Moeilijk list
+  function buildCatParts(name){
+    var isHard = (name==='Moeilijk');
+    var g, hard, pairs;
+    if(isHard){
+      pairs=[];
+      TERMEN.forEach(function(gr){ (gr.items||[]).forEach(function(it){ if(HARD[it.roman]) pairs.push({it:it, grp:gr.groep}); }); });
+      g = {groep:name, items:pairs.map(function(x){ return x.it; })};
+      hard = g.items.slice();
+    } else {
+      g = catByName(name); if(!g) return null;
+      hard = catHard(g);
+      pairs = g.items.map(function(it){ return {it:it, grp:null}; });
+    }
+    var list = pairs.length
+      ? pairs.map(function(x){ return termRowHtml(x.it, x.grp); }).join('')
+      : '<div class="cs-empty">Nog geen moeilijke woorden.<br>Tik op '+bkmk({cls:'bk-inline'})+' bij een woord om het hier te bewaren.</div>';
+    var chips = isHard ? ''
+      : '<span class="cs-chip glass hot" id="cs-hardchip"'+(hard.length?'':' hidden')+'>'+bkmk({on:true,cls:'bk-inline'})+'<b id="cs-hardn">'+hard.length+'</b> moeilijk</span>';
+    var note = isHard
+      ? 'Je moeilijke woorden staan hier bij elkaar — oefen ze tot ze vanzelf gaan.'
+      : rateNoteHtml(name);
+    return {
+      isHard:isHard,
+      accent: isHard ? '#C1121F' : '#3E5BD6',   // consistent blue for woordgroepen; Moeilijk keeps its red identity
+      eyebrow:'낱말 · '+(isHard?'MOEILIJK':'WOORDGROEP'),
+      titlerow:'<div class="cs-titlewrap"><h2 class="cs-title cs-title-cur">'+esc(name)+'</h2></div><div class="cs-chips">'+chips+'</div>',
+      chips:chips, note:note, list:list,
+      body:(isHard?'':rateHtml(name))+'<div class="cs-note">'+note+'</div><div class="ct-list">'+list+'</div>'
+    };
+  }
+  function applyCatAccent(el, ac){
+    el.style.setProperty('--el', ac);
+    el.style.setProperty('--deep', shade(ac,-32));
+    el.style.setProperty('--glow', shade(ac,40));
+    el.style.setProperty('--elink', shade(ac,-58));
+    el.style.setProperty('--hot', shade(ac,26));
+  }
+  function catNames(){ return TERMEN.filter(function(g){ return g.items && g.items.length>=2; }).map(function(g){ return g.groep; }); }
   function openCat(name){
-    var g = catByName(name); if(!g) return;
-    var m = catMeta(name), hard = catHard(g);
+    var parts = buildCatParts(name); if(!parts) return;
     catSheet = document.createElement('div');
-    catSheet.className='session catsheet';
-    catSheet.style.setProperty('--el', m.el);
-    catSheet.style.setProperty('--deep', shade(m.el,-32));
-    catSheet.style.setProperty('--glow', shade(m.el,40));
-    catSheet.style.setProperty('--elink', shade(m.el,-58));
-    catSheet.style.setProperty('--hot', shade(m.el,26));
-    var list = g.items.map(function(it){ return termRowHtml(it, null); }).join('');
+    catSheet.className='session catsheet wcat';
+    catSheet.setAttribute('data-cat', name);
+    applyCatAccent(catSheet, parts.accent);
+    var multi = !parts.isHard && catNames().length>=2;
+    if(multi){
+      var citems = catNames().map(function(n){ return {id:n, label:n}; });
+      activePager = { sheet:catSheet, items:citems,
+        step:function(dir){ navCat(dir); },
+        pick:function(id){ gotoCat(id); } };
+    } else { activePager = null; }
+    var pager = multi ?
+      '<div class="cs-pager">'+
+        '<button class="cs-pgb" data-act="pageprev" aria-label="Vorige woordgroep">'+IC.back+'</button>'+
+        '<button class="cs-pgb cs-pgb-next" data-act="pagenext" aria-label="Volgende woordgroep">'+IC.back+'</button>'+
+      '</div>' : '';
+    var dots = multi ? buildDotsHtml(activePager.items, name) : '';
     catSheet.innerHTML =
       '<div class="cs-hero">'+
-        '<div class="pt-bg"></div><div class="pt-noise"></div>'+
-        '<div class="cs-mtn" aria-hidden="true">'+mountainSVG()+'</div>'+
-        '<div class="cs-wm" aria-hidden="true">'+m.han+'</div>'+
         '<button class="cs-x" data-act="catclose" aria-label="Sluiten">'+IC.x+'</button>'+
         '<div class="cs-head">'+
-          '<div class="cs-eye">낱말 · WOORDGROEP</div>'+
-          '<h2 class="cs-title">'+esc(name)+'</h2>'+
-          '<div class="cs-chips">'+
-            '<span class="cs-chip glass">'+g.items.length+' termen</span>'+
-            '<span class="cs-chip glass hot" id="cs-hardchip"'+(hard.length?'':' hidden')+'>'+IC.bookmark+'<b id="cs-hardn">'+hard.length+'</b> om te oefenen</span>'+
-          '</div>'+
+          '<div class="cs-eye">'+parts.eyebrow+'</div>'+
+          '<div class="cs-titlerow">'+parts.titlerow+'</div>'+
         '</div>'+
       '</div>'+
-      '<div class="cs-body">'+
-        '<div class="cs-note">Tik op '+IC.speak+' voor de uitspraak, of op '+IC.bookmarkO+' om een woord als <b>moeilijk</b> te markeren.</div>'+
-        '<div class="ct-list">'+list+'</div>'+
-      '</div>';
+      '<div class="cs-body">'+parts.body+'</div>'+
+      pager + dots;
     stage.appendChild(catSheet);
+    moveRateHL(catSheet.querySelector('.cs-rate'), true);
+    if(multi){ attachCatSwipe(catSheet); attachDotScrub(catSheet); showDots(); }
     fnav.classList.add('hide');
+    void catSheet.offsetWidth; // capture the off-screen start so the drill-in transition runs
     requestAnimationFrame(function(){ catSheet.classList.add('show'); });
+  }
+  // Cross-slide only the woordgroep title, mirroring the belt-picker meta swap (old slides out, new in)
+  function csTitleSwap(sheet, name, dir){
+    if(!sheet) return;
+    var wrap=sheet.querySelector('.cs-titlewrap');
+    var cur=wrap && wrap.querySelector('.cs-title-cur');
+    if(!cur) return;
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ cur.textContent=name; return; }
+    var stale=wrap.querySelectorAll('.cs-title-ghost');
+    for(var i=0;i<stale.length;i++){ if(stale[i].parentNode) stale[i].parentNode.removeChild(stale[i]); }
+    var ghost=cur.cloneNode(true);
+    ghost.className='cs-title cs-title-ghost';
+    wrap.appendChild(ghost);
+    cur.textContent=name;
+    cur.classList.remove('enter-r','enter-l'); void cur.offsetWidth;
+    cur.classList.add(dir<0 ? 'enter-l' : 'enter-r');
+    ghost.classList.add(dir<0 ? 'exit-r' : 'exit-l');
+    var done=function(){ if(ghost.parentNode) ghost.parentNode.removeChild(ghost); };
+    ghost.addEventListener('animationend', done);
+    setTimeout(done, 520);
+  }
+  // Confidence card stays put; only the active selection (+ its group-specific bloom) updates, easing across.
+  function updateRate(name){
+    if(!catSheet) return;
+    var rate=catSheet.querySelector('.cs-rate'); if(!rate) return;
+    var s=catStage(name), b=bloomFor(name);
+    var opts=rate.querySelectorAll('.cs-ropt');
+    for(var i=0;i<opts.length;i++){
+      var btn=opts[i], st=+btn.getAttribute('data-stage');
+      btn.setAttribute('data-groep', name);
+      btn.classList.toggle('on', st===s);
+      if(st===2){ btn.style.setProperty('--ic', b.col); var gi=btn.querySelector('.gicon'); if(gi) gi.setAttribute('style', bloomStyle(b)); }
+    }
+    moveRateHL(rate, false);
+  }
+  // Slide the confidence-selector highlight to the active option (tween like the tab bar); snap on first paint.
+  function moveRateHL(rate, snap){
+    if(!rate) return;
+    var opts=rate.querySelector('.cs-rate-opts'); if(!opts) return;
+    var hl=opts.querySelector('.cs-rate-hl'); if(!hl) return;
+    var on=opts.querySelector('.cs-ropt.on'); if(!on){ hl.classList.remove('ready'); return; }
+    var ic=(on.style.getPropertyValue('--ic')||'').trim();
+    if(snap) hl.style.transition='none';
+    if(ic) hl.style.setProperty('--hlic', ic);
+    hl.style.width=on.offsetWidth+'px';
+    hl.style.transform='translateX('+on.offsetLeft+'px)';
+    hl.classList.add('ready');
+    if(snap){ void hl.offsetWidth; hl.style.transition=''; }  // restore CSS tween for later moves
+  }
+  // Note stays in place; its text crossfades (out → swap → in).
+  function fadeSwap(el, html){
+    if(!el) return;
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ el.innerHTML=html; return; }
+    el.classList.add('cs-fading');
+    setTimeout(function(){ el.innerHTML=html; el.scrollTop=0; el.classList.remove('cs-fading'); }, 170);
+  }
+  // The list card FRAME (bg/border) stays fixed. Old rows fade out, new rows fade in, and the
+  // card height eases from the old to the new group's height when the row count differs.
+  function swapCatList(el, html){
+    if(!el) return;
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ el.innerHTML=html; el.scrollTop=0; return; }
+    var h0 = el.offsetHeight;
+    el.classList.add('cs-fading');                 // current rows fade to 0
+    setTimeout(function(){
+      el.innerHTML = html; el.scrollTop = 0;        // swap while faded (new rows start at 0 too)
+      el.style.flex = ''; el.style.height = '';     // natural flex sizing to measure the target
+      void el.offsetHeight;
+      var h1 = el.offsetHeight;                     // flex-resolved height for the new content
+      if(Math.abs(h1 - h0) < 1){                    // same height → just fade the rows back in
+        requestAnimationFrame(function(){ el.classList.remove('cs-fading'); });
+        return;
+      }
+      el.style.flex = '0 0 auto';                   // take flex out of the loop while we ease height
+      el.style.height = h0 + 'px';                  // lock the start height
+      void el.offsetHeight;                         // commit before animating
+      requestAnimationFrame(function(){
+        el.style.transition = 'height .3s cubic-bezier(.22,.9,.3,1)';
+        el.style.height = h1 + 'px';                // ease the card to the new height
+        el.classList.remove('cs-fading');           // new rows fade in
+      });
+      setTimeout(function(){                         // restore normal flex sizing after the ease
+        el.style.transition = ''; el.style.height = ''; el.style.flex = '';
+      }, 340);
+    }, 170);
+  }
+  /* ---- Shared bottom dot navigation (Woorden woordgroepen + Handboek onderdelen) ----
+     activePager holds the paging model for the sheet currently on screen. */
+  var activePager = null;   // { sheet, items:[{id,label}], step(dir), pick(id) }
+  var _dotsHideT = null;
+  function buildDotsHtml(items, activeId){
+    if(!items || items.length<2) return '';
+    var h='<div class="cs-dots"><span class="cs-dot-tip" aria-hidden="true"></span>';
+    for(var i=0;i<items.length;i++){
+      h+='<button class="cs-dot'+(items[i].id===activeId?' on':'')+'" data-act="dotgoto" data-id="'+esc(items[i].id)+'" aria-label="'+esc(items[i].label)+'"></button>';
+    }
+    return h+'</div>';
+  }
+  function pagerDots(){ return activePager ? activePager.sheet.querySelector('.cs-dots') : null; }
+  function showDots(){
+    var dots=pagerDots(); if(!dots) return;
+    dots.classList.add('show');
+    clearTimeout(_dotsHideT);
+    _dotsHideT=setTimeout(function(){ if(dots && !dots.classList.contains('scrubbing')) dots.classList.remove('show'); }, 1700);
+  }
+  function updateDots(activeId){
+    var dots=pagerDots(); if(!dots || !activePager) return;
+    var btns=dots.querySelectorAll('.cs-dot'), items=activePager.items;
+    for(var i=0;i<btns.length;i++){ btns[i].classList.toggle('on', items[i] && items[i].id===activeId); }
+    showDots();
+  }
+  // Press/drag the dots to scrub: they grow, a label of the target appears above, release navigates.
+  function attachDotScrub(sheet){
+    var dots=sheet.querySelector('.cs-dots'); if(!dots) return;
+    var tip=dots.querySelector('.cs-dot-tip');
+    var scrubbing=false, handled=false, pvIdx=0;
+    function items(){ return activePager?activePager.items:[]; }
+    function dotEls(){ return dots.querySelectorAll('.cs-dot'); }
+    function idxFromX(x){
+      var b=dotEls(), best=0, bd=Infinity;
+      for(var i=0;i<b.length;i++){ var r=b[i].getBoundingClientRect(), c=r.left+r.width/2, d=Math.abs(x-c); if(d<bd){ bd=d; best=i; } }
+      return best;
+    }
+    function preview(idx){
+      pvIdx=idx; var b=dotEls(), it=items();
+      for(var i=0;i<b.length;i++) b[i].classList.toggle('preview', i===idx);
+      if(tip){ tip.textContent=it[idx]?it[idx].label:''; var d=b[idx]; if(d) tip.style.left=(d.offsetLeft+d.offsetWidth/2)+'px'; }
+    }
+    function clearPv(){ var b=dotEls(); for(var i=0;i<b.length;i++) b[i].classList.remove('preview'); }
+    function finish(nav){
+      if(!scrubbing) return; scrubbing=false;
+      dots.classList.remove('scrubbing'); clearPv();
+      var it=items();
+      if(nav && it[pvIdx] && activePager){ activePager.pick(it[pvIdx].id); } else { showDots(); }
+    }
+    dots.addEventListener('pointerdown', function(e){
+      if(e.pointerType==='mouse' && e.button!==0) return;
+      scrubbing=true; handled=true;
+      try{ dots.setPointerCapture(e.pointerId); }catch(_){}
+      clearTimeout(_dotsHideT);
+      dots.classList.add('show','scrubbing');
+      preview(idxFromX(e.clientX));
+      e.preventDefault();
+    });
+    dots.addEventListener('pointermove', function(e){ if(scrubbing) preview(idxFromX(e.clientX)); });
+    dots.addEventListener('pointerup', function(){ finish(true); });
+    dots.addEventListener('pointercancel', function(){ finish(false); });
+    dots.addEventListener('click', function(e){ if(handled){ e.stopPropagation(); e.preventDefault(); handled=false; } }, true);
+  }
+  // Swap the Woorden sheet to another woordgroep (dir sets the cross-slide direction).
+  // Only the title moves (cross-slide); the rate card + note + list stay fixed and their content crossfades.
+  function swapToCat(name, dir){
+    if(!catSheet) return;
+    var parts = buildCatParts(name); if(!parts) return;
+    applyCatAccent(catSheet, parts.accent);
+    catSheet.setAttribute('data-cat', name);
+    var eye=catSheet.querySelector('.cs-eye'); if(eye) eye.innerHTML=parts.eyebrow;
+    var chips=catSheet.querySelector('.cs-titlerow .cs-chips'); if(chips) chips.innerHTML=parts.chips;
+    csTitleSwap(catSheet, name, dir);
+    updateRate(name);
+    fadeSwap(catSheet.querySelector('.cs-note'), parts.note);
+    swapCatList(catSheet.querySelector('.ct-list'), parts.list);
+    updateDots(name);
+  }
+  // Page between woordgroepen in place (dir -1 prev / +1 next), cycling; skips the Moeilijk list.
+  function navCat(dir){
+    if(!catSheet) return;
+    var cur = catSheet.getAttribute('data-cat');
+    var names = catNames();
+    var i = names.indexOf(cur); if(i<0 || names.length<2) return;
+    var name = names[(i+dir+names.length)%names.length];
+    if(name===cur) return;
+    swapToCat(name, dir);
+  }
+  // Jump straight to a woordgroep from the dot navigation (direction follows list order).
+  function gotoCat(name){
+    if(!catSheet) return;
+    var cur = catSheet.getAttribute('data-cat'); if(name===cur){ showDots(); return; }
+    var names = catNames(), ci=names.indexOf(cur), ti=names.indexOf(name);
+    if(ci<0 || ti<0) return;
+    swapToCat(name, ti>ci ? 1 : -1);
+  }
+  // Swipe left/right anywhere on the sheet to page (companion to the ‹ › arrows); routes via activePager.
+  function attachCatSwipe(el){
+    var x0=0,y0=0,down=false,swiped=false;
+    el.addEventListener('pointerdown', function(e){
+      if(e.pointerType==='mouse' && e.button!==0) return;
+      if(e.target && e.target.closest && e.target.closest('.cs-dots')) return;  // let the dots own their scrub
+      x0=e.clientX; y0=e.clientY; down=true; swiped=false;
+    });
+    el.addEventListener('pointermove', function(e){
+      if(!down) return;
+      var dx=e.clientX-x0, dy=e.clientY-y0;
+      if(!swiped && Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)*1.4){ swiped=true; down=false; if(activePager) activePager.step(dx<0?1:-1); }
+    });
+    el.addEventListener('pointerup', function(){ down=false; });
+    el.addEventListener('pointercancel', function(){ down=false; });
+    el.addEventListener('click', function(e){ if(swiped){ e.stopPropagation(); e.preventDefault(); swiped=false; } }, true);
   }
   function closeCat(){
     if(!catSheet) return;
-    var s=catSheet; catSheet=null;
+    var s=catSheet; catSheet=null; activePager=null;
     s.classList.remove('show');
-    setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 320);
+    setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 400);
     fnav.classList.remove('hide');
   }
+
+  /* Transient overlay scrollbar: a JS thumb (.vsb) per scroll container, shown while scrolling then faded. */
+  (function(){
+    var SEL='.surface,.sbody,.cs-body,.ct-list,.wscroll';
+    function thumbFor(c){
+      var t=c._vsb;
+      if(!t || t.parentNode!==c){
+        if(getComputedStyle(c).position==='static') c.style.position='relative';
+        if(!t){ t=document.createElement('div'); t.className='vsb'; c._vsb=t; }
+        c.appendChild(t);
+      }
+      return t;
+    }
+    function update(c){
+      var sh=c.scrollHeight, ch=c.clientHeight;
+      if(sh-ch<=6){ if(c._vsb) c._vsb.classList.remove('on'); return; }
+      var t=thumbFor(c);
+      var th=Math.max(28, Math.round(ch*ch/sh)), travel=ch-th;
+      var y=(c.scrollTop/(sh-ch))*travel;
+      t.style.height=th+'px';
+      t.style.transform='translateY('+(c.scrollTop+y)+'px)';
+      t.classList.add('on');
+      clearTimeout(c._vsbHide);
+      c._vsbHide=setTimeout(function(){ if(c._vsb) c._vsb.classList.remove('on'); }, 950);
+    }
+    document.addEventListener('scroll', function(e){
+      var c=e.target;
+      if(c && c.nodeType===1 && c.matches && c.matches(SEL)) update(c);
+    }, true);
+    window.addEventListener('resize', function(){
+      var els=document.querySelectorAll(SEL);
+      for(var i=0;i<els.length;i++){ if(els[i]._vsb && els[i]._vsb.classList.contains('on')) update(els[i]); }
+    });
+  })();
 
   /* =========================================================
      HANDBOEK — reference manual hub + frosted detail sheets
      ========================================================= */
   var HB_CATS=[
-    {key:'poomsae',    title:'Poomsae',         han:'품', el:'#2468D6', sub:'De vormen',          unit:'vormen',     wide:true},
-    {key:'standen',    title:'Standen',         han:'서', el:'#2F9E56', sub:'Voetposities',       unit:'standen'},
-    {key:'technieken', title:'Technieken',      han:'술', el:'#C2792E', sub:'Blok · stoot · trap',unit:'technieken'},
-    {key:'theorie',    title:'Theorie',         han:'론', el:'#8B45E6', sub:'Wat & waarom',       unit:'onderwerpen'},
-    {key:'ilbo',       title:'Ilbo Taeryon',    han:'일', el:'#B23A48', sub:'Stapsparren',        unit:'afwerkingen'},
-    {key:'hosinsul',   title:'Zelfverdediging', han:'호', el:'#3E5BD6', sub:'Hosinsul',           unit:'technieken'},
-    {key:'examen',     title:'Examenkaart',     han:'시', el:'#0E7C86', sub:'Wat je moet kunnen', unit:'onderdelen'}
+    {key:'theorie',    title:'Theorie',         han:'론', el:'#8B45E6', sub:'Wat & waarom',       unit:'onderwerpen', grp:1},
+    {key:'examen',     title:'Examenkaart',     han:'시', el:'#8B45E6', sub:'Wat je moet kunnen', unit:'onderdelen',  grp:1},
+    {key:'standen',    title:'Standen',         han:'서', el:'#2F9E56', sub:'Voetposities',       unit:'standen',     grp:2},
+    {key:'technieken', title:'Technieken',      han:'술', el:'#2F9E56', sub:'Blok · stoot · trap',unit:'technieken',  grp:2},
+    {key:'poomsae',    title:'Poomsae',         han:'품', el:'#2468D6', sub:'De vormen',          unit:'vormen',      grp:3, wide:true},
+    {key:'ilbo',       title:'Ilbo Taeryon',    han:'일', el:'#2468D6', sub:'Stapsparren',        unit:'afwerkingen', grp:3},
+    {key:'hosinsul',   title:'Hosinsul',        han:'호', el:'#2468D6', sub:'Zelfverdediging',    unit:'technieken',  grp:3}
   ];
   function hbCat(key){ for(var i=0;i<HB_CATS.length;i++) if(HB_CATS[i].key===key) return HB_CATS[i]; return null; }
   function hbLv(key){ var n=C.naslag&&C.naslag[key]; return n?(n.niveau[POOM]||n.niveau['1']):{}; }
@@ -2415,14 +3067,32 @@
     '</button>';
   }
   function renderHandbook(){
-    var cards = HB_CATS.map(hbCard).join('');
+    function hbHubRow(cat){
+      return '<button class="wrow" data-act="openhb" data-hb="'+cat.key+'">'+
+        '<span class="wrow-emb hb-emb" style="--e:'+cat.el+'" aria-hidden="true">'+cat.han+'</span>'+
+        '<span class="wrow-tx"><span class="wrow-t">'+esc(cat.title)+'</span>'+
+          '<span class="wrow-sub">'+esc(cat.sub)+'</span></span>'+
+        '<span class="wrow-ch">'+IC.chev+'</span>'+
+      '</button>';
+    }
+    // Cluster consecutive cats by their grp marker into separate .wlist cards
+    // (HB_CATS drives both the visual order and the pager/dot-nav order — single source of truth).
+    var lists='', i=0;
+    while(i<HB_CATS.length){
+      var g=HB_CATS[i].grp, rows='';
+      while(i<HB_CATS.length && HB_CATS[i].grp===g){ rows+=hbHubRow(HB_CATS[i]); i++; }
+      lists+='<div class="wlist">'+rows+'</div>';
+    }
     var html =
-    '<div class="surface"><div class="pad">'+
-      '<div class="jhead"><div class="jk"><span class="han-lab">교본 · Gyobon</span></div>'+
-        '<h1>Handboek</h1>'+
-        '<div class="js">Alles wat je voor je examen moet kennen — kies een onderdeel om te oefenen.</div></div>'+
-      '<div class="catgrid">'+cards+'</div>'+
-    '</div></div>';
+    '<div class="surface wlib">'+statusBar()+
+      '<div class="whead">'+
+        '<div class="jhead"><div class="jk"><span class="han-lab">교본 · Gyobon</span></div>'+
+          '<h1>Handboek</h1>'+
+          '<div class="js">Alles voor je examen —<br>kies een onderdeel.</div></div>'+
+        '<span class="whead-masc whead-bag"><button type="button" class="pbag" data-act="hitbag" aria-label="Sla de bokszak"><img class="pbag-swing" src="assets/mascot/punchbag-bag.png" alt=""><img class="pbag-mount" src="assets/mascot/punchbag-mount.png" alt=""></button></span>'+
+      '</div>'+
+      '<div class="wscroll">'+lists+'</div>'+
+    '</div>';
     stage.insertAdjacentHTML('beforeend', wrapScreen(html));
     return stage.lastElementChild;
   }
@@ -2476,9 +3146,10 @@
       var h='';
       (C.technieken||[]).forEach(function(gr){
         h+='<div class="hb-grouphd">'+esc(gr.cat)+'</div>';
-        gr.items.forEach(function(it){ h+=hbRow({ko:it.ko, ro:it.roman, nl:it.nl}); });
+        var rr=''; gr.items.forEach(function(it){ rr+=hbRow({ko:it.ko, ro:it.roman, nl:it.nl}); });
+        h+='<div class="ct-list">'+rr+'</div>';
       });
-      return '<div class="ct-list">'+h+'</div>';
+      return h;
     }
     var rows='';
     if(key==='poomsae') poomsae.forEach(function(f){
@@ -2495,40 +3166,78 @@
     return '<div class="ct-list">'+rows+'</div>';
   }
   var hbSheet=null;
+  function hbNames(){ return HB_CATS.map(function(c){ return c.key; }); }
+  function hbChips(cat){
+    return '<span class="cs-chip glass">'+hbCount(cat.key)+' '+esc(cat.unit)+'</span>'+
+      '<span class="cs-chip glass">'+esc(cat.sub)+'</span>';
+  }
+  function hbTitleRow(cat){
+    return '<div class="cs-titlewrap"><h2 class="cs-title cs-title-cur">'+esc(cat.title)+'</h2></div>'+
+      '<div class="cs-chips">'+hbChips(cat)+'</div>';
+  }
   function openHb(key){
     var cat=hbCat(key); if(!cat) return;
     hbSheet=document.createElement('div');
-    hbSheet.className='session catsheet';
-    hbSheet.style.setProperty('--el', cat.el);
-    hbSheet.style.setProperty('--deep', shade(cat.el,-32));
-    hbSheet.style.setProperty('--glow', shade(cat.el,40));
-    hbSheet.style.setProperty('--elink', shade(cat.el,-58));
-    hbSheet.style.setProperty('--hot', shade(cat.el,26));
+    hbSheet.className='session catsheet hbcat';
+    hbSheet.setAttribute('data-hb', key);
+    applyCatAccent(hbSheet, cat.el);
+    var items = HB_CATS.map(function(c){ return {id:c.key, label:c.title}; });
+    activePager = { sheet:hbSheet, items:items,
+      step:function(dir){ navHb(dir); },
+      pick:function(id){ gotoHb(id); } };
+    var pager =
+      '<div class="cs-pager">'+
+        '<button class="cs-pgb" data-act="pageprev" aria-label="Vorig onderdeel">'+IC.back+'</button>'+
+        '<button class="cs-pgb cs-pgb-next" data-act="pagenext" aria-label="Volgend onderdeel">'+IC.back+'</button>'+
+      '</div>';
+    var dots = buildDotsHtml(items, key);
     hbSheet.innerHTML =
       '<div class="cs-hero">'+
-        '<div class="pt-bg"></div><div class="pt-noise"></div>'+
-        '<div class="cs-mtn" aria-hidden="true">'+mountainSVG()+'</div>'+
-        '<div class="cs-wm" aria-hidden="true">'+cat.han+'</div>'+
         '<button class="cs-x" data-act="hbclose" aria-label="Sluiten">'+IC.x+'</button>'+
         '<div class="cs-head">'+
           '<div class="cs-eye">교본 · HANDBOEK</div>'+
-          '<h2 class="cs-title">'+esc(cat.title)+'</h2>'+
-          '<div class="cs-chips">'+
-            '<span class="cs-chip glass">'+hbCount(cat.key)+' '+esc(cat.unit)+'</span>'+
-            '<span class="cs-chip glass">'+esc(cat.sub)+'</span>'+
-          '</div>'+
+          '<div class="cs-titlerow">'+hbTitleRow(cat)+'</div>'+
         '</div>'+
       '</div>'+
-      '<div class="cs-body">'+hbBody(cat.key)+'</div>';
+      '<div class="cs-body">'+hbBody(cat.key)+'</div>'+
+      pager + dots;
     stage.appendChild(hbSheet);
+    attachCatSwipe(hbSheet); attachDotScrub(hbSheet); showDots();
     fnav.classList.add('hide');
+    void hbSheet.offsetWidth; // capture the off-screen start so the drill-in transition runs
     requestAnimationFrame(function(){ hbSheet.classList.add('show'); });
+  }
+  // Page between Handboek onderdelen in place (dir -1 prev / +1 next), cycling; body crossfades, title cross-slides.
+  function swapToHb(key, dir){
+    if(!hbSheet) return;
+    var cat=hbCat(key); if(!cat) return;
+    applyCatAccent(hbSheet, cat.el);
+    hbSheet.setAttribute('data-hb', key);
+    var chips=hbSheet.querySelector('.cs-titlerow .cs-chips'); if(chips) chips.innerHTML=hbChips(cat);
+    csTitleSwap(hbSheet, cat.title, dir);
+    fadeSwap(hbSheet.querySelector('.cs-body'), hbBody(cat.key));
+    updateDots(key);
+  }
+  function navHb(dir){
+    if(!hbSheet) return;
+    var keys=hbNames(), cur=hbSheet.getAttribute('data-hb'), i=keys.indexOf(cur);
+    if(i<0 || keys.length<2) return;
+    var key=keys[(i+dir+keys.length)%keys.length];
+    if(key===cur) return;
+    swapToHb(key, dir);
+  }
+  function gotoHb(key){
+    if(!hbSheet) return;
+    var cur=hbSheet.getAttribute('data-hb'); if(key===cur){ showDots(); return; }
+    var keys=hbNames(), ci=keys.indexOf(cur), ti=keys.indexOf(key);
+    if(ci<0 || ti<0) return;
+    swapToHb(key, ti>ci ? 1 : -1);
   }
   function closeHb(){
     if(!hbSheet) return;
-    var s=hbSheet; hbSheet=null;
+    var s=hbSheet; hbSheet=null; activePager=null;
     s.classList.remove('show');
-    setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 320);
+    setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 400);
     fnav.classList.remove('hide');
   }
   // lighten(+)/darken(-) a #rrggbb hex by pct toward white/black
@@ -2810,6 +3519,53 @@
     var dot = track.querySelector('.exd[data-d="'+idx+'"]');
     if(dot){ dot.classList.remove('dpop'); void dot.offsetWidth; dot.classList.add(ok?'ok':'bad','dpop'); }
   }
+  var EXAM_SEX='boy'; // Jayden — expression companion; 'girl' for a girl profile
+  var EX_MOOD_I={win:-1,great:0,ok:1,worried:2,sad:3};
+  function examMood(s){
+    if(s.pass && s.goed >= s.pass) return 'win';   // pass al binnen — dolblij
+    var m = s.maxFout - s.fout;          // resterende fout-marge (geslaagd = fout <= maxFout)
+    if(s.fout===0) return 'great';
+    if(m>=2) return 'ok';
+    if(m>=0) return 'worried';
+    return 'sad';
+  }
+  function examMoodSub(s, mood){
+    if((s.goed||0)+(s.fout||0)===0) return '';   // nothing answered yet — no premature feedback
+    if(mood==='win') return 'Al geslaagd — maak \'m mooi af!';
+    var m = Math.max(0, s.maxFout - s.fout);
+    if(mood==='great') return 'Nog foutloos — top bezig!';
+    if(mood==='ok')    return 'Goed bezig · nog '+m+' fout mogelijk';
+    if(mood==='worried') return m>=1 ? 'Let op · nog 1 fout mogelijk' : 'Spannend · geen fout meer over';
+    return 'Te veel fout · blijf rustig doorgaan';
+  }
+  function examHead(s){
+    var mood=examMood(s);
+    return '<div class="ex-head">'+
+      '<div class="sh"><div class="k">Proef examen</div><h2>Vraag '+(s.i+1)+' van '+s.qs.length+'</h2>'+
+        '<p class="sub" id="ex-sub">'+examMoodSub(s,mood)+'</p></div>'+
+    '</div>';
+  }
+  function examFace(s){
+    var mood=examMood(s);
+    return '<span class="ex-face x-'+mood+'" id="ex-face" data-x="'+mood+'">'+
+        '<img class="ex-face-base" src="assets/mascot/face/face-'+EXAM_SEX+'-'+mood+'.png" alt="" aria-hidden="true">'+
+        '<img class="ex-face-blink" src="assets/mascot/face/face-'+EXAM_SEX+'-'+mood+'-blink.png" alt="" aria-hidden="true"></span>';
+  }
+  function setExamFace(s, outcome){
+    if(!examEl) return;
+    var wrap=examEl.querySelector('#ex-face'); if(!wrap) return;
+    var mood=examMood(s), prev=wrap.getAttribute('data-x');
+    wrap.setAttribute('data-x',mood);
+    wrap.className='ex-face x-'+mood;
+    var img=wrap.querySelector('.ex-face-base'); if(img) img.src='assets/mascot/face/face-'+EXAM_SEX+'-'+mood+'.png';
+    var blk=wrap.querySelector('.ex-face-blink'); if(blk) blk.src='assets/mascot/face/face-'+EXAM_SEX+'-'+mood+'-blink.png';
+    var sub=examEl.querySelector('#ex-sub'); if(sub) sub.textContent=examMoodSub(s,mood);
+    if(outcome){
+      var worse = prev && EX_MOOD_I[mood]>EX_MOOD_I[prev];
+      var anim = (mood==='win') ? 'rbob' : ((outcome==='wrong'||worse) ? 'rshake' : 'rbob');
+      wrap.classList.remove('rshake','rbob'); void wrap.offsetWidth; wrap.classList.add(anim);
+    }
+  }
   function renderExamQ(){
     var s = examState; if(!s) return;
     if(s.i >= s.qs.length){ return renderExamDone(); }
@@ -2822,13 +3578,14 @@
         '<span class="ol">'+letters[i]+'</span>'+esc(o)+'</button>';
     }).join('');
     body.innerHTML = '<div class="stepin">'+
-      sHead('Proef examen','Vraag '+(s.i+1)+' van '+s.qs.length,'')+
+      examHead(s)+
       examTrack(s)+
       '<div class="ex-q">'+esc(q.v)+'</div>'+
       '<div class="opts" id="ex-opts">'+opts+'</div>'+
       (q.why?'<div class="why" id="ex-why">'+esc(q.why)+'</div>':'')+
     '</div>';
-    foot.innerHTML = '<button class="nextbtn ghost" id="ex-next" data-act="exnext" disabled style="opacity:.45">Kies een antwoord</button>';
+    foot.innerHTML = examFace(s)+
+      '<button class="nextbtn ghost" id="ex-next" data-act="exnext" disabled style="opacity:.45">Kies een antwoord</button>';
     body.scrollTop = 0;
     s.answered = false;
   }
@@ -2842,6 +3599,7 @@
     var all = opts.querySelectorAll('.opt');
     all[correct].classList.add('correct');
     if(chosen!==correct){ btn.classList.add('wrong'); s.fout++; examFillDot(s,false); sfx('wrong'); } else { s.goed++; examFillDot(s,true); sfx('correct'); }
+    setExamFace(s, chosen!==correct ? 'wrong' : 'correct');
     var why = examEl.querySelector('#ex-why'); if(why) why.classList.add('show');
     var nb = examEl.querySelector('#ex-next');
     if(nb){ nb.disabled=false; nb.style.opacity='1'; nb.classList.remove('ghost');
@@ -2857,10 +3615,13 @@
     var body = examEl.querySelector('#ex-body');
     var foot = examEl.querySelector('#ex-foot');
     if(passed && ('examen' in missionDone)) missionDone.examen = true;
+    var mSlug = mascotBelt(geupInfo(GEUP_I));   // result hero belt matches the profile grade
+    var coachFace = (s.goed >= Math.ceil(s.pass*0.6)) ? 'coach-point' : 'coach-point-serious'; // gentle when close, calm-serious when the score was low
     var hero = passed
-      ? '<span class="ex-masc"><img class="ex-mascot" src="assets/mascot/kid-medal.png" alt="" aria-hidden="true">'+
-          '<img class="ex-mascot blinklay" src="assets/mascot/kid-medal-blink.png" alt="" aria-hidden="true"></span>'
-      : '<div class="ex-badge">💪</div>';
+      ? '<span class="ex-masc"><img class="ex-mascot" src="assets/mascot/kid-medal-'+mSlug+'.png" alt="" aria-hidden="true">'+
+          '<img class="ex-mascot blinklay" src="assets/mascot/kid-medal-'+mSlug+'-blink.png" alt="" aria-hidden="true"></span>'
+      : '<span class="ex-masc"><img class="ex-mascot ex-coach" src="assets/mascot/'+coachFace+'.png" alt="" aria-hidden="true">'+
+          '<img class="ex-mascot ex-coach blinklay" src="assets/mascot/'+coachFace+'-blink.png" alt="" aria-hidden="true"></span>';
     body.innerHTML = '<div class="stepin"><div class="ex-result '+(passed?'pass':'fail')+'">'+
       hero+
       '<div class="ex-rk">'+(passed?'Geslaagd':'Bijna!')+'</div>'+
@@ -2895,6 +3656,11 @@
     setTopBar(th(CUR).el);             // match the iOS top bar to the timer's gradient
     var tOpts = OT_TEMPOS.map(function(t){
       return '<button class="ot-topt'+(t.v===otState.speed?' on':'')+'" data-act="otspeed" data-v="'+t.v+'"><span class="ot-tlab">'+t.s+'<span class="ot-tx">×</span></span></button>';
+    }).join('');
+    var rOpts = OT_REPS.map(function(r){
+      var inf=r.v===Infinity, dv=inf?'inf':String(r.v);
+      var lab=inf?'<svg class="ot-inf" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill="currentColor" d="M18.6 6.62c-1.44 0-2.8.56-3.77 1.53L7.8 14.39c-.64.64-1.49.99-2.4.99-1.87 0-3.39-1.51-3.39-3.38S3.53 8.62 5.4 8.62c.91 0 1.76.35 2.44 1.03l1.13 1 1.51-1.34L9.22 8.2C8.2 7.18 6.84 6.62 5.4 6.62 2.42 6.62 0 9.04 0 12s2.42 5.38 5.4 5.38c1.44 0 2.8-.56 3.77-1.53l7.03-6.24c.64-.64 1.49-.99 2.4-.99 1.87 0 3.39 1.51 3.39 3.38s-1.52 3.38-3.39 3.38c-.9 0-1.76-.35-2.44-1.03l-1.14-1.01-1.51 1.34 1.27 1.12c1.02 1.01 2.37 1.57 3.82 1.57 2.98 0 5.4-2.41 5.4-5.38S21.58 6.62 18.6 6.62z"/></svg>':'<span class="ot-rlab">'+r.v+'<span class="ot-tx">×</span></span>';
+      return '<button class="ot-ropt'+(r.v===otState.reps?' on':'')+(inf?' inf':'')+'" data-act="otrep" data-v="'+dv+'">'+lab+'</button>';
     }).join('');
     var c0 = COUNT[0];
     var mSlug = mascotBelt(geupInfo(GEUP_I));
@@ -2933,8 +3699,12 @@
         '<img class="ot-blink" id="ot-masc-blink" src="'+mBlink+'" alt=""></div></div>'+
       '<div class="ot-bar">'+
         '<div class="ot-left">'+
-          '<div class="ot-ctl" id="ot-repeat-ctl"><span class="ot-lab">Herhaal</span>'+
-            '<button class="ot-fab" id="ot-repeat" data-act="otrepeat" aria-label="Herhalen">'+IC.repeat+'</button></div>'+
+          '<div class="ot-rep">'+
+            '<span class="ot-lab">Herhaal</span>'+
+            '<div class="ot-rmenu"><div class="ot-rmenu-inner"><span class="ot-rthumb"></span>'+rOpts+'</div></div>'+
+            '<button class="ot-fab ot-rep-fab" id="ot-repeat" data-act="otrepeat" aria-label="Aantal herhalingen">'+IC.repeat+
+              '<span class="ot-badge empty" id="ot-rep-badge"></span></button>'+
+          '</div>'+
           '<div class="ot-tempo">'+
             '<span class="ot-lab">Tempo</span>'+
             '<div class="ot-tmenu"><div class="ot-tmenu-inner"><span class="ot-tthumb"></span>'+tOpts+'</div></div>'+
@@ -2962,8 +3732,8 @@
   }
   function closeTimer(){
     if(!timerScreen) return;
-    otStop();
-    clearTimeout(otGlintT);
+    otStop(); otCloseReps();
+    clearTimeout(otGlintT); clearTimeout(otRepT);
     setTopBar();                       // restore the cream top bar
     timerScreen.classList.remove('show');
     fnav.classList.remove('hide');
@@ -3310,9 +4080,13 @@
   function otFrac(n,d){ return '<span class="ot-fr"><sup>'+n+'</sup><span class="sl">&#8260;</span><sub>'+d+'</sub></span>'; }
   var OT_TEMPOS = [ {v:0.25,s:otFrac(1,4),name:'Traag'}, {v:0.5,s:otFrac(1,2),name:'Rustig'},
                     {v:1,s:'1',name:'Normaal'}, {v:2,s:'2',name:'Snel'} ];
+  /* Herhaal-opties: 2× / 4× / 10× / oneindig. reps=0 = uit (speelt één keer). */
+  var OT_REPS = [ {v:2}, {v:4}, {v:10}, {v:Infinity} ];
+  function otRepV(s){ return s==='inf' ? Infinity : parseInt(s,10); }
   var OT_BASE = 850, OT_READY = 3, OT_DRAIN = 520;
-  var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, loop:false, _lastFrac:0, _wrapT:null };
+  var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, reps:0, left:0, _lastFrac:0, _wrapT:null };
   var otTmT=null; // tempo fold-out collapse/close timer
+  var otRepT=null; // herhaal fold-out close timer
   var otGlintT=null; // attention-glint scheduler for the "tik om te starten" hint
   function buzz(ms){ if(navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
 
@@ -3397,9 +4171,13 @@
     correct: 'assets/sounds/chrisiex1-correct-156911.mp3',
     wrong:   'assets/sounds/vadim_makes_sound-ui-error-denied-sound-2-547856.mp3',
     exampass:'assets/sounds/soundshelfstudio-mission-complete-chime-534595.mp3',
-    examfail:'assets/sounds/freesound_community-negative_beeps-6008.mp3'
+    examfail:'assets/sounds/freesound_community-negative_beeps-6008.mp3',
+    beep:    'assets/sounds/u_edtmwfwu7c-beep-329314.mp3',
+    rate0:   'assets/sounds/soynoviembre-digital-error-notification-tone-04-563613.mp3',
+    rate1:   'assets/sounds/soundshelfstudio-mission-complete-chime-534595.mp3',
+    rate2:   'assets/sounds/updatepelgo-success-221935.mp3'
   };
-  var SFX_GAIN={check:0.95, complete:0.85, chime:0.85, correct:0.9, wrong:0.85, exampass:0.9, examfail:0.85};
+  var SFX_GAIN={check:0.95, complete:0.85, chime:0.85, correct:0.9, wrong:0.85, exampass:0.9, examfail:0.85, beep:0.5, rate0:0.8, rate1:0.85, rate2:0.85};
   var _sfxBuf={}, _sfxLoading={};
   function sfxLoad(name){
     var ac=sfxCtx(); if(!ac) return;
@@ -3412,13 +4190,14 @@
     }).catch(function(){ _sfxBuf[name]=null; _sfxLoading[name]=false; });
   }
   function sfxPreload(){ for(var k in SFX_SAMPLES){ sfxLoad(k); } }
-  function sfxSample(name, gain){
+  function sfxSample(name, gain, dur){
     var ac=sfxCtx(); if(!ac) return false;
     var buf=_sfxBuf[name]; if(!buf){ sfxLoad(name); return false; }
     try{
       var src=ac.createBufferSource(), g=ac.createGain();
       src.buffer=buf; g.gain.value=(gain!=null?gain:(SFX_GAIN[name]||0.85));
-      src.connect(g); g.connect(ac.destination); src.start(0);
+      src.connect(g); g.connect(ac.destination);
+      if(dur!=null) src.start(0,0,dur); else src.start(0);
       return true;
     }catch(e){ return false; }
   }
@@ -3432,11 +4211,16 @@
     try{
       if(name==='check'){ if(!sfxSample('check')){ sfxTone(1760,0,0.045,'triangle',0.08); sfxTone(1046.5,0.02,0.10,'sine',0.17); sfxTone(1568,0.10,0.22,'sine',0.17); sfxTone(2093,0.10,0.15,'sine',0.05); } }
       else if(name==='uncheck'){ sfxTone(420,0,0.11,'sine',0.12); }
+      else if(name==='thud'){ sfxTone(172,0,0.05,'triangle',0.15); sfxTone(94,0.008,0.15,'sine',0.20); sfxTone(128,0,0.10,'sawtooth',0.05); }
       else if(name==='complete'){ if(!sfxSample('complete')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
       else if(name==='correct'){ if(!sfxSample('correct')){ sfxTone(880,0,0.09,'sine',0.16); sfxTone(1318.5,0.08,0.16,'sine',0.16); } }
       else if(name==='wrong'){ if(!sfxSample('wrong')){ sfxTone(311,0,0.14,'sawtooth',0.10); sfxTone(233,0.10,0.20,'sawtooth',0.10); } }
       else if(name==='exampass'){ if(!sfxSample('exampass')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
       else if(name==='examfail'){ if(!sfxSample('examfail')){ sfxTone(392,0,0.16,'sine',0.13); sfxTone(311,0.14,0.16,'sine',0.13); sfxTone(233,0.28,0.28,'sine',0.13); } }
+      else if(name==='beep'){ if(!sfxSample('beep', null, 0.26)){ sfxTone(880,0,0.09,'sine',0.13); } }
+      else if(name==='rate0'){ if(!sfxSample('rate0')){ sfxTone(311,0,0.14,'sawtooth',0.10); sfxTone(233,0.10,0.20,'sawtooth',0.10); } }
+      else if(name==='rate1'){ if(!sfxSample('rate1')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
+      else if(name==='rate2'){ if(!sfxSample('rate2')){ sfxTone(880,0,0.09,'sine',0.16); sfxTone(1318.5,0.08,0.16,'sine',0.16); } }
     }catch(e){}
   }
   function otTempoLabel(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].s+'<span class="ot-tx">×</span>'; } return '1<span class="ot-tx">×</span>'; }
@@ -3474,8 +4258,8 @@
         hint.style.opacity = otState.running ? '0' : '1'; }
     } else {
       if(dial) dial.classList.remove('ready');
-      otShowDots(numEl, 0);
-      if(wordEl) wordEl.innerHTML='<span class="w-ko">준비</span><span class="w-dot">·</span><span class="w-ro">Junbi</span>';
+      numEl.innerHTML='';                 // resting dial: no ready-dots yet
+      if(wordEl) wordEl.innerHTML='';      // hold 준비 · Junbi until the countdown starts
       if(hint){ hint.textContent='tik om te starten'; hint.style.opacity='1'; }
     }
     host.classList.toggle('running', !!otState.running);
@@ -3497,8 +4281,17 @@
   function otResettable(){ return otState.running || otState.phase!=='idle' || otState.i>0; }
   function otSyncControls(){
     var host=timerScreen; if(!host) return;
-    var rb=host.querySelector('#ot-repeat'); if(rb) rb.classList.toggle('on', otState.loop);
-    var rc=host.querySelector('#ot-repeat-ctl'); if(rc) rc.classList.toggle('lab-on', otState.loop);
+    var active = otState.reps!==0;
+    var rb=host.querySelector('#ot-repeat'); if(rb) rb.classList.toggle('on', active);
+    var rw=host.querySelector('.ot-rep'); if(rw) rw.classList.toggle('has-sel', active);
+    var badge=host.querySelector('#ot-rep-badge');
+    var showNum = active && otState.reps!==Infinity && otState.left>0;
+    if(badge){
+      if(showNum){ badge.textContent=String(otState.left); badge.classList.remove('empty'); }
+      else { badge.textContent=''; badge.classList.add('empty'); }
+    }
+    if(rb) rb.classList.toggle('has-num', showNum);
+    [].forEach.call(host.querySelectorAll('.ot-ropt'),function(o){ o.classList.toggle('on', otRepV(o.getAttribute('data-v'))===otState.reps); });
     var canReset=otResettable();
     var rs=host.querySelector('#ot-reset'); if(rs) rs.classList.toggle('is-off', !canReset);
     var rsc=host.querySelector('#ot-reset-ctl'); if(rsc) rsc.classList.toggle('lab-on', canReset);
@@ -3551,9 +4344,9 @@
   function otTick(){
     if(otState.phase==='ready'){
       otState.ready--;
-      if(otState.ready>0){ otRender(); buzz(6); otSchedule(); return; }
+      if(otState.ready>0){ otRender(); buzz(6); sfx('beep'); otSchedule(); return; }
       // ready hit 0: let the third (last) dot finish draining before the count begins
-      otRender(); buzz(6);            // renders ○○○ — the last pip animates out over ~0.5s
+      otRender(); buzz(6); sfx('beep');            // renders ○○○ — the last pip animates out over ~0.5s
       clearTimeout(otState.iv);
       otState.iv=setTimeout(function(){
         if(otState.phase!=='ready') return;
@@ -3562,51 +4355,140 @@
       return;
     }
     if(otState.i>=COUNT.length-1){
-      if(otState.loop){ otLoopWrap(); otSchedule(); }
+      if(otState.reps===Infinity){ otLoopWrap(); otSchedule(); }
+      else if(otState.reps>0){
+        otState.left--;
+        if(otState.left>0){ otLoopWrap(); otSchedule(); otSyncControls(); otBumpBadge(); }
+        else { otState.reps=0; otState.left=0; otStop(); otRender(); otSyncControls(); buzz(22); if(Math.random()<0.55) otMascotPeek(); }
+      }
       else { otStop(); otRender(); otSyncControls(); buzz(22); if(Math.random()<0.45) otMascotPeek(); }
       return;
     }
     otState.i++; otRender(); otPop(); speak(COUNT[otState.i][0]); buzz(6); otSchedule();
   }
   function otStart(){
-    otCloseFan();
+    otCloseFan(); otCloseReps();
+    if(timerScreen) timerScreen.classList.remove('ot-paused');
     otState.phase='ready'; otState.ready=OT_READY; otState.i=0; otState.running=true;
-    otRender(); otSyncControls(); speak('준비'); buzz(16); otSchedule();
+    otState.left=(otState.reps===Infinity?Infinity:otState.reps);
+    otRender(); otSyncControls(); speak('준비'); buzz(16); otSchedule();  // no beep here — the ready beats start on the first tick, after the 준비 voice
   }
   function otPause(){
     otState.running=false; clearTimeout(otState.iv);
+    if(timerScreen) timerScreen.classList.add('ot-paused');
     var hint=timerScreen&&timerScreen.querySelector('#ot-hint');
-    if(hint){ hint.textContent='gepauzeerd — tik om verder te gaan'; hint.style.opacity='1'; }
+    if(hint){ hint.textContent='gepauzeerd — tik om verder te gaan'; hint.classList.remove('glint'); hint.style.opacity='1'; }
     otSyncControls();
   }
   function otResume(){
     otState.running=true;
+    if(timerScreen) timerScreen.classList.remove('ot-paused');
     var hint=timerScreen&&timerScreen.querySelector('#ot-hint'); if(hint) hint.style.opacity='0';
     otSyncControls(); otSchedule();
   }
   function otTap(){
-    var w=timerScreen&&timerScreen.querySelector('.ot-tempo');
-    if(w && w.classList.contains('open')){ otCloseFan(); return; }
+    var wt=timerScreen&&timerScreen.querySelector('.ot-tempo');
+    if(wt && wt.classList.contains('open')){ otCloseFan(); return; }
+    var wr=timerScreen&&timerScreen.querySelector('.ot-rep');
+    if(wr && wr.classList.contains('open')){ otCloseReps(); return; }
     if(otState.running){ otPause(); return; }
     var finished=(otState.phase==='count' && otState.i>=COUNT.length-1);
     if(otState.phase==='idle' || finished){ otStart(); }
     else { otResume(); }
   }
   function otReset(){
-    otCloseFan(); clearTimeout(otState.iv); clearTimeout(otState._wrapT); otState.running=false;
+    otCloseFan(); otCloseReps(); clearTimeout(otState.iv); clearTimeout(otState._wrapT); otState.running=false;
+    if(timerScreen) timerScreen.classList.remove('ot-paused');
     otState.phase='idle'; otState.ready=OT_READY; otState.i=0;
+    otState.left=(otState.reps===Infinity?Infinity:otState.reps);
     var pr=timerScreen&&timerScreen.querySelector('#ot-prog'), kg=timerScreen&&timerScreen.querySelector('#ot-knobg');
     if(pr) pr.style.opacity=''; if(kg) kg.style.opacity='';
     otSyncControls(); otRender();
   }
-  function otRepeat(){
-    otCloseFan(); otState.loop=!otState.loop;
+  /* ---- Herhaal fold-out: 2× / 4× / 10× / ∞ (mirrors the tempo fold-out) ---- */
+  function moveRepThumb(animate){
+    var host=timerScreen; if(!host) return;
+    var inner=host.querySelector('.ot-rmenu-inner'), thumb=host.querySelector('.ot-rthumb');
+    if(!inner||!thumb) return;
+    var on=inner.querySelector('.ot-ropt.on') || inner.querySelector('.ot-ropt.inf'); if(!on) return;
+    if(!animate) thumb.style.transition='none';
+    thumb.style.width=on.offsetWidth+'px';
+    thumb.style.transform='translateX('+on.offsetLeft+'px)';
+    if(!animate){ void thumb.offsetWidth; thumb.style.transition=''; }
+  }
+  function otRepeatMenu(){
+    var host=timerScreen; if(!host) return;
+    var w=host.querySelector('.ot-rep'); if(!w) return;
+    if(w.classList.contains('open')){ otCloseReps(); return; }
+    otCloseFan();                                    // only one fold-out open at a time
+    var lft=host.querySelector('.ot-left'); if(lft) lft.classList.add('rep-open');
+    var menu=w.querySelector('.ot-rmenu'), inner=w.querySelector('.ot-rmenu-inner');
+    w.classList.add('open');
+    if(menu&&inner) menu.style.width=(inner.offsetWidth+14)+'px'; // +14 = 2×(1px border + 6px padding) → 7px gap each side
+    moveRepThumb(false);
+  }
+  function otCloseReps(){
+    var host=timerScreen; if(!host) return;
+    clearTimeout(otRepT);
+    var w=host.querySelector('.ot-rep'); if(!w) return;
+    var collapsing=w.classList.contains('collapsing');
+    if(!w.classList.contains('open') && !collapsing) return;
+    w.classList.remove('open','collapsing');
+    var menu=w.querySelector('.ot-rmenu'); if(menu){ menu.style.transition=''; menu.style.width=''; }
+    var lft=host.querySelector('.ot-left'); if(lft) lft.classList.remove('rep-open');
+    if(collapsing){                                  // aborted mid-glide → clear the inline travel styles
+      var inner=w.querySelector('.ot-rmenu-inner'), thumb=w.querySelector('.ot-rthumb');
+      if(inner){ inner.style.transition=''; inner.style.transform=''; }
+      if(thumb){ thumb.style.transition=''; thumb.style.transform=''; thumb.style.width=''; }
+    }
+  }
+  function otBumpBadge(){
+    var b=timerScreen&&timerScreen.querySelector('#ot-rep-badge');
+    if(b && !b.classList.contains('empty')){ b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
+  }
+  /* Selecting a herhaal value closes the fold-out with the SAME motion as the tempo selector: the chosen
+     disc glides LEFT to the closed-button home as the pill collapses (.36s cubic-bezier(.4,0,.2,1)) and the
+     other options fade, then the loop-icon FAB cross-fades back in. (No value-morph — the repeat button
+     face is an icon+badge, not the picked number.) */
+  function otCollapseReps(){
+    var host=timerScreen; if(!host) return;
+    var w=host.querySelector('.ot-rep'); if(!w||!w.classList.contains('open')) return;
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ otCloseReps(); return; }
+    var menu=w.querySelector('.ot-rmenu'), inner=w.querySelector('.ot-rmenu-inner'),
+        thumb=w.querySelector('.ot-rthumb'), on=inner&&inner.querySelector('.ot-ropt.on');
+    w.classList.add('collapsing');
+    if(on){ inner.style.transition='transform .36s cubic-bezier(.4,0,.2,1)'; inner.style.transform='translateX('+(3-on.offsetLeft)+'px)'; }
+    menu.style.transition='width .36s cubic-bezier(.4,0,.2,1), opacity .22s ease, visibility .44s';
+    menu.style.width='64px';
+    clearTimeout(otRepT);
+    otRepT=setTimeout(function(){                     // disc arrived home → menu fades out, revealing the FAB
+      if(!timerScreen) return;
+      var w2=timerScreen.querySelector('.ot-rep'); if(!w2) return;
+      w2.classList.remove('open','collapsing');
+      var lft=timerScreen.querySelector('.ot-left'); if(lft) lft.classList.remove('rep-open'); // restore the tempo button (mutual-exclusion fade)
+      var m=w2.querySelector('.ot-rmenu'), inn=w2.querySelector('.ot-rmenu-inner'), th=w2.querySelector('.ot-rthumb');
+      if(m){ m.style.transition=''; m.style.width=''; }
+      if(inn){ inn.style.transition=''; inn.style.transform=''; }
+      if(th){ th.style.transition=''; th.style.transform=''; th.style.width=''; }
+    }, 360);
+  }
+  /* Pick a herhaal count; re-tapping the active value turns repeating off (back to idle). */
+  function otPickRep(dv){
+    var v=otRepV(dv), off=(v===otState.reps);
+    if(off){ otState.reps=0; otState.left=0; }
+    else { otState.reps=v; otState.left=(v===Infinity?Infinity:v); }
     otSyncControls();
+    var thumb=timerScreen&&timerScreen.querySelector('.ot-rthumb');
+    if(thumb) thumb.style.transition='transform .24s cubic-bezier(.34,1.28,.4,1), width .24s cubic-bezier(.34,1.28,.4,1), opacity .2s ease';
+    if(!off) moveRepThumb(true);                      // beat 1: snap the disc under the picked value
+    clearTimeout(otRepT);
+    otRepT=setTimeout(otCollapseReps, 250);           // beat 2: glide it home as the pill collapses (tempo motion)
   }
   function otTempo(){
     var host=timerScreen; if(!host) return;
     var w=host.querySelector('.ot-tempo'); if(!w) return;
     if(w.classList.contains('open')){ otCloseFan(); return; }
+    otCloseReps();                                   // only one fold-out open at a time
     var menu=w.querySelector('.ot-tmenu'), inner=w.querySelector('.ot-tmenu-inner');
     w.classList.add('open');
     if(menu&&inner) menu.style.width=(inner.offsetWidth+14)+'px'; // +14 = 2×(1px border + 6px padding) → 7px gap each side
@@ -3742,12 +4624,16 @@
   /* =========================================================
      Navigation between surfaces
      ========================================================= */
+  var _navHLready=false;
   function moveNavHL(){
     var hl=document.getElementById('fnav-hl'); if(!hl) return;
     var on=fnav.querySelector('button.on'); if(!on) return;
+    // First reveal: snap to size/position and fade in only — no width-grow/slide artefact.
+    if(!_navHLready) hl.style.transition='opacity .3s ease';
     hl.style.width=on.offsetWidth+'px';
     hl.style.transform='translateX('+on.offsetLeft+'px)';
     hl.classList.add('ready');
+    if(!_navHLready){ void hl.offsetWidth; hl.style.transition=''; _navHLready=true; }  // restore CSS slide+morph for later switches
   }
   function showScreen(name){
     var prev=state.screen;
@@ -3826,6 +4712,7 @@
     else if(a==='exretry'){ examRetry(); }
     else if(a==='exclose'){ closeExam(); showScreen('today'); }
     else if(a==='opentimer'){ openTimer(); }
+    else if(a==='hitbag'){ hitBag(act, e); }
     else if(a==='timerclose'){ closeTimer(); }
     else if(a==='journey'){ showScreen('journey'); }
     else if(a==='sclose'){ closeSession(); showScreen('today'); }
@@ -3841,10 +4728,11 @@
     else if(a==='tlspeed'){ tlSpeed(act.getAttribute('data-v')); }
     else if(a==='ottap'){ otTap(); }
     else if(a==='otreset'){ otReset(); }
-    else if(a==='otrepeat'){ otRepeat(); }
+    else if(a==='otrepeat'){ otRepeatMenu(); }
+    else if(a==='otrep'){ otPickRep(act.getAttribute('data-v')); }
     else if(a==='ottempo'){ otTempo(); }
     else if(a==='otspeed'){ otSpeed(act.getAttribute('data-v')); }
-    else if(a==='say'){ speak(act.getAttribute('data-ko'), act.getAttribute('data-stop')?act:act); }
+    else if(a==='say'){ var _sb=act.classList.contains('ct-row')?(act.querySelector('.ct-say')||act):act; speak(act.getAttribute('data-ko'), _sb); }
     else if(a==='flip'){ var fl=session.querySelector('#flip'); if(fl) fl.classList.toggle('flipped'); }
     else if(a==='answer'){ handleAnswer(act); }
     else if(a==='cigoal'){ openCheckin('goal'); }
@@ -3852,8 +4740,13 @@
     else if(a==='beltsheet'){ openBeltSheet(); }
     else if(a==='beltsheetclose'){ closeBeltSheet(); }
     else if(a==='opencat'){ openCat(act.getAttribute('data-groep')); }
+    else if(a==='openhard'){ openCat('Moeilijk'); }
     else if(a==='catclose'){ closeCat(); }
+    else if(a==='pageprev'){ if(activePager) activePager.step(-1); }
+    else if(a==='pagenext'){ if(activePager) activePager.step(1); }
+    else if(a==='dotgoto'){ if(activePager) activePager.pick(act.getAttribute('data-id')); }
     else if(a==='hardterm'){ toggleHardTerm(act.getAttribute('data-k'), act); }
+    else if(a==='setmastery'){ setCatStage(act.getAttribute('data-groep'), +act.getAttribute('data-stage'), act); }
     else if(a==='examchk'){ toggleExamChk(act.getAttribute('data-k')); }
     else if(a==='openhb'){ openHb(act.getAttribute('data-hb')); }
     else if(a==='hbclose'){ closeHb(); }

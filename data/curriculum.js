@@ -254,7 +254,17 @@ window.CURRICULUM = {
       { ko: "도복", roman: "Dobok", nl: "Taekwondopak" },
       { ko: "도장", roman: "Dojang", nl: "Trainingsruimte" },
       { ko: "기합", roman: "Kiap", nl: "Krachtkreet" },
-      { ko: "품새", roman: "Poomsae", nl: "Stijlvorm (vormen)" }
+      { ko: "품새", roman: "Poomsae", nl: "Stijlvorm (vormen)" },
+      { ko: "하나", roman: "Hana / Il", nl: "een" },
+      { ko: "둘", roman: "Dul / I", nl: "twee" },
+      { ko: "셋", roman: "Set / Sam", nl: "drie" },
+      { ko: "넷", roman: "Net / Sa", nl: "vier" },
+      { ko: "다섯", roman: "Tasot / O", nl: "vijf" },
+      { ko: "여섯", roman: "Yosot / Yuk", nl: "zes" },
+      { ko: "일곱", roman: "Ilgop / Chil", nl: "zeven" },
+      { ko: "여덟", roman: "Yodol / Pal", nl: "acht" },
+      { ko: "아홉", roman: "Ahop / Ku", nl: "negen" },
+      { ko: "열", roman: "Yul / Sip", nl: "tien" }
     ]},
     { groep: "Commando's", items: [
       { ko: "차렷", roman: "Charyot", nl: "In de houding staan" },
@@ -326,18 +336,6 @@ window.CURRICULUM = {
       { ko: "겨루기", roman: "Gyeo-rugi", nl: "Sparren" },
       { ko: "격파", roman: "Gye Pa", nl: "Breektest" },
       { ko: "호신술", roman: "Hosinsul", nl: "Zelfverdediging" }
-    ]},
-    { groep: "Tellen (1–10)", items: [
-      { ko: "하나", roman: "Hana / Il", nl: "een" },
-      { ko: "둘", roman: "Dul / I", nl: "twee" },
-      { ko: "셋", roman: "Set / Sam", nl: "drie" },
-      { ko: "넷", roman: "Net / Sa", nl: "vier" },
-      { ko: "다섯", roman: "Tasot / O", nl: "vijf" },
-      { ko: "여섯", roman: "Yosot / Yuk", nl: "zes" },
-      { ko: "일곱", roman: "Ilgop / Chil", nl: "zeven" },
-      { ko: "여덟", roman: "Yodol / Pal", nl: "acht" },
-      { ko: "아홉", roman: "Ahop / Ku", nl: "negen" },
-      { ko: "열", roman: "Yul / Sip", nl: "tien" }
     ]}
   ],
 
