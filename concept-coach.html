@@ -1418,17 +1418,6 @@
   .wcat .cs-x svg,.hbcat .cs-x svg{width:25px;height:25px}
   @media (hover:hover){ .wcat .cs-x:hover,.hbcat .cs-x:hover{background:rgba(20,23,18,.05)} }
   .wcat .cs-x:active,.hbcat .cs-x:active{transform:scale(.9)}
-  /* Prev/next arrows — flat, quiet ghost buttons in the TOP-LEFT corner, matching the close (X) button. */
-  .cs-pager{position:absolute;left:16px;top:calc(env(safe-area-inset-top) + 26px);z-index:60;
-    display:flex;gap:2px;background:none;border:0;box-shadow:none;padding:0;
-    -webkit-backdrop-filter:none;backdrop-filter:none}
-  .cs-pgb{width:44px;height:44px;flex:none;border:0;background:transparent;color:var(--ink);border-radius:50%;cursor:pointer;
-    -webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;
-    transition:background .2s ease, color .2s ease, transform .14s ease}
-  .cs-pgb svg{width:24px;height:24px}
-  .cs-pgb-next svg{transform:scaleX(-1)}
-  @media (hover:hover){ .cs-pgb:hover{background:rgba(20,23,18,.05)} }
-  .cs-pgb:active{transform:scale(.9)}
   /* Bottom dot navigation — small traditional page dots. Press/drag to scrub: dots grow and a
      floating label of the target screen appears; release navigates. Auto-fades like the scrollbar. */
   .cs-dots{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 16px);transform:translateX(-50%);
@@ -1456,14 +1445,21 @@
   .cs-dot-tip::after{content:"";position:absolute;left:50%;bottom:-4px;transform:translateX(-50%) rotate(45deg);
     width:8px;height:8px;background:rgba(26,23,18,.94);border-radius:2px}
   .cs-dots.scrubbing .cs-dot-tip{opacity:1}
-  /* Paging between categories: only the TITLE moves (cross-slide, belt-picker style). Shared by
-     Woorden woordgroepen and Handboek onderdelen. */
+  /* Paging between categories: the TITLE and the confidence icons cross-slide (belt-picker style).
+     Shared by Woorden woordgroepen and Handboek onderdelen. */
   .wcat .cs-titlewrap,.hbcat .cs-titlewrap{position:relative;overflow:hidden;flex:1 1 auto;min-width:0}
   .wcat .cs-title-ghost,.hbcat .cs-title-ghost{position:absolute;left:0;bottom:0;width:100%;margin:0;pointer-events:none}
   .wcat .cs-title-cur.enter-r,.hbcat .cs-title-cur.enter-r{animation:bpEnterR .38s cubic-bezier(.22,.9,.3,1)}
   .wcat .cs-title-cur.enter-l,.hbcat .cs-title-cur.enter-l{animation:bpEnterL .38s cubic-bezier(.22,.9,.3,1)}
   .wcat .cs-title-ghost.exit-l,.hbcat .cs-title-ghost.exit-l{animation:bpExitL .38s cubic-bezier(.22,.9,.3,1) forwards}
   .wcat .cs-title-ghost.exit-r,.hbcat .cs-title-ghost.exit-r{animation:bpExitR .38s cubic-bezier(.22,.9,.3,1) forwards}
+  /* …and the confidence-selector icons (three glyphs + highlight) slide with it; the question stays. */
+  .wcat .cs-rate-optswrap{position:relative;overflow:hidden}
+  .wcat .cs-rate-opts-ghost{position:absolute;left:0;top:0;width:100%;pointer-events:none}
+  .wcat .cs-rate-opts.enter-r{animation:bpEnterR .38s cubic-bezier(.22,.9,.3,1)}
+  .wcat .cs-rate-opts.enter-l{animation:bpEnterL .38s cubic-bezier(.22,.9,.3,1)}
+  .wcat .cs-rate-opts-ghost.exit-l{animation:bpExitL .38s cubic-bezier(.22,.9,.3,1) forwards}
+  .wcat .cs-rate-opts-ghost.exit-r{animation:bpExitR .38s cubic-bezier(.22,.9,.3,1) forwards}
   .wcat .cs-note{transition:opacity .17s ease}
   .wcat .cs-note.cs-fading{opacity:0}
   /* List frame (card bg/border/radius) stays put; only the rows crossfade, and the card
@@ -2661,12 +2657,12 @@
     }
     return '<div class="cs-rate">'+
       '<div class="cs-rate-q">Hoe goed ken je deze woordgroep?</div>'+
-      '<div class="cs-rate-opts">'+
+      '<div class="cs-rate-optswrap"><div class="cs-rate-opts">'+
         '<span class="cs-rate-hl" aria-hidden="true"></span>'+
         opt(0,'seed','Nog oefenen',growGlyph('seed'),'#B58C5E')+
         opt(1,'sprout','Bijna',growGlyph('sprout'),'#5AA46B')+
         opt(2,'bloom','Ken ik',growGlyph('bloom',b),b.col)+
-      '</div></div>';
+      '</div></div></div>';
   }
   var RATE_NOTE=[
     ['Nog oefenen','je zoekt deze woorden nog meestal op'],
@@ -2752,11 +2748,6 @@
         step:function(dir){ navCat(dir); },
         pick:function(id){ gotoCat(id); } };
     } else { activePager = null; }
-    var pager = multi ?
-      '<div class="cs-pager">'+
-        '<button class="cs-pgb" data-act="pageprev" aria-label="Vorige woordgroep">'+IC.back+'</button>'+
-        '<button class="cs-pgb cs-pgb-next" data-act="pagenext" aria-label="Volgende woordgroep">'+IC.back+'</button>'+
-      '</div>' : '';
     var dots = multi ? buildDotsHtml(activePager.items, name) : '';
     catSheet.innerHTML =
       '<div class="cs-hero">'+
@@ -2767,7 +2758,7 @@
         '</div>'+
       '</div>'+
       '<div class="cs-body">'+parts.body+'</div>'+
-      pager + dots;
+      dots;
     stage.appendChild(catSheet);
     moveRateHL(catSheet.querySelector('.cs-rate'), true);
     if(multi){ attachCatSwipe(catSheet); attachDotScrub(catSheet); showDots(); }
@@ -2795,19 +2786,42 @@
     ghost.addEventListener('animationend', done);
     setTimeout(done, 520);
   }
-  // Confidence card stays put; only the active selection (+ its group-specific bloom) updates, easing across.
-  function updateRate(name){
-    if(!catSheet) return;
-    var rate=catSheet.querySelector('.cs-rate'); if(!rate) return;
+  // Apply a group's confidence state to its .cs-rate-opts (selection + group-specific bloom colour).
+  function setRateOpts(optsEl, name){
+    if(!optsEl) return;
     var s=catStage(name), b=bloomFor(name);
-    var opts=rate.querySelectorAll('.cs-ropt');
+    var opts=optsEl.querySelectorAll('.cs-ropt');
     for(var i=0;i<opts.length;i++){
       var btn=opts[i], st=+btn.getAttribute('data-stage');
       btn.setAttribute('data-groep', name);
       btn.classList.toggle('on', st===s);
       if(st===2){ btn.style.setProperty('--ic', b.col); var gi=btn.querySelector('.gicon'); if(gi) gi.setAttribute('style', bloomStyle(b)); }
     }
-    moveRateHL(rate, false);
+  }
+  // Paging: the three confidence icons + their highlight cross-slide out/in with the page while the
+  // "Hoe goed ken je…" label stays put. Ghost-clones the old set sliding out; the new set snaps its
+  // highlight (so it rides in WITH the icons) and slides in. Same dir mapping as csTitleSwap.
+  function csRateSwap(sheet, name, dir){
+    if(!sheet) return;
+    var rate=sheet.querySelector('.cs-rate'); if(!rate) return;
+    var wrap=rate.querySelector('.cs-rate-optswrap'); if(!wrap) return;
+    var opts=wrap.querySelector('.cs-rate-opts'); if(!opts) return;
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      setRateOpts(opts, name); moveRateHL(rate, true); return;
+    }
+    var stale=wrap.querySelectorAll('.cs-rate-opts-ghost');
+    for(var i=0;i<stale.length;i++){ if(stale[i].parentNode) stale[i].parentNode.removeChild(stale[i]); }
+    var ghost=opts.cloneNode(true);
+    ghost.className='cs-rate-opts cs-rate-opts-ghost';
+    wrap.appendChild(ghost);
+    setRateOpts(opts, name);
+    moveRateHL(rate, true);
+    opts.classList.remove('enter-r','enter-l'); void opts.offsetWidth;
+    opts.classList.add(dir<0 ? 'enter-l' : 'enter-r');
+    ghost.classList.add(dir<0 ? 'exit-r' : 'exit-l');
+    var done=function(){ if(ghost.parentNode) ghost.parentNode.removeChild(ghost); };
+    ghost.addEventListener('animationend', done);
+    setTimeout(done, 520);
   }
   // Slide the confidence-selector highlight to the active option (tween like the tab bar); snap on first paint.
   function moveRateHL(rate, snap){
@@ -2932,7 +2946,7 @@
     var eye=catSheet.querySelector('.cs-eye'); if(eye) eye.innerHTML=parts.eyebrow;
     var chips=catSheet.querySelector('.cs-titlerow .cs-chips'); if(chips) chips.innerHTML=parts.chips;
     csTitleSwap(catSheet, name, dir);
-    updateRate(name);
+    csRateSwap(catSheet, name, dir);
     fadeSwap(catSheet.querySelector('.cs-note'), parts.note);
     swapCatList(catSheet.querySelector('.ct-list'), parts.list);
     updateDots(name);
@@ -3185,11 +3199,6 @@
     activePager = { sheet:hbSheet, items:items,
       step:function(dir){ navHb(dir); },
       pick:function(id){ gotoHb(id); } };
-    var pager =
-      '<div class="cs-pager">'+
-        '<button class="cs-pgb" data-act="pageprev" aria-label="Vorig onderdeel">'+IC.back+'</button>'+
-        '<button class="cs-pgb cs-pgb-next" data-act="pagenext" aria-label="Volgend onderdeel">'+IC.back+'</button>'+
-      '</div>';
     var dots = buildDotsHtml(items, key);
     hbSheet.innerHTML =
       '<div class="cs-hero">'+
@@ -3200,7 +3209,7 @@
         '</div>'+
       '</div>'+
       '<div class="cs-body">'+hbBody(cat.key)+'</div>'+
-      pager + dots;
+      dots;
     stage.appendChild(hbSheet);
     attachCatSwipe(hbSheet); attachDotScrub(hbSheet); showDots();
     fnav.classList.add('hide');
@@ -4742,8 +4751,6 @@
     else if(a==='opencat'){ openCat(act.getAttribute('data-groep')); }
     else if(a==='openhard'){ openCat('Moeilijk'); }
     else if(a==='catclose'){ closeCat(); }
-    else if(a==='pageprev'){ if(activePager) activePager.step(-1); }
-    else if(a==='pagenext'){ if(activePager) activePager.step(1); }
     else if(a==='dotgoto'){ if(activePager) activePager.pick(act.getAttribute('data-id')); }
     else if(a==='hardterm'){ toggleHardTerm(act.getAttribute('data-k'), act); }
     else if(a==='setmastery'){ setCatStage(act.getAttribute('data-groep'), +act.getAttribute('data-stage'), act); }
