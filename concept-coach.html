@@ -607,11 +607,47 @@
   .face.front{background:var(--surface);border:1px solid var(--line)}
   .face.front .fl{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--gray);margin-bottom:12px}
   .face.front .fw{font-size:24px;font-weight:700;color:var(--ink);line-height:1.3}
-  .face.front .tap{margin-top:16px;font-size:12.5px;color:var(--el);font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em}
+  .face .tap{margin-top:16px;font-size:12.5px;font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em}
+  .face.front .tap{color:var(--el)}
+  /* attention glint over the flip-hint — accent letters catch a bright slice, matching the CTA sheen */
+  .face.front .tap.glint{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    background-image:linear-gradient(100deg,rgba(255,255,255,0) 42%,rgba(255,255,255,.92) 50%,rgba(255,255,255,0) 58%),linear-gradient(var(--el),var(--el));
+    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:96% 0,0 0;animation:hintGlint 1.15s linear}
   .face.back{background:linear-gradient(152deg,var(--el),var(--deep));color:#fff;transform:rotateY(180deg)}
   .face.back .bh{font-size:34px;font-weight:700;line-height:1.1}
   .face.back .br{font-size:16px;font-weight:600;margin-top:6px;color:rgba(255,255,255,.9)}
+  /* Dark card back: the calm idle-dots speaker reads like an overflow menu here, so we fall back to a
+     clearly-tappable labelled pill — a speaker glyph + "Uitspraak" that can't be mistaken for the flip. */
+  .wf-listen{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:9px 17px 9px 13px;border:0;
+    border-radius:999px;background:rgba(255,255,255,.17);color:#fff;font-family:var(--cond);text-transform:uppercase;
+    letter-spacing:.07em;font-size:13px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:transform .12s ease,background .16s ease}
+  .wf-listen:hover{background:rgba(255,255,255,.26)}
+  .wf-listen:active{transform:scale(.94)}
+  .wf-lic{width:22px;height:22px;flex:none;display:grid;place-items:center}
+  .wf-lic svg{width:22px;height:22px;display:block}
+  .wf-lic .wv{display:none}
+  .wf-listen.ring .wf-spk{display:none}
+  .wf-listen.ring .wv{display:block}
+  /* one-shot attention nudge when the card flips to the back — guides the eye to the listen pill */
+  .wf-listen.nudge{animation:listenNudge .6s ease}
+  @keyframes listenNudge{0%{transform:scale(1)}28%{transform:scale(1.09)}55%{transform:scale(.97)}100%{transform:scale(1)}}
   .face.back .spk{margin-top:16px;background:rgba(255,255,255,.18);color:#fff}
+
+  /* woorden drill: Lijst | Kaarten toggle + flip-deck */
+  .wd-toggle{display:inline-flex;gap:4px;padding:3px;margin:0 0 4px;background:var(--line);border-radius:999px}
+  .wd-tab{border:0;background:none;font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;font-weight:700;
+    font-size:12.5px;color:var(--gray);padding:7px 18px;border-radius:999px;cursor:pointer;transition:color .16s,background .16s}
+  .wd-tab.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(26,23,18,.12)}
+  .wd-view{display:none}
+  .wd-view.on{display:block}
+  .wd-view.wd-kaarten.on{animation:stepin .3s both}
+  .wd-flip{height:200px;margin-top:14px}
+  .wdeck-count{margin-top:22px;text-align:center;font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:var(--gray)}
+  .wdeck-count b{color:var(--el);font-size:15px;font-weight:800}
+  .wdeck-dots{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;max-width:220px;margin:16px auto 0}
+  .wdeck-dots span{width:7px;height:7px;border-radius:50%;background:var(--line);cursor:pointer;transition:transform .2s,background .2s}
+  .wdeck-dots span.on{background:var(--el);transform:scale(1.35)}
 
   /* check (quiz) */
   .opts{margin-top:22px;display:grid;gap:11px}
@@ -878,7 +914,6 @@
   .fchip.on .fck{display:grid}
   .fchip:active{transform:scale(.96)}
   .fchip.disabled,.fchip:disabled{opacity:.36;pointer-events:none;filter:saturate(.6)}
-  .rhint{margin-top:16px;font-size:13px;color:var(--gray);text-align:center}
   .rdone-ic{width:88px;height:88px;margin:14px auto 4px;border-radius:50%;display:grid;place-items:center;
     background:var(--tint);color:var(--el)}
   .rdone-ic svg{width:44px;height:44px}
@@ -1514,12 +1549,14 @@
     color:var(--el);background:transparent;transition:transform .12s ease}
   .ct-say:active{transform:scale(.9)}
   .ct-say svg{width:18px;height:18px}
-  /* Woorden speaker: two-state — calm idle dots ↔ per-bar animated waveform while speaking (Woorden only, not Handboek) */
-  .wcat .ct-say .snd{width:32px;height:32px;display:block;background:currentColor;
+  /* Standard speaker everywhere: two-state — calm idle dots ↔ per-bar animated waveform while speaking */
+  .ct-say .snd{width:32px;height:32px;display:block;background:currentColor;
     -webkit-mask:url(assets/icons/Sound_Idle.png) center/contain no-repeat;mask:url(assets/icons/Sound_Idle.png) center/contain no-repeat}
-  .wcat .ct-say .wv{display:none;width:32px;height:32px}
-  .wcat .ct-say.ring .snd{display:none}
-  .wcat .ct-say.ring .wv{display:block}
+  .ct-say .wv{display:none;width:32px;height:32px}
+  .ct-say.ring .snd{display:none}
+  .ct-say.ring .wv{display:block}
+  /* dark card backs (woorden deck / onthoud): white speaker + spacing under the roman line */
+  .face.back .ct-say{color:#fff;margin-top:14px}
   /* interactive hard-mark toggle on term rows */
   .ct-bk-btn{flex:none;width:40px;height:40px;border:0;background:transparent;border-radius:12px;cursor:pointer;
     display:grid;place-items:center;color:var(--gray);transition:color .18s ease,background .18s ease,transform .12s ease}
@@ -1549,15 +1586,33 @@
   @keyframes wheadBlink{0%,88%,100%{opacity:0}90%,92%{opacity:1}94%{opacity:0}96%,98%{opacity:1}}
   /* Handboek header: interactive hanging punch-bag — ceiling mount + hook stay static,
      the bag + straps swing left↔right from the hook pivot; tap it to land a hit. */
-  .whead-masc.whead-bag{width:auto;height:178px;aspect-ratio:695/2400;margin:0 15px -6px 0;pointer-events:auto;overflow:visible}
+  .whead-masc.whead-bag{width:auto;height:178px;aspect-ratio:695/2400;margin:0 38px -6px 0;pointer-events:auto;overflow:visible}
   .pbag{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;background:none;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent}
   .pbag img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;object-position:center;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
   .pbag .pbag-mount{z-index:2}
+  .pbag .pbag-mount-top{z-index:4}
   .pbag .pbag-swing{z-index:1;transform-origin:49.8% 12.9%;will-change:transform;transform:rotate(0deg)}
   @media (prefers-reduced-motion:no-preference){ .pbag .pbag-swing{animation:pbagSway 3.4s ease-in-out infinite} }
   @keyframes pbagSway{0%,100%{transform:rotate(-3.1deg)}50%{transform:rotate(3.1deg)}}
   /* punch-bag impact sparks: near-black (scoped so the to-do completion sparks stay cream) */
   .pbag .hit-pop{background:var(--ink)}
+  /* Handboek header height matches Woorden (142px) so the title + list bottom-align the same.
+     The bag hangs from a thin ceiling rail (::before) that runs under the profile + streak,
+     tying it to the top status row; the bag is sized to stop just above the first list card. */
+  .wlib .whead-hb{height:142px;position:relative}
+  /* Thin ceiling rail the bag's hook drapes over. Two copies of the mount image are stacked:
+     the hook loop (pbag-mount-top, z4) sits ABOVE the rail, the rail (::before, z3) crosses at
+     the hook neck, and the shaft+ring+bag (pbag-mount z2 + swing z1) hang BELOW it — so the rail
+     reads as threaded over-and-under the hook. Seam values are tuned to the mount art. */
+  .wlib .whead-hb::before{content:"";position:absolute;left:22px;right:22px;top:16px;height:3px;z-index:3;
+    background:var(--gray);border-radius:2px;pointer-events:none}
+  .wlib .whead-hb .whead-bag{align-self:flex-start;height:178px;margin:1px 14px 0 0;touch-action:none}
+  .wlib .whead-hb .pbag{cursor:grab}
+  .wlib .whead-hb .pbag.grab{cursor:grabbing}
+  /* while sliding the bag along the rail: pause the idle sway and let it trail the drag */
+  .wlib .whead-hb .pbag.grab .pbag-swing{animation:none;transform:rotate(var(--lag,0deg))}
+  .wlib .whead-hb .pbag-mount{clip-path:inset(5.06% 0 0 0)}
+  .wlib .whead-hb .pbag-mount-top{clip-path:inset(3.67% 0 94.94% 0)}
   .wlist{display:flex;flex-direction:column;margin-top:16px;background:var(--surface);
     border:1px solid var(--line);border-radius:16px;overflow:hidden}
   .wrow{position:relative;display:flex;align-items:center;gap:13px;width:100%;text-align:left;cursor:pointer;
@@ -1675,11 +1730,24 @@
   .hb-grouphd:first-child{margin-top:2px}
   .hb-grouphd::after{content:"";flex:1;height:1px;background:var(--line)}
   .hb-lead{font-size:13.5px;line-height:1.55;color:var(--ink);margin:0 2px 14px}
-  .hb-eis{position:relative;background:linear-gradient(160deg,rgba(255,255,255,.7),var(--surface));
-    border:1px solid var(--line);border-left:3px solid var(--el);border-radius:13px;padding:12px 14px;
+  /* Onderdeel hero illustration (Gyeokpa breaking, Gyeorugi sparring, Poomsae stance) — a
+     mascot scene grounded by a soft accent wash "from the floor", no hard card. */
+  .hb-illus{position:relative;margin:0 -6px 16px;padding:10px 6px 0;border-radius:20px;
+    background:radial-gradient(126% 94% at 50% 100%, rgba(36,104,214,.13), rgba(36,104,214,0) 72%)}
+  .hb-illusb{position:relative;width:100%;max-width:330px;margin:0 auto}
+  .hb-illus.hb-illus-tall .hb-illusb{max-width:210px}
+  .hb-illusb img{display:block;width:100%;height:auto}
+  .hb-illusb .hb-blink{position:absolute;left:0;top:0;opacity:0}
+  @keyframes hbBlink{0%,92.5%,100%{opacity:0}94.5%,97.5%{opacity:1}}
+  @media (prefers-reduced-motion:no-preference){.hb-illusb .hb-blink{animation:hbBlink 5.6s infinite}}
+  /* "Wat je laat zien" — bare vertical accent bar (same language as the daily quote .gday),
+     no card / border / fill, so important info reads consistently across the whole app. */
+  .hb-eis{position:relative;padding:1px 0 1px 16px;
     font-size:13.5px;line-height:1.5;color:var(--ink);margin-bottom:16px}
+  .hb-eis::before{content:"";position:absolute;left:0;top:.16em;bottom:.16em;width:6px;
+    border-radius:3px;background:var(--accent,var(--el));opacity:.9}
   .hb-eis-l{display:block;font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-size:11px;
-    font-weight:800;color:var(--el);margin-bottom:4px}
+    font-weight:800;color:var(--accent,var(--el));margin-bottom:4px}
   .hb-sec{margin-bottom:15px}
   .hb-sec h4{font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;font-size:14px;
     color:var(--deep);margin:0 0 5px}
@@ -1764,6 +1832,7 @@
     arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
     check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
     speak:'<svg class="wv" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect class="wv-b" x="3.1" y="10.2" width="1.8" height="3.6" rx=".9"/><rect class="wv-b" x="6.3" y="7.2" width="1.8" height="9.6" rx=".9"/><rect class="wv-b" x="9.5" y="5.2" width="1.8" height="13.6" rx=".9"/><rect class="wv-b" x="12.5" y="9.5" width="1.8" height="5" rx=".9"/><rect class="wv-b" x="15.7" y="6.6" width="1.8" height="10.8" rx=".9"/><rect class="wv-b" x="18.9" y="10.4" width="1.8" height="3.2" rx=".9"/></svg>',
+    spk:'<svg class="wf-spk" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.4v5.2h3.4L12 18.9V5.1L7.4 9.4H4z" fill="currentColor"/><path d="M15.3 9.1a4 4 0 0 1 0 5.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M17.7 6.6a7.3 7.3 0 0 1 0 10.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
     x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
     idea:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18h5M10 21.5h4M12 2.5a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1V18h6v-1.8c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 2.5z"/></svg>',
@@ -1964,6 +2033,7 @@
     var g = geupInfo(GEUP_I), hl = document.getElementById('fnav-hl');
     var fill = beltFill(g);                             // dual belts → advanced colour; green deepened for AA
     document.documentElement.style.setProperty('--beltfill', fill);  // active-tab accent, shared app-wide
+    document.documentElement.style.setProperty('--accent', beltStroke(g)); // belt-adaptive "important info" stroke (quote + hb-eis)
     if(!hl || !fnav) return;
     var ink  = (contrast('#FFFFFF',fill) >= contrast(shade(g.col2||g.col,-66),fill)) ? '#FFFFFF' : shade(g.col2||g.col,-66);
     hl.style.background  = fill;
@@ -2153,6 +2223,7 @@
   // left/right swing (hit from the left → swings right, and vice-versa). Mount/hook stay put.
   function hitBag(bagBtn, ev){
     if(!bagBtn) return;
+    if(PBAG.dragged){ PBAG.dragged=false; return; }   // a rail-drag just ended → don't also punch
     var swing = bagBtn.querySelector('.pbag-swing');
     var rect = bagBtn.getBoundingClientRect();
     var x = (ev && ev.clientX) ? (ev.clientX - rect.left) : rect.width*0.5;
@@ -2186,25 +2257,80 @@
     setTimeout(tick, 1600 + Math.random()*2600);
   })();
 
+  /* Handboek punch-bag: slide it left↔right along the ceiling rail (a tap still lands a hit).
+     The bag (hook + shaft + bag) translates as one; the rail line stays put, so it reads as the
+     bag sliding along the rail. The title block shrinks to hug the bag's left edge as it nears. */
+  var PBAG={x:0, dragged:false};
+  (function bagRail(){
+    var span,btn,swing,hdr,jh,startX=0,startTx=0,drag=false,pid=null,minTx=0,maxTx=0,lastX=0,lastT=0,vel=0;
+    function now(){ return (typeof performance!=='undefined'&&performance.now)?performance.now():Date.now(); }
+    function down(e){
+      var b=(e.target&&e.target.closest)?e.target.closest('.pbag'):null; if(!b) return;
+      btn=b; span=b.closest('.whead-bag'); hdr=b.closest('.whead-hb'); if(!span||!hdr) return;
+      jh=hdr.querySelector('.jhead'); swing=b.querySelector('.pbag-swing');
+      startX=e.clientX; startTx=PBAG.x; drag=false; PBAG.dragged=false; pid=e.pointerId;
+      lastX=e.clientX; lastT=now();
+      var hr=hdr.getBoundingClientRect(), sr=span.getBoundingClientRect();
+      var half=sr.width/2, centerBase=(sr.left-PBAG.x)+half;   // untranslated hook centre
+      var railR=hr.right-22-half;                              // don't overhang the rail's right end
+      var leftLimit=hr.left+190+half;                          // protect the title/subtitle width
+      minTx=leftLimit-centerBase; maxTx=railR-centerBase; if(minTx>maxTx) minTx=maxTx;
+      window.addEventListener('pointermove', move, {passive:false});
+      window.addEventListener('pointerup', up, {passive:true});
+      window.addEventListener('pointercancel', up, {passive:true});
+    }
+    function move(e){
+      var dx=e.clientX-startX;
+      if(!drag){ if(Math.abs(dx)>5){ drag=true; try{btn.setPointerCapture(pid);}catch(_){} btn.classList.add('grab'); } else return; }
+      if(e.cancelable) e.preventDefault();
+      var tx=Math.max(minTx, Math.min(maxTx, startTx+dx));
+      PBAG.x=tx; span.style.transform='translateX('+tx+'px)';
+      if(jh) jh.style.marginRight = tx<0 ? (-tx)+'px' : '';    // text right edge follows the bag
+      var t=now(), dt=t-lastT; if(dt>0){ vel=(e.clientX-lastX)/dt; lastX=e.clientX; lastT=t; }
+      if(swing){ var rot=Math.max(-8,Math.min(8,-vel*70)); swing.style.setProperty('--lag',rot+'deg'); }
+    }
+    function up(){
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      try{ if(pid!=null&&btn) btn.releasePointerCapture(pid); }catch(_){}
+      if(drag){
+        PBAG.dragged=true;                                     // suppress the click that would punch
+        if(swing && swing.animate){
+          var k=Math.max(-1,Math.min(1,-vel*5)); swing.style.setProperty('--lag','0deg');
+          var seq=[8*k,-5*k,3*k,-1.5*k,0];
+          var an=swing.animate(seq.map(function(d,i){return{transform:'rotate('+d+'deg)',offset:i/(seq.length-1)};}),
+            {duration:820, easing:'cubic-bezier(.2,.7,.3,1)'});
+          an.onfinish=function(){ if(btn) btn.classList.remove('grab'); if(swing) swing.style.transform=''; };
+        } else if(btn){ btn.classList.remove('grab'); }
+      }
+      drag=false;
+    }
+    document.addEventListener('pointerdown', down, {passive:true});
+  })();
+
   function poomRangeIds(){ return POOM==="2" ? JOURNEY.concat(['koryo']) : JOURNEY.slice(); }
   function firstNum(s){ var m=String(s==null?'':s).match(/\d+/); return m?+m[0]:0; }
-  /* Stap-sparring & hosinsul-aantallen per geup (bron: "Examen eisen TKD Kawarmala").
-     Hosinsul begint pas vanaf 4e geup; ilbo vanaf 8e geup. Poom valt terug op de poom-eisen. */
+  /* Stap-sparring, hosinsul, sparren & breektest per geup (bron: "Examen eisen TKD Kawarmala").
+     Hosinsul begint pas vanaf 4e geup; ilbo vanaf 8e geup. Gyeorugi (sparren) hoort bij elke
+     graad vanaf 8e geup; Gyeokpa (breektest) pas vanaf 6e geup. Poom valt terug op de poom-eisen. */
   var GEUP_EIS = {
-    '10':{ilbo:0,  ibo:0, hosinsul:0},
-    '8': {ilbo:3,  ibo:0, hosinsul:0},
-    '6': {ilbo:5,  ibo:2, hosinsul:0},
-    '4': {ilbo:8,  ibo:3, hosinsul:3},
-    '3': {ilbo:10, ibo:5, hosinsul:5},
-    '2': {ilbo:12, ibo:7, hosinsul:7},
-    '1': {ilbo:15, ibo:0, hosinsul:10},
-    'P1':{ilbo:15, ibo:0, hosinsul:12},
-    'P2':{ilbo:15, ibo:0, hosinsul:12}
+    '10':{ilbo:0,  ibo:0, hosinsul:0,  gyeorugi:false, gyeokpa:false},
+    '8': {ilbo:3,  ibo:0, hosinsul:0,  gyeorugi:true,  gyeokpa:false},
+    '6': {ilbo:5,  ibo:2, hosinsul:0,  gyeorugi:true,  gyeokpa:true},
+    '4': {ilbo:8,  ibo:3, hosinsul:3,  gyeorugi:true,  gyeokpa:true},
+    '3': {ilbo:10, ibo:5, hosinsul:5,  gyeorugi:true,  gyeokpa:true},
+    '2': {ilbo:12, ibo:7, hosinsul:7,  gyeorugi:true,  gyeokpa:true},
+    '1': {ilbo:15, ibo:0, hosinsul:10, gyeorugi:true,  gyeokpa:true},
+    'P1':{ilbo:15, ibo:0, hosinsul:12, gyeorugi:true,  gyeokpa:true},
+    'P2':{ilbo:15, ibo:0, hosinsul:12, gyeorugi:true,  gyeokpa:true}
   };
-  function curEis(){ return GEUP_EIS[geupInfo(GEUP_I).stop] || {ilbo:0,ibo:0,hosinsul:0}; }
+  function curEis(){ return GEUP_EIS[geupInfo(GEUP_I).stop] || {ilbo:0,ibo:0,hosinsul:0,gyeorugi:false,gyeokpa:false}; }
   function ilboCount(){ return curEis().ilbo; }
   function iboCount(){ return curEis().ibo; }
   function hosinsulCount(){ return curEis().hosinsul; }
+  function hasGyeorugi(){ return !!curEis().gyeorugi; }
+  function hasGyeokpa(){ return !!curEis().gyeokpa; }
   function examRule(){
     var ek=C.examenkaart&&C.examenkaart[POOM];
     var m=ek&&String(ek.slagen).match(/(\d+)\D+(\d+)/);
@@ -2347,6 +2473,16 @@
       if(btn){ btn.classList.add('ring'); u.onend=u.onerror=function(){btn.classList.remove('ring');}; }
       speechSynthesis.speak(u);
     }catch(e){}
+  }
+  /* Standard pronunciation speaker: idle dots ↔ animated waveform (used everywhere). */
+  function sayBtn(ko, extraCls){
+    return '<button class="ct-say'+(extraCls?' '+extraCls:'')+'" data-act="say" data-ko="'+esc(ko)+'" aria-label="Uitspraak"><span class="snd" aria-hidden="true"></span>'+IC.speak+'</button>';
+  }
+  /* Labelled pronunciation pill for dark card backs (deck flashcard): unmistakable speaker + "Uitspraak"
+     so it can't be read as a menu or confused with the flip. Speaker glyph ↔ waveform on .ring. */
+  function listenBtn(ko){
+    return '<button class="wf-listen wf-say" data-act="say" data-ko="'+esc(ko)+'" aria-label="Uitspraak">'+
+      '<span class="wf-lic" aria-hidden="true">'+IC.spk+IC.speak+'</span><span>Uitspraak</span></button>';
   }
 
   var stage = document.getElementById('stage');
@@ -2592,7 +2728,7 @@
         'aria-pressed="'+(h?'true':'false')+'" aria-label="Markeer als moeilijk">'+bkmk({on:h})+'</button>'+
       '<div class="ct-tx"><div class="ct-ko">'+esc(it.ko)+(groupName?'<span class="ct-grp">'+esc(groupName)+'</span>':'')+'</div>'+
         '<div class="ct-meta"><b>'+esc(it.roman)+'</b><span class="ct-nl"> · '+esc(it.nl)+'</span></div></div>'+
-      '<button class="ct-say" data-act="say" data-ko="'+esc(it.ko)+'" aria-label="Uitspraak"><span class="snd" aria-hidden="true"></span>'+IC.speak+'</button>'+
+      sayBtn(it.ko)+
     '</div>';
   }
   function wRender(){ /* removed: search + filter replaced by the Moeilijk list row */ }
@@ -2685,6 +2821,7 @@
   }
   function setCatStage(name, s, btn){
     if(!name) return;
+    var cur = MASTERY[name]||0; if(cur===s) return; // already at this stage → no re-pop / re-sound
     if(s) MASTERY[name]=s; else delete MASTERY[name];
     if(catSheet){
       var opts=catSheet.querySelectorAll('.cs-ropt');
@@ -3040,8 +3177,16 @@
     {key:'technieken', title:'Technieken',      han:'술', el:'#2F9E56', sub:'Blok · stoot · trap',unit:'technieken',  grp:2},
     {key:'poomsae',    title:'Poomsae',         han:'품', el:'#2468D6', sub:'De vormen',          unit:'vormen',      grp:3, wide:true},
     {key:'ilbo',       title:'Ilbo Taeryon',    han:'일', el:'#2468D6', sub:'Stapsparren',        unit:'afwerkingen', grp:3},
-    {key:'hosinsul',   title:'Hosinsul',        han:'호', el:'#2468D6', sub:'Zelfverdediging',    unit:'technieken',  grp:3}
+    {key:'hosinsul',   title:'Hosinsul',        han:'호', el:'#2468D6', sub:'Zelfverdediging',    unit:'technieken',  grp:3},
+    {key:'gyeorugi',   title:'Gyeorugi',        han:'겨', el:'#2468D6', sub:'Sparren',            unit:'sparren',     grp:3,
+      kind:'onderdeel', odid:'gyeorugi', ko:'겨루기', roman:'Gyeorugi', show:hasGyeorugi,
+      eis:'Op je examen spar je één of meer korte rondjes met een partner, met volledige bescherming (hogu en helm). De examinator let op controle, timing en afstand en op sportief gedrag — niet op winnen.'},
+    {key:'gyeokpa',    title:'Gyeokpa',         han:'격', el:'#2468D6', sub:'Breektest',          unit:'breektest',   grp:3,
+      kind:'onderdeel', odid:'gyepa', ko:'격파', roman:'Gyeokpa', show:hasGyeokpa,
+      eis:'Op je examen breek je één plank met een techniek die bij je band past. Je krijgt meestal een paar pogingen; blijf rustig en gefocust. Altijd samen met je trainer.'}
   ];
+  // Only the onderdelen die bij de huidige graad horen (Gyeorugi vanaf 8e, Gyeokpa vanaf 6e geup).
+  function hbCatsActive(){ return HB_CATS.filter(function(c){ return !c.show || c.show(); }); }
   function hbCat(key){ for(var i=0;i<HB_CATS.length;i++) if(HB_CATS[i].key===key) return HB_CATS[i]; return null; }
   function hbLv(key){ var n=C.naslag&&C.naslag[key]; return n?(n.niveau[POOM]||n.niveau['1']):{}; }
   function hbExam(){ return C.examenkaart&&(C.examenkaart[POOM]||C.examenkaart['1']) || {onderdelen:[]}; }
@@ -3082,6 +3227,14 @@
       '<div class="cc-terms">'+rows+'</div>'+
     '</button>';
   }
+  // Re-apply the persisted punch-bag rail position (and the title's hug width) after a re-render.
+  function applyBagPos(root){
+    if(!root) return;
+    var span=root.querySelector('.whead-bag'); if(!span) return;
+    var jh=root.querySelector('.whead-hb .jhead');
+    span.style.transform = PBAG.x ? 'translateX('+PBAG.x+'px)' : '';
+    if(jh) jh.style.marginRight = PBAG.x<0 ? (-PBAG.x)+'px' : '';
+  }
   function renderHandbook(){
     function hbHubRow(cat){
       return '<button class="wrow" data-act="openhb" data-hb="'+cat.key+'">'+
@@ -3093,27 +3246,27 @@
     }
     // Cluster consecutive cats by their grp marker into separate .wlist cards
     // (HB_CATS drives both the visual order and the pager/dot-nav order — single source of truth).
-    var lists='', i=0;
-    while(i<HB_CATS.length){
-      var g=HB_CATS[i].grp, rows='';
-      while(i<HB_CATS.length && HB_CATS[i].grp===g){ rows+=hbHubRow(HB_CATS[i]); i++; }
+    var CATS=hbCatsActive(), lists='', i=0;
+    while(i<CATS.length){
+      var g=CATS[i].grp, rows='';
+      while(i<CATS.length && CATS[i].grp===g){ rows+=hbHubRow(CATS[i]); i++; }
       lists+='<div class="wlist">'+rows+'</div>';
     }
     var html =
     '<div class="surface wlib">'+statusBar()+
-      '<div class="whead">'+
+      '<div class="whead whead-hb">'+
         '<div class="jhead"><div class="jk"><span class="han-lab">교본 · Gyobon</span></div>'+
           '<h1>Handboek</h1>'+
           '<div class="js">Alles voor je examen —<br>kies een onderdeel.</div></div>'+
-        '<span class="whead-masc whead-bag"><button type="button" class="pbag" data-act="hitbag" aria-label="Sla de bokszak"><img class="pbag-swing" src="assets/mascot/punchbag-bag.png" alt=""><img class="pbag-mount" src="assets/mascot/punchbag-mount.png" alt=""></button></span>'+
+        '<span class="whead-masc whead-bag"><button type="button" class="pbag" data-act="hitbag" aria-label="Sla de bokszak"><img class="pbag-swing" src="assets/mascot/punchbag-bag.png" alt=""><img class="pbag-mount" src="assets/mascot/punchbag-mount.png" alt=""><img class="pbag-mount-top" src="assets/mascot/punchbag-mount.png" alt="" aria-hidden="true"></button></span>'+
       '</div>'+
       '<div class="wscroll">'+lists+'</div>'+
     '</div>';
     stage.insertAdjacentHTML('beforeend', wrapScreen(html));
-    return stage.lastElementChild;
+    var _hb=stage.lastElementChild; applyBagPos(_hb); return _hb;
   }
   function hbRow(e){
-    var say = e.ko ? '<button class="ct-say" data-act="say" data-ko="'+esc(e.ko)+'" aria-label="Uitspraak">'+IC.speak+'</button>' : '';
+    var say = e.ko ? sayBtn(e.ko) : '';
     var head = e.ko
       ? '<div class="ct-ko">'+esc(e.ko)+'</div><div class="ct-meta"><b>'+esc(e.ro)+'</b>'+(e.nl?'<span class="ct-nl"> · '+esc(e.nl)+'</span>':'')+'</div>'
       : '<div class="ct-ko">'+esc(e.ro)+'</div>';
@@ -3123,10 +3276,29 @@
   }
   function hbNaslagBody(key){
     var n=C.naslag[key], lv=hbLv(key), h='';
+    if(key==='ilbo') h+=illusHtml('ilbo-taeryon', false, -0.4);
     if(n.intro) h+='<p class="hb-lead">'+esc(n.intro)+'</p>';
     if(lv.eis)  h+='<div class="hb-eis"><span class="hb-eis-l">Wat je laat zien</span>'+esc(lv.eis)+'</div>';
     (lv.secties||[]).forEach(function(s){ h+='<div class="hb-sec"><h4>'+esc(s.h)+'</h4><p>'+s.b+'</p></div>'; });
     if(lv.check&&lv.check.length) h+='<div class="hb-sec"><h4>Let op</h4><ul class="hb-check">'+lv.check.map(function(c){ return '<li>'+esc(c)+'</li>'; }).join('')+'</ul></div>';
+    return h;
+  }
+  /* Gyeorugi/Gyeokpa etc.: intro (uitleg) + graad-eis + tips, gebouwd uit C.onderdelen. */
+  function illusHtml(slug, tall, delay){
+    return '<div class="hb-illus'+(tall?' hb-illus-tall':'')+'"><div class="hb-illusb">'+
+      '<img src="assets/mascot/'+slug+'.png" alt="" aria-hidden="true">'+
+      '<img class="hb-blink" src="assets/mascot/'+slug+'-blink.png" alt="" aria-hidden="true" style="animation-delay:'+delay+'s">'+
+      '</div></div>';
+  }
+  function hbOnderdeelBody(cat){
+    var list=C.onderdelen||[], od=null, i;
+    for(i=0;i<list.length;i++){ if(list[i].id===cat.odid){ od=list[i]; break; } }
+    var h='';
+    var ILLUS={ gyepa:'gyeokpa-scene', gyeorugi:'gyeorugi-pair' };
+    if(cat && ILLUS[cat.odid]) h+=illusHtml(ILLUS[cat.odid], false, cat.odid==='gyepa'?-2.9:-0.4);
+    if(od&&od.uitleg) h+='<p class="hb-lead">'+esc(od.uitleg)+'</p>';
+    if(cat.eis)       h+='<div class="hb-eis"><span class="hb-eis-l">Wat je laat zien</span>'+esc(cat.eis)+'</div>';
+    if(od&&od.tips&&od.tips.length) h+='<div class="hb-sec"><h4>Let op</h4><ul class="hb-check">'+od.tips.map(function(t){ return '<li>'+esc(t)+'</li>'; }).join('')+'</ul></div>';
     return h;
   }
   function hbExamBody(){
@@ -3156,6 +3328,8 @@
     if(hbSheet){ var body=hbSheet.querySelector('.cs-body'); if(body) body.innerHTML=hbBody('examen'); }
   }
   function hbBody(key){
+    var cat=hbCat(key);
+    if(cat&&cat.kind==='onderdeel') return hbOnderdeelBody(cat);
     if(key==='ilbo'||key==='hosinsul') return hbNaslagBody(key);
     if(key==='examen') return hbExamBody();
     if(key==='technieken'){
@@ -3179,11 +3353,16 @@
     else if(key==='theorie') (C.theorie||[]).forEach(function(t){
       rows+=hbRow({ro:t.titel, body:'<div class="hb-body">'+t.body+'</div>'});
     });
-    return '<div class="ct-list">'+rows+'</div>';
+    var pre = (key==='poomsae') ? illusHtml('poomsae-stance', true, -1.7) : '';
+    return pre+'<div class="ct-list">'+rows+'</div>';
   }
   var hbSheet=null;
-  function hbNames(){ return HB_CATS.map(function(c){ return c.key; }); }
+  function hbNames(){ return hbCatsActive().map(function(c){ return c.key; }); }
   function hbChips(cat){
+    if(cat.kind==='onderdeel'){
+      return '<span class="cs-chip glass">'+esc(cat.ko)+' · '+esc(cat.roman)+'</span>'+
+        '<span class="cs-chip glass">'+esc(cat.sub)+'</span>';
+    }
     return '<span class="cs-chip glass">'+hbCount(cat.key)+' '+esc(cat.unit)+'</span>'+
       '<span class="cs-chip glass">'+esc(cat.sub)+'</span>';
   }
@@ -3197,7 +3376,7 @@
     hbSheet.className='session catsheet hbcat';
     hbSheet.setAttribute('data-hb', key);
     applyCatAccent(hbSheet, cat.el);
-    var items = HB_CATS.map(function(c){ return {id:c.key, label:c.title}; });
+    var items = hbCatsActive().map(function(c){ return {id:c.key, label:c.title}; });
     activePager = { sheet:hbSheet, items:items,
       step:function(dir){ navHb(dir); },
       pick:function(id){ gotoHb(id); } };
@@ -3313,7 +3492,7 @@
      Tik op de rij → oefen de inhoud → "Gedaan" streept 'm af,
      net als het proefexamen (i.p.v. meteen aanvinken).
      ======================================================= */
-  var drillEl = null, drillId = null;
+  var drillEl = null, drillId = null, WDECK = null;
   function openDrill(id){
     if(drillEl || session || examEl) return;
     drillId = id;
@@ -3342,12 +3521,27 @@
       var rows = vd.terms.map(function(it,i){
         return '<div class="tvrow"><span class="tv-num">'+(i+1)+'</span><div class="tv-txt"><div class="tv-ko">'+esc(it.ko)+'</div>'+
           '<div class="tv-ro">'+esc(it.roman)+'</div><div class="tv-nl">'+esc(it.nl)+'</div></div>'+
-          '<button class="spk sm" data-act="say" data-ko="'+esc(it.ko)+'">'+IC.speak+'</button></div>';
+          sayBtn(it.ko)+'</div>';
       }).join('');
+      var t0 = vd.terms[0] || {ko:'',roman:'',nl:''};
+      var dots = vd.terms.map(function(_x,i){ return '<span'+(i===0?' class="on"':'')+' data-act="wddot" data-i="'+i+'"></span>'; }).join('');
+      var deck =
+        '<div class="wdeck">'+
+          '<div class="wdeck-count"><b class="wd-i">1</b> / '+vd.terms.length+' woorden</div>'+
+          '<div class="flip wd-flip" id="wd-flip" data-act="wdflip">'+
+            '<div class="flip-in">'+
+              '<div class="face front"><div class="fl">Nederlands</div><div class="fw wf-nl">'+esc(t0.nl)+'</div><div class="tap">Tik voor het Koreaans</div></div>'+
+              '<div class="face back"><div class="bh wf-ko">'+esc(t0.ko)+'</div><div class="br wf-ro">'+esc(t0.roman)+'</div>'+
+                listenBtn(t0.ko)+'</div>'+
+            '</div>'+
+          '</div>'+
+          '<div class="wdeck-dots">'+dots+'</div>'+
+        '</div>';
       return { k:'Koreaanse woorden', h:'Zeg ze hardop',
         sub:'',
         eye:'<div class="tveye"><span>'+vd.n+' begrippen</span><span class="d"></span><span>'+esc(clusterShort(vd.label))+'</span></div>',
         list:'<div class="tvlist"><div class="tvgroup">'+rows+'</div></div>',
+        deck: deck, hasCards: true,
         done:'Woorden geoefend '+IC.check };
     }
     var info = SPAR_INFO[id];
@@ -3378,7 +3572,19 @@
     // Vaste kop: kicker + grijze telling + titel dokt bij het scrollen (zelfde principe als de
     // wekelijkse check-in). Alleen de lijst scrollt; de titel krimpt en blijft als compacte kop staan.
     head.innerHTML = '<div class="dr-tt-txt"><div class="dr-kickrow"><div class="k">'+p.k+'</div><span class="dr-sep"></span>'+p.eye+'</div><h2>'+p.h+'</h2>'+(p.sub?'<p class="sub">'+p.sub+'</p>':'')+'</div>';
-    body.innerHTML = '<div class="stepin dr-in">'+p.list+'</div>';
+    var listHtml = p.list;
+    if(p.hasCards){
+      // Standalone woorden-drill: lijst + kaarten-deck achter een Lijst|Kaarten-toggle.
+      // (De geleide-trainingsstap gebruikt p.list rechtstreeks en blijft dus ongewijzigd.)
+      listHtml =
+        '<div class="wd-toggle" role="tablist">'+
+          '<button class="wd-tab on" data-act="wdtab" data-wdtab="kaarten" role="tab">Kaarten</button>'+
+          '<button class="wd-tab" data-act="wdtab" data-wdtab="lijst" role="tab">Lijst</button>'+
+        '</div>'+
+        '<div class="wd-view wd-kaarten on">'+(p.deck||'')+'</div>'+
+        '<div class="wd-view wd-lijst">'+p.list+'</div>';
+    }
+    body.innerHTML = '<div class="stepin dr-in">'+listHtml+'</div>';
     // Knop start als 'ghost' + disabled; komt pas vrij (accent-blauw + glint) als je de lijst hebt doorlopen.
     foot.innerHTML = '<button class="nextbtn ghost" id="drill-done" data-act="drilldone" disabled aria-disabled="true">'+p.done+'</button>';
     body.scrollTop = 0;
@@ -3388,6 +3594,7 @@
   // Daarnaast: de overlay-titel dokt mee met de scroll (zelfde principe als de check-in swipe).
   function drillInit(){
     if(!drillEl) return;
+    WDECK=null;
     var body=drillEl.querySelector('#drill-body'), doneBtn=drillEl.querySelector('#drill-done'),
         head=drillEl.querySelector('#drill-head'), shead=drillEl.querySelector('.shead'),
         inEl=body&&body.querySelector('.dr-in');
@@ -3405,6 +3612,9 @@
     body._drDock=dockUpd; body.addEventListener('scroll', dockUpd, {passive:true}); dockUpd();
     function gate(){
       if(!doneBtn || !doneBtn.disabled) return;
+      // In kaarten-modus regelt de deck zelf de vrijgave (wdUnlock op de laatste kaart);
+      // de korte, niet-scrollbare kaartweergave mag 'Klaar' niet per ongeluk vrijgeven.
+      if(WDECK){ var _lv=body.querySelector('.wd-lijst'); if(_lv && !_lv.classList.contains('on')) return; }
       if(body.scrollTop+body.clientHeight >= body.scrollHeight-6){
         doneBtn.disabled=false; doneBtn.removeAttribute('aria-disabled'); doneBtn.classList.remove('ghost');
       }
@@ -3412,14 +3622,119 @@
     if(body._drScroll) body.removeEventListener('scroll', body._drScroll);
     body._drScroll=gate;
     body.addEventListener('scroll', gate, {passive:true});
+    if(drillId==='woorden') wdSetup(body, doneBtn);   // deck opzetten vóór de eerste gate: zet WDECK zodat de kaarten-guard grijpt
     gate();
   }
   function closeDrill(){
     if(!drillEl) return;
     drillEl.classList.remove('show');
     fnav.classList.remove('hide');
-    var d = drillEl; drillEl=null; drillId=null;
+    var d = drillEl; drillEl=null; drillId=null; WDECK=null;
     setTimeout(function(){ if(d&&d.parentNode) d.parentNode.removeChild(d); }, 380);
+  }
+  // Woorden-deck (Kaarten-tab): bladerbare flip-kaarten naast de lijst.
+  function wdSetup(body, doneBtn){
+    var root = body && body.querySelector('.wd-kaarten'); if(!root){ WDECK=null; return; }
+    WDECK = { root:root, terms:(vocabOfDay().terms||[]), idx:0, done:doneBtn, swiped:false };
+    var taps = root.querySelectorAll('.tap');
+    for(var ti=0; ti<taps.length; ti++){ var tp=taps[ti];
+      if(!tp._wdGlint){ tp._wdGlint=true; tp.addEventListener('animationend', function(){ this.classList.remove('glint'); }); }
+    }
+    // listen-pill nudge cleanup (deck back)
+    var lb = root.querySelector('.wf-listen');
+    if(lb && !lb._wdNudge){ lb._wdNudge=true; lb.addEventListener('animationend', function(){ this.classList.remove('nudge'); }); }
+    var deck = root.querySelector('.wdeck');
+    var card = root.querySelector('#wd-flip');
+    if(deck && card && !card._wdSwipe){
+      card._wdSwipe=true; card.style.touchAction='pan-y'; deck.style.touchAction='pan-y';
+      var sx=0, sy=0, dn=false, drag=false, W=300, pid=null;
+      var springIn='transform .26s cubic-bezier(.32,.72,0,1),opacity .26s ease';
+      function relax(anim){ card.style.transition = anim ? springIn : 'none'; card.style.transform=''; card.style.opacity=''; }
+      function atStart(){ return WDECK && WDECK.idx===0; }
+      function atLast(){ return WDECK && WDECK.idx===WDECK.terms.length-1; }
+      deck.addEventListener('pointerdown', function(e){
+        if(e.target.closest && e.target.closest('.wf-listen,.wdeck-dots')){ dn=false; return; }
+        dn=true; drag=false; sx=e.clientX; sy=e.clientY; pid=e.pointerId;
+        W=card.offsetWidth||300; if(WDECK) WDECK.swiped=false; card.style.transition='none';
+      });
+      deck.addEventListener('pointermove', function(e){
+        if(!dn) return;
+        var dx=e.clientX-sx, dy=e.clientY-sy;
+        if(!drag){
+          if(Math.abs(dx)<8) return;
+          if(Math.abs(dx)<=Math.abs(dy)){ dn=false; return; }   // vertical intent → let it scroll
+          drag=true; try{ deck.setPointerCapture(pid); }catch(_){}
+        }
+        var atEnd=(dx>0&&atStart())||(dx<0&&atLast());
+        var eff=atEnd?dx*0.3:dx;                                 // rubber-band resistance at the ends
+        card.style.transform='translateX('+eff+'px) rotate('+(eff*0.018)+'deg)';
+        card.style.opacity=String(Math.max(.5,1-Math.abs(eff)/(W*1.5)));
+      });
+      function end(e){
+        if(!dn) return; dn=false;
+        try{ if(pid!=null) deck.releasePointerCapture(pid); }catch(_){}
+        if(!drag){ relax(false); return; }                      // pure tap → leave the flip-click alone
+        if(WDECK) WDECK.swiped=true;                             // any real drag suppresses the ensuing flip
+        var dx=(e.clientX||sx)-sx;
+        var go = Math.abs(dx)>Math.min(72,W*0.22) && !((dx>0&&atStart())||(dx<0&&atLast()));
+        if(go && WDECK){
+          var dir = dx<0 ? 1 : -1;                               // left-swipe → next, right-swipe → prev
+          card.style.transition='transform .17s ease,opacity .17s ease';
+          card.style.transform='translateX('+(dir<0?W:-W)+'px)'; card.style.opacity='0';
+          setTimeout(function(){
+            wdShow(WDECK.idx+dir);
+            card.style.transition='none';
+            card.style.transform='translateX('+(dir<0?-W:W)+'px)'; card.style.opacity='0';
+            void card.offsetWidth;                              // start off-screen on the opposite side, then glide in
+            card.style.transition=springIn; card.style.transform=''; card.style.opacity='';
+          },145);
+        } else { relax(true); }                                 // not far enough → spring back
+      }
+      deck.addEventListener('pointerup', end);
+      deck.addEventListener('pointercancel', function(){ if(dn){ dn=false; try{ if(pid!=null) deck.releasePointerCapture(pid); }catch(_){} relax(true); } });
+    }
+    wdShow(0);
+  }
+  function wdGlint(back){
+    if(!WDECK) return;
+    if(back){                                                    // back face → nudge the labelled listen pill
+      var b=WDECK.root.querySelector('.face.back .wf-listen'); if(!b) return;
+      b.classList.remove('nudge'); void b.offsetWidth; b.classList.add('nudge');
+    } else {                                                     // front face → glint the flip-hint
+      var t=WDECK.root.querySelector('.face.front .tap'); if(!t) return;
+      t.classList.remove('glint'); void t.offsetWidth; t.classList.add('glint');
+    }
+  }
+  function wdShow(i){
+    if(!WDECK) return;
+    var n=WDECK.terms.length; if(n<1) return;
+    if(i<0) i=0; if(i>n-1) i=n-1;
+    WDECK.idx=i; var t=WDECK.terms[i]||{}, r=WDECK.root;
+    var fl=r.querySelector('#wd-flip'); if(fl) fl.classList.remove('flipped');
+    var nl=r.querySelector('.wf-nl'); if(nl) nl.textContent=t.nl||'';
+    var ko=r.querySelector('.wf-ko'); if(ko) ko.textContent=t.ko||'';
+    var ro=r.querySelector('.wf-ro'); if(ro) ro.textContent=t.roman||'';
+    var says=r.querySelectorAll('.wf-say'); for(var s2=0;s2<says.length;s2++) says[s2].setAttribute('data-ko', t.ko||'');
+    var ci=r.querySelector('.wd-i'); if(ci) ci.textContent=(i+1);
+    var dots=r.querySelectorAll('.wdeck-dots span'); for(var d=0;d<dots.length;d++) dots[d].classList.toggle('on', d===i);
+    var pv=r.querySelector('[data-act="wdprev"]'); if(pv) pv.disabled=(i===0);
+    var nx=r.querySelector('[data-act="wdnext"]'); if(nx) nx.disabled=(i===n-1);
+    if(i===n-1) wdUnlock();          // laatste kaart bereikt → 'Klaar' vrij (net als lijst-bodem)
+    wdGlint();                       // korte glint over de tap-hint nodigt uit tot omdraaien
+  }
+  function wdUnlock(){
+    var b=WDECK&&WDECK.done;
+    if(b && b.disabled){ b.disabled=false; b.removeAttribute('aria-disabled'); b.classList.remove('ghost'); }
+  }
+  function wdTab(act){
+    if(!drillEl) return;
+    var tab=act.getAttribute('data-wdtab'), tabs=drillEl.querySelectorAll('.wd-tab'), i;
+    for(i=0;i<tabs.length;i++) tabs[i].classList.toggle('on', tabs[i].getAttribute('data-wdtab')===tab);
+    var lv=drillEl.querySelector('.wd-lijst'), kv=drillEl.querySelector('.wd-kaarten');
+    if(lv) lv.classList.toggle('on', tab==='lijst');
+    if(kv) kv.classList.toggle('on', tab==='kaarten');
+    var body=drillEl.querySelector('#drill-body');
+    if(body){ body.scrollTop=0; if(body._drDock) body._drDock(); if(body._drScroll) body._drScroll(); }
   }
   function drillDone(){
     var id = drillId;
@@ -3860,7 +4175,7 @@
             '<div class="tv-txt"><div class="tv-ko">'+esc(it.ko)+(isNew?'<span class="newtag">nieuw</span>':'')+'</div>'+
               '<div class="tv-ro">'+esc(it.roman)+'</div>'+
               '<div class="tv-nl">'+esc(it.nl)+'</div></div>'+
-            '<button class="spk sm" data-act="say" data-ko="'+esc(it.ko)+'">'+IC.speak+'</button>'+
+            sayBtn(it.ko)+
           '</div>';
         }).join('');
         return '<div class="tvgroup"><div class="tv-glabel">'+esc(g.groep)+'</div>'+rows+'</div>';
@@ -3907,7 +4222,7 @@
             '<div class="face front"><div class="fl">Nederlands</div><div class="fw">'+esc(r.nl)+'</div>'+
               '<div class="tap">Tik om om te draaien →</div></div>'+
             '<div class="face back"><div class="bh">'+esc(r.ko)+'</div><div class="br">'+esc(r.roman)+'</div>'+
-              '<button class="spk" data-act="say" data-ko="'+esc(r.ko)+'" data-stop="1">'+IC.speak+'</button></div>'+
+              sayBtn(r.ko)+'</div>'+
           '</div>'+
         '</div>';
       footHtml = '<button class="nextbtn" data-act="next">Ik heb \u2019m '+IC.check+'</button>';
@@ -4184,11 +4499,13 @@
     exampass:'assets/sounds/soundshelfstudio-mission-complete-chime-534595.mp3',
     examfail:'assets/sounds/freesound_community-negative_beeps-6008.mp3',
     beep:    'assets/sounds/u_edtmwfwu7c-beep-329314.mp3',
-    rate0:   'assets/sounds/soynoviembre-digital-error-notification-tone-04-563613.mp3',
+    rate0:   'assets/sounds/vadim_makes_sound-achievement-badge-pop-sound-1-547860.mp3',
     rate1:   'assets/sounds/soundshelfstudio-mission-complete-chime-534595.mp3',
-    rate2:   'assets/sounds/updatepelgo-success-221935.mp3'
+    rate2:   'assets/sounds/soynoviembre-digital-error-notification-tone-04-563613.mp3',
+    thud:    'assets/sounds/universfield-power-punch-192118.mp3',
+    flip:    'assets/sounds/oxidvideos-taking-playing-card-2-522516.mp3'
   };
-  var SFX_GAIN={check:0.95, complete:0.85, chime:0.85, correct:0.9, wrong:0.85, exampass:0.9, examfail:0.85, beep:0.5, rate0:0.8, rate1:0.85, rate2:0.85};
+  var SFX_GAIN={check:0.95, complete:0.85, chime:0.85, correct:0.9, wrong:0.85, exampass:0.9, examfail:0.85, beep:0.5, rate0:0.8, rate1:0.85, rate2:0.85, thud:0.95, flip:0.8};
   var _sfxBuf={}, _sfxLoading={};
   function sfxLoad(name){
     var ac=sfxCtx(); if(!ac) return;
@@ -4222,16 +4539,17 @@
     try{
       if(name==='check'){ if(!sfxSample('check')){ sfxTone(1760,0,0.045,'triangle',0.08); sfxTone(1046.5,0.02,0.10,'sine',0.17); sfxTone(1568,0.10,0.22,'sine',0.17); sfxTone(2093,0.10,0.15,'sine',0.05); } }
       else if(name==='uncheck'){ sfxTone(420,0,0.11,'sine',0.12); }
-      else if(name==='thud'){ sfxTone(172,0,0.05,'triangle',0.15); sfxTone(94,0.008,0.15,'sine',0.20); sfxTone(128,0,0.10,'sawtooth',0.05); }
+      else if(name==='thud'){ if(!sfxSample('thud')){ sfxTone(172,0,0.05,'triangle',0.15); sfxTone(94,0.008,0.15,'sine',0.20); sfxTone(128,0,0.10,'sawtooth',0.05); } }
+      else if(name==='flip'){ if(!sfxSample('flip')){ sfxTone(520,0,0.045,'triangle',0.08); sfxTone(300,0.02,0.06,'sine',0.06); } }
       else if(name==='complete'){ if(!sfxSample('complete')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
       else if(name==='correct'){ if(!sfxSample('correct')){ sfxTone(880,0,0.09,'sine',0.16); sfxTone(1318.5,0.08,0.16,'sine',0.16); } }
       else if(name==='wrong'){ if(!sfxSample('wrong')){ sfxTone(311,0,0.14,'sawtooth',0.10); sfxTone(233,0.10,0.20,'sawtooth',0.10); } }
       else if(name==='exampass'){ if(!sfxSample('exampass')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
       else if(name==='examfail'){ if(!sfxSample('examfail')){ sfxTone(392,0,0.16,'sine',0.13); sfxTone(311,0.14,0.16,'sine',0.13); sfxTone(233,0.28,0.28,'sine',0.13); } }
       else if(name==='beep'){ if(!sfxSample('beep', null, 0.26)){ sfxTone(880,0,0.09,'sine',0.13); } }
-      else if(name==='rate0'){ if(!sfxSample('rate0')){ sfxTone(311,0,0.14,'sawtooth',0.10); sfxTone(233,0.10,0.20,'sawtooth',0.10); } }
+      else if(name==='rate0'){ if(!sfxSample('rate0')){ sfxTone(660,0,0.05,'sine',0.13); sfxTone(1046.5,0.05,0.12,'sine',0.12); } }
       else if(name==='rate1'){ if(!sfxSample('rate1')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
-      else if(name==='rate2'){ if(!sfxSample('rate2')){ sfxTone(880,0,0.09,'sine',0.16); sfxTone(1318.5,0.08,0.16,'sine',0.16); } }
+      else if(name==='rate2'){ if(!sfxSample('rate2')){ sfxTone(311,0,0.14,'sawtooth',0.10); sfxTone(233,0.10,0.20,'sawtooth',0.10); } }
     }catch(e){}
   }
   function otTempoLabel(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].s+'<span class="ot-tx">×</span>'; } return '1<span class="ot-tx">×</span>'; }
@@ -4717,6 +5035,11 @@
     else if(a==='startexam'){ openExam(); }
     else if(a==='drill'){ openDrill(act.getAttribute('data-id')); }
     else if(a==='drilldone'){ drillDone(); }
+    else if(a==='wdtab'){ wdTab(act); }
+    else if(a==='wdflip'){ if(WDECK&&WDECK.swiped){ WDECK.swiped=false; } else { var _wf=drillEl&&drillEl.querySelector('#wd-flip'); if(_wf){ _wf.classList.toggle('flipped'); sfx('flip'); var _bk=_wf.classList.contains('flipped'); if(WDECK){ if(WDECK._gt) clearTimeout(WDECK._gt); WDECK._gt=setTimeout(function(){ wdGlint(_bk); }, 430); } } } }
+    else if(a==='wdnext'){ if(WDECK) wdShow(WDECK.idx+1); }
+    else if(a==='wdprev'){ if(WDECK) wdShow(WDECK.idx-1); }
+    else if(a==='wddot'){ if(WDECK) wdShow(+act.getAttribute('data-i')||0); }
     else if(a==='drillclose'){ closeDrill(); }
     else if(a==='exanswer'){ examAnswer(act); }
     else if(a==='exnext'){ examNext(); }
@@ -4744,7 +5067,7 @@
     else if(a==='ottempo'){ otTempo(); }
     else if(a==='otspeed'){ otSpeed(act.getAttribute('data-v')); }
     else if(a==='say'){ var _sb=act.classList.contains('ct-row')?(act.querySelector('.ct-say')||act):act; speak(act.getAttribute('data-ko'), _sb); }
-    else if(a==='flip'){ var fl=session.querySelector('#flip'); if(fl) fl.classList.toggle('flipped'); }
+    else if(a==='flip'){ var fl=session.querySelector('#flip'); if(fl){ fl.classList.toggle('flipped'); sfx('flip'); } }
     else if(a==='answer'){ handleAnswer(act); }
     else if(a==='cigoal'){ openCheckin('goal'); }
     else if(a==='cireflect'){ openCheckin('reflect'); }
@@ -4838,8 +5161,6 @@
       btn.classList.toggle('disabled', full && !on);
       btn.disabled = full && !on;
     });
-    var hint=reflect.querySelector('.rhint');
-    if(hint) hint.textContent = focusHint();
   }
   // single-choice option as a flowing sentence: "**Sterk**, het ging lekker deze week"
   function ciOpt(o, on, act){
@@ -4887,7 +5208,7 @@
             var on=rfPick.indexOf(fa.id)>=0, dis=full&&!on;
             return '<button class="fchip'+(on?' on':'')+(dis?' disabled':'')+'"'+(dis?' disabled':'')+' data-act="pickfocus" data-id="'+fa.id+'">'+
               '<span class="fe">'+fa.em+'</span><span>'+fa.label+'</span><span class="fck">'+IC.check+'</span></button>';
-          }).join('')+'</div><div class="rhint">'+focusHint()+'</div>'; },
+          }).join('')+'</div>'; },
         answered:function(){ return rfPick.length>0; },
         summary:function(){ return rfPick.length?focusShortFrom(rfPick):''; } }
     ];
@@ -4948,11 +5269,6 @@
     if(!reflect || !ciValid()) return;
     ciSave(); closeCheckin(); showScreen('today');
     if(rfMode==='goal') confetti();
-  }
-  function focusHint(){
-    return rfPick.length
-      ? (rfPick.length>=FOCUS_MAX ? esc(FOCUS_MAX)+' gekozen — mooi zo!' : esc(rfPick.length)+' gekozen — je kunt er '+(FOCUS_MAX-rfPick.length)+' meer kiezen')
-      : 'Tik om te kiezen';
   }
   function syncSubmit(){
     if(!reflect) return;
