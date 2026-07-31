@@ -1600,19 +1600,24 @@
      The bag hangs from a thin ceiling rail (::before) that runs under the profile + streak,
      tying it to the top status row; the bag is sized to stop just above the first list card. */
   .wlib .whead-hb{height:142px;position:relative}
-  /* Thin ceiling rail the bag's hook drapes over. Two copies of the mount image are stacked:
-     the hook loop (pbag-mount-top, z4) sits ABOVE the rail, the rail (::before, z3) crosses at
-     the hook neck, and the shaft+ring+bag (pbag-mount z2 + swing z1) hang BELOW it — so the rail
-     reads as threaded over-and-under the hook. Seam values are tuned to the mount art. */
-  .wlib .whead-hb::before{content:"";position:absolute;left:22px;right:22px;top:16px;height:3px;z-index:3;
-    background:var(--gray);border-radius:2px;pointer-events:none}
+  /* Two ceiling-rail segments the hook drapes BETWEEN, for a clean "bag hanging over the bar"
+     illusion: the LEFT rail (::before) runs from the screen edge to the hook-arch's left outer
+     edge; the RIGHT rail (::after) from the arch's right outer edge to the screen edge. The gap
+     between them = the hook's footprint, so the descending "?" hook fills it and the bar reads as
+     one continuous rail behind the bag. The inner edges (--rail-l / --rail-r) track the hook's
+     live x (drag) via updateRail(); the hook loop (pbag-mount-top, z4) still sits above, shaft
+     +ring+bag (pbag-mount z2 + swing z1) below. Fallbacks match the at-rest bag position. */
+  .wlib .whead-hb::before{content:"";position:absolute;left:0;width:var(--rail-l,321px);top:16px;height:3px;z-index:3;
+   background:#080A0A;border-radius:0 2px 2px 0;pointer-events:none}
+  .wlib .whead-hb::after{content:"";position:absolute;left:var(--rail-r,334px);right:0;top:16px;height:3px;z-index:3;
+   background:#080A0A;border-radius:2px 0 0 2px;pointer-events:none}
   .wlib .whead-hb .whead-bag{align-self:flex-start;height:178px;margin:1px 14px 0 0;touch-action:none}
   .wlib .whead-hb .pbag{cursor:grab}
   .wlib .whead-hb .pbag.grab{cursor:grabbing}
   /* while sliding the bag along the rail: pause the idle sway and let it trail the drag */
   .wlib .whead-hb .pbag.grab .pbag-swing{animation:none;transform:rotate(var(--lag,0deg))}
-  .wlib .whead-hb .pbag-mount{clip-path:inset(5.06% 0 0 0)}
-  .wlib .whead-hb .pbag-mount-top{clip-path:inset(3.67% 0 94.94% 0)}
+  .wlib .whead-hb .pbag-mount{clip-path:inset(5.04% 0 0 0)}
+  .wlib .whead-hb .pbag-mount-top{clip-path:inset(2.71% 0 94.96% 0)}
   .wlist{display:flex;flex-direction:column;margin-top:16px;background:var(--surface);
     border:1px solid var(--line);border-radius:16px;overflow:hidden}
   .wrow{position:relative;display:flex;align-items:center;gap:13px;width:100%;text-align:left;cursor:pointer;
@@ -2261,6 +2266,19 @@
      The bag (hook + shaft + bag) translates as one; the rail line stays put, so it reads as the
      bag sliding along the rail. The title block shrinks to hug the bag's left edge as it nears. */
   var PBAG={x:0, dragged:false};
+  // Hook-arch outer edges at the rail line, as fractions of the mount box width (image-x 255/424
+  // of 695 across the rail's image-y 121–162 band). Drive the two rails' inner edges so the gap
+  // between the left/right rail segments always clears the hook, wherever the bag is dragged.
+  var ARCH_L=255/695, ARCH_R=424/695;
+  function updateRail(hdr){
+    if(!hdr||!hdr.style) return;
+    var span=hdr.querySelector('.whead-bag'); if(!span) return;
+    var hr=hdr.getBoundingClientRect(), sr=span.getBoundingClientRect(); if(!sr.width) return;
+    var l=(sr.left-hr.left)+ARCH_L*sr.width;   // left rail ends at the arch's left outer edge
+    var r=(sr.left-hr.left)+ARCH_R*sr.width;   // right rail starts at the arch's right outer edge
+    hdr.style.setProperty('--rail-l', Math.max(0,l).toFixed(1)+'px');
+    hdr.style.setProperty('--rail-r', Math.max(0,r).toFixed(1)+'px');
+  }
   (function bagRail(){
     var span,btn,swing,hdr,jh,startX=0,startTx=0,drag=false,pid=null,minTx=0,maxTx=0,lastX=0,lastT=0,vel=0;
     function now(){ return (typeof performance!=='undefined'&&performance.now)?performance.now():Date.now(); }
@@ -2286,6 +2304,7 @@
       var tx=Math.max(minTx, Math.min(maxTx, startTx+dx));
       PBAG.x=tx; span.style.transform='translateX('+tx+'px)';
       if(jh) jh.style.marginRight = tx<0 ? (-tx)+'px' : '';    // text right edge follows the bag
+      updateRail(hdr);                                         // left/right rail ends track the hook
       var t=now(), dt=t-lastT; if(dt>0){ vel=(e.clientX-lastX)/dt; lastX=e.clientX; lastT=t; }
       if(swing){ var rot=Math.max(-8,Math.min(8,-vel*70)); swing.style.setProperty('--lag',rot+'deg'); }
     }
@@ -2308,6 +2327,9 @@
     }
     document.addEventListener('pointerdown', down, {passive:true});
   })();
+  window.addEventListener('resize', function(){
+    var hdr=document.querySelector('.wlib .whead-hb'); if(hdr) updateRail(hdr);
+  });
 
   function poomRangeIds(){ return POOM==="2" ? JOURNEY.concat(['koryo']) : JOURNEY.slice(); }
   function firstNum(s){ var m=String(s==null?'':s).match(/\d+/); return m?+m[0]:0; }
@@ -2463,7 +2485,18 @@
     koVoice = vs.filter(function(v){return /ko(-|_)?/i.test(v.lang);})[0] || null;
   }
   if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  /* Native-bridge seam: a future iOS/Capacitor shell can define
+       window.PoomNative = { speak(text,lang,rate), haptic(ms) }
+     before the page loads. On the web PoomNative is undefined, so every path below is
+     unchanged. Keeping all pronunciation routed through speak() and all haptics through
+     buzz() means the native port only implements that one object — no code archaeology. */
   function speak(txt, btn){
+    var N=window.PoomNative;
+    if(N && typeof N.speak==='function'){
+      if(btn){ btn.classList.add('ring'); setTimeout(function(){ btn.classList.remove('ring'); }, Math.max(700, String(txt).length*140)); }
+      try{ N.speak(txt, 'ko-KR', 0.9); }catch(e){}
+      return;
+    }
     if(!('speechSynthesis' in window)) return;
     try{
       speechSynthesis.cancel();
@@ -3234,6 +3267,8 @@
     var jh=root.querySelector('.whead-hb .jhead');
     span.style.transform = PBAG.x ? 'translateX('+PBAG.x+'px)' : '';
     if(jh) jh.style.marginRight = PBAG.x<0 ? (-PBAG.x)+'px' : '';
+    var hdr=root.querySelector('.whead-hb');
+    if(hdr){ updateRail(hdr); requestAnimationFrame(function(){ updateRail(hdr); }); }
   }
   function renderHandbook(){
     function hbHubRow(cat){
@@ -4319,7 +4354,7 @@
     } else {
       ptState.running=true; btn.innerHTML=IC.pause; btn.classList.add('playing');
       ptState.iv=setInterval(function(){ ptState.t++; ptRender();
-        if(ptState.t===ptState.target && navigator.vibrate) navigator.vibrate(30);
+        if(ptState.t===ptState.target) buzz(30);
       }, 1000);
     }
     ptRender();
@@ -4364,14 +4399,14 @@
     } else { tlState.i++; }
     tlRender();
     speak(COUNT[tlState.i][0]);
-    if(navigator.vibrate) navigator.vibrate(8);
+    buzz(8);
     tlSchedule();
   }
   function tlStart(){
     if(tlState.i>=COUNT.length-1) tlState.i=0;
     tlState.running=true; tlRender();
     speak(COUNT[tlState.i][0]);
-    if(navigator.vibrate) navigator.vibrate(8);
+    buzz(8);
     tlSchedule();
   }
   function tlToggle(){
@@ -4414,7 +4449,7 @@
   var otTmT=null; // tempo fold-out collapse/close timer
   var otRepT=null; // herhaal fold-out close timer
   var otGlintT=null; // attention-glint scheduler for the "tik om te starten" hint
-  function buzz(ms){ if(navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
+  function buzz(ms){ var N=window.PoomNative; if(N && typeof N.haptic==='function'){ try{ N.haptic(ms); }catch(e){} return; } if(navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
 
   /* ---- Daily wisdom: shake (or tap) the greeting quote to draw a new one ---- */
   function dailyQuote(){ var q=C.quotes||[]; return q.length ? q[new Date().getDate()%q.length] : 'Elke dag een beetje sterker.'; }
@@ -4512,10 +4547,16 @@
     if(_sfxBuf[name]!==undefined || _sfxLoading[name]) return;
     var url=SFX_SAMPLES[name]; if(!url) return;
     _sfxLoading[name]=true;
-    fetch(url).then(function(r){ return r.arrayBuffer(); }).then(function(ab){
-      ac.decodeAudioData(ab, function(buf){ _sfxBuf[name]=buf; _sfxLoading[name]=false; },
-        function(){ _sfxBuf[name]=null; _sfxLoading[name]=false; });
-    }).catch(function(){ _sfxBuf[name]=null; _sfxLoading[name]=false; });
+    var fail=function(){ _sfxBuf[name]=null; _sfxLoading[name]=false; };
+    var decode=function(ab){ ac.decodeAudioData(ab, function(buf){ _sfxBuf[name]=buf; _sfxLoading[name]=false; }, fail); };
+    /* XHR fallback: a native WKWebView wrap blocks fetch() of bundled file URLs, but
+       XMLHttpRequest still loads local assets there. No-op on the web (fetch succeeds). */
+    var viaXHR=function(){ try{ var x=new XMLHttpRequest(); x.open('GET',url,true); x.responseType='arraybuffer';
+      x.onload=function(){ if(x.status===0||(x.status>=200&&x.status<300)){ if(x.response) decode(x.response); else fail(); } else fail(); };
+      x.onerror=fail; x.send(); }catch(e){ fail(); } };
+    if(typeof fetch==='function'){
+      fetch(url).then(function(r){ return r.arrayBuffer(); }).then(decode).catch(viaXHR);
+    } else { viaXHR(); }
   }
   function sfxPreload(){ for(var k in SFX_SAMPLES){ sfxLoad(k); } }
   function sfxSample(name, gain, dur){

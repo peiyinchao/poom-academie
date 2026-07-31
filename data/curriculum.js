@@ -370,7 +370,7 @@ window.CURRICULUM = {
     { id: "gyepa", ko: "격파", roman: "Gyeokpa", nl: "Breektest",
       icon: "break",
       uitleg: "Het breken van een plank (of testplank) met een trap of slag om kracht, precisie en focus te tonen. Kinderen gebruiken vaak herbruikbare kunststof-planken. Alleen onder begeleiding van je trainer.",
-      tips: ["Richt je kracht dóór de plank heen", "Adem uit en kiai op het moment van raken", "Alleen doen met toestemming van je trainer"] }
+      tips: ["Richt je kracht dóór de plank heen", "Adem uit en kihap op het moment van raken", "Alleen doen met toestemming van je trainer"] }
   ],
 
   /* -------------------- NASLAG: ILBO & HOSINSUL (poom-bewust) -------------------- */
