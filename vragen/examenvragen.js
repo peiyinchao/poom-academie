@@ -18,6 +18,7 @@
        opties:    ["De weg", "De vuist", ...], // 2 t/m 4 antwoordkeuzes
        antwoord:  "De weg",                    // MOET exact gelijk zijn aan één van de opties
        niveau:    null,                        // null = voor iedereen; "poom2" = pas vanaf 2e poom
+       term:      "Ap kubi",                   // optioneel: koppel de vraag aan een stand/woord (romanisatie)
        toelichting: ""                         // optioneel: korte uitleg / bron (mag leeg)
      },
 
@@ -32,6 +33,9 @@
      (Nieuwe categorie verzinnen mag — hij verschijnt dan vanzelf.)
    • "niveau": laat op null voor geup-leerlingen. Gebruik "poom2" voor vragen
      die pas gesteld mogen worden vanaf de 2e poom (bv. Koryo-theorie).
+   • "term" (optioneel): de romanisatie van de stand/het woord waar de vraag over
+     gaat (bv. "Ap kubi"). Markeert een leerling die stand als MOEILIJK (bladwijzer),
+     dan zorgt de app dat deze vraag in het proefexamen terugkomt.
 
    Na wijzigen: gewoon opslaan en de app herladen. Geen andere stappen nodig.
    ========================================================================= */
@@ -121,17 +125,17 @@ window.POOM_VRAGEN = {
     { id: "st-apkubi", categorie: "Standen",
       vraag: "Wat is 'ap kubi'?",
       opties: ["Paardrijstand", "Lange voorwaartse stand", "Sluitstand", "Achterwaartse stand"],
-      antwoord: "Lange voorwaartse stand", niveau: null, toelichting: "" },
+      antwoord: "Lange voorwaartse stand", niveau: null, term: "Ap kubi", toelichting: "" },
 
     { id: "st-juchum", categorie: "Standen",
       vraag: "Welke stand is de paardrijstand?",
       opties: ["Dwit kubi", "Ap seogi", "Juchum seogi", "Moa seogi"],
-      antwoord: "Juchum seogi", niveau: null, toelichting: "" },
+      antwoord: "Juchum seogi", niveau: null, term: "Juchum seogi", toelichting: "" },
 
     { id: "st-dwitkubi", categorie: "Standen",
       vraag: "Welke stand is de verdedigingsstand (gewicht achter)?",
       opties: ["Ap kubi", "Dwit kubi", "Juchum seogi", "Moa seogi"],
-      antwoord: "Dwit kubi", niveau: null, toelichting: "" },
+      antwoord: "Dwit kubi", niveau: null, term: "Dwit kubi", toelichting: "" },
 
     /* ---------------- TECHNIEKEN (trappen) ---------------- */
     { id: "tk-dollyo", categorie: "Technieken",
@@ -195,12 +199,12 @@ window.POOM_VRAGEN = {
 
     { id: "pm-il-trig", categorie: "Poomsae",
       vraag: "Welk trigram hoort bij Taegeuk 1?",
-      opties: ["Gon (aarde)", "Gam (water)", "Keon (hemel)", "Ri (vuur)"],
-      antwoord: "Keon (hemel)", niveau: null, toelichting: "Taegeuk Il Jang = Keon, de hemel." },
+      opties: ["Gon (aarde)", "Gam (water)", "Geon (hemel)", "Ri (vuur)"],
+      antwoord: "Geon (hemel)", niveau: null, toelichting: "Taegeuk Il Jang = Geon, de hemel." },
 
     { id: "pm-pal-trig", categorie: "Poomsae",
       vraag: "Welk trigram hoort bij Taegeuk 8?",
-      opties: ["Keon (hemel)", "Gon (aarde)", "Gam (water)", "Ri (vuur)"],
+      opties: ["Geon (hemel)", "Gon (aarde)", "Gam (water)", "Ri (vuur)"],
       antwoord: "Gon (aarde)", niveau: null, toelichting: "Taegeuk Pal Jang = Gon, de aarde." },
 
     { id: "pm-pal-bew", categorie: "Poomsae",

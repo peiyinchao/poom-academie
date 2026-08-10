@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#F4F1EA">
 <title>Poom Academy — Concept: Je Reis (smart trainer)</title>
+<link rel="manifest" href="manifest-coach.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Poom Academy">
 <link rel="stylesheet" href="fonts/inter.css">
 <link rel="stylesheet" href="fonts/poster.css">
 <style>
@@ -48,6 +55,11 @@
   .surface{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;
     -webkit-overflow-scrolling:touch}
   .surface::-webkit-scrollbar{display:none}
+  /* Main tabs read as fixed native screens: Vandaag never scrolls (the dashboard fits), and the
+     Handboek/Woorden shells hold a fixed header with only their inner list scrolling. Inner
+     scrollers contain their scroll so the page/body never rubber-bands or drifts. */
+  #today-surface{overflow:hidden}
+  .wscroll,.wcat .ct-list,.hbcat .cs-body,.wcat .cs-body{overscroll-behavior:contain}
   /* Transient overlay scrollbar — auto-shows while scrolling, fades out after a short pause.
      A JS-driven thumb (.vsb) is injected into each scroll container so the length of the list
      is legible on touch + desktop without a persistent bar. */
@@ -1534,7 +1546,7 @@
     border-radius:15px;padding:12px 13px}
   /* Woorden sheet: terms as one grouped list with dividers (not separate cards) */
   .wcat .ct-list{gap:0;background:var(--surface);border:1px solid var(--line);border-radius:16px}
-  .wcat .ct-row{position:relative;background:transparent;border:0;border-radius:0;padding:12px 15px 12px 66px;cursor:pointer}
+  .wcat .ct-row{position:relative;background:transparent;border:0;border-radius:0;padding:11px 14px;cursor:pointer}
   .wcat .ct-row + .ct-row{border-top:1px solid var(--line)}
   .ct-tx{flex:1;min-width:0}
   .ct-ko{display:flex;align-items:center;gap:8px;font-size:19px;font-weight:700;color:var(--ink);line-height:1.16}
@@ -1549,12 +1561,19 @@
     color:var(--el);background:transparent;transition:transform .12s ease}
   .ct-say:active{transform:scale(.9)}
   .ct-say svg{width:18px;height:18px}
-  /* Standard speaker everywhere: two-state — calm idle dots ↔ per-bar animated waveform while speaking */
-  .ct-say .snd{width:32px;height:32px;display:block;background:currentColor;
-    -webkit-mask:url(assets/icons/Sound_Idle.png) center/contain no-repeat;mask:url(assets/icons/Sound_Idle.png) center/contain no-repeat}
-  .ct-say .wv{display:none;width:32px;height:32px}
-  .ct-say.ring .snd{display:none}
+  /* Standard speaker everywhere: two-state — speaker glyph idle ↔ per-bar animated waveform while speaking */
+  .ct-say .wf-spk{display:block;width:22px;height:22px}
+  .ct-say .wv{display:none;width:24px;height:24px}
+  .ct-say.ring .wf-spk{display:none}
   .ct-say.ring .wv{display:block}
+  /* Woorden term rows: a leading line number that morphs into the speaking waveform while the
+     word is read aloud, then reverts to the number when it finishes. */
+  .wcat .ct-num{flex:none;width:26px;height:26px;display:grid;place-items:center;color:var(--el)}
+  .wcat .ct-num .ct-n{font-family:var(--cond);font-weight:700;font-size:15px;color:var(--gray);
+    line-height:1;font-variant-numeric:tabular-nums}
+  .wcat .ct-num .wv{display:none;width:24px;height:24px}
+  .wcat .ct-row.ring .ct-num .ct-n{display:none}
+  .wcat .ct-row.ring .ct-num .wv{display:block}
   /* dark card backs (woorden deck / onthoud): white speaker + spacing under the roman line */
   .face.back .ct-say{color:#fff;margin-top:14px}
   /* interactive hard-mark toggle on term rows */
@@ -1565,14 +1584,12 @@
   .ct-bk-btn.on{color:var(--el)}
   .ct-bk-btn:active{transform:scale(.86)}
   .ct-bk-btn.bkpop{animation:bkpop .34s cubic-bezier(.34,1.4,.4,1)}
-  /* Bookmark hit target = the full-height strip left of the word (Fitts's law): a tap here marks
-     the term moeilijk and NEVER triggers speech. The icon stays centered; the button just grows. */
-  .wcat .ct-bk-btn{position:absolute;left:0;top:0;bottom:0;width:66px;height:auto;margin:0;padding:0;border-radius:0;z-index:2}
-  .wcat .ct-bk-btn:active{transform:none}
-  .wcat .ct-bk-btn .bkmk{transition:transform .12s ease}
-  .wcat .ct-bk-btn:active .bkmk{transform:scale(.86)}
-  .wcat .ct-bk-btn.bkpop{animation:none}
-  .wcat .ct-bk-btn.bkpop .bkmk{animation:bkpop .34s cubic-bezier(.34,1.4,.4,1)}
+  /* Bookmark toggle sits on the right; only this small button (un)marks the term as moeilijk —
+     tapping anywhere else on the row reads the word aloud (revert of the old full-width hit area). */
+  .wcat .ct-bk-btn{flex:none;width:40px;height:40px;color:var(--gray)}
+  .wcat .ct-bk-btn.on{color:var(--el)}
+  .wcat .ct-bk-btn:active{transform:scale(.86)}
+  .wcat .ct-bk-btn.bkpop{animation:bkpop .34s cubic-bezier(.34,1.4,.4,1)}
   @keyframes bkpop{0%{transform:scale(1)}40%{transform:scale(1.32)}100%{transform:scale(1)}}
   .ct-grp{flex:none;align-self:center;font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;
     font-size:10px;font-weight:700;color:var(--gray);opacity:.85}
@@ -1727,6 +1744,24 @@
   .hb-exeis{display:block;font-size:12.5px;line-height:1.5;color:var(--ink);margin-top:7px}
   /* Handboek detail rows + sections */
   .ct-row.hb-row{align-items:flex-start}
+  /* Standen: floated foot-diagram (left) + floated speaker (right); text wraps full-width around both */
+  .hbcat .st-row{display:block}
+  .hbcat .st-row::after{content:"";display:block;clear:both}
+  /* Frameless foot-diagram: transparent PNG sits straight on the surface, enlarged */
+  .st-fig{float:left;width:94px;margin:2px 15px 2px 0}
+  .st-fig img{width:100%;height:auto;display:block;-webkit-user-drag:none;user-select:none}
+  .st-act{float:right;margin:2px -4px 2px 10px}
+  .st-row .hb-body{margin-top:6px}
+  /* Weight distribution pill. Neutral by default; only asymmetric (non-50/50) is highlighted */
+  .st-wt{display:inline-block;margin-top:7px;font-family:var(--cond);font-weight:700;font-size:14px;
+    letter-spacing:.01em;color:var(--ink);background:var(--soft);
+    border:1px solid var(--line);border-radius:8px;padding:3px 10px 2px;line-height:1.25}
+  .st-wt b{color:var(--gray);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;margin-right:6px}
+  .st-wt.key{color:var(--seal);background:rgba(193,18,31,.07);border-color:rgba(193,18,31,.17)}
+  .hb-figure{float:right;width:150px;height:auto;margin:2px 0 0 13px;shape-outside:margin-box;pointer-events:none;user-select:none}
+  .hbcat .ct-row.hbfig{padding-bottom:0}
+  .hbfig .hb-body{display:flow-root}
+  @media (max-width:360px){ .hb-figure{width:132px} }
   .hb-sub{font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;font-size:11.5px;color:var(--gray);margin-top:4px}
   .hb-body{font-size:13px;line-height:1.55;color:var(--ink);margin-top:7px}
   .hb-body b{color:var(--deep)}
@@ -2507,9 +2542,9 @@
       speechSynthesis.speak(u);
     }catch(e){}
   }
-  /* Standard pronunciation speaker: idle dots ↔ animated waveform (used everywhere). */
+  /* Standard pronunciation speaker: speaker glyph idle ↔ animated waveform (used everywhere). */
   function sayBtn(ko, extraCls){
-    return '<button class="ct-say'+(extraCls?' '+extraCls:'')+'" data-act="say" data-ko="'+esc(ko)+'" aria-label="Uitspraak"><span class="snd" aria-hidden="true"></span>'+IC.speak+'</button>';
+    return '<button class="ct-say'+(extraCls?' '+extraCls:'')+'" data-act="say" data-ko="'+esc(ko)+'" aria-label="Uitspraak">'+IC.spk+IC.speak+'</button>';
   }
   /* Labelled pronunciation pill for dark card backs (deck flashcard): unmistakable speaker + "Uitspraak"
      so it can't be read as a menu or confused with the flip. Speaker glyph ↔ waveform on .ring. */
@@ -2753,15 +2788,17 @@
   function bkmk(o){ o=o||{};
     return '<span class="bkmk'+(o.on?' on':'')+(o.cls?(' '+o.cls):'')+'" aria-hidden="true"></span>';
   }
-  /* one reusable term row: hangul + roman·nl (+ optional group tag) + hard-mark toggle + speaker */
-  function termRowHtml(it, groupName){
+  /* one reusable term row: leading line number (morphs into the speaking waveform) + hangul +
+     roman·nl (+ optional group tag) + bookmark toggle. The whole row reads the word aloud; only
+     the small bookmark button on the right (un)marks it as moeilijk. */
+  function termRowHtml(it, groupName, idx){
     var h = !!HARD[it.roman];
-    return '<div class="ct-row'+(h?' hard':'')+'" data-term="'+esc(it.roman)+'" data-act="say" data-ko="'+esc(it.ko)+'">'+
-      '<button class="ct-bk-btn'+(h?' on':'')+'" data-act="hardterm" data-k="'+esc(it.roman)+'" '+
-        'aria-pressed="'+(h?'true':'false')+'" aria-label="Markeer als moeilijk">'+bkmk({on:h})+'</button>'+
+    return '<div class="ct-row'+(h?' hard':'')+'" data-term="'+esc(it.roman)+'" data-act="say" data-ko="'+esc(it.ko)+'" aria-label="Zeg '+esc(it.roman)+' hardop">'+
+      '<span class="ct-num" aria-hidden="true"><b class="ct-n">'+(idx||'')+'</b>'+IC.speak+'</span>'+
       '<div class="ct-tx"><div class="ct-ko">'+esc(it.ko)+(groupName?'<span class="ct-grp">'+esc(groupName)+'</span>':'')+'</div>'+
         '<div class="ct-meta"><b>'+esc(it.roman)+'</b><span class="ct-nl"> · '+esc(it.nl)+'</span></div></div>'+
-      sayBtn(it.ko)+
+      '<button class="ct-bk-btn'+(h?' on':'')+'" data-act="hardterm" data-k="'+esc(it.roman)+'" '+
+        'aria-pressed="'+(h?'true':'false')+'" aria-label="Bewaar bij moeilijke woorden">'+bkmk({on:h})+'</button>'+
     '</div>';
   }
   function wRender(){ /* removed: search + filter replaced by the Moeilijk list row */ }
@@ -2883,7 +2920,7 @@
       pairs = g.items.map(function(it){ return {it:it, grp:null}; });
     }
     var list = pairs.length
-      ? pairs.map(function(x){ return termRowHtml(x.it, x.grp); }).join('')
+      ? pairs.map(function(x,i){ return termRowHtml(x.it, x.grp, i+1); }).join('')
       : '<div class="cs-empty">Nog geen moeilijke woorden.<br>Tik op '+bkmk({cls:'bk-inline'})+' bij een woord om het hier te bewaren.</div>';
     var chips = isHard ? ''
       : '<span class="cs-chip glass hot" id="cs-hardchip"'+(hard.length?'':' hidden')+'>'+bkmk({on:true,cls:'bk-inline'})+'<b id="cs-hardn">'+hard.length+'</b> moeilijk</span>';
@@ -3222,10 +3259,36 @@
   function hbCatsActive(){ return HB_CATS.filter(function(c){ return !c.show || c.show(); }); }
   function hbCat(key){ for(var i=0;i<HB_CATS.length;i++) if(HB_CATS[i].key===key) return HB_CATS[i]; return null; }
   function hbLv(key){ var n=C.naslag&&C.naslag[key]; return n?(n.niveau[POOM]||n.niveau['1']):{}; }
-  function hbExam(){ return C.examenkaart&&(C.examenkaart[POOM]||C.examenkaart['1']) || {onderdelen:[]}; }
+  // Examenkaart = jouw VOLGENDE examen. Titel, subtekst én inhoud volgen de eerstvolgende graad.
+  // Geup-eisen komen uit GEUP_EIS (== "Examen eisen TKD Kawarmala"); poom-examens houden hun eigen kaart.
+  var ORD_NL={1:'eerste',2:'tweede',3:'derde',4:'vierde',5:'vijfde',6:'zesde',7:'zevende',8:'achtste',9:'negende',10:'tiende'};
+  function nextGradeInfo(){ return geupInfo(Math.min(GEUPS.length-1, GEUP_I+1)); }
+  function gradeNoun(g){ return /poom/i.test(g.grade)?'poom':'geup'; }
+  function examTitle(){ var g=nextGradeInfo(); return 'Examenkaart '+firstNum(g.grade)+'e '+gradeNoun(g); }
+  function examSub(){ var g=nextGradeInfo(), n=firstNum(g.grade); return 'Wat moet je kunnen voor jouw '+(ORD_NL[n]||(n+'e'))+' '+gradeNoun(g); }
+  function geupExamCard(g){
+    var e=GEUP_EIS[g.stop]||{}, tf=byId(g.form2||g.form), maxN=tf?tf.nr:8, od=[];
+    od.push({id:'poomsae', ko:'품새', roman:'Poomsae', nl:'Poomsae (vormen)',
+      eis:'Stijlvormen Taegeuk 1 t/m '+maxN+'. De commissie kiest welke je moet laten zien.', link:'#/poomsae', linkLabel:'Bekijk vormen'});
+    if(e.ilbo) od.push({id:'ilbo', ko:'일보 대련', roman:'Ilbo Taeryon', nl:'Eén-stap sparren', eis:e.ilbo+' afwerkingen (ilbo daeryon).'});
+    if(e.ibo)  od.push({id:'ibo', ko:'이보 대련', roman:'Ibo Taeryon', nl:'Twee-stap sparren', eis:e.ibo+' afwerkingen (ibo daeryon).'});
+    if(e.hosinsul) od.push({id:'hosinsul', ko:'호신술', roman:'Hosinsul', nl:'Zelfverdediging', eis:e.hosinsul+' verdedigingen tegen vastpakken, beetpakken en klemmen.'});
+    if(e.gyeorugi) od.push({id:'gyeorugi', ko:'겨루기', roman:'Gyeorugi', nl:'Sparren', eis:'Sparren met volledige bescherming (hogu en helm). De examinator let op controle, timing en afstand.'});
+    if(e.gyeokpa)  od.push({id:'gyepa', ko:'격파', roman:'Gyeokpa', nl:'Breektest', eis:'Eén breektest met een techniek die bij je band past. Altijd samen met je trainer.'});
+    if(g.stop==='1') od.push({id:'theorie', roman:'Theorie', nl:'Theorie', eis:'Meerkeuzevragen over termen, standen en technieken.', link:'#/quiz', linkLabel:'Doe de quiz'});
+    return {onderdelen:od};
+  }
+  function hbExam(){
+    var g=nextGradeInfo();
+    if(g.stop==='P1') return (C.examenkaart&&C.examenkaart['1'])||{onderdelen:[]};
+    if(g.stop==='P2') return (C.examenkaart&&C.examenkaart['2'])||{onderdelen:[]};
+    return geupExamCard(g);
+  }
+  function catTitle(cat){ return cat&&cat.key==='examen' ? examTitle() : (cat?cat.title:''); }
+  function catSub(cat){ return cat&&cat.key==='examen' ? examSub() : (cat?cat.sub:''); }
   function hbCount(key){
     if(key==='poomsae')    return poomsae.length;
-    if(key==='standen')    return (C.standen||[]).length;
+    if(key==='standen')    return standenList().length;
     if(key==='technieken') return (C.technieken||[]).reduce(function(n,g){ return n+g.items.length; },0);
     if(key==='theorie')    return (C.theorie||[]).length;
     if(key==='ilbo')       return ilboCount();
@@ -3236,7 +3299,7 @@
   function hbPreview(key){
     var r=[];
     if(key==='poomsae')      poomsae.slice(0,3).forEach(function(f){ r.push({ro:f.korean, nl:f.element}); });
-    else if(key==='standen') (C.standen||[]).slice(0,3).forEach(function(s){ r.push({ro:s.roman, nl:s.nl}); });
+    else if(key==='standen') standenList().slice(0,3).forEach(function(s){ r.push({ro:s.roman, nl:s.nl}); });
     else if(key==='technieken'){ var it=[]; (C.technieken||[]).forEach(function(g){ g.items.forEach(function(x){ it.push(x); }); }); it.slice(0,3).forEach(function(x){ r.push({ro:x.roman, nl:x.nl}); }); }
     else if(key==='theorie') (C.theorie||[]).slice(0,3).forEach(function(t){ r.push({ro:t.titel, nl:''}); });
     else if(key==='ilbo'||key==='hosinsul') (hbLv(key).secties||[]).slice(0,3).forEach(function(s){ r.push({ro:s.h, nl:''}); });
@@ -3256,7 +3319,7 @@
       '<div class="cc-head"><span class="cc-emb">'+cat.han+'</span>'+
         '<span class="cc-count">'+hbCount(cat.key)+'</span></div>'+
       '<div class="cc-title">'+esc(cat.title)+'</div>'+
-      '<div class="cc-lead">'+esc(cat.sub)+'</div>'+
+      '<div class="cc-lead">'+esc(catSub(cat))+'</div>'+
       '<div class="cc-terms">'+rows+'</div>'+
     '</button>';
   }
@@ -3275,7 +3338,7 @@
       return '<button class="wrow" data-act="openhb" data-hb="'+cat.key+'">'+
         '<span class="wrow-emb hb-emb" style="--e:'+cat.el+'" aria-hidden="true">'+cat.han+'</span>'+
         '<span class="wrow-tx"><span class="wrow-t">'+esc(cat.title)+'</span>'+
-          '<span class="wrow-sub">'+esc(cat.sub)+'</span></span>'+
+          '<span class="wrow-sub">'+esc(catSub(cat))+'</span></span>'+
         '<span class="wrow-ch">'+IC.chev+'</span>'+
       '</button>';
     }
@@ -3300,6 +3363,29 @@
     stage.insertAdjacentHTML('beforeend', wrapScreen(html));
     var _hb=stage.lastElementChild; applyBagPos(_hb); return _hb;
   }
+  /* Stance foot-diagrams (1:2 voetdiagrammen). Dwit koa & Kyotdari have no drawing — left out for now. */
+  var STANCE_IMG={
+    'Moa seogi':'moa','Naranhi seogi':'naranhi','Ap seogi':'ap-seogi',
+    'Ap kubi':'ap-kubi','Dwit kubi':'dwit-kubi','Juchum seogi':'juchum',
+    'Beom seogi':'beom','Oreun seogi':'oreun','Wen seogi':'wen',
+    'Ap koa seogi':'ap-koa','Hakdari seogi':'hakdari'
+  };
+  function stanceImg(roman){ var s=STANCE_IMG[roman]; return s?'img/stances/'+s+'.png':null; }
+  function standenList(){ return (C.standen||[]).filter(function(s){ return stanceImg(s.roman); }); }
+  // One stance row: floated foot-diagram (left) + floated speaker (right); text wraps full-width around both.
+  function stanceRow(s){
+    var img=stanceImg(s.roman);
+    var fig=img?'<span class="st-fig"><img src="'+img+'" alt="Voetdiagram '+esc(s.roman)+'" loading="lazy"></span>':'';
+    return '<div class="ct-row hb-row st-row'+(img?'':' st-nofig')+'">'+fig+
+      '<div class="st-act">'+sayBtn(s.ko)+'</div>'+
+      '<div class="ct-tx">'+
+        '<div class="ct-ko">'+esc(s.ko)+'</div>'+
+        '<div class="ct-meta"><b>'+esc(s.roman)+'</b><span class="ct-nl"> · '+esc(s.nl)+'</span></div>'+
+        '<div class="st-wt'+(/^\s*50\s*\/\s*50\s*$/.test(s.gewicht||'')?'':' key')+'"><b>Gewicht</b>'+esc(s.gewicht)+'</div>'+
+        (s.uitleg?'<div class="hb-body">'+esc(s.uitleg)+'</div>':'')+
+      '</div>'+
+    '</div>';
+  }
   function hbRow(e){
     var say = e.ko ? sayBtn(e.ko) : '';
     var head = e.ko
@@ -3307,7 +3393,9 @@
       : '<div class="ct-ko">'+esc(e.ro)+'</div>';
     var meta = e.meta ? '<div class="hb-sub">'+esc(e.meta)+'</div>' : '';
     var body = e.body || '';
-    return '<div class="ct-row hb-row"><div class="ct-tx">'+head+meta+body+'</div>'+say+'</div>';
+    var aside = e.aside || '';
+    var cls = e.cls ? ' '+e.cls : '';
+    return '<div class="ct-row hb-row'+cls+'"><div class="ct-tx">'+head+meta+body+'</div>'+aside+say+'</div>';
   }
   function hbNaslagBody(key){
     var n=C.naslag[key], lv=hbLv(key), h='';
@@ -3341,7 +3429,6 @@
     var done = ond.filter(function(o){ return EXAM_CHK[o.id]; }).length;
     var pct = ond.length ? Math.round(done/ond.length*100) : 0;
     var head = '';
-    if(ex.slagen) head += '<div class="hb-eis"><span class="hb-eis-l">Theorie-eis</span>'+esc(ex.slagen)+'</div>';
     head += '<div class="hb-prog"><div class="hb-prog-bar"><i style="width:'+pct+'%"></i></div>'+
             '<span class="hb-prog-n">'+done+'/'+ond.length+'</span></div>';
     var rows = ond.map(function(o){
@@ -3381,12 +3468,18 @@
       rows+=hbRow({ko:f.hangul, ro:f.korean, meta:f.trigram+'  '+f.element+' · '+f.band+' · '+f.bewegingen+' bewegingen',
         body:f.betekenis?'<div class="hb-body">'+esc(f.betekenis)+'</div>':''});
     });
-    else if(key==='standen') (C.standen||[]).forEach(function(s){
-      rows+=hbRow({ko:s.ko, ro:s.roman, nl:s.nl, meta:'Gewicht '+s.gewicht,
-        body:s.uitleg?'<div class="hb-body">'+esc(s.uitleg)+'</div>':''});
-    });
+    else if(key==='standen') standenList().forEach(function(s){ rows+=stanceRow(s); });
     else if(key==='theorie') (C.theorie||[]).forEach(function(t){
-      rows+=hbRow({ro:t.titel, body:'<div class="hb-body">'+t.body+'</div>'});
+      if(t.id==='taegeuk'){
+        var img='<img class="hb-figure" src="assets/mascot/flag-kid-bust.png" alt="Kind met de Koreaanse vlag" loading="lazy">';
+        var parts=t.body.split('. ');
+        var lead=parts.slice(0,2).join('. ')+'. ';
+        var tail=parts.slice(2).join('. ');
+        var bodyHtml='<div class="hb-body">'+lead+img+tail+'</div>';
+        rows+=hbRow({ro:t.titel, body:bodyHtml, cls:'hbfig'});
+      } else {
+        rows+=hbRow({ro:t.titel, body:'<div class="hb-body">'+t.body+'</div>'});
+      }
     });
     var pre = (key==='poomsae') ? illusHtml('poomsae-stance', true, -1.7) : '';
     return pre+'<div class="ct-list">'+rows+'</div>';
@@ -3402,7 +3495,7 @@
       '<span class="cs-chip glass">'+esc(cat.sub)+'</span>';
   }
   function hbTitleRow(cat){
-    return '<div class="cs-titlewrap"><h2 class="cs-title cs-title-cur">'+esc(cat.title)+'</h2></div>'+
+    return '<div class="cs-titlewrap"><h2 class="cs-title cs-title-cur">'+esc(catTitle(cat))+'</h2></div>'+
       '<div class="cs-chips">'+hbChips(cat)+'</div>';
   }
   function openHb(key){
@@ -3439,7 +3532,7 @@
     applyCatAccent(hbSheet, cat.el);
     hbSheet.setAttribute('data-hb', key);
     var chips=hbSheet.querySelector('.cs-titlerow .cs-chips'); if(chips) chips.innerHTML=hbChips(cat);
-    csTitleSwap(hbSheet, cat.title, dir);
+    csTitleSwap(hbSheet, catTitle(cat), dir);
     fadeSwap(hbSheet.querySelector('.cs-body'), hbBody(cat.key));
     updateDots(key);
   }
@@ -3822,7 +3915,7 @@
       var ai = opts.indexOf(q.antwoord);
       if(opts.length<2 || ai<0){                          // ongeldige vraag → melden + overslaan
         if(window.console) console.warn('[examen] vraag overgeslagen (antwoord niet in opties):', q.id); return; }
-      out.push({ v:q.vraag, o:opts, a:ai, cat:q.categorie||'', why:q.toelichting||'' });
+      out.push({ v:q.vraag, o:opts, a:ai, cat:q.categorie||'', why:q.toelichting||'', term:q.term||'' });
     });
     return out;
   }
@@ -3837,7 +3930,12 @@
     var bank = examBank();
     if(!bank.length){ return; }
     var n = Math.min(rule.total, bank.length);
-    var qs = examShuffle(bank).slice(0, n);
+    // Prioritise questions tied to a bookmarked (moeilijk) term so the proefexamen tests what the
+    // student marked as hard — then fill the rest and shuffle the final set for a natural order.
+    var sh = examShuffle(bank);
+    var hot = sh.filter(function(q){ return q.term && HARD[q.term]; });
+    var rest = sh.filter(function(q){ return !(q.term && HARD[q.term]); });
+    var qs = examShuffle(hot.concat(rest).slice(0, n));
     examState = { qs:qs, i:0, goed:0, fout:0, total:n, maxFout:rule.fout, pass:Math.max(1, n-rule.fout), answered:false };
     var el = document.createElement('div');
     el.className='session exam'; el.id='exam';
@@ -4534,9 +4632,9 @@
     exampass:'assets/sounds/soundshelfstudio-mission-complete-chime-534595.mp3',
     examfail:'assets/sounds/freesound_community-negative_beeps-6008.mp3',
     beep:    'assets/sounds/u_edtmwfwu7c-beep-329314.mp3',
-    rate0:   'assets/sounds/vadim_makes_sound-achievement-badge-pop-sound-1-547860.mp3',
-    rate1:   'assets/sounds/soundshelfstudio-mission-complete-chime-534595.mp3',
-    rate2:   'assets/sounds/soynoviembre-digital-error-notification-tone-04-563613.mp3',
+    rate0:   'assets/sounds/soynoviembre-digital-error-notification-tone-04-563613.mp3',
+    rate1:   'assets/sounds/vadim_makes_sound-achievement-badge-pop-sound-1-547860.mp3',
+    rate2:   'assets/sounds/soundshelfstudio-mission-complete-chime-534595.mp3',
     thud:    'assets/sounds/universfield-power-punch-192118.mp3',
     flip:    'assets/sounds/oxidvideos-taking-playing-card-2-522516.mp3'
   };
@@ -4588,9 +4686,9 @@
       else if(name==='exampass'){ if(!sfxSample('exampass')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
       else if(name==='examfail'){ if(!sfxSample('examfail')){ sfxTone(392,0,0.16,'sine',0.13); sfxTone(311,0.14,0.16,'sine',0.13); sfxTone(233,0.28,0.28,'sine',0.13); } }
       else if(name==='beep'){ if(!sfxSample('beep', null, 0.26)){ sfxTone(880,0,0.09,'sine',0.13); } }
-      else if(name==='rate0'){ if(!sfxSample('rate0')){ sfxTone(660,0,0.05,'sine',0.13); sfxTone(1046.5,0.05,0.12,'sine',0.12); } }
-      else if(name==='rate1'){ if(!sfxSample('rate1')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
-      else if(name==='rate2'){ if(!sfxSample('rate2')){ sfxTone(311,0,0.14,'sawtooth',0.10); sfxTone(233,0.10,0.20,'sawtooth',0.10); } }
+      else if(name==='rate0'){ if(!sfxSample('rate0')){ sfxTone(311,0,0.14,'sawtooth',0.10); sfxTone(233,0.10,0.20,'sawtooth',0.10); } }
+      else if(name==='rate1'){ if(!sfxSample('rate1')){ sfxTone(660,0,0.05,'sine',0.13); sfxTone(1046.5,0.05,0.12,'sine',0.12); } }
+      else if(name==='rate2'){ if(!sfxSample('rate2')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
     }catch(e){}
   }
   function otTempoLabel(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].s+'<span class="ot-tx">×</span>'; } return '1<span class="ot-tx">×</span>'; }
@@ -5107,7 +5205,7 @@
     else if(a==='otrep'){ otPickRep(act.getAttribute('data-v')); }
     else if(a==='ottempo'){ otTempo(); }
     else if(a==='otspeed'){ otSpeed(act.getAttribute('data-v')); }
-    else if(a==='say'){ var _sb=act.classList.contains('ct-row')?(act.querySelector('.ct-say')||act):act; speak(act.getAttribute('data-ko'), _sb); }
+    else if(a==='say'){ var _row=act.classList.contains('ct-row')?act:null; var _sb=_row?(_row.querySelector('.ct-say')||_row):act; if(_row){ [].forEach.call(document.querySelectorAll('.ct-row.ring'),function(r){ r.classList.remove('ring'); }); } speak(act.getAttribute('data-ko'), _sb); }
     else if(a==='flip'){ var fl=session.querySelector('#flip'); if(fl){ fl.classList.toggle('flipped'); sfx('flip'); } }
     else if(a==='answer'){ handleAnswer(act); }
     else if(a==='cigoal'){ openCheckin('goal'); }
@@ -5309,7 +5407,6 @@
   function ciSubmit(){
     if(!reflect || !ciValid()) return;
     ciSave(); closeCheckin(); showScreen('today');
-    if(rfMode==='goal') confetti();
   }
   function syncSubmit(){
     if(!reflect) return;
@@ -5409,6 +5506,7 @@
     // card can't sneak under it; past 150px it's parked as the compact header in the top bar.
     var denom=150;
     function upd(){
+      if(!reflect) return;
       var c=body.scrollTop/denom; c=c<0?0:c>1?1:c;
       reflect.style.setProperty('--cic', c.toFixed(3));
     }

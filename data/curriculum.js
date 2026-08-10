@@ -57,9 +57,9 @@ window.CURRICULUM = {
   poomsae: [
     {
       id: "il", nr: 1, sino: "Il", video: "esocvXAtf-E", level: 0, korean: "Taegeuk Il Jang", hangul: "태극 1장",
-      trigram: "☰", trigramNaam: "Keon", trigramHangul: "건",
+      trigram: "☰", trigramNaam: "Geon", trigramHangul: "건",
       element: "Hemel", kup: "8e geup", band: "Geel", bewegingen: 18,
-      betekenis: "Keon staat voor de hemel en het licht — het begin van alles. De eerste vorm legt de basis: rechte standen en de meest voorkomende technieken.",
+      betekenis: "Geon staat voor de hemel en het licht — het begin van alles. De eerste vorm legt de basis: rechte standen en de meest voorkomende technieken.",
       beeld: "Hemel en licht", kernpunt: "Sterke, duidelijke basis. Rustig beginnen en netjes eindigen.",
       focus: ["Rechte lijnen in de diagram (het pad vormt een + )", "Rustig en groot bewegen", "Kihap op de laatste beweging"],
       nieuw: [
@@ -275,7 +275,7 @@ window.CURRICULUM = {
       { ko: "갈려", roman: "Gallyeo", nl: "Onderbreek (uit elkaar)" }
     ]},
     { groep: "Basisrichtingen", items: [
-      { ko: "왼", roman: "Oen", nl: "Links" },
+      { ko: "왼", roman: "Wen", nl: "Links" },
       { ko: "오른", roman: "Oreun", nl: "Rechts" },
       { ko: "앞", roman: "Ap", nl: "Voorwaarts" },
       { ko: "뒤", roman: "Dwit", nl: "Achterwaarts" },
@@ -333,8 +333,8 @@ window.CURRICULUM = {
       { ko: "일보 대련", roman: "Ilbo Taeryon", nl: "Eénstapssparring" },
       { ko: "이보 대련", roman: "Ibo Taeryon", nl: "Tweestapssparring" },
       { ko: "삼보 대련", roman: "Sambo Taeryon", nl: "Driestapssparring" },
-      { ko: "겨루기", roman: "Gyeo-rugi", nl: "Sparren" },
-      { ko: "격파", roman: "Gye Pa", nl: "Breektest" },
+      { ko: "겨루기", roman: "Gyeorugi", nl: "Sparren" },
+      { ko: "격파", roman: "Gyeokpa", nl: "Breektest" },
       { ko: "호신술", roman: "Hosinsul", nl: "Zelfverdediging" }
     ]}
   ],
@@ -342,9 +342,9 @@ window.CURRICULUM = {
   /* -------------------- THEORIE -------------------- */
   theorie: [
     { id: "wat", titel: "Wat is taekwondo?", body:
-      "Taekwondo (태권도) betekent letterlijk <b>de weg van hand en voet</b>: <b>tae</b> = voet / schoppen, <b>kwon</b> = vuist / hand, <b>do</b> = de weg. Het is een Koreaanse vechtkunst en sinds 2000 een olympische sport. Je traint niet alleen techniek, maar ook respect, discipline en doorzettingsvermogen." },
+      "Taekwondo (태권도) betekent letterlijk <b>de weg van hand en voet</b>. <b>Tae</b> = voet / schoppen. <b>Kwon</b> = vuist / hand. <b>Do</b> = de weg. Het is een Koreaanse vechtkunst en sinds 2000 een olympische sport. Je traint niet alleen techniek, maar ook respect, discipline en doorzettingsvermogen." },
     { id: "taegeuk", titel: "De taegeuk & de vlag", body:
-      "Het merk van deze app is de <b>taegeuk</b> uit de Koreaanse vlag: de rood-blauwe cirkel staat voor <b>eum en yang</b> — evenwicht tussen tegengestelde krachten. De vier tekens op de vlag zijn <b>trigrammen</b> (Geon, Ri, Gam, Gon). Niet toevallig heten de acht kleurbandvormen <b>Taegeuk 1–8</b>, elk verbonden aan een trigram." },
+      "De rood-blauwe cirkel op de Koreaanse vlag is de <b>taegeuk</b> en staat voor <b>eum en yang</b> — evenwicht tussen tegengestelde krachten. De vier tekens in de hoeken zijn <b>trigrammen</b>: <b>Geon</b> is de hemel (Taegeuk 1), <b>Ri</b> is vuur (3), <b>Gam</b> is water (6) en <b>Gon</b> is de aarde (8). Niet toevallig heten de acht kleurbandvormen <b>Taegeuk 1–8</b>, elk verbonden aan een trigram." },
     { id: "poom", titel: "Poom of dan?", body:
       "Ben je <b>jonger dan 15 jaar</b> en haal je je zwarte band? Dan krijg je een <b>poom</b> (junior zwarte band) met een rood-zwarte band. Vanaf je 15e kun je die laten omzetten naar een <b>dan</b> (volwassen zwarte band). Deze app werkt naar je <b>eerste en tweede poom</b> toe." },
     { id: "etiquette", titel: "Etiquette in de dojang", body:
@@ -457,9 +457,9 @@ window.CURRICULUM = {
           eis: "15 stuks: 5 afwerkingen met een handtechniek en 10 met een voettechniek, waarvan minstens 3 gesprongen." },
         { id: "hosinsul", ko: "호신술", roman: "Hosinsul", nl: "Zelfverdediging",
           eis: "12 verdedigingen tegen vasthouden, beetpakken en klemmen — met je eigen partner." },
-        { id: "gyeorugi", ko: "겨루기", roman: "Gyeo-rugi", nl: "Sparren",
+        { id: "gyeorugi", ko: "겨루기", roman: "Gyeorugi", nl: "Sparren",
           eis: "1× 1,5 minuut sparren met volledige bescherming en verschillende taekwondotechnieken." },
-        { id: "gyepa", ko: "격파", roman: "Gye Pa", nl: "Breektest",
+        { id: "gyepa", ko: "격파", roman: "Gyeokpa", nl: "Breektest",
           eis: "3 categorie-A breektesten: 2 eigen keuzes (min. 1 voettechniek) + 1 aangewezen Yeop-, Dollyeo- of Dwit-chagi." },
         { id: "theorie", roman: "Theorie", nl: "Theorie",
           eis: "±15 meerkeuzevragen over termen, standen en technieken t/m Taegeuk 8. Vanaf 9 goed is voldoende.",
@@ -476,9 +476,9 @@ window.CURRICULUM = {
           eis: "15 stuks, waarvan minstens 5 aanvallen ánders dan een gewone stoot. 5 hand- en 10 voetafwerkingen, min. 3 gesprongen." },
         { id: "hosinsul", ko: "호신술", roman: "Hosinsul", nl: "Zelfverdediging",
           eis: "12 verdedigingen tegen verschillende stokaanvallen (oefenstok 50–80 cm) — alleen veilig en door de trainer goedgekeurd." },
-        { id: "pyojeok", ko: "표적 차기", roman: "Pyojeok Chagi + Gyeo-rugi", nl: "Targetwerk + sparren",
+        { id: "pyojeok", ko: "표적 차기", roman: "Pyojeok Chagi + Gyeorugi", nl: "Targetwerk + sparren",
           eis: "1 minuut combinaties op 1–2 targets, direct gevolgd door 1 minuut sparren; volledige wedstrijdbescherming." },
-        { id: "gyepa", ko: "격파", roman: "Gye Pa", nl: "Breektest",
+        { id: "gyepa", ko: "격파", roman: "Gyeokpa", nl: "Breektest",
           eis: "2 categorie-A breektesten in één sprong, zonder tussentijds te landen; minstens 1 voettechniek." },
         { id: "theorie", roman: "Theorie", nl: "Theorie",
           eis: "±25 meerkeuzevragen over termen, standen en technieken t/m Koryo. Vanaf 15 goed is voldoende.",
@@ -514,7 +514,7 @@ window.CURRICULUM = {
     { v: "Wat betekent 'do' in taekwondo?", o: ["De weg", "De vuist", "De voet", "De meester"], a: 0 },
     { v: "Welk commando betekent 'begin'?", o: ["Geuman", "Sijak", "Junbi", "Baro"], a: 1 },
     { v: "Hoeveel bewegingen heeft Taegeuk 1 (Il jang)?", o: ["12", "18", "20", "27"], a: 1 },
-    { v: "Welk trigram hoort bij Taegeuk 1?", o: ["Gon (aarde)", "Gam (water)", "Keon (hemel)", "Ri (vuur)"], a: 2 },
+    { v: "Welk trigram hoort bij Taegeuk 1?", o: ["Gon (aarde)", "Gam (water)", "Geon (hemel)", "Ri (vuur)"], a: 2 },
     { v: "Wat is 'ap kubi'?", o: ["Paardrijstand", "Lange voorwaartse stand", "Sluitstand", "Achterwaartse stand"], a: 1 },
     { v: "Hoe tel je '3' in het Koreaans?", o: ["Set", "Dul", "Net", "Hana"], a: 0 },
     { v: "Wat is 'dollyo chagi'?", o: ["Zijtrap", "Voortrap", "Draaitrap", "Bijltrap"], a: 2 },
@@ -539,7 +539,7 @@ window.CURRICULUM = {
     { v: "Wat betekent 'kihap'?", o: ["Groeten", "Strijdkreet", "Stop", "Klaarstaan"], a: 1 },
     { v: "Welke stand is de verdedigingsstand (gewicht achter)?", o: ["Ap kubi", "Dwit kubi", "Juchum seogi", "Moa seogi"], a: 1 },
     { v: "Wat is 'ap chagi'?", o: ["Zijtrap", "Draaitrap", "Voorwaartse trap", "Achtertrap"], a: 2 },
-    { v: "Welk trigram hoort bij Taegeuk 8?", o: ["Keon (hemel)", "Gon (aarde)", "Gam (water)", "Ri (vuur)"], a: 1 },
+    { v: "Welk trigram hoort bij Taegeuk 8?", o: ["Geon (hemel)", "Gon (aarde)", "Gam (water)", "Ri (vuur)"], a: 1 },
     { v: "Wat betekent 'dojang'?", o: ["Trainingspak", "Oefenzaal", "Band", "Leraar"], a: 1 },
     { v: "Wat betekent 'sabeomnim'?", o: ["Leerling", "Leraar / master", "Band", "Groet"], a: 1 },
     { v: "Hoeveel bewegingen heeft Taegeuk 8?", o: ["18", "20", "25", "27"], a: 3 },
