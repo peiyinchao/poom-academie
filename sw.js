@@ -2,7 +2,7 @@
    Mijn Poom Academie — Service Worker (offline-first)
    Verhoog CACHE bij elke inhoud-/codewijziging om te verversen.
    ============================================================ */
-var CACHE = 'poom-v55';
+var CACHE = 'poom-v56';
 
 /* Kern-schil die vooraf wordt gecachet (rest volgt tijdens gebruik). */
 var PRECACHE = [
@@ -12,6 +12,10 @@ var PRECACHE = [
   './app.js',
   './data/curriculum.js',
   './manifest.webmanifest',
+  './concept-coach.html',
+  './manifest-coach.webmanifest',
+  './vragen/examenvragen.js',
+  './icons/apple-touch-180.png',
   './mark-taeguk.svg',
   './icon-taeguk-dark.svg',
   './fonts/inter.css',
@@ -59,15 +63,17 @@ self.addEventListener('fetch', function (e) {
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // alles is lokaal
 
-  // Navigaties: netwerk-eerst, val terug op gecachte app-schil (offline).
+  // Navigaties: netwerk-eerst, val terug op de gecachte pagina zelf en
+  // anders op de app-schil (offline). Elke pagina wordt onder haar eigen
+  // URL bewaard zodat zowel index.html als concept-coach.html offline werken.
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req).then(function (res) {
         var copy = res.clone();
-        caches.open(CACHE).then(function (c) { c.put('./index.html', copy); });
+        caches.open(CACHE).then(function (c) { c.put(req, copy); });
         return res;
       }).catch(function () {
-        return caches.match('./index.html');
+        return caches.match(req).then(function (hit) { return hit || caches.match('./index.html'); });
       })
     );
     return;

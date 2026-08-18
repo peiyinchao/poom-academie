@@ -5643,5 +5643,24 @@
   }
 })();
 </script>
+<script>
+  /* Offline-first: registreer dezelfde service worker als de hoofd-app.
+     Zo blijft de coach werken zonder server (op je startscherm/https). */
+  if ('serviceWorker' in navigator) {
+    var hadController = !!navigator.serviceWorker.controller;
+    var reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if (!hadController || reloaded) return;
+      reloaded = true; window.location.reload();
+    });
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').then(function(reg){
+        document.addEventListener('visibilitychange', function(){
+          if (document.visibilityState === 'visible') reg.update();
+        });
+      }).catch(function(e){ console.warn('SW mislukt', e); });
+    });
+  }
+</script>
 </body>
 </html>

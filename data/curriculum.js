@@ -346,7 +346,7 @@ window.CURRICULUM = {
     { id: "taegeuk", titel: "De taegeuk & de vlag", body:
       "De rood-blauwe cirkel op de Koreaanse vlag is de <b>taegeuk</b> en staat voor <b>eum en yang</b> — evenwicht tussen tegengestelde krachten. De vier tekens in de hoeken zijn <b>trigrammen</b>: <b>Geon</b> is de hemel (Taegeuk 1), <b>Ri</b> is vuur (3), <b>Gam</b> is water (6) en <b>Gon</b> is de aarde (8). Niet toevallig heten de acht kleurbandvormen <b>Taegeuk 1–8</b>, elk verbonden aan een trigram." },
     { id: "poom", titel: "Poom of dan?", body:
-      "Ben je <b>jonger dan 15 jaar</b> en haal je je zwarte band? Dan krijg je een <b>poom</b> (junior zwarte band) met een rood-zwarte band. Vanaf je 15e kun je die laten omzetten naar een <b>dan</b> (volwassen zwarte band). Deze app werkt naar je <b>eerste en tweede poom</b> toe." },
+      "Ben je <b>jonger dan 15 jaar</b> en haal je je zwarte band? Dan krijg je een <b>poom</b> (junior zwarte band) met een rood-zwarte band. Vanaf je 15e kun je die laten omzetten naar een <b>dan</b> (volwassen zwarte band)." },
     { id: "etiquette", titel: "Etiquette in de dojang", body:
       "<b>Buig</b> als je de dojang (zaal) binnenkomt en verlaat. Groet je trainer en je trainingspartners. Draag een <b>schone dobok</b> met je band goed geknoopt. Wees op tijd, luister goed en help elkaar. Respect staat altijd voorop." },
     { id: "waarden", titel: "De waarden van taekwondo", body:
