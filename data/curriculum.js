@@ -59,9 +59,9 @@ window.CURRICULUM = {
       id: "il", nr: 1, sino: "Il", video: "esocvXAtf-E", level: 0, korean: "Taegeuk Il Jang", hangul: "태극 1장",
       trigram: "☰", trigramNaam: "Geon", trigramHangul: "건",
       element: "Hemel", kup: "8e geup", band: "Geel", bewegingen: 18,
-      betekenis: "Geon staat voor de hemel en het licht — het begin van alles. De eerste vorm legt de basis: rechte standen en de meest voorkomende technieken.",
+      betekenis: "<b>Geon</b> staat voor <b>de hemel en het licht</b> — het begin van alles. De eerste vorm legt de <b>basis</b>: rechte standen en de meest voorkomende technieken.",
       beeld: "Hemel en licht", kernpunt: "Sterke, duidelijke basis. Rustig beginnen en netjes eindigen.",
-      focus: ["Rechte lijnen in de diagram (het pad vormt een + )", "Rustig en groot bewegen", "Kihap op de laatste beweging"],
+      focus: ["<b>Rechte lijnen</b> in de diagram (het pad vormt een + )", "<b>Rustig en groot</b> bewegen", "<b>Kihap</b> op de laatste beweging"],
       nieuw: [
         { ko: "아래 막기", roman: "Arae makgi", nl: "Lage blok" },
         { ko: "몸통 지르기", roman: "Momtong jireugi", nl: "Middenstoot" },
@@ -74,9 +74,9 @@ window.CURRICULUM = {
       id: "i", nr: 2, sino: "I", video: "YvjZaW6Qm7Y", level: 0, korean: "Taegeuk I Jang", hangul: "태극 2장",
       trigram: "☱", trigramNaam: "Tae", trigramHangul: "태",
       element: "Meer", kup: "7e geup", band: "Geel-groen", bewegingen: 18,
-      betekenis: "Tae is het meer: vreugde en innerlijke stevigheid. De vorm voegt hoge blokken toe en meer trappen.",
+      betekenis: "<b>Tae</b> is <b>het meer</b>: vreugde en innerlijke stevigheid. De vorm voegt <b>hoge blokken</b> toe en meer trappen.",
       beeld: "Meer en kalmte", kernpunt: "Adem beheersen en ontspannen kracht gebruiken.",
-      focus: ["Hoge blok (eolgul makgi) zuiver plaatsen", "Trap en stoot vloeiend koppelen", "Blik altijd eerst in de richting"],
+      focus: ["<b>Hoge blok</b> (eolgul makgi) zuiver plaatsen", "Trap en stoot <b>vloeiend koppelen</b>", "<b>Blik</b> altijd eerst in de richting"],
       nieuw: [
         { ko: "얼굴 막기", roman: "Eolgul makgi", nl: "Hoge / gezichtsblok" },
         { ko: "앞차기 몸통 지르기", roman: "Ap chagi – momtong jireugi", nl: "Trap gevolgd door middenstoot" }
@@ -87,9 +87,9 @@ window.CURRICULUM = {
       id: "sam", nr: 3, sino: "Sam", video: "r7gI13Nl380", level: 0, korean: "Taegeuk Sam Jang", hangul: "태극 3장",
       trigram: "☲", trigramNaam: "Ri", trigramHangul: "리",
       element: "Vuur", kup: "6e geup", band: "Groen", bewegingen: 20,
-      betekenis: "Ri is het vuur: warmte en enthousiasme. Hier komt de achterstand en de meshand erbij.",
+      betekenis: "<b>Ri</b> is <b>het vuur</b>: warmte en enthousiasme. Hier komt de <b>achterstand</b> en de <b>meshand</b> erbij.",
       beeld: "Vuur", kernpunt: "Energie, ritme en duidelijke richtingswisselingen.",
-      focus: ["Dwit kubi (achterstand) laag en stabiel", "Meshand-slag met scherpe stop", "Ritme: snel–langzaam afwisselen"],
+      focus: ["<b>Dwit kubi</b> (achterstand) laag en stabiel", "<b>Meshand-slag</b> met scherpe stop", "<b>Ritme</b>: snel–langzaam afwisselen"],
       nieuw: [
         { ko: "손날 막기", roman: "Sonnal makgi", nl: "Meshand-blok (in achterstand)" },
         { ko: "손날 목치기", roman: "Sonnal mok chigi", nl: "Meshand-slag naar de nek" }
@@ -100,9 +100,9 @@ window.CURRICULUM = {
       id: "sa", nr: 4, sino: "Sa", video: "FWmRMg9ZYuw", level: 0, korean: "Taegeuk Sa Jang", hangul: "태극 4장",
       trigram: "☳", trigramNaam: "Jin", trigramHangul: "진",
       element: "Donder", kup: "5e geup", band: "Groen-blauw", bewegingen: 20,
-      betekenis: "Jin is de donder: kracht en moed, maar met beheersing. Deze vorm heeft de meeste nieuwe technieken.",
+      betekenis: "<b>Jin</b> is <b>de donder</b>: kracht en moed, maar met beheersing. Deze vorm heeft de <b>meeste nieuwe technieken</b>.",
       beeld: "Donder", kernpunt: "Krachtig reageren en toch beheerst blijven.",
-      focus: ["Speerhand en zwaluw-slag netjes richten", "Zijtrap (yeop chagi) met de mesvoet", "Stevig blijven na de donderende technieken"],
+      focus: ["<b>Speerhand</b> en <b>zwaluw-slag</b> netjes richten", "<b>Zijtrap</b> (yeop chagi) met de mesvoet", "<b>Stevig blijven</b> na de donderende technieken"],
       nieuw: [
         { ko: "손날 몸통 막기", roman: "Sonnal momtong makgi", nl: "Dubbele meshand middenblok" },
         { ko: "편손끝 세워찌르기", roman: "Pyeonsonkeut sewo jjireugi", nl: "Speerhand-steek" },
@@ -116,9 +116,9 @@ window.CURRICULUM = {
       id: "o", nr: 5, sino: "O", video: "RyB9u3F70No", level: 0, korean: "Taegeuk O Jang", hangul: "태극 5장",
       trigram: "☴", trigramNaam: "Seon", trigramHangul: "손",
       element: "Wind", kup: "4e geup", band: "Blauw", bewegingen: 20,
-      betekenis: "Seon is de wind: zacht maar soms machtig. Hamervuist en elleboog geven de vorm pit.",
+      betekenis: "<b>Seon</b> is <b>de wind</b>: zacht maar soms machtig. <b>Hamervuist</b> en <b>elleboog</b> geven de vorm pit.",
       beeld: "Wind", kernpunt: "Soms zacht en soepel, soms plotseling krachtig.",
-      focus: ["Juchum seogi (paardrijstand) breed en laag", "Elleboogslag draait vanuit de heup", "Hamervuist ontspannen, dan hard"],
+      focus: ["<b>Juchum seogi</b> (paardrijstand) breed en laag", "<b>Elleboogslag</b> draait vanuit de heup", "<b>Hamervuist</b> ontspannen, dan hard"],
       nieuw: [
         { ko: "메주먹 내려치기", roman: "Me jumeok naeryo chigi", nl: "Hamervuist neerwaarts" },
         { ko: "팔굽 돌려치기", roman: "Palkup dollyo chigi", nl: "Draaiende elleboogslag" },
@@ -130,9 +130,9 @@ window.CURRICULUM = {
       id: "yuk", nr: 6, sino: "Yuk", video: "WZcE8Yhsasc", level: 0, korean: "Taegeuk Yuk Jang", hangul: "태극 6장",
       trigram: "☵", trigramNaam: "Gam", trigramHangul: "감",
       element: "Water", kup: "3e geup", band: "Blauw-rood", bewegingen: 19,
-      betekenis: "Gam is het water: het stroomt om obstakels heen. Hier verschijnt de draaitrap.",
+      betekenis: "<b>Gam</b> is <b>het water</b>: het stroomt om obstakels heen. Hier verschijnt de <b>draaitrap</b>.",
       beeld: "Water", kernpunt: "Meebewegen, omleiden en weer doorgaan.",
-      focus: ["Dollyo chagi (draaitrap) met de wreef", "Handpalm-blok soepel", "Vloeiend blijven, zoals water"],
+      focus: ["<b>Dollyo chagi</b> (draaitrap) met de wreef", "<b>Handpalm-blok</b> soepel", "<b>Vloeiend blijven</b>, zoals water"],
       nieuw: [
         { ko: "돌려차기", roman: "Dollyo chagi", nl: "Draaitrap (roundhouse)" },
         { ko: "한손날 얼굴 바깥막기", roman: "Hansonnal eolgul bakkat makgi", nl: "Enkele meshand hoge buitenblok" },
@@ -144,9 +144,9 @@ window.CURRICULUM = {
       id: "chil", nr: 7, sino: "Chil", video: "9_4HQkM4f3o", level: 0, korean: "Taegeuk Chil Jang", hangul: "태극 7장",
       trigram: "☶", trigramNaam: "Gan", trigramHangul: "간",
       element: "Berg", kup: "2e geup", band: "Rood", bewegingen: 25,
-      betekenis: "Gan is de berg: stevig en standvastig. Veel korte, krachtige technieken en de kniestoot.",
+      betekenis: "<b>Gan</b> is <b>de berg</b>: stevig en standvastig. Veel korte, krachtige technieken en de <b>kniestoot</b>.",
       beeld: "Berg", kernpunt: "Stabiel staan, goede balans en stevige houdingen.",
-      focus: ["Beom seogi (tijgerstand) licht op de voorvoet", "Schaarblok met beide armen tegelijk", "Kniestoot met een greep ervoor"],
+      focus: ["<b>Beom seogi</b> (tijgerstand) licht op de voorvoet", "<b>Schaarblok</b> met beide armen tegelijk", "<b>Kniestoot</b> met een greep ervoor"],
       nieuw: [
         { ko: "손날 아래막기", roman: "Sonnal arae makgi", nl: "Meshand lage blok" },
         { ko: "가위 막기", roman: "Gawi makgi", nl: "Schaarblok" },
@@ -159,9 +159,9 @@ window.CURRICULUM = {
       id: "pal", nr: 8, sino: "Pal", video: "1pYia9d5tUY", level: 0, korean: "Taegeuk Pal Jang", hangul: "태극 8장",
       trigram: "☷", trigramNaam: "Gon", trigramHangul: "곤",
       element: "Aarde", kup: "1e geup", band: "Rood-zwart", bewegingen: 27,
-      betekenis: "Gon is de aarde: de basis waarop alles rust. De laatste kleurbandvorm — daarna volgt de eerste poom.",
+      betekenis: "<b>Gon</b> is <b>de aarde</b>: de basis waarop alles rust. De <b>laatste kleurbandvorm</b> — daarna volgt de eerste poom.",
       beeld: "Aarde", kernpunt: "Alles uit de vorige vormen verbinden en volwassen uitvoeren.",
-      focus: ["Sprongtrap (dubbele voortrap) met hoogte", "Alles wat je leerde samenbrengen", "Kracht, controle én ademhaling"],
+      focus: ["<b>Sprongtrap</b> (dubbele voortrap) met hoogte", "Alles wat je leerde <b>samenbrengen</b>", "<b>Kracht, controle én ademhaling</b>"],
       nieuw: [
         { ko: "두발 당성 앞차기", roman: "Dubal dangseong ap chagi", nl: "Springende dubbele voortrap" },
         { ko: "엇걸어 아래막기", roman: "Eotgeoreo arae makgi", nl: "Gekruiste lage blok" },
@@ -170,11 +170,11 @@ window.CURRICULUM = {
       standen: ["Ap kubi", "Dwit kubi", "Juchum seogi"]
     },
     {
-      id: "koryo", nr: 9, sino: "", video: "", level: 2, korean: "Koryo", hangul: "고려",
+      id: "koryo", nr: 9, sino: "", video: "Q_zVLSVl7rM", level: 2, korean: "Koryo", hangul: "고려",
       trigram: "士", trigramNaam: "Seonbi", trigramHangul: "선비",
       element: "De geleerde", kup: "2e poom", band: "Zwart (poom)", bewegingen: 30,
-      betekenis: "Koryo is vernoemd naar de Goryeo-dynastie — waar het woord 'Korea' vandaan komt. Het teken 士 staat voor de seonbi: een geleerde, sterke geest die niet buigt voor onrecht. Dit is je eerste zwarteband-vorm en de verplichte poomsae voor je 2e poom-examen.",
-      focus: ["Zijtrap (yeop chagi) en blok scherp koppelen", "Bewuste, volwassen kracht — geen haast", "Sonnal-technieken met een duidelijke stop"],
+      betekenis: "Koryo is vernoemd naar de <b>Goryeo-dynastie</b> — waar het woord 'Korea' vandaan komt. Het teken 士 staat voor de <b>seonbi</b>: een geleerde, sterke geest die niet buigt voor onrecht. Dit is je <b>eerste zwarteband-vorm</b> en de verplichte poomsae voor je <b>2e poom-examen</b>.",
+      focus: ["<b>Zijtrap</b> (yeop chagi) en blok scherp koppelen", "<b>Bewuste, volwassen kracht</b> — geen haast", "<b>Sonnal-technieken</b> met een duidelijke stop"],
       nieuw: [
         { ko: "칼재비", roman: "Kaljaebi", nl: "Duim-keelgreep / -stoot" },
         { ko: "한손날 바깥막기", roman: "Han sonnal bakkat makgi", nl: "Enkele meshand buitenblok" },
@@ -185,11 +185,11 @@ window.CURRICULUM = {
       standen: ["Ap kubi", "Dwit kubi", "Juchum seogi"]
     },
     {
-      id: "keumgang", nr: 10, sino: "", video: "", level: 3, korean: "Keumgang", hangul: "금강",
+      id: "keumgang", nr: 10, sino: "", video: "vh4EpyRXhxM", level: 3, korean: "Keumgang", hangul: "금강",
       trigram: "山", trigramNaam: "Berg / diamant", trigramHangul: "산",
       element: "Onbreekbare kracht", kup: "3e poom", band: "Zwart (poom)", bewegingen: 27,
-      betekenis: "Keumgang betekent 'diamant' — te hard om te breken — en verwijst naar de Keumgang-berg en de Keumgang-krijger die het kwaad verjaagt. De vorm is langzaam, machtig en vol balans. Keumgang hoort pas bij je 3e poom, ná Koryo — dus buiten de eisen van deze app.",
-      focus: ["Kraanstand (hakdari seogi): stil en in balans op één been", "Langzame, zware bewegingen met ademhaling", "Berg- en diamantblok breed en stevig"],
+      betekenis: "Keumgang betekent <b>'diamant'</b> — te hard om te breken — en verwijst naar de <b>Keumgang-berg</b> en de <b>Keumgang-krijger</b> die het kwaad verjaagt. De vorm is <b>langzaam, machtig en vol balans</b>. Keumgang hoort pas bij je <b>3e poom</b>, ná Koryo — dus buiten de eisen van deze app.",
+      focus: ["<b>Kraanstand</b> (hakdari seogi): stil en in balans op één been", "<b>Langzame, zware bewegingen</b> met ademhaling", "<b>Berg- en diamantblok</b> breed en stevig"],
       nieuw: [
         { ko: "금강막기", roman: "Keumgang makgi", nl: "Diamantblok (hoog + laag samen)" },
         { ko: "산틀막기", roman: "Santeul makgi", nl: "Bergblok" },

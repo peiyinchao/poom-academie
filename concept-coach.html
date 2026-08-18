@@ -368,11 +368,11 @@
   .navdock{position:absolute;left:22px;right:22px;bottom:calc(env(safe-area-inset-bottom) + 20px);
     z-index:60;display:flex;align-items:center;gap:10px}
   .fnav{position:relative;flex:1;min-height:58px;display:flex;justify-content:space-between;gap:4px;background:rgba(252,250,246,.5);
-    -webkit-backdrop-filter:blur(30px) saturate(1.9);backdrop-filter:blur(30px) saturate(1.9);border-radius:999px;padding:5px;
+    -webkit-backdrop-filter:blur(30px) saturate(1.9);backdrop-filter:blur(30px) saturate(1.9);border-radius:999px;padding:3px;
     border:1px solid rgba(255,255,255,.55);
     box-shadow:0 14px 32px -16px rgba(40,24,12,.4), 0 1px 0 rgba(255,255,255,.75) inset}
   .fnav button{position:relative;z-index:1;flex:1 1 0;border:0;background:transparent;color:rgba(30,22,16,.56);border-radius:17px;
-    padding:6px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-family:var(--cond);text-transform:uppercase;
+    padding:4px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-family:var(--cond);text-transform:uppercase;
     font-weight:700;letter-spacing:.03em;font-size:8.5px;line-height:1;transition:color .32s ease, transform .14s ease}
   .fnav button svg{width:24px;height:24px}
   .fnav button.on{color:var(--beltink,var(--elink))}
@@ -382,7 +382,7 @@
     .fnav button:active{transform:scale(.92)}
   }
   /* Sliding frosted-glass highlight behind the active tab */
-  .fnav-hl{position:absolute;top:5px;bottom:5px;left:0;width:0;z-index:0;pointer-events:none;border-radius:999px;
+  .fnav-hl{position:absolute;top:3px;bottom:3px;left:0;width:0;z-index:0;pointer-events:none;border-radius:999px;
     background:linear-gradient(180deg,#ffffff,#fff3ec);
     border:1px solid rgba(255,255,255,.9);
     box-shadow:0 5px 14px -5px rgba(120,52,20,.32), 0 1px 0 rgba(255,255,255,.85) inset;
@@ -436,6 +436,14 @@
   .timerscreen .pt-word{margin-top:4px;gap:10px}
   .timerscreen .pt-word .w-ko{font-family:'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;font-size:32px;font-weight:400}
   .timerscreen .pt-word .w-ro{font-size:15px}
+  /* Idle prompt centered inside the ring, larger so the empty circle feels intentional */
+  .timerscreen .pt-start{display:none;font-family:var(--cond);font-weight:800;text-transform:uppercase;
+    font-size:34px;line-height:1.02;letter-spacing:.02em;color:rgba(255,255,255,.8);text-align:center;max-width:196px;padding:0 6px}
+  .timerscreen .ptimer.idle .pt-num,.timerscreen .ptimer.idle .pt-word{display:none}
+  .timerscreen .ptimer.idle .pt-start{display:block}
+  .timerscreen .pt-start.glint{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    background-image:linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,1) 50%,rgba(255,255,255,0) 60%),linear-gradient(rgba(255,255,255,.8),rgba(255,255,255,.8));
+    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:96% 0,0 0;animation:hintGlint 1.2s linear}
   /* Only number + character + romanisation live inside the ring; hint sits BELOW it */
   .timerscreen .ptimer.bare{justify-content:center;align-items:center;gap:24px;padding:0}
   .timerscreen .pt-dial{flex:none;margin:0;transition:opacity .3s}
@@ -703,8 +711,8 @@
   .ex-head .sh{margin:0;flex:1;min-width:0}
   #ex-sub:empty{display:none}
   #exam .sfoot{position:relative}
-  .ex-face{position:absolute;right:22px;bottom:calc(100% - 2px);z-index:4;width:104px;height:104px;border-radius:50%;overflow:hidden;background:#fff;
-    box-shadow:0 8px 18px rgba(20,23,18,.16)}
+  .ex-face{position:relative;flex:none;width:72px;height:72px;border-radius:50%;overflow:hidden;background:#fff;
+    box-shadow:0 6px 14px rgba(20,23,18,.14)}
   .ex-face img{position:absolute;top:50%;left:50%;width:94%;height:94%;transform:translate(-50%,-50%);display:block;border-radius:50%}
   .ex-face .ex-face-blink{opacity:0}
   @media (prefers-reduced-motion:no-preference){.ex-face .ex-face-blink{animation:exFaceBlink 4.8s ease-in-out infinite}}
@@ -1542,7 +1550,7 @@
   /* Handboek sheet: the whole body scrolls; its content crossfades on paging (no pinned zone) */
   .hbcat .cs-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;margin-top:16px;
     border-radius:0;box-shadow:none;background:var(--page);
-    padding:2px 20px calc(env(safe-area-inset-bottom) + 78px);transition:opacity .17s ease}
+    padding:2px 20px calc(env(safe-area-inset-bottom) + 24px);transition:opacity .17s ease}
   .hbcat .cs-body::-webkit-scrollbar{display:none}
   .hbcat .cs-body.cs-fading{opacity:0}
   /* Handboek reference lists share the Woorden grouped-card look (dividers, no per-row cards) */
@@ -1575,14 +1583,9 @@
   .ct-say .wv{display:none;width:24px;height:24px}
   .ct-say.ring .wf-spk{display:none}
   .ct-say.ring .wv{display:block}
-  /* Woorden term rows: a leading line number that morphs into the speaking waveform while the
-     word is read aloud, then reverts to the number when it finishes. */
-  .wcat .ct-num{flex:none;width:26px;height:26px;display:grid;place-items:center;color:var(--el)}
-  .wcat .ct-num .ct-n{font-family:var(--cond);font-weight:700;font-size:15px;color:var(--gray);
-    line-height:1;font-variant-numeric:tabular-nums}
-  .wcat .ct-num .wv{display:none;width:24px;height:24px}
-  .wcat .ct-row.ring .ct-num .ct-n{display:none}
-  .wcat .ct-row.ring .ct-num .wv{display:block}
+  /* Woorden term rows: bookmark square (left) + term text + standard speaker (right) that morphs
+     to the animated waveform while the word is read aloud, then reverts to the speaker glyph. */
+  .ct-say-ind{pointer-events:none}
   /* dark card backs (woorden deck / onthoud): white speaker + spacing under the roman line */
   .face.back .ct-say{color:#fff;margin-top:14px}
   /* interactive hard-mark toggle on term rows */
@@ -1593,8 +1596,8 @@
   .ct-bk-btn.on{color:var(--el)}
   .ct-bk-btn:active{transform:scale(.86)}
   .ct-bk-btn.bkpop{animation:bkpop .34s cubic-bezier(.34,1.4,.4,1)}
-  /* Bookmark toggle sits on the right; only this small button (un)marks the term as moeilijk —
-     tapping anywhere else on the row reads the word aloud (revert of the old full-width hit area). */
+  /* Bookmark toggle sits on the left; only this small button (un)marks the term as moeilijk —
+     tapping anywhere else on the row reads the word aloud (whole-row say hit area). */
   .wcat .ct-bk-btn{flex:none;width:40px;height:40px;color:var(--gray)}
   .wcat .ct-bk-btn.on{color:var(--el)}
   .wcat .ct-bk-btn:active{transform:scale(.86)}
@@ -1659,12 +1662,11 @@
   .wrow-hard .wrow-emb.bkmks{background:currentColor;color:var(--seal);border-radius:0;
     -webkit-mask:center/contain no-repeat url(assets/icons/Bookmarks1.png);
     mask:center/contain no-repeat url(assets/icons/Bookmarks1.png)}
-  /* conventional bookmark: outline (currentColor) when idle -> filled seal on select */
-  .bkmk{display:inline-block;width:1em;height:1em;flex:none;vertical-align:middle;background:#6B6459;
-    -webkit-mask:center/contain no-repeat url(assets/icons/Bookmark-outline.png);
-    mask:center/contain no-repeat url(assets/icons/Bookmark-outline.png);transition:background .18s ease}
-  .bkmk.on{background:var(--seal);
-    -webkit-mask-image:url(assets/icons/Bookmark.png);mask-image:url(assets/icons/Bookmark.png)}
+  /* conventional bookmark: light-gray fill when idle -> red seal fill on select */
+  .bkmk{display:inline-block;width:1em;height:1em;flex:none;vertical-align:middle;background:#C4BFB4;
+    -webkit-mask:center/contain no-repeat url(assets/icons/Bookmark.png);
+    mask:center/contain no-repeat url(assets/icons/Bookmark.png);transition:background .18s ease}
+  .bkmk.on{background:var(--seal)}
   .bk-inline{width:1em;height:1.05em;vertical-align:-.16em}
   .cs-chip .bk-inline{width:16px;height:16px;vertical-align:middle}
   .wrow-tx{flex:1;min-width:0}
@@ -1776,6 +1778,7 @@
   .hbcat .ct-row.hbfig{padding-bottom:0}
   .hbfig .hb-body{display:flow-root}
   .hbfig .hb-wrap{display:flow-root}
+  .hb-flag{hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
   @media (max-width:360px){ .hb-figure{width:132px} }
   .hb-sub{font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;font-size:11.5px;color:var(--gray);margin-top:4px}
   .hb-body{font-size:13px;line-height:1.55;color:var(--ink);margin-top:7px}
@@ -1800,6 +1803,19 @@
   .hb-illusb .hb-blink-l{clip-path:inset(0 50% 0 0)}
   .hb-illusb .hb-blink-r{clip-path:inset(0 0 0 50%)}
   @media (prefers-reduced-motion:no-preference){.hb-illusb .hb-blink-r{animation-duration:6.7s}}
+  /* Poomsae Handboek: the stance mascotte shrinks on scroll from a big hero illustration into a
+     small companion docked beside the title, while the list scrolls beneath it. Geometry (rest/dock
+     position + scale) is measured in pmSetup and interpolated by --pmc (0 rest -> 1 docked). */
+  .hbcat[data-hb="poomsae"] .cs-hero{position:relative;z-index:6}
+  .pm-masc{position:absolute;left:0;top:0;width:var(--pm-w,150px);z-index:4;transform-origin:0 0;
+    pointer-events:none;will-change:transform;filter:drop-shadow(0 7px 12px rgba(20,23,18,.16));
+    transform:translate(calc(var(--pm-x0,0px) + var(--pm-dx,0px) * var(--pmc,0)),
+                        calc(var(--pm-y0,0px) + var(--pm-dy,0px) * var(--pmc,0)))
+              scale(calc(1 + (var(--pm-s,.3) - 1) * var(--pmc,0)))}
+  .pm-mascb{position:relative;width:100%}
+  .pm-mascb > img{display:block;width:100%;height:auto}
+  .pm-mascb .hb-blink{position:absolute;left:0;top:0;width:100%;opacity:0}
+  .pm-spacer{width:100%}
   /* "Wat je laat zien" — bare vertical accent bar (same language as the daily quote .gday),
      no card / border / fill, so important info reads consistently across the whole app. */
   .hb-eis{position:relative;padding:1px 0 1px 16px;
@@ -1814,6 +1830,7 @@
   .hb-sec p{font-size:13.5px;line-height:1.55;color:var(--ink);margin:0}
   .hb-check{margin:6px 0 0;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--ink)}
   .hb-check li{margin-bottom:3px}
+  .hb-check b{color:var(--deep)}
   /* Video link — a simple inline hyperlink to the school's Facebook clip (opens in a new tab) */
   .hb-link{color:var(--el);font-weight:600;text-decoration:underline;text-underline-offset:2px;
     text-decoration-thickness:1.5px;-webkit-tap-highlight-color:transparent}
@@ -1826,6 +1843,7 @@
   .poom-nm .poom-hg{font-size:13px;font-weight:600;color:var(--gray);white-space:nowrap}
   .poom-row .hb-sub{margin-top:3px;font-size:12px}
   .poom-blurb{margin:8px 0 0;font-size:13px;line-height:1.5;color:var(--ink);opacity:.85}
+  .poom-blurb b{color:var(--deep)}
   .poom-chev{flex:none;width:20px;height:20px;color:var(--gray);opacity:.5;align-self:center;margin-left:2px}
   .poom-chev svg{width:100%;height:100%}
   @media (hover:hover){ .poom-row:hover{background:color-mix(in srgb, #6B6459 4%, transparent)} .poom-row:hover .poom-chev{opacity:.85} }
@@ -1864,7 +1882,7 @@
   .pd-video.playing{background:#000}
   .pd-video.playing iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   /* PNG-mask nav icons (inherit currentColor → belt ink when active) */
-  .nav-ic{width:27px;height:27px;flex:none;display:block;background:currentColor;
+  .nav-ic{width:30px;height:30px;flex:none;display:block;background:currentColor;
     -webkit-mask:center/contain no-repeat;mask:center/contain no-repeat}
   .ic-today{-webkit-mask-image:url('assets/icons/Vandaag.png');mask-image:url('assets/icons/Vandaag.png')}
   .ic-handboek{-webkit-mask-image:url('assets/icons/Handboek.png');mask-image:url('assets/icons/Handboek.png')}
@@ -2862,17 +2880,17 @@
   function bkmk(o){ o=o||{};
     return '<span class="bkmk'+(o.on?' on':'')+(o.cls?(' '+o.cls):'')+'" aria-hidden="true"></span>';
   }
-  /* one reusable term row: leading line number (morphs into the speaking waveform) + hangul +
-     roman·nl (+ optional group tag) + bookmark toggle. The whole row reads the word aloud; only
-     the small bookmark button on the right (un)marks it as moeilijk. */
-  function termRowHtml(it, groupName, idx){
+  /* one reusable term row: bookmark toggle (small square, left) + hangul + roman·nl (+ optional
+     group tag) + standard speaker (right) that morphs to the waveform while speaking. The whole
+     row reads the word aloud; only the small bookmark button on the left (un)marks it as moeilijk. */
+  function termRowHtml(it, groupName){
     var h = !!HARD[it.roman];
     return '<div class="ct-row'+(h?' hard':'')+'" data-term="'+esc(it.roman)+'" data-act="say" data-ko="'+esc(it.ko)+'" aria-label="Zeg '+esc(it.roman)+' hardop">'+
-      '<span class="ct-num" aria-hidden="true"><b class="ct-n">'+(idx||'')+'</b>'+IC.speak+'</span>'+
-      '<div class="ct-tx"><div class="ct-ko">'+esc(it.ko)+(groupName?'<span class="ct-grp">'+esc(groupName)+'</span>':'')+'</div>'+
-        '<div class="ct-meta"><b>'+esc(it.roman)+'</b><span class="ct-nl"> · '+esc(it.nl)+'</span></div></div>'+
       '<button class="ct-bk-btn'+(h?' on':'')+'" data-act="hardterm" data-k="'+esc(it.roman)+'" '+
         'aria-pressed="'+(h?'true':'false')+'" aria-label="Bewaar bij moeilijke woorden">'+bkmk({on:h})+'</button>'+
+      '<div class="ct-tx"><div class="ct-ko">'+esc(it.ko)+(groupName?'<span class="ct-grp">'+esc(groupName)+'</span>':'')+'</div>'+
+        '<div class="ct-meta"><b>'+esc(it.roman)+'</b><span class="ct-nl"> · '+esc(it.nl)+'</span></div></div>'+
+      '<span class="ct-say ct-say-ind" aria-hidden="true">'+IC.spk+IC.speak+'</span>'+
     '</div>';
   }
   function wRender(){ /* removed: search + filter replaced by the Moeilijk list row */ }
@@ -2996,7 +3014,7 @@
       pairs = g.items.map(function(it){ return {it:it, grp:null}; });
     }
     var list = pairs.length
-      ? pairs.map(function(x,i){ return termRowHtml(x.it, x.grp, i+1); }).join('')
+      ? pairs.map(function(x){ return termRowHtml(x.it, x.grp); }).join('')
       : '<div class="cs-empty">Nog geen moeilijke woorden.<br>Tik op '+bkmk({cls:'bk-inline'})+' bij een woord om het hier te bewaren.</div>';
     var chips = isHard ? ''
       : '<span class="cs-chip glass hot" id="cs-hardchip"'+(hard.length?'':' hidden')+'>'+bkmk({on:true,cls:'bk-inline'})+'<b id="cs-hardn">'+hard.length+'</b> moeilijk</span>';
@@ -3271,6 +3289,25 @@
     el.addEventListener('pointercancel', function(){ down=false; });
     el.addEventListener('click', function(e){ if(swiped){ e.stopPropagation(); e.preventDefault(); swiped=false; } }, true);
   }
+  // Handboek onderdelen are hub-and-spoke: no lateral paging between them. Only a rightward swipe
+  // (iOS-style back gesture) returns to the Handboek overview; leftward swipes do nothing.
+  function attachHbBackSwipe(el){
+    var x0=0,y0=0,down=false,swiped=false;
+    el.addEventListener('pointerdown', function(e){
+      if(e.pointerType==='mouse' && e.button!==0) return;
+      x0=e.clientX; y0=e.clientY; down=true; swiped=false;
+    });
+    el.addEventListener('pointermove', function(e){
+      if(!down || swiped) return;
+      var dx=e.clientX-x0, dy=e.clientY-y0;
+      if(Math.abs(dx)<=Math.abs(dy)*1.4) return;           // vertical scroll — ignore
+      if(dx>60){ swiped=true; down=false; closeHb(); }      // swipe right → back to overview
+      else if(dx<-40){ down=false; }                        // swipe left → do nothing (no paging)
+    });
+    el.addEventListener('pointerup', function(){ down=false; });
+    el.addEventListener('pointercancel', function(){ down=false; });
+    el.addEventListener('click', function(e){ if(swiped){ e.stopPropagation(); e.preventDefault(); swiped=false; } }, true);
+  }
   function closeCat(){
     if(!catSheet) return;
     var s=catSheet; catSheet=null; activePager=null;
@@ -3317,19 +3354,19 @@
      HANDBOEK — reference manual hub + frosted detail sheets
      ========================================================= */
   var HB_CATS=[
-    {key:'theorie',    title:'Theorie',         han:'론', el:'#8B45E6', sub:'Wat & waarom',       unit:'onderwerpen', grp:1},
-    {key:'examen',     title:'Examenkaart',     han:'시', el:'#8B45E6', sub:'Wat je moet kunnen', unit:'onderdelen',  grp:1},
-    {key:'standen',    title:'Standen',         han:'서', el:'#2F9E56', sub:'Voetposities',       unit:'standen',     grp:2},
-    {key:'technieken', title:'Technieken',      han:'술', el:'#2F9E56', sub:'Blok · stoot · trap',unit:'technieken',  grp:2},
-    {key:'poomsae',    title:'Poomsae',         han:'품', el:'#2468D6', sub:'De vormen',          unit:'vormen',      grp:3, wide:true},
-    {key:'ilbo',       title:'Ilbo Taeryon',    han:'일', el:'#2468D6', sub:'Stapsparren',        unit:'afwerkingen', grp:3},
-    {key:'hosinsul',   title:'Hosinsul',        han:'호', el:'#2468D6', sub:'Zelfverdediging',    unit:'technieken',  grp:3},
-    {key:'gyeorugi',   title:'Gyeorugi',        han:'겨', el:'#2468D6', sub:'Sparren',            unit:'sparren',     grp:3,
+    {key:'standen',    title:'Standen',         han:'서', el:'#2F9E56', sub:'Voetposities',       unit:'standen',     grp:1},
+    {key:'technieken', title:'Technieken',      han:'술', el:'#2F9E56', sub:'Blok · stoot · trap',unit:'technieken',  grp:1},
+    {key:'poomsae',    title:'Poomsae',         han:'품', el:'#2468D6', sub:'De vormen',          unit:'vormen',      grp:2, wide:true},
+    {key:'ilbo',       title:'Ilbo Taeryon',    han:'일', el:'#2468D6', sub:'Stapsparren',        unit:'afwerkingen', grp:2},
+    {key:'hosinsul',   title:'Hosinsul',        han:'호', el:'#2468D6', sub:'Zelfverdediging',    unit:'technieken',  grp:2},
+    {key:'gyeorugi',   title:'Gyeorugi',        han:'겨', el:'#2468D6', sub:'Sparren',            unit:'sparren',     grp:2,
       kind:'onderdeel', odid:'gyeorugi', ko:'겨루기', roman:'Gyeorugi', show:hasGyeorugi,
       eis:'Op je examen spar je één of meer korte rondjes met een partner, met volledige bescherming (hogu en helm). De examinator let op controle, timing en afstand en op sportief gedrag — niet op winnen.'},
-    {key:'gyeokpa',    title:'Gyeokpa',         han:'격', el:'#2468D6', sub:'Breektest',          unit:'breektest',   grp:3,
+    {key:'gyeokpa',    title:'Gyeokpa',         han:'격', el:'#2468D6', sub:'Breektest',          unit:'breektest',   grp:2,
       kind:'onderdeel', odid:'gyepa', ko:'격파', roman:'Gyeokpa', show:hasGyeokpa,
-      eis:'Op je examen breek je één plank met een techniek die bij je band past. Je krijgt meestal een paar pogingen; blijf rustig en gefocust. Altijd samen met je trainer.'}
+      eis:'Op je examen breek je één plank met een techniek die bij je band past. Je krijgt meestal een paar pogingen; blijf rustig en gefocust. Altijd samen met je trainer.'},
+    {key:'theorie',    title:'Theorie',         han:'론', el:'#8B45E6', sub:'Wat & waarom',       unit:'onderwerpen', grp:3},
+    {key:'examen',     title:'Examenkaart',     han:'시', el:'#8B45E6', sub:'Wat je moet kunnen', unit:'onderdelen',  grp:3}
   ];
   // Only the onderdelen die bij de huidige graad horen (Gyeorugi vanaf 8e, Gyeokpa vanaf 6e geup).
   function hbCatsActive(){ return HB_CATS.filter(function(c){ return !c.show || c.show(); }); }
@@ -3594,13 +3631,13 @@
         var parts=t.body.split('. ');
         var lead=parts.slice(0,2).join('. ')+'.';
         var tail=parts.slice(2).join('. ');
-        var bodyHtml='<div class="hb-body">'+lead+' <span class="hb-wrap">'+img+tail+'</span></div>';
+        var bodyHtml='<div class="hb-body hb-flag" lang="nl">'+lead+' <span class="hb-wrap">'+img+tail+'</span></div>';
         rows+=hbRow({ro:t.titel, body:bodyHtml, cls:'hbfig'});
       } else {
         rows+=hbRow({ro:t.titel, body:'<div class="hb-body">'+t.body+'</div>'});
       }
     });
-    var pre = (key==='poomsae') ? illusHtml('poomsae-stance', true, -1.7) : '';
+    var pre = (key==='poomsae') ? '<div class="pm-spacer" id="pm-spacer" aria-hidden="true"></div>' : '';
     return pre+'<div class="ct-list">'+rows+'</div>';
   }
   var hbSheet=null;
@@ -3626,10 +3663,10 @@
     hbSheet.setAttribute('data-hb', key);
     applyCatAccent(hbSheet, cat.el);
     var items = hbCatsActive().map(function(c){ return {id:c.key, label:c.title}; });
-    activePager = { sheet:hbSheet, items:items,
-      step:function(dir){ navHb(dir); },
-      pick:function(id){ gotoHb(id); } };
-    var dots = buildDotsHtml(items, key);
+    // Hub-and-spoke: no lateral pager (step/pick are inert) and no dots — switching onderdelen
+    // happens by going back to the Handboek overview. Kept as an object so poomsae detail's
+    // activePager save/restore keeps working.
+    activePager = { sheet:hbSheet, items:items, step:function(){}, pick:function(){} };
     hbSheet.innerHTML =
       '<div class="cs-hero">'+
         '<button class="cs-x" data-act="hbclose" aria-label="Sluiten">'+IC.x+'</button>'+
@@ -3638,13 +3675,13 @@
           '<div class="cs-titlerow">'+hbTitleRow(cat)+'</div>'+
         '</div>'+
       '</div>'+
-      '<div class="cs-body">'+hbBody(cat.key)+'</div>'+
-      dots;
+      '<div class="cs-body">'+hbBody(cat.key)+'</div>';
     stage.appendChild(hbSheet);
-    attachCatSwipe(hbSheet); attachDotScrub(hbSheet); showDots();
+    attachHbBackSwipe(hbSheet);
     fnav.classList.add('hide');
     void hbSheet.offsetWidth; // capture the off-screen start so the drill-in transition runs
     requestAnimationFrame(function(){ hbSheet.classList.add('show'); });
+    if(key==='poomsae') pmSetup(hbSheet);
   }
   // Page between Handboek onderdelen in place (dir -1 prev / +1 next), cycling; body crossfades, title cross-slides.
   function swapToHb(key, dir){
@@ -3675,9 +3712,64 @@
   function closeHb(){
     if(!hbSheet) return;
     var s=hbSheet; hbSheet=null; activePager=null;
+    if(s._pmResize){ window.removeEventListener('resize', s._pmResize); s._pmResize=null; }
     s.classList.remove('show');
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 400);
     fnav.classList.remove('hide');
+  }
+  /* Poomsae Handboek scroll animation: the stance mascotte starts as a big hero illustration and,
+     as the list scrolls, shrinks + glides into a small companion docked beside the title. The list
+     starts below the big mascotte (spacer) and scrolls beneath it. --pmc (0 rest -> 1 docked) is
+     driven from the body scroll; rest/dock geometry is measured so it adapts to the title width and
+     safe-area insets. */
+  function pmSetup(sheet){
+    var hero=sheet.querySelector('.cs-hero'), body=sheet.querySelector('.cs-body'),
+        title=sheet.querySelector('.cs-title'), spacer=sheet.querySelector('#pm-spacer');
+    if(!hero||!body||!title||!spacer) return;
+    var RATIO=793/520;                                  // poomsae-stance.png aspect (h/w)
+    var masc=document.createElement('div');
+    masc.className='pm-masc'; masc.id='pm-masc'; masc.setAttribute('aria-hidden','true');
+    masc.innerHTML='<div class="pm-mascb">'+
+        '<img src="assets/mascot/poomsae-stance.png" alt="">'+
+        '<img class="hb-blink" src="assets/mascot/poomsae-stance-blink.png" alt="" style="animation-delay:-1.7s">'+
+      '</div>';
+    hero.appendChild(masc);
+    function geom(){
+      var hr=hero.getBoundingClientRect(), tr=title.getBoundingClientRect(), br=body.getBoundingClientRect();
+      if(!hr.width) return;
+      var restW=Math.max(120, Math.min(154, hr.width*0.42));
+      var restH=restW*RATIO;
+      var x0=Math.round((hr.width-restW)/2);            // rest: centred under the title
+      var y0=Math.round((tr.bottom-hr.top)+12);
+      var dockH=74, dockW=dockH/RATIO, s=dockW/restW;   // dock: small, beside the title
+      // Dock beside the actual title TEXT (the .cs-title box is full-width), clamped inside the hero.
+      var textRight=tr.right;
+      try{ var rg=document.createRange(); rg.selectNodeContents(title); var rr=rg.getBoundingClientRect(); if(rr.width) textRight=rr.right; }catch(e){}
+      var dockX=Math.round((textRight-hr.left)+16);
+      var maxX=Math.round(hr.width-dockW-10);
+      if(dockX>maxX) dockX=maxX;
+      var dockTop=Math.round((tr.bottom-hr.top)-dockH+4);
+      masc.style.setProperty('--pm-w', restW+'px');
+      masc.style.setProperty('--pm-x0', x0+'px');
+      masc.style.setProperty('--pm-y0', y0+'px');
+      masc.style.setProperty('--pm-dx', (dockX-x0)+'px');
+      masc.style.setProperty('--pm-dy', (dockTop-y0)+'px');
+      masc.style.setProperty('--pm-s', s.toFixed(4));
+      // Reserve the rest-mascotte height so the list starts just below it; the same distance is the
+      // scroll range over which the dock completes (so the spacer clears exactly as it finishes).
+      var Hs=Math.max(40, Math.round((hr.top+y0+restH) - br.top + 14));
+      spacer.style.height=Hs+'px';
+      body._pmHs=Hs;
+    }
+    function upd(){ var Hs=body._pmHs||1, c=body.scrollTop/Hs; c=c<0?0:c>1?1:c; sheet.style.setProperty('--pmc', c.toFixed(3)); }
+    geom(); upd();
+    if(body._pmScroll) body.removeEventListener('scroll', body._pmScroll);
+    body._pmScroll=upd; body.addEventListener('scroll', upd, {passive:true});
+    if(sheet._pmResize) window.removeEventListener('resize', sheet._pmResize);
+    sheet._pmResize=function(){ geom(); upd(); }; window.addEventListener('resize', sheet._pmResize);
+    // Re-measure once the drill-in scale transition settles (rect is scaled mid-open).
+    setTimeout(function(){ geom(); upd(); }, 70);
+    setTimeout(function(){ geom(); upd(); }, 460);
   }
   /* ---- Poomsae drill-in detail ---- */
   var poomSheet=null, poomPagerSaved=null;
@@ -3688,14 +3780,14 @@
       '<div class="ct-tx">'+
         '<div class="poom-nm"><b>'+esc(f.korean)+'</b><span class="poom-hg">'+esc(f.hangul)+'</span></div>'+
         '<div class="hb-sub">'+esc(f.trigramNaam)+' · '+esc(f.element)+' · '+esc(f.band)+' · '+f.bewegingen+' bewegingen</div>'+
-        (f.betekenis?'<p class="poom-blurb">'+esc(f.betekenis)+'</p>':'')+
+        (f.betekenis?'<p class="poom-blurb">'+f.betekenis+'</p>':'')+
       '</div>'+
       '<span class="poom-chev">'+IC.chev+'</span>'+
     '</div>';
   }
   function poomDetailBody(f){
     var h='';
-    // Instructievideo first (skip when no video, e.g. koryo/keumgang)
+    // Instructievideo first (skip when no video)
     if(f.video){
       h+='<div class="hb-sec"><h4>Instructievideo</h4>'+
         '<button class="pd-video" data-act="video" data-v="'+esc(f.video)+'" aria-label="Speel instructievideo">'+
@@ -3708,7 +3800,7 @@
     var tags='';
     if(f.beeld) tags+='<span class="pd-tag"><b>Beeld</b>'+esc(f.beeld)+'</span>';
     if(f.kernpunt) tags+='<span class="pd-tag"><b>Kernpunt</b>'+esc(f.kernpunt)+'</span>';
-    var focus=(f.focus||[]).map(function(c){ return '<li>'+esc(c)+'</li>'; }).join('');
+    var focus=(f.focus||[]).map(function(c){ return '<li>'+c+'</li>'; }).join('');
     if(tags||focus){
       h+='<div class="hb-sec"><h4>Waar let je op</h4>'+
         (tags?'<div class="pd-focus">'+tags+'</div>':'')+
@@ -4205,6 +4297,7 @@
     return '<div class="ex-head">'+
       '<div class="sh"><div class="k">Proef examen</div><h2>Vraag '+(s.i+1)+' van '+s.qs.length+'</h2>'+
         '<p class="sub" id="ex-sub">'+examMoodSub(s,mood)+'</p></div>'+
+      examFace(s)+
     '</div>';
   }
   function examFace(s){
@@ -4246,8 +4339,7 @@
       '<div class="opts" id="ex-opts">'+opts+'</div>'+
       (q.why?'<div class="why" id="ex-why">'+esc(q.why)+'</div>':'')+
     '</div>';
-    foot.innerHTML = examFace(s)+
-      '<button class="nextbtn ghost" id="ex-next" data-act="exnext" disabled style="opacity:.45">Kies een antwoord</button>';
+    foot.innerHTML = '<button class="nextbtn ghost" id="ex-next" data-act="exnext" disabled style="opacity:.45">Kies een antwoord</button>';
     body.scrollTop = 0;
     s.answered = false;
   }
@@ -4351,6 +4443,7 @@
               '<div class="pt-num" id="ot-num">1</div>'+
               '<div class="pt-word" id="ot-word"><span class="w-ko">'+c0[0]+'</span>'+
                 '<span class="w-dot">·</span><span class="w-ro">'+c0[1]+'</span></div>'+
+              '<div class="pt-start" id="ot-start">Tik om te starten</div>'+
             '</div>'+
           '</div>'+
           '<div class="pt-hint" id="ot-hint">tik om te starten</div>'+
@@ -4388,7 +4481,7 @@
     fnav.classList.add('hide');
     requestAnimationFrame(function(){ el.classList.add('show'); });
     otReset();
-    var hn=el.querySelector('#ot-hint');
+    var hn=el.querySelector('#ot-start');
     if(hn) hn.addEventListener('animationend', function(e){ if(e.animationName==='hintGlint') this.classList.remove('glint'); });
     otHintGlint();
   }
@@ -4482,7 +4575,7 @@
     }
 
     else if(type==='meaning'){
-      var lead = esc(f.betekenis);
+      var lead = esc((f.betekenis||'').replace(/<\/?b>/g,''));
       var first = lead.charAt(0), rest = lead.slice(1);
       html = sHead('De vorm','Wat het betekent','')+
         '<p class="lead"><span class="drop poster">'+first+'</span>'+rest+'</p>'+
@@ -4491,7 +4584,7 @@
     }
 
     else if(type==='focus'){
-      var fl = (f.focus||[]);
+      var fl = (f.focus||[]).map(function(s){ return s.replace(/<\/?b>/g,''); });
       var items = fl.map(function(x,i){
         if(i===0) return '<li class="main"><span class="sq"></span><span><span class="mtag">Hoofdfocus vandaag</span>'+esc(x)+'</span></li>';
         return '<li><span class="sq"></span><span>'+esc(x)+'</span></li>';
@@ -4914,12 +5007,12 @@
     if(!numEl) return;
     var frac=0, C=666;
     if(otState.phase==='ready'){
-      if(dial) dial.classList.add('ready');
+      if(dial){ dial.classList.add('ready'); dial.classList.remove('idle'); }
       otShowDots(numEl, OT_READY - otState.ready);
       if(wordEl) wordEl.innerHTML='<span class="w-ko">준비</span><span class="w-dot">·</span><span class="w-ro">Junbi</span>';
       if(hint){ hint.textContent='maak je klaar'; hint.style.opacity='1'; }
     } else if(otState.phase==='count'){
-      if(dial) dial.classList.remove('ready');
+      if(dial){ dial.classList.remove('ready'); dial.classList.remove('idle'); }
       var c=COUNT[otState.i];
       numEl.textContent=(otState.i+1);
       if(wordEl) wordEl.innerHTML='<span class="w-ko">'+c[0]+'</span><span class="w-dot">·</span><span class="w-ro">'+c[1]+'</span>';
@@ -4928,10 +5021,10 @@
       if(hint){ hint.textContent = otState.running ? '' : (done ? 'tik voor opnieuw' : 'tik om verder te tellen');
         hint.style.opacity = otState.running ? '0' : '1'; }
     } else {
-      if(dial) dial.classList.remove('ready');
-      numEl.innerHTML='';                 // resting dial: no ready-dots yet
+      if(dial){ dial.classList.remove('ready'); dial.classList.add('idle'); }
+      numEl.innerHTML='';                 // resting dial: prompt lives in .pt-start, centered in the ring
       if(wordEl) wordEl.innerHTML='';      // hold 준비 · Junbi until the countdown starts
-      if(hint){ hint.textContent='tik om te starten'; hint.style.opacity='1'; }
+      if(hint){ hint.textContent=''; hint.style.opacity='0'; hint.classList.remove('glint'); }
     }
     host.classList.toggle('running', !!otState.running);
     /* Fill + knob move together over one tick; SNAP (no reverse sweep) whenever the ring shrinks
@@ -5225,9 +5318,9 @@
     clearTimeout(otGlintT);
     otGlintT=setTimeout(function(){
       if(!timerScreen) return;
-      var h=timerScreen.querySelector('#ot-hint');
+      var h=timerScreen.querySelector('#ot-start');
       var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if(h && !reduce && otState.phase==='idle' && !otState.running && h.style.opacity!=='0'){
+      if(h && !reduce && otState.phase==='idle' && !otState.running){
         h.classList.remove('glint'); void h.offsetWidth; h.classList.add('glint');
       }
       otHintGlint();
@@ -5408,7 +5501,7 @@
     else if(a==='otrep'){ otPickRep(act.getAttribute('data-v')); }
     else if(a==='ottempo'){ otTempo(); }
     else if(a==='otspeed'){ otSpeed(act.getAttribute('data-v')); }
-    else if(a==='say'){ var _row=act.classList.contains('ct-row')?act:null; var _sb=_row?(_row.querySelector('.ct-say')||_row):act; if(_row){ [].forEach.call(document.querySelectorAll('.ct-row.ring'),function(r){ r.classList.remove('ring'); }); } speak(act.getAttribute('data-ko'), _sb); }
+    else if(a==='say'){ var _row=act.classList.contains('ct-row')?act:null; var _sb=_row?(_row.querySelector('.ct-say')||_row):act; if(_row){ [].forEach.call(document.querySelectorAll('.ct-row.ring, .ct-say.ring'),function(r){ r.classList.remove('ring'); }); } speak(act.getAttribute('data-ko'), _sb); }
     else if(a==='flip'){ var fl=session.querySelector('#flip'); if(fl){ fl.classList.toggle('flipped'); sfx('flip'); } }
     else if(a==='answer'){ handleAnswer(act); }
     else if(a==='cigoal'){ openCheckin('goal'); }
