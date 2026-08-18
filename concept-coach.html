@@ -219,6 +219,9 @@
   .jhead{padding:16px 0 4px}
   .jhead h1{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:32px;letter-spacing:-.01em;margin:0}
   .jhead .js{margin-top:8px;color:var(--gray);font-size:14px}
+  /* Library subtitles (Woorden + Handboek) share one size so switching tabs doesn't jump;
+     Handboek's line re-wraps as the punch-bag narrows the title column. */
+  .wlib .whead .js{font-size:12px;letter-spacing:-.005em;line-height:1.35;text-wrap:balance}
   /* geup-level slider (coloured fill = current grade) */
   .beltpick{margin:18px 0 6px;background:var(--surface);border:1px solid var(--line);
     border-radius:22px;padding:16px 18px 18px}
@@ -400,7 +403,7 @@
     color:rgba(30,22,16,.56);display:grid;place-items:center;
     transition:opacity .25s, transform .25s, color .2s ease, background .2s ease}
   .fab-timer svg{width:25px;height:25px}
-  .fab-timer-ic{width:40px;height:40px;background:currentColor;
+  .fab-timer-ic{width:34px;height:34px;background:currentColor;
     -webkit-mask:url(assets/icons/Timer2.png) center/contain no-repeat;
     mask:url(assets/icons/Timer2.png) center/contain no-repeat}
   .fab-timer:hover{color:rgba(30,22,16,.9)}
@@ -1120,7 +1123,7 @@
   .tv-glabel{font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;
     color:var(--deep);margin:0 2px 4px;display:flex;align-items:center;gap:9px}
   .tv-glabel::after{content:"";flex:1;height:1px;background:var(--line)}
-  .tvrow{display:flex;align-items:center;gap:14px;padding:15px 2px}
+  .tvrow{display:flex;align-items:center;gap:14px;padding:15px 2px;cursor:pointer}
   .tvrow + .tvrow{border-top:1px solid var(--line)}
   .tv-num{flex:none;align-self:flex-start;width:20px;margin-top:2px;font-family:var(--cond);font-weight:700;
     font-size:13px;color:#B7AE9C;text-align:right;font-variant-numeric:tabular-nums}
@@ -1452,6 +1455,7 @@
   .cs-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
   .cs-chip{font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;font-size:11.5px;font-weight:700;
     padding:7px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums}
+  .cs-chip[hidden]{display:none}   /* honour the hidden attr (base display:inline-flex would otherwise override it) */
   .cs-chip.glass{background:rgba(255,255,255,.15);-webkit-backdrop-filter:blur(12px) saturate(1.3);
     backdrop-filter:blur(12px) saturate(1.3);border:1px solid rgba(255,255,255,.26);color:#fff}
   .cs-chip.hot{background:rgba(255,255,255,.92);color:var(--deep);border-color:transparent}
@@ -1606,9 +1610,9 @@
   .ct-grp{flex:none;align-self:center;font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;
     font-size:10px;font-weight:700;color:var(--gray);opacity:.85}
   /* Woorden — clean list hub */
-  .whead{display:flex;align-items:flex-end;gap:2px;padding-top:6px}
-  .whead .jhead{flex:1 1 auto;min-width:0;padding-top:10px}
-  .whead-masc{flex:0 0 auto;position:relative;width:116px;height:142px;margin:0 -2px -6px 0;display:block;pointer-events:none}
+  .whead{display:flex;align-items:flex-start;gap:2px;padding-top:6px}
+  .whead .jhead{flex:1 1 auto;min-width:0;padding-top:10px;margin-top:10px}
+  .whead-masc{flex:0 0 auto;align-self:flex-end;position:relative;width:104px;height:130px;margin:0 -2px -6px 0;display:block;pointer-events:none}
   .whead-masc img{width:100%;height:100%;object-fit:contain;object-position:bottom center;display:block}
   .whead-masc .whead-blink{position:absolute;inset:0;opacity:0}
   @media (prefers-reduced-motion:no-preference){.whead-masc .whead-blink{animation:wheadBlink 5.6s ease-in-out infinite}}
@@ -1629,17 +1633,14 @@
      The bag hangs from a thin ceiling rail (::before) that runs under the profile + streak,
      tying it to the top status row; the bag is sized to stop just above the first list card. */
   .wlib .whead-hb{height:142px;position:relative}
-  /* Two ceiling-rail segments the hook drapes BETWEEN, for a clean "bag hanging over the bar"
-     illusion: the LEFT rail (::before) runs from the screen edge to the hook-arch's left outer
-     edge; the RIGHT rail (::after) from the arch's right outer edge to the screen edge. The gap
-     between them = the hook's footprint, so the descending "?" hook fills it and the bar reads as
-     one continuous rail behind the bag. The inner edges (--rail-l / --rail-r) track the hook's
-     live x (drag) via updateRail(); the hook loop (pbag-mount-top, z4) still sits above, shaft
-     +ring+bag (pbag-mount z2 + swing z1) below. Fallbacks match the at-rest bag position. */
-  .wlib .whead-hb::before{content:"";position:absolute;left:0;width:var(--rail-l,321px);top:16px;height:3px;z-index:3;
-   background:#080A0A;border-radius:0 2px 2px 0;pointer-events:none}
-  .wlib .whead-hb::after{content:"";position:absolute;left:var(--rail-r,334px);right:0;top:16px;height:3px;z-index:3;
-   background:#080A0A;border-radius:2px 0 0 2px;pointer-events:none}
+  /* The rail is a FIXED bar spanning the avatar->streak cluster (the whole top-right control group),
+     directly underneath it. The hook's footprint (l..r) splits it into a left (::before) + right
+     (::after) segment so the "?" hook drapes through; the bag is constrained (down()) so the hook
+     only travels to the ends. Calm neutral tone (var(--gray)) so it reads as hardware, not a focal point. */
+  .wlib .whead-hb::before{content:"";position:absolute;left:var(--rail-a-left,276px);width:var(--rail-a-width,45px);top:16px;height:3px;z-index:3;
+   background:var(--gray);border-radius:2px;pointer-events:none}
+  .wlib .whead-hb::after{content:"";position:absolute;left:var(--rail-b-left,334px);width:var(--rail-b-width,34px);top:16px;height:3px;z-index:3;
+   background:var(--gray);border-radius:2px;pointer-events:none}
   .wlib .whead-hb .whead-bag{align-self:flex-start;height:178px;margin:1px 14px 0 0;touch-action:none}
   .wlib .whead-hb .pbag{cursor:grab}
   .wlib .whead-hb .pbag.grab{cursor:grabbing}
@@ -1669,6 +1670,7 @@
   .bkmk.on{background:var(--seal)}
   .bk-inline{width:1em;height:1.05em;vertical-align:-.16em}
   .cs-chip .bk-inline{width:16px;height:16px;vertical-align:middle}
+  .cs-empty .bk-inline{width:18px;height:19px;vertical-align:-4px}
   .wrow-tx{flex:1;min-width:0}
   .wrow-sub{display:block;font-size:12px;color:var(--gray);margin-top:1px;line-height:1.3}
   /* Handboek list emblem — the category han glyph tinted with its own accent */
@@ -1755,9 +1757,10 @@
   .hb-exeis{display:block;font-size:12.5px;line-height:1.5;color:var(--ink);margin-top:7px}
   /* Handboek detail rows + sections */
   .ct-row.hb-row{align-items:flex-start}
+  .ct-row.hb-row[data-act="say"]{cursor:pointer}
   /* Standen: name row full-width on top; below it the foot-diagram + info (weight + guidance) sit side by side */
   .hbcat .st-row{display:block}
-  .st-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .st-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer}
   .st-head .ct-tx{flex:1;min-width:0}
   .st-act{flex:none;margin:1px -4px 0 8px}
   .st-main{display:flex;align-items:flex-start;gap:16px;margin-top:12px}
@@ -2401,10 +2404,25 @@
     if(!hdr||!hdr.style) return;
     var span=hdr.querySelector('.whead-bag'); if(!span) return;
     var hr=hdr.getBoundingClientRect(), sr=span.getBoundingClientRect(); if(!sr.width) return;
-    var l=(sr.left-hr.left)+ARCH_L*sr.width;   // left rail ends at the arch's left outer edge
-    var r=(sr.left-hr.left)+ARCH_R*sr.width;   // right rail starts at the arch's right outer edge
+    var l=(sr.left-hr.left)+ARCH_L*sr.width;   // hook arch left outer edge (x in header space)
+    var r=(sr.left-hr.left)+ARCH_R*sr.width;   // hook arch right outer edge
     hdr.style.setProperty('--rail-l', Math.max(0,l).toFixed(1)+'px');
     hdr.style.setProperty('--rail-r', Math.max(0,r).toFixed(1)+'px');
+    // Fixed rail = the avatar->streak cluster's span, directly underneath it. The hook gap (l..r)
+    // splits it into a left + right segment. The bag is constrained (see down()) so l/r stay within
+    // that span, so the rail's outer ends stay pinned to the avatar/chip edges — it never grows on drag.
+    var root=hdr.closest('.surface');
+    var chip=root?root.querySelector('.streakchip'):null;
+    var av=root?root.querySelector('.avatar'):null;
+    if(chip){
+      var cr=chip.getBoundingClientRect();
+      var cR=cr.right-hr.left;                                    // rail right end = streak chip's right edge
+      var railL=av?(av.getBoundingClientRect().left-hr.left):(cr.left-hr.left); // rail left end = avatar's left edge
+      hdr.style.setProperty('--rail-a-left', railL.toFixed(1)+'px');
+      hdr.style.setProperty('--rail-a-width', Math.max(0,l-railL).toFixed(1)+'px');
+      hdr.style.setProperty('--rail-b-left', r.toFixed(1)+'px');
+      hdr.style.setProperty('--rail-b-width', Math.max(0,cR-r).toFixed(1)+'px');
+    }
   }
   (function bagRail(){
     var span,btn,swing,hdr,jh,startX=0,startTx=0,drag=false,pid=null,minTx=0,maxTx=0,lastX=0,lastT=0,vel=0;
@@ -2416,10 +2434,14 @@
       startX=e.clientX; startTx=PBAG.x; drag=false; PBAG.dragged=false; pid=e.pointerId;
       lastX=e.clientX; lastT=now();
       var hr=hdr.getBoundingClientRect(), sr=span.getBoundingClientRect();
-      var half=sr.width/2, centerBase=(sr.left-PBAG.x)+half;   // untranslated hook centre
-      var railR=hr.right-22-half;                              // don't overhang the rail's right end
-      var leftLimit=hr.left+190+half;                          // protect the title/subtitle width
-      minTx=leftLimit-centerBase; maxTx=railR-centerBase; if(minTx>maxTx) minTx=maxTx;
+      var w=sr.width, U=(sr.left-hr.left)-PBAG.x;              // untranslated hook-span left (header coords)
+      var root=hdr.closest('.surface'), chip=root?root.querySelector('.streakchip'):null, av=root?root.querySelector('.avatar'):null;
+      var cr=chip?chip.getBoundingClientRect():null;
+      var cl=av?(av.getBoundingClientRect().left-hr.left):(cr?cr.left-hr.left:hr.width-116); // rail left end = avatar's left edge
+      var cR=cr?(cr.right-hr.left):(hr.width-24);              // rail right end = streak chip's right edge
+      minTx=cl-U-ARCH_L*w;                                     // hook's left edge reaches the rail's left end
+      maxTx=cR-U-ARCH_R*w;                                     // hook's right edge reaches the rail's right end
+      if(minTx>maxTx){ minTx=maxTx=(minTx+maxTx)/2; }
       window.addEventListener('pointermove', move, {passive:false});
       window.addEventListener('pointerup', up, {passive:true});
       window.addEventListener('pointercancel', up, {passive:true});
@@ -2637,6 +2659,11 @@
   /* Standard pronunciation speaker: speaker glyph idle ↔ animated waveform (used everywhere). */
   function sayBtn(ko, extraCls){
     return '<button class="ct-say'+(extraCls?' '+extraCls:'')+'" data-act="say" data-ko="'+esc(ko)+'" aria-label="Uitspraak">'+IC.spk+IC.speak+'</button>';
+  }
+  /* Non-interactive speaker indicator for rows whose WHOLE line is the tap target (woorden model):
+     the row wrapper carries data-act="say"; this glyph only mirrors the speaking state (pointer-events:none). */
+  function sayInd(extraCls){
+    return '<span class="ct-say ct-say-ind'+(extraCls?' '+extraCls:'')+'" aria-hidden="true">'+IC.spk+IC.speak+'</span>';
   }
   /* Labelled pronunciation pill for dark card backs (deck flashcard): unmistakable speaker + "Uitspraak"
      so it can't be read as a menu or confused with the flip. Speaker glyph ↔ waveform on .ring. */
@@ -3488,7 +3515,7 @@
       '<div class="whead whead-hb">'+
         '<div class="jhead"><div class="jk"><span class="han-lab">교본 · Gyobon</span></div>'+
           '<h1>Handboek</h1>'+
-          '<div class="js">Alles voor je examen —<br>kies een onderdeel.</div></div>'+
+          '<div class="js">Alles voor je examen — kies een onderdeel.</div></div>'+
         '<span class="whead-masc whead-bag"><button type="button" class="pbag" data-act="hitbag" aria-label="Sla de bokszak"><img class="pbag-swing" src="assets/mascot/punchbag-bag.png" alt=""><img class="pbag-mount" src="assets/mascot/punchbag-mount.png" alt=""><img class="pbag-mount-top" src="assets/mascot/punchbag-mount.png" alt="" aria-hidden="true"></button></span>'+
       '</div>'+
       '<div class="wscroll">'+lists+'</div>'+
@@ -3519,12 +3546,12 @@
     var wt='<div class="st-wt'+(/^\s*50\s*\/\s*50\s*$/.test(s.gewicht||'')?'':' key')+'"><b>Gewicht</b>'+esc(s.gewicht)+'</div>';
     var uit=s.uitleg?'<div class="hb-body">'+esc(s.uitleg)+'</div>':'';
     return '<div class="ct-row hb-row st-row'+(img?'':' st-nofig')+'">'+
-      '<div class="st-head">'+
+      '<div class="st-head" data-act="say" data-ko="'+esc(s.ko)+'" aria-label="Zeg '+esc(s.roman)+' hardop">'+
         '<div class="ct-tx">'+
           '<div class="ct-ko">'+esc(s.ko)+'</div>'+
           '<div class="ct-meta"><b>'+esc(s.roman)+'</b><span class="ct-nl"> · '+esc(s.nl)+'</span></div>'+
         '</div>'+
-        '<div class="st-act">'+sayBtn(s.ko)+'</div>'+
+        '<div class="st-act">'+sayInd()+'</div>'+
       '</div>'+
       '<div class="st-main">'+
         '<div class="st-info">'+wt+uit+'</div>'+fig+
@@ -3532,7 +3559,7 @@
     '</div>';
   }
   function hbRow(e){
-    var say = e.ko ? sayBtn(e.ko) : '';
+    var say = e.ko ? sayInd() : '';
     var head = e.ko
       ? '<div class="ct-ko">'+esc(e.ko)+'</div><div class="ct-meta"><b>'+esc(e.ro)+'</b>'+(e.nl?'<span class="ct-nl"> · '+esc(e.nl)+'</span>':'')+'</div>'
       : '<div class="ct-ko">'+esc(e.ro)+'</div>';
@@ -3540,7 +3567,8 @@
     var body = e.body || '';
     var aside = e.aside || '';
     var cls = e.cls ? ' '+e.cls : '';
-    return '<div class="ct-row hb-row'+cls+'"><div class="ct-tx">'+head+meta+body+'</div>'+aside+say+'</div>';
+    var sayAttr = e.ko ? ' data-act="say" data-ko="'+esc(e.ko)+'" aria-label="Zeg '+esc(e.ro)+' hardop"' : '';
+    return '<div class="ct-row hb-row'+cls+'"'+sayAttr+'><div class="ct-tx">'+head+meta+body+'</div>'+aside+say+'</div>';
   }
   function hbNaslagBody(key){
     // Simplified reference page (ilbo + hosinsul share this builder): concept intro + illustration
@@ -3942,9 +3970,9 @@
     if(id==='woorden'){
       var vd = vocabOfDay();
       var rows = vd.terms.map(function(it,i){
-        return '<div class="tvrow"><span class="tv-num">'+(i+1)+'</span><div class="tv-txt"><div class="tv-ko">'+esc(it.ko)+'</div>'+
+        return '<div class="tvrow" data-act="say" data-ko="'+esc(it.ko)+'" aria-label="Zeg '+esc(it.roman)+' hardop"><span class="tv-num">'+(i+1)+'</span><div class="tv-txt"><div class="tv-ko">'+esc(it.ko)+'</div>'+
           '<div class="tv-ro">'+esc(it.roman)+'</div><div class="tv-nl">'+esc(it.nl)+'</div></div>'+
-          sayBtn(it.ko)+'</div>';
+          sayInd()+'</div>';
       }).join('');
       var t0 = vd.terms[0] || {ko:'',roman:'',nl:''};
       var dots = vd.terms.map(function(_x,i){ return '<span'+(i===0?' class="on"':'')+' data-act="wddot" data-i="'+i+'"></span>'; }).join('');
@@ -4600,11 +4628,11 @@
       var groupsHtml = groups.map(function(g){
         var rows = g.items.map(function(it){
           var isNew = n0 && it.ko===n0.ko;
-          return '<div class="tvrow'+(isNew?' isnew':'')+'">'+
+          return '<div class="tvrow'+(isNew?' isnew':'')+'" data-act="say" data-ko="'+esc(it.ko)+'" aria-label="Zeg '+esc(it.roman)+' hardop">'+
             '<div class="tv-txt"><div class="tv-ko">'+esc(it.ko)+(isNew?'<span class="newtag">nieuw</span>':'')+'</div>'+
               '<div class="tv-ro">'+esc(it.roman)+'</div>'+
               '<div class="tv-nl">'+esc(it.nl)+'</div></div>'+
-            sayBtn(it.ko)+
+            sayInd()+
           '</div>';
         }).join('');
         return '<div class="tvgroup"><div class="tv-glabel">'+esc(g.groep)+'</div>'+rows+'</div>';
@@ -5501,7 +5529,7 @@
     else if(a==='otrep'){ otPickRep(act.getAttribute('data-v')); }
     else if(a==='ottempo'){ otTempo(); }
     else if(a==='otspeed'){ otSpeed(act.getAttribute('data-v')); }
-    else if(a==='say'){ var _row=act.classList.contains('ct-row')?act:null; var _sb=_row?(_row.querySelector('.ct-say')||_row):act; if(_row){ [].forEach.call(document.querySelectorAll('.ct-row.ring, .ct-say.ring'),function(r){ r.classList.remove('ring'); }); } speak(act.getAttribute('data-ko'), _sb); }
+    else if(a==='say'){ var _inner=act.querySelector?act.querySelector('.ct-say'):null; var _sb=_inner||act; if(_inner){ [].forEach.call(document.querySelectorAll('.ct-row.ring, .ct-say.ring'),function(r){ r.classList.remove('ring'); }); } speak(act.getAttribute('data-ko'), _sb); }
     else if(a==='flip'){ var fl=session.querySelector('#flip'); if(fl){ fl.classList.toggle('flipped'); sfx('flip'); } }
     else if(a==='answer'){ handleAnswer(act); }
     else if(a==='cigoal'){ openCheckin('goal'); }
