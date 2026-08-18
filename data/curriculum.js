@@ -440,7 +440,7 @@ window.CURRICULUM = {
         }
       },
       veilig: "Geen rukken aan vingers of gewrichten. Je partner kan altijd aftikken of ‘stop’ zeggen. Oefen dit onderdeel alleen onder begeleiding van je trainer.",
-      video: { url: "https://www.facebook.com/reel/663327380932748", poster: "./img/video/hosinsul.jpg", titel: "3 Hosinsul", bron: "Onze school" }
+      video: { url: "https://www.facebook.com/reel/663327380932748", poster: "./img/video/hosinsul.jpg", titel: "3 Hosinsul", bron: "Taekwondo Kawarmala Holland" }
     }
   },
 
