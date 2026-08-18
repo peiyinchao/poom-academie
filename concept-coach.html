@@ -1518,8 +1518,17 @@
   .wcat .cs-head,.hbcat .cs-head{margin-top:92px}
   .wcat .cs-eye,.hbcat .cs-eye{color:var(--gray)}
   .wcat .cs-title,.hbcat .cs-title{color:var(--ink);font-size:32px;margin-top:0}
+  /* Examenkaart grade token, coloured to the belt it represents */
+  .hbcat .cs-title .ek-grade{-webkit-text-fill-color:currentColor}
+  .hbcat .cs-title .ek-poom{color:var(--ink);-webkit-text-fill-color:var(--ink)}
+  .hbcat .cs-title .ek-star{color:#B9932E;-webkit-text-fill-color:#B9932E;margin-left:.08em;font-weight:900}
   .wcat .cs-titlerow,.hbcat .cs-titlerow{display:flex;align-items:flex-end;justify-content:space-between;gap:8px 14px;flex-wrap:wrap;margin-top:6px}
   .wcat .cs-titlerow .cs-chips,.hbcat .cs-titlerow .cs-chips{margin-top:0;padding-bottom:4px;flex:0 0 auto;display:flex;gap:7px;flex-wrap:wrap}
+  /* Standen: subtitle beneath the title (replaces the count/label chips) explaining seogi vs kubi */
+  .hbcat .cs-titlerow:has(.cs-standen-sub){flex-direction:column;align-items:flex-start;gap:6px}
+  .hbcat .cs-titlerow:has(.cs-standen-sub) .cs-chips{display:block;flex:1 1 100%;padding-bottom:0}
+  .cs-standen-sub{font-size:12.5px;line-height:1.5;color:var(--gray)}
+  .cs-standen-sub b{color:var(--ink);font-weight:800}
   .wcat .cs-chip.glass,.hbcat .cs-chip.glass{background:var(--soft);border:1px solid var(--line);color:var(--gray);
     -webkit-backdrop-filter:none;backdrop-filter:none}
   .wcat .cs-chip.hot{background:color-mix(in srgb, var(--seal) 12%, #fff);color:var(--seal);border-color:transparent}
@@ -1744,14 +1753,19 @@
   .hb-exeis{display:block;font-size:12.5px;line-height:1.5;color:var(--ink);margin-top:7px}
   /* Handboek detail rows + sections */
   .ct-row.hb-row{align-items:flex-start}
-  /* Standen: floated foot-diagram (left) + floated speaker (right); text wraps full-width around both */
+  /* Standen: name row full-width on top; below it the foot-diagram + info (weight + guidance) sit side by side */
   .hbcat .st-row{display:block}
-  .hbcat .st-row::after{content:"";display:block;clear:both}
-  /* Frameless foot-diagram: transparent PNG sits straight on the surface, enlarged */
-  .st-fig{float:left;width:94px;margin:2px 15px 2px 0}
+  .st-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .st-head .ct-tx{flex:1;min-width:0}
+  .st-act{flex:none;margin:1px -4px 0 8px}
+  .st-main{display:flex;align-items:flex-start;gap:16px;margin-top:12px}
+  .st-nofig .st-main{margin-top:10px}
+  /* Frameless foot-diagram: transparent PNG sits straight on the surface */
+  .st-fig{flex:none;width:94px}
   .st-fig img{width:100%;height:auto;display:block;-webkit-user-drag:none;user-select:none}
-  .st-act{float:right;margin:2px -4px 2px 10px}
-  .st-row .hb-body{margin-top:6px}
+  .st-info{flex:1;min-width:0}
+  .st-info .st-wt{margin-top:0}
+  .st-info .hb-body{margin-top:8px}
   /* Weight distribution pill. Neutral by default; only asymmetric (non-50/50) is highlighted */
   .st-wt{display:inline-block;margin-top:7px;font-family:var(--cond);font-weight:700;font-size:14px;
     letter-spacing:.01em;color:var(--ink);background:var(--soft);
@@ -1776,11 +1790,16 @@
   .hb-illus{position:relative;margin:0 -6px 16px;padding:10px 6px 0;border-radius:20px;
     background:radial-gradient(126% 94% at 50% 100%, rgba(36,104,214,.13), rgba(36,104,214,0) 72%)}
   .hb-illusb{position:relative;width:100%;max-width:330px;margin:0 auto}
-  .hb-illus.hb-illus-tall .hb-illusb{max-width:210px}
+  .hb-illus.hb-illus-tall .hb-illusb{max-width:143px}
+  .hb-illus.hb-illus-tall{margin-left:0;margin-right:0}
   .hb-illusb img{display:block;width:100%;height:auto}
   .hb-illusb .hb-blink{position:absolute;left:0;top:0;opacity:0}
   @keyframes hbBlink{0%,92.5%,100%{opacity:0}94.5%,97.5%{opacity:1}}
   @media (prefers-reduced-motion:no-preference){.hb-illusb .hb-blink{animation:hbBlink 5.6s infinite}}
+  /* Two-mascot scenes: blink each half on its own clock so their eyes don't close together */
+  .hb-illusb .hb-blink-l{clip-path:inset(0 50% 0 0)}
+  .hb-illusb .hb-blink-r{clip-path:inset(0 0 0 50%)}
+  @media (prefers-reduced-motion:no-preference){.hb-illusb .hb-blink-r{animation-duration:6.7s}}
   /* "Wat je laat zien" — bare vertical accent bar (same language as the daily quote .gday),
      no card / border / fill, so important info reads consistently across the whole app. */
   .hb-eis{position:relative;padding:1px 0 1px 16px;
@@ -1791,10 +1810,75 @@
     font-weight:800;color:var(--accent,var(--el));margin-bottom:4px}
   .hb-sec{margin-bottom:15px}
   .hb-sec h4{font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;font-size:14px;
-    color:var(--deep);margin:0 0 5px}
+    color:var(--deep);margin:0 0 12px}
   .hb-sec p{font-size:13.5px;line-height:1.55;color:var(--ink);margin:0}
   .hb-check{margin:6px 0 0;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--ink)}
   .hb-check li{margin-bottom:3px}
+  /* Video link — opens the school's Facebook clip in a new tab (simple link, no poster preview) */
+  .hb-videohd{font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;font-size:12px;
+    font-weight:800;color:var(--gray);margin:2px 2px 12px}
+  .reellink{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;
+    background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    text-decoration:none;color:var(--ink);-webkit-tap-highlight-color:transparent;
+    box-shadow:0 10px 24px -18px rgba(16,24,40,.5)}
+  .reellink .reellink-ic{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;
+    background:#1877F2;color:#fff}
+  .reellink .reellink-ic svg{width:19px;height:19px}
+  .reellink .reellink-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+  .reellink .reellink-tx b{font-size:14px;font-weight:700;line-height:1.25;color:var(--ink)}
+  .reellink .reellink-tx span{font-size:12px;color:var(--gray)}
+  .reellink .reellink-go{flex:none;width:18px;height:18px;color:var(--gray);opacity:.5}
+  .reellink .reellink-go svg{width:100%;height:100%}
+  @media (hover:hover){ .reellink:hover{background:color-mix(in srgb,#6B6459 4%,transparent)} .reellink:hover .reellink-go{opacity:.85} }
+  .reellink:active{transform:scale(.99)}
+  /* Poomsae list rows — name + hangul + short betekenis; whole row drills in (chevron → openPoomDetail) */
+  .poom-row{cursor:pointer;align-items:flex-start;gap:12px}
+  .poom-nm{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .poom-nm b{font-size:16px;font-weight:800;color:var(--ink)}
+  .poom-nm .poom-hg{font-size:13px;font-weight:600;color:var(--gray);white-space:nowrap}
+  .poom-row .hb-sub{margin-top:3px;font-size:12px}
+  .poom-blurb{margin:8px 0 0;font-size:13px;line-height:1.5;color:var(--ink);opacity:.85}
+  .poom-chev{flex:none;width:20px;height:20px;color:var(--gray);opacity:.5;align-self:center;margin-left:2px}
+  .poom-chev svg{width:100%;height:100%}
+  @media (hover:hover){ .poom-row:hover{background:color-mix(in srgb, #6B6459 4%, transparent)} .poom-row:hover .poom-chev{opacity:.85} }
+  .poom-row:active{background:color-mix(in srgb, #6B6459 7%, transparent)}
+  /* Poomsae detail sheet (drill-in on top of the poomsae list) */
+  .poomdetail .pd-back{position:absolute;top:calc(env(safe-area-inset-top) + 16px);left:20px;right:auto;z-index:4;
+    width:64px;height:64px;padding:0;display:grid;place-items:center;background:transparent;border:0;cursor:pointer;
+    color:var(--ink);border-radius:50%}
+  .poomdetail .pd-back svg{width:25px;height:25px}
+  @media (hover:hover){ .poomdetail .pd-back:hover{background:rgba(20,23,18,.05)} }
+  .poomdetail .pd-back:active{transform:scale(.9)}
+  .poomdetail .cs-hero{padding-top:calc(env(safe-area-inset-top) + 52px)}
+  .poomdetail .cs-eye{color:var(--el)}
+  .pd-titlerow{display:flex;align-items:flex-start;gap:12px;margin-top:9px}
+  .pd-trig{flex:none;width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    color:#fff;background:linear-gradient(150deg,var(--el),var(--deep));box-shadow:0 5px 14px color-mix(in srgb,var(--el) 30%,transparent)}
+  .pd-trig svg{width:27px;height:27px}
+  .pd-tt{min-width:0}
+  .poomdetail .pd-tt .cs-title{margin:0}
+  .pd-sub{display:block;font-size:12.5px;color:var(--gray);margin-top:3px}
+  .pd-facts{display:flex;flex-wrap:wrap;gap:9px 22px;margin-top:15px}
+  .pd-fact{display:flex;flex-direction:column;line-height:1.15}
+  .pd-fk{font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:10.5px;color:var(--gray)}
+  .pd-fv{font-size:14px;font-weight:700;color:var(--ink)}
+  .poomdetail .cs-body{padding-top:18px}
+  .pd-focus{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 11px}
+  .pd-tag{display:inline-flex;flex-direction:column;gap:2px;background:color-mix(in srgb,var(--el) 8%,#fff);
+    border:1px solid color-mix(in srgb,var(--el) 20%,#fff);border-radius:12px;padding:8px 12px;font-size:13px;
+    line-height:1.4;color:var(--ink);max-width:100%}
+  .pd-tag b{font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:10.5px;color:var(--el)}
+  .pd-video{position:relative;display:block;width:100%;border:0;padding:0;border-radius:16px;overflow:hidden;
+    background:#0B0E14;aspect-ratio:16/9;cursor:pointer}
+  .pd-video-thumb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.72}
+  .pd-video-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;
+    border-radius:50%;background:rgba(255,255,255,.92);color:#0B0E14;display:flex;align-items:center;justify-content:center;
+    z-index:2;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+  .pd-video-play svg{width:26px;height:26px;margin-left:3px}
+  .pd-video-lab{position:absolute;left:13px;bottom:11px;z-index:2;color:#fff;font-size:12px;font-family:var(--cond);
+    text-transform:uppercase;letter-spacing:.08em}
+  .pd-video.playing{background:#000}
+  .pd-video.playing iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   /* PNG-mask nav icons (inherit currentColor → belt ink when active) */
   .nav-ic{width:27px;height:27px;flex:none;display:block;background:currentColor;
     -webkit-mask:center/contain no-repeat;mask:center/contain no-repeat}
@@ -1889,7 +1973,8 @@
     bookmark:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.2L5 21V4a1 1 0 0 1 1-1z"/></svg>',
     bookmarkO:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.2L5 21V4a1 1 0 0 1 1-1z"/></svg>',
     search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>',
-    grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg>'
+    grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg>',
+    fb:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"/></svg>'
   };
 
   /* ---- Korean visual motifs (SVG) ---- */
@@ -2067,6 +2152,13 @@
   function beltStroke(g){
     var c = beltFill(g), guard=0;
     while(contrast(c,'#F4F1EA') < 3 && guard++<24){ c = shade(c,-8); }
+    return c;
+  }
+  // A single belt hex tuned as legible INK on the cream page (--page #F4F1EA),
+  // so grade-coloured text (e.g. the Examenkaart title) stays readable.
+  function inkOnPage(hex){
+    var c = hex || '#1A1712', guard=0;
+    while(contrast(c,'#F4F1EA') < 3.4 && guard++<48){ c = shade(c,-6); }
     return c;
   }
   // Colour the active-tab highlight + label to match the student's belt grade (adaptive ink for legibility)
@@ -2982,13 +3074,13 @@
     var wrap=sheet.querySelector('.cs-titlewrap');
     var cur=wrap && wrap.querySelector('.cs-title-cur');
     if(!cur) return;
-    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ cur.textContent=name; return; }
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ cur.innerHTML=name; return; }
     var stale=wrap.querySelectorAll('.cs-title-ghost');
     for(var i=0;i<stale.length;i++){ if(stale[i].parentNode) stale[i].parentNode.removeChild(stale[i]); }
     var ghost=cur.cloneNode(true);
     ghost.className='cs-title cs-title-ghost';
     wrap.appendChild(ghost);
-    cur.textContent=name;
+    cur.innerHTML=name;
     cur.classList.remove('enter-r','enter-l'); void cur.offsetWidth;
     cur.classList.add(dir<0 ? 'enter-l' : 'enter-r');
     ghost.classList.add(dir<0 ? 'exit-r' : 'exit-l');
@@ -3155,7 +3247,7 @@
     catSheet.setAttribute('data-cat', name);
     var eye=catSheet.querySelector('.cs-eye'); if(eye) eye.innerHTML=parts.eyebrow;
     var chips=catSheet.querySelector('.cs-titlerow .cs-chips'); if(chips) chips.innerHTML=parts.chips;
-    csTitleSwap(catSheet, name, dir);
+    csTitleSwap(catSheet, esc(name), dir);
     csRateSwap(catSheet, name, dir);
     fadeSwap(catSheet.querySelector('.cs-note'), parts.note);
     swapCatList(catSheet.querySelector('.ct-list'), parts.list);
@@ -3266,6 +3358,25 @@
   function nextGradeInfo(){ return geupInfo(Math.min(GEUPS.length-1, GEUP_I+1)); }
   function gradeNoun(g){ return /poom/i.test(g.grade)?'poom':'geup'; }
   function examTitle(){ var g=nextGradeInfo(); return 'Examenkaart '+firstNum(g.grade)+'e '+gradeNoun(g); }
+  // Same contextual title, but the grade token carries the belt colour it represents:
+  // single-colour belts → solid legible ink; dual belts → a two-stop gradient (blue→red,
+  // red→black); black-belt poom levels → black ink + a gold * (1e poom) / ** (2e poom).
+  function examTitleHtml(){
+    var g=nextGradeInfo(), gradeTxt=esc(firstNum(g.grade)+'e '+gradeNoun(g));
+    if(/poom/i.test(g.grade)){
+      var stars = g.stop==='P2' ? '**' : '*';
+      return 'Examenkaart <span class="ek-grade ek-poom">'+gradeTxt+
+        '<span class="ek-star" aria-hidden="true">'+stars+'</span></span>';
+    }
+    var style;
+    if(g.col2){
+      // match the "Kies je graad" slider fill exactly: dualBg = soft 20/80 blend of the belt's two colours
+      style='background-image:'+dualBg(g)+';-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:'+inkOnPage(g.col);
+    } else {
+      style='color:'+inkOnPage(g.col);
+    }
+    return 'Examenkaart <span class="ek-grade" style="'+style+'">'+gradeTxt+'</span>';
+  }
   function examSub(){ var g=nextGradeInfo(), n=firstNum(g.grade); return 'Wat moet je kunnen voor jouw '+(ORD_NL[n]||(n+'e'))+' '+gradeNoun(g); }
   function geupExamCard(g){
     var e=GEUP_EIS[g.stop]||{}, tf=byId(g.form2||g.form), maxN=tf?tf.nr:8, od=[];
@@ -3286,6 +3397,7 @@
     return geupExamCard(g);
   }
   function catTitle(cat){ return cat&&cat.key==='examen' ? examTitle() : (cat?cat.title:''); }
+  function catTitleHtml(cat){ return cat&&cat.key==='examen' ? examTitleHtml() : esc(cat?cat.title:''); }
   function catSub(cat){ return cat&&cat.key==='examen' ? examSub() : (cat?cat.sub:''); }
   function hbCount(key){
     if(key==='poomsae')    return poomsae.length;
@@ -3372,18 +3484,30 @@
     'Ap koa seogi':'ap-koa','Hakdari seogi':'hakdari'
   };
   function stanceImg(roman){ var s=STANCE_IMG[roman]; return s?'img/stances/'+s+'.png':null; }
-  function standenList(){ return (C.standen||[]).filter(function(s){ return stanceImg(s.roman); }); }
-  // One stance row: floated foot-diagram (left) + floated speaker (right); text wraps full-width around both.
+  // Display order for the Standen page (data file keeps its own canonical order for lookups).
+  var STANCE_ORDER=['Moa seogi','Naranhi seogi','Ap seogi','Ap kubi','Beom seogi','Hakdari seogi','Juchum seogi','Dwit kubi','Wen seogi','Oreun seogi','Ap koa seogi'];
+  function standenList(){
+    return (C.standen||[]).filter(function(s){ return stanceImg(s.roman); }).sort(function(a,b){
+      var ia=STANCE_ORDER.indexOf(a.roman), ib=STANCE_ORDER.indexOf(b.roman);
+      return (ia<0?STANCE_ORDER.length:ia)-(ib<0?STANCE_ORDER.length:ib);
+    });
+  }
+  // One stance row: floated foot-diagram (right) + floated speaker (left); text wraps full-width around both.
   function stanceRow(s){
     var img=stanceImg(s.roman);
     var fig=img?'<span class="st-fig"><img src="'+img+'" alt="Voetdiagram '+esc(s.roman)+'" loading="lazy"></span>':'';
-    return '<div class="ct-row hb-row st-row'+(img?'':' st-nofig')+'">'+fig+
-      '<div class="st-act">'+sayBtn(s.ko)+'</div>'+
-      '<div class="ct-tx">'+
-        '<div class="ct-ko">'+esc(s.ko)+'</div>'+
-        '<div class="ct-meta"><b>'+esc(s.roman)+'</b><span class="ct-nl"> · '+esc(s.nl)+'</span></div>'+
-        '<div class="st-wt'+(/^\s*50\s*\/\s*50\s*$/.test(s.gewicht||'')?'':' key')+'"><b>Gewicht</b>'+esc(s.gewicht)+'</div>'+
-        (s.uitleg?'<div class="hb-body">'+esc(s.uitleg)+'</div>':'')+
+    var wt='<div class="st-wt'+(/^\s*50\s*\/\s*50\s*$/.test(s.gewicht||'')?'':' key')+'"><b>Gewicht</b>'+esc(s.gewicht)+'</div>';
+    var uit=s.uitleg?'<div class="hb-body">'+esc(s.uitleg)+'</div>':'';
+    return '<div class="ct-row hb-row st-row'+(img?'':' st-nofig')+'">'+
+      '<div class="st-head">'+
+        '<div class="ct-tx">'+
+          '<div class="ct-ko">'+esc(s.ko)+'</div>'+
+          '<div class="ct-meta"><b>'+esc(s.roman)+'</b><span class="ct-nl"> · '+esc(s.nl)+'</span></div>'+
+        '</div>'+
+        '<div class="st-act">'+sayBtn(s.ko)+'</div>'+
+      '</div>'+
+      '<div class="st-main">'+
+        '<div class="st-info">'+wt+uit+'</div>'+fig+
       '</div>'+
     '</div>';
   }
@@ -3399,27 +3523,44 @@
     return '<div class="ct-row hb-row'+cls+'"><div class="ct-tx">'+head+meta+body+'</div>'+aside+say+'</div>';
   }
   function hbNaslagBody(key){
-    var n=C.naslag[key], lv=hbLv(key), h='';
-    if(key==='ilbo') h+=illusHtml('ilbo-taeryon', false, -0.4);
+    // Simplified reference page (ilbo + hosinsul share this builder): concept intro + illustration
+    // + a link to the school's video. Grade-specific quantities (how many afwerkingen/verdedigingen)
+    // live in the contextual Examenkaart, not here.
+    var n=C.naslag[key], h='';
+    if(key==='ilbo') h+=illusHtml('ilbo-taeryon', false, -0.4, true);
     if(n.intro) h+='<p class="hb-lead">'+esc(n.intro)+'</p>';
-    if(lv.eis)  h+='<div class="hb-eis"><span class="hb-eis-l">Wat je laat zien</span>'+esc(lv.eis)+'</div>';
-    (lv.secties||[]).forEach(function(s){ h+='<div class="hb-sec"><h4>'+esc(s.h)+'</h4><p>'+s.b+'</p></div>'; });
-    if(lv.check&&lv.check.length) h+='<div class="hb-sec"><h4>Let op</h4><ul class="hb-check">'+lv.check.map(function(c){ return '<li>'+esc(c)+'</li>'; }).join('')+'</ul></div>';
+    if(n.video) h+=reelHtml(n.video);
     return h;
   }
+  function reelHtml(v){
+    return '<h4 class="hb-videohd">Taekwondo Kawarmala Holland</h4>'+
+      '<a class="reellink" href="'+esc(v.url)+'" target="_blank" rel="noopener">'+
+        '<span class="reellink-ic">'+IC.fb+'</span>'+
+        '<span class="reellink-tx"><b>'+esc(v.titel)+'</b><span>'+esc(v.bron)+' · Facebook</span></span>'+
+        '<span class="reellink-go">'+IC.chev+'</span>'+
+      '</a>';
+  }
   /* Gyeorugi/Gyeokpa etc.: intro (uitleg) + graad-eis + tips, gebouwd uit C.onderdelen. */
-  function illusHtml(slug, tall, delay){
-    return '<div class="hb-illus'+(tall?' hb-illus-tall':'')+'"><div class="hb-illusb">'+
-      '<img src="assets/mascot/'+slug+'.png" alt="" aria-hidden="true">'+
-      '<img class="hb-blink" src="assets/mascot/'+slug+'-blink.png" alt="" aria-hidden="true" style="animation-delay:'+delay+'s">'+
-      '</div></div>';
+  function illusHtml(slug, tall, delay, pair){
+    var base='<img src="assets/mascot/'+slug+'.png" alt="" aria-hidden="true">';
+    var blink;
+    if(pair){
+      // Two mascots share one scene PNG: blink each half independently (different delay + drift) so
+      // their eyes don't close in lockstep. The blink frame only differs at the eyes, so the midline
+      // clip is invisible on the rest of the scene.
+      blink='<img class="hb-blink hb-blink-l" src="assets/mascot/'+slug+'-blink.png" alt="" aria-hidden="true" style="animation-delay:'+delay+'s">'+
+        '<img class="hb-blink hb-blink-r" src="assets/mascot/'+slug+'-blink.png" alt="" aria-hidden="true" style="animation-delay:'+(delay-2.8)+'s">';
+    } else {
+      blink='<img class="hb-blink" src="assets/mascot/'+slug+'-blink.png" alt="" aria-hidden="true" style="animation-delay:'+delay+'s">';
+    }
+    return '<div class="hb-illus'+(tall?' hb-illus-tall':'')+'"><div class="hb-illusb">'+base+blink+'</div></div>';
   }
   function hbOnderdeelBody(cat){
     var list=C.onderdelen||[], od=null, i;
     for(i=0;i<list.length;i++){ if(list[i].id===cat.odid){ od=list[i]; break; } }
     var h='';
     var ILLUS={ gyepa:'gyeokpa-scene', gyeorugi:'gyeorugi-pair' };
-    if(cat && ILLUS[cat.odid]) h+=illusHtml(ILLUS[cat.odid], false, cat.odid==='gyepa'?-2.9:-0.4);
+    if(cat && ILLUS[cat.odid]) h+=illusHtml(ILLUS[cat.odid], false, cat.odid==='gyepa'?-2.9:-0.4, true);
     if(od&&od.uitleg) h+='<p class="hb-lead">'+esc(od.uitleg)+'</p>';
     if(cat.eis)       h+='<div class="hb-eis"><span class="hb-eis-l">Wat je laat zien</span>'+esc(cat.eis)+'</div>';
     if(od&&od.tips&&od.tips.length) h+='<div class="hb-sec"><h4>Let op</h4><ul class="hb-check">'+od.tips.map(function(t){ return '<li>'+esc(t)+'</li>'; }).join('')+'</ul></div>';
@@ -3465,10 +3606,7 @@
       return h;
     }
     var rows='';
-    if(key==='poomsae') poomsae.forEach(function(f){
-      rows+=hbRow({ko:f.hangul, ro:f.korean, meta:f.trigram+'  '+f.element+' · '+f.band+' · '+f.bewegingen+' bewegingen',
-        body:f.betekenis?'<div class="hb-body">'+esc(f.betekenis)+'</div>':''});
-    });
+    if(key==='poomsae') poomsae.forEach(function(f){ rows+=poomRow(f); });
     else if(key==='standen') standenList().forEach(function(s){ rows+=stanceRow(s); });
     else if(key==='theorie') (C.theorie||[]).forEach(function(t){
       if(t.id==='taegeuk'){
@@ -3488,15 +3626,17 @@
   var hbSheet=null;
   function hbNames(){ return hbCatsActive().map(function(c){ return c.key; }); }
   function hbChips(cat){
-    if(cat.kind==='onderdeel'){
-      return '<span class="cs-chip glass">'+esc(cat.ko)+' · '+esc(cat.roman)+'</span>'+
-        '<span class="cs-chip glass">'+esc(cat.sub)+'</span>';
+    // The seogi/kubi explanation is the only header sub-content worth keeping; the count/label
+    // chips on every other Handboek sheet don't add value, so they're dropped everywhere.
+    if(cat.key==='standen'){
+      return '<span class="cs-standen-sub"><b>Seogi</b> (서기) betekent \u2018stand\u2019 \u2014 zo heten de meeste standen. '+
+        '<b>Kubi</b> (굽이) betekent \u2018gebogen\u2019: een lange, diepe stand met een gebogen knie die het gewicht draagt, '+
+        'zoals Ap kubi (naar voren) en Dwit kubi (naar achteren).</span>';
     }
-    return '<span class="cs-chip glass">'+hbCount(cat.key)+' '+esc(cat.unit)+'</span>'+
-      '<span class="cs-chip glass">'+esc(cat.sub)+'</span>';
+    return '';
   }
   function hbTitleRow(cat){
-    return '<div class="cs-titlewrap"><h2 class="cs-title cs-title-cur">'+esc(catTitle(cat))+'</h2></div>'+
+    return '<div class="cs-titlewrap"><h2 class="cs-title cs-title-cur">'+catTitleHtml(cat)+'</h2></div>'+
       '<div class="cs-chips">'+hbChips(cat)+'</div>';
   }
   function openHb(key){
@@ -3533,7 +3673,7 @@
     applyCatAccent(hbSheet, cat.el);
     hbSheet.setAttribute('data-hb', key);
     var chips=hbSheet.querySelector('.cs-titlerow .cs-chips'); if(chips) chips.innerHTML=hbChips(cat);
-    csTitleSwap(hbSheet, catTitle(cat), dir);
+    csTitleSwap(hbSheet, catTitleHtml(cat), dir);
     fadeSwap(hbSheet.querySelector('.cs-body'), hbBody(cat.key));
     updateDots(key);
   }
@@ -3558,6 +3698,92 @@
     s.classList.remove('show');
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 400);
     fnav.classList.remove('hide');
+  }
+  /* ---- Poomsae drill-in detail ---- */
+  var poomSheet=null, poomPagerSaved=null;
+  function poomById(id){ for(var i=0;i<poomsae.length;i++){ if(poomsae[i].id===id) return poomsae[i]; } return null; }
+  function standByRoman(r){ var a=C.standen||[]; for(var i=0;i<a.length;i++){ if(a[i].roman===r) return a[i]; } return null; }
+  function poomRow(f){
+    return '<div class="ct-row hb-row poom-row" data-act="openpoom" data-id="'+esc(f.id)+'" role="button" tabindex="0">'+
+      '<div class="ct-tx">'+
+        '<div class="poom-nm"><b>'+esc(f.korean)+'</b><span class="poom-hg">'+esc(f.hangul)+'</span></div>'+
+        '<div class="hb-sub">'+esc(f.trigramNaam)+' · '+esc(f.element)+' · '+esc(f.band)+' · '+f.bewegingen+' bewegingen</div>'+
+        (f.betekenis?'<p class="poom-blurb">'+esc(f.betekenis)+'</p>':'')+
+      '</div>'+
+      '<span class="poom-chev">'+IC.chev+'</span>'+
+    '</div>';
+  }
+  function poomDetailBody(f){
+    var h='';
+    // Waar let je op
+    var tags='';
+    if(f.beeld) tags+='<span class="pd-tag"><b>Beeld</b>'+esc(f.beeld)+'</span>';
+    if(f.kernpunt) tags+='<span class="pd-tag"><b>Kernpunt</b>'+esc(f.kernpunt)+'</span>';
+    var focus=(f.focus||[]).map(function(c){ return '<li>'+esc(c)+'</li>'; }).join('');
+    if(tags||focus){
+      h+='<div class="hb-sec"><h4>Waar let je op</h4>'+
+        (tags?'<div class="pd-focus">'+tags+'</div>':'')+
+        (focus?'<ul class="hb-check">'+focus+'</ul>':'')+'</div>';
+    }
+    // Nieuwe technieken
+    if(f.nieuw&&f.nieuw.length){
+      var nr=''; f.nieuw.forEach(function(t){ nr+=hbRow({ko:t.ko, ro:t.roman, nl:t.nl}); });
+      h+='<div class="hb-sec"><h4>Nieuwe technieken</h4><div class="ct-list">'+nr+'</div></div>';
+    }
+    // Standen in deze vorm
+    if(f.standen&&f.standen.length){
+      var sr=''; f.standen.forEach(function(rm){ var s=standByRoman(rm); if(s) sr+=stanceRow(s); });
+      if(sr) h+='<div class="hb-sec"><h4>Standen in deze vorm</h4><div class="ct-list">'+sr+'</div></div>';
+    }
+    // Instructievideo (skip when no video, e.g. koryo/keumgang)
+    if(f.video){
+      h+='<div class="hb-sec"><h4>Instructievideo</h4>'+
+        '<button class="pd-video" data-act="video" data-v="'+esc(f.video)+'" aria-label="Speel instructievideo">'+
+          '<img class="pd-video-thumb" src="https://i.ytimg.com/vi/'+esc(f.video)+'/hqdefault.jpg" alt="" loading="lazy" onerror="this.style.display=\'none\'">'+
+          '<span class="pd-video-play">'+IC.play+'</span>'+
+          '<span class="pd-video-lab">'+esc(f.korean)+'</span>'+
+        '</button></div>';
+    }
+    return h;
+  }
+  function openPoomDetail(id){
+    var f=poomById(id); if(!f) return;
+    poomPagerSaved=activePager; activePager=null;
+    poomSheet=document.createElement('div');
+    poomSheet.className='session catsheet hbcat poomdetail';
+    applyCatAccent(poomSheet, '#2468D6');
+    poomSheet.innerHTML=
+      '<div class="cs-hero">'+
+        '<button class="pd-back" data-act="poomclose" aria-label="Terug naar poomsae">'+IC.back+'</button>'+
+        '<div class="cs-head">'+
+          '<div class="cs-eye">품새 · POOMSAE</div>'+
+          '<div class="pd-titlerow">'+
+            '<span class="pd-trig">'+trigramSVG(f.trigram)+'</span>'+
+            '<span class="pd-tt">'+
+              '<h2 class="cs-title">'+esc(f.korean)+'</h2>'+
+              '<span class="pd-sub">'+esc(f.hangul)+' · '+esc(f.trigramNaam)+' ('+esc(f.trigramHangul)+')</span>'+
+            '</span>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="cs-body">'+poomDetailBody(f)+'</div>';
+    stage.appendChild(poomSheet);
+    fnav.classList.add('hide');
+    void poomSheet.offsetWidth;
+    requestAnimationFrame(function(){ poomSheet.classList.add('show'); });
+  }
+  function closePoomDetail(){
+    if(!poomSheet) return;
+    var s=poomSheet; poomSheet=null;
+    activePager=poomPagerSaved; poomPagerSaved=null;
+    s.classList.remove('show');
+    setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 400);
+    // Leave fnav hidden — the Handboek poomsae sheet is still open underneath.
+  }
+  function playPoomVideo(v, btn){
+    if(!v||!btn||btn.classList.contains('playing')) return;
+    btn.classList.add('playing');
+    btn.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+v+'?rel=0&modestbranding=1&autoplay=1" title="Instructievideo" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
   }
   // lighten(+)/darken(-) a #rrggbb hex by pct toward white/black
   function shade(hex, pct){
@@ -5222,6 +5448,9 @@
     else if(a==='examchk'){ toggleExamChk(act.getAttribute('data-k')); }
     else if(a==='openhb'){ openHb(act.getAttribute('data-hb')); }
     else if(a==='hbclose'){ closeHb(); }
+    else if(a==='openpoom'){ openPoomDetail(act.getAttribute('data-id')); }
+    else if(a==='poomclose'){ closePoomDetail(); }
+    else if(a==='video'){ playPoomVideo(act.getAttribute('data-v'), act); }
     else if(a==='pickmood'){ rfMood=act.getAttribute('data-r'); ciAfterPick('mood',act); }
     else if(a==='pickwent'){ rfRating=act.getAttribute('data-r'); ciAfterPick('went',act); }
     else if(a==='pickhelp'){ rfHelp=act.getAttribute('data-r'); ciAfterPick('helpful',act); }

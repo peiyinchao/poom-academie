@@ -14,3 +14,5 @@ Inspiration/
 # Scratch screenshots & backups
 out_*.png
 *.bak
+# QR code helper image (regenerated on demand)
+coach-qr.png
