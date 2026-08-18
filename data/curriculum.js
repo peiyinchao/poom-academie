@@ -402,7 +402,7 @@ window.CURRICULUM = {
         }
       },
       veilig: "Wacht tot de aanval echt is gestart. Houd tegenaanvallen op veilige afstand of met gecontroleerd contact, en spreek vooraf een duidelijk stopteken af.",
-      video: { url: "https://www.facebook.com/reel/347532419750423", poster: "./img/video/ilbo.jpg", titel: "5 Ilbo Taeryon", bron: "Van je leraar" }
+      video: { url: "https://www.facebook.com/reel/347532419750423", poster: "./img/video/ilbo.jpg", titel: "5 Ilbo Taeryon", bron: "Taekwondo Kawarmala Holland" }
     },
     hosinsul: {
       id: "hosinsul", ko: "호신술", roman: "Hosinsul", nl: "Zelfverdediging", icon: "shield",

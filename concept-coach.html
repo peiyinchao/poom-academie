@@ -68,7 +68,7 @@
   .vsb.on{opacity:1}
   @media (prefers-reduced-motion:reduce){ .vsb{transition:none} }
   .pad{padding:0 22px 130px}
-  #today-surface .pad{padding-bottom:84px}
+  #today-surface .pad{padding-bottom:56px}
   @media (max-width:440px){
     body{padding:0;background:var(--page)}
     .device{width:100vw;height:100vh;height:100dvh;border-radius:0;border:0;box-shadow:none}
@@ -100,7 +100,7 @@
     border:1.6px solid var(--page);box-sizing:border-box;background:var(--soft)}
 
   /* ---------- Coach greeting ---------- */
-  .greet{padding:10px 0 4px;display:flex;align-items:flex-end;gap:8px}
+  .greet{padding:28px 0 4px;display:flex;align-items:flex-end;gap:8px}
   .greet-txt{flex:1 1 auto;min-width:0}
   .greet-masc{flex:0 0 auto;width:125px;height:158px;margin-bottom:-2px;display:block;cursor:pointer;
     pointer-events:auto;-webkit-tap-highlight-color:transparent;user-select:none;
@@ -818,7 +818,7 @@
     font-size:13.5px;font-weight:700;color:var(--deep);text-align:center;font-family:var(--cond);text-transform:uppercase;letter-spacing:.03em}
 
   /* ---- Training van vandaag — coloured element hero + missie-kolommen ---- */
-  .trainday{position:relative;margin-top:20px;border-radius:26px;overflow:hidden;color:#fff;isolation:isolate;
+  .trainday{position:relative;margin-top:30px;border-radius:26px;overflow:hidden;color:#fff;isolation:isolate;
     display:flex;flex-direction:column;min-height:300px;
     background:
       radial-gradient(130% 100% at 88% 4%, rgba(255,255,255,.16), transparent 55%),
@@ -1814,23 +1814,11 @@
   .hb-sec p{font-size:13.5px;line-height:1.55;color:var(--ink);margin:0}
   .hb-check{margin:6px 0 0;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--ink)}
   .hb-check li{margin-bottom:3px}
-  /* Video link — opens the school's Facebook clip in a new tab (simple link, no poster preview) */
-  .hb-videohd{font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;font-size:12px;
-    font-weight:800;color:var(--gray);margin:2px 2px 12px}
-  .reellink{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;
-    background:var(--surface);border:1px solid var(--line);border-radius:14px;
-    text-decoration:none;color:var(--ink);-webkit-tap-highlight-color:transparent;
-    box-shadow:0 10px 24px -18px rgba(16,24,40,.5)}
-  .reellink .reellink-ic{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;
-    background:#1877F2;color:#fff}
-  .reellink .reellink-ic svg{width:19px;height:19px}
-  .reellink .reellink-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
-  .reellink .reellink-tx b{font-size:14px;font-weight:700;line-height:1.25;color:var(--ink)}
-  .reellink .reellink-tx span{font-size:12px;color:var(--gray)}
-  .reellink .reellink-go{flex:none;width:18px;height:18px;color:var(--gray);opacity:.5}
-  .reellink .reellink-go svg{width:100%;height:100%}
-  @media (hover:hover){ .reellink:hover{background:color-mix(in srgb,#6B6459 4%,transparent)} .reellink:hover .reellink-go{opacity:.85} }
-  .reellink:active{transform:scale(.99)}
+  /* Video link — a simple inline hyperlink to the school's Facebook clip (opens in a new tab) */
+  .hb-link{color:var(--el);font-weight:600;text-decoration:underline;text-underline-offset:2px;
+    text-decoration-thickness:1.5px;-webkit-tap-highlight-color:transparent}
+  @media (hover:hover){ .hb-link:hover{opacity:.8} }
+  .hb-link:active{opacity:.6}
   /* Poomsae list rows — name + hangul + short betekenis; whole row drills in (chevron → openPoomDetail) */
   .poom-row{cursor:pointer;align-items:flex-start;gap:12px}
   .poom-nm{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -1854,7 +1842,6 @@
   .pd-tt{flex:1 1 auto;min-width:0}
   .poomdetail .pd-tt .cs-title{margin:1px 0 0;font-size:30px;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .pd-sub{display:block;font-size:12.5px;color:var(--gray);margin-top:4px}
   .pd-facts{display:flex;flex-wrap:wrap;gap:9px 22px;margin-top:15px}
   .pd-fact{display:flex;flex-direction:column;line-height:1.15}
   .pd-fk{font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:10.5px;color:var(--gray)}
@@ -2256,12 +2243,9 @@
 
   /* ---- Woordenschat (termen categories) ---- */
   var TERMEN = C.termen || [];
-  // Simulated "struggle/bookmark" data (roman → true): what Jayden finds hard.
-  var HARD = {
-    'Gyeong-rye':1,'Junbi':1,'Baro':1,'Dwit':1,'Oreun':1,'Momdollyo':1,'Jeochyo':1,
-    'Dangyo':1,'Eolgool':1,'Momtong':1,'An Palmok':1,'Sonnal':1,'Palkoop':1,
-    'Balnal':1,'Dwitchook':1,'Ibo Taeryon':1,'Set / Sam':1
-  };
+  // "Struggle/bookmark" data (roman → true): the words Jayden marks as hard.
+  // Starts empty in the prototype — the default Moeilijk count is 0 until he bookmarks a word.
+  var HARD = {};
   // Per-category accent + Korean (hangul) emblem
   var CAT_META = {
     'Algemeen':{el:'#3E5BD6',han:'기'},
@@ -2917,6 +2901,8 @@
   function refreshHardCount(){
     var total = TERMEN.reduce(function(a,g){ return a+catHard(g).length; }, 0);
     var el = document.querySelector('#w-hardn'); if(el) el.textContent=total;
+    // Keep the empty-state in sync so the pulsing attention dot only shows while there are hard words.
+    var row = document.querySelector('.wrow-hard'); if(row) row.classList.toggle('off', total===0);
   }
 
   /* ---- mastery growth (seed -> sprout -> bloom, per category) ---- */
@@ -3530,12 +3516,9 @@
     return h;
   }
   function reelHtml(v){
-    return '<h4 class="hb-videohd">Taekwondo Kawarmala Holland</h4>'+
-      '<a class="reellink" href="'+esc(v.url)+'" target="_blank" rel="noopener">'+
-        '<span class="reellink-ic">'+IC.fb+'</span>'+
-        '<span class="reellink-tx"><b>'+esc(v.titel)+'</b><span>'+esc(v.bron)+' · Facebook</span></span>'+
-        '<span class="reellink-go">'+IC.chev+'</span>'+
-      '</a>';
+    return '<p class="hb-lead">Voorbeeldvideo: '+
+      '<a class="hb-link" href="'+esc(v.url)+'" target="_blank" rel="noopener">'+esc(v.titel)+'</a>'+
+      ' · '+esc(v.bron)+' · Facebook</p>';
   }
   /* Gyeorugi/Gyeokpa etc.: intro (uitleg) + graad-eis + tips, gebouwd uit C.onderdelen. */
   function illusHtml(slug, tall, delay, pair){
@@ -3712,6 +3695,15 @@
   }
   function poomDetailBody(f){
     var h='';
+    // Instructievideo first (skip when no video, e.g. koryo/keumgang)
+    if(f.video){
+      h+='<div class="hb-sec"><h4>Instructievideo</h4>'+
+        '<button class="pd-video" data-act="video" data-v="'+esc(f.video)+'" aria-label="Speel instructievideo">'+
+          '<img class="pd-video-thumb" src="https://i.ytimg.com/vi/'+esc(f.video)+'/hqdefault.jpg" alt="" loading="lazy" onerror="this.style.display=\'none\'">'+
+          '<span class="pd-video-play">'+IC.play+'</span>'+
+          '<span class="pd-video-lab">'+esc(f.korean)+'</span>'+
+        '</button></div>';
+    }
     // Waar let je op
     var tags='';
     if(f.beeld) tags+='<span class="pd-tag"><b>Beeld</b>'+esc(f.beeld)+'</span>';
@@ -3733,15 +3725,6 @@
       var sr=''; f.standen.forEach(function(rm){ var s=standByRoman(rm); if(s) sr+=hbRow({ko:s.ko, ro:s.roman, nl:s.nl}); });
       if(sr) h+='<div class="hb-sec"><h4>Standen in deze vorm</h4><div class="ct-list">'+sr+'</div></div>';
     }
-    // Instructievideo (skip when no video, e.g. koryo/keumgang)
-    if(f.video){
-      h+='<div class="hb-sec"><h4>Instructievideo</h4>'+
-        '<button class="pd-video" data-act="video" data-v="'+esc(f.video)+'" aria-label="Speel instructievideo">'+
-          '<img class="pd-video-thumb" src="https://i.ytimg.com/vi/'+esc(f.video)+'/hqdefault.jpg" alt="" loading="lazy" onerror="this.style.display=\'none\'">'+
-          '<span class="pd-video-play">'+IC.play+'</span>'+
-          '<span class="pd-video-lab">'+esc(f.korean)+'</span>'+
-        '</button></div>';
-    }
     return h;
   }
   function openPoomDetail(id){
@@ -3756,7 +3739,6 @@
           '<button class="pd-back" data-act="poomclose" aria-label="Terug naar poomsae">'+IC.back+'</button>'+
           '<div class="pd-tt">'+
             '<h2 class="cs-title">'+esc(f.korean)+'</h2>'+
-            '<span class="pd-sub">'+esc(f.hangul)+' · '+esc(f.trigramNaam)+' ('+esc(f.trigramHangul)+')</span>'+
           '</div>'+
         '</div>'+
       '</div>'+
