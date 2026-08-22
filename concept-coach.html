@@ -1075,9 +1075,8 @@
   .ux-swipe .qcard{padding:8px 22px 12px}
   /* first card sits below the overlaid title; later cards use the full height */
   .ux-swipe .qcard:first-child{justify-content:flex-start;padding-top:224px}
-  /* reflect: the belt lies flat under the title, so the first card starts lower and the
-     title reclaims the full width (no right gutter for a side mascot) */
-  .ux-swipe.rf-reflect .qcard:first-child{padding-top:252px}
+  /* reflect: the belt sits above the kicker inside the title block, so the title reclaims the
+     full width (no right gutter for a side mascot) and cards start at the SAME place as goal */
   .ux-swipe .ci-topttl.has-belt .ci-tt-txt{padding-right:0}
   .ux-swipe .qcard-in{background:var(--surface);border:1.5px solid var(--line);border-radius:22px;
     box-shadow:0 22px 46px -26px rgba(20,23,18,.42),inset 0 1px 0 rgba(255,255,255,.7);
@@ -1095,11 +1094,13 @@
     -webkit-mask:url(assets/img/reflect-belt-dark.png) no-repeat center/contain;
     mask:url(assets/img/reflect-belt-dark.png) no-repeat center/contain}
   .bb-belt .cb-ink{background:url(assets/img/reflect-belt-ink.png) no-repeat center/contain}
-  /* reflect (swipe): lay the coiled belt flat as a wide horizontal band beneath the title */
-  .ux-swipe .ci-topmasc.has-belt{display:block;top:150px;padding:0 24px}
-  .ux-swipe .ci-topmasc.has-belt .ci-tt-belt{width:100%;height:90px;margin:0}
-  .ux-swipe .ci-topmasc.has-belt .ci-tt-belt .bb-belt{left:50%;top:50%;width:88px;height:242px;
+  /* reflect (swipe): the coiled belt lies flat as a small horizontal graphic ABOVE the kicker,
+     left-aligned with the title, so it never overlaps the text */
+  .ci-tt-beltflat{position:relative;display:block;width:120px;height:46px;margin:0 0 10px;
+    pointer-events:none;filter:drop-shadow(0 8px 12px rgba(20,23,18,.18))}
+  .ci-tt-beltflat .bb-belt{position:absolute;left:50%;top:50%;width:44px;height:120px;
     transform:translate(-50%,-50%) rotate(-90deg)}
+  .ux-swipe .ci-tt-beltflat{opacity:calc(1 - var(--cic,0) * 1.6)}
 
   /* Begeleide drill (woorden/sparring): vaste kop (kicker + titel + telling + uitleg) die NIET
      meescrollt. Alleen de lijst scrollt eronder door, met een zachte fade aan de bovenkant.
@@ -5941,23 +5942,26 @@
     if(!reflect) return;
     var m=ciMeta();
     reflect.classList.remove('ux-page','ux-accordion','ux-swipe'); reflect.classList.add('ux-'+CI_UX);
-    reflect.classList.toggle('rf-reflect', rfMode!=='goal');
     ['.swipedots','.uxswitch','.ci-topttl','.ci-topmasc','.ci-beltband'].forEach(function(sel){ var e=reflect.querySelector(sel); if(e) e.parentNode.removeChild(e); });
     var bodyEl=reflect.querySelector('#rfbody'), footEl=reflect.querySelector('#rffoot');
     // greeting-style title at the top (like Vandaag); goal shows the cheering kid, reflect the coiled belt
+    var beltHtml = '<span class="bb-belt">'+
+        '<span class="cb cb-main"></span><span class="cb cb-dark"></span><span class="cb cb-ink"></span>'+
+      '</span>';
     var mascHtml = rfMode==='goal'
       ? '<span class="ci-tt-masc"><span class="gm-b">'+
           '<img class="gm-i" src="assets/img/goal-kid.png" alt="" aria-hidden="true">'+
           '<img class="gm-i gm-blink" src="assets/img/goal-kid-blink.png" alt="" aria-hidden="true">'+
         '</span></span>'
-      : '<span class="ci-tt-belt" aria-hidden="true"><span class="bb-belt">'+
-          '<span class="cb cb-main"></span><span class="cb cb-dark"></span><span class="cb cb-ink"></span>'+
-        '</span></span>';
+      : '<span class="ci-tt-belt" aria-hidden="true">'+beltHtml+'</span>';
+    // Swipe reflect: the belt is a small flat graphic ABOVE the kicker, inside the title flow, so it
+    // never overlaps the text. Swipe goal keeps the cheering kid in its own layer behind the cards.
+    var inlineBelt = (CI_UX==='swipe' && rfMode!=='goal')
+      ? '<span class="ci-tt-beltflat" aria-hidden="true">'+beltHtml+'</span>' : '';
     var ttl=document.createElement('div'); ttl.className='ci-topttl'+(rfMode==='goal'?' has-masc':' has-belt');
-    // In swipe the mascot/belt lives in its OWN layer behind the cards so cards scroll over it; the title stays on top.
-    ttl.innerHTML='<div class="ci-tt-txt"><div class="k">'+m.k+'</div><h2>'+m.h+'</h2></div>'+(CI_UX==='swipe'?'':mascHtml);
+    ttl.innerHTML='<div class="ci-tt-txt">'+inlineBelt+'<div class="k">'+m.k+'</div><h2>'+m.h+'</h2></div>'+(CI_UX==='swipe'?'':mascHtml);
     reflect.insertBefore(ttl, bodyEl);
-    if(CI_UX==='swipe'){ var mL=document.createElement('div'); mL.className='ci-topmasc'+(rfMode==='goal'?' has-masc':' has-belt'); mL.innerHTML=mascHtml; reflect.insertBefore(mL, bodyEl); }
+    if(CI_UX==='swipe' && rfMode==='goal'){ var mL=document.createElement('div'); mL.className='ci-topmasc has-masc'; mL.innerHTML=mascHtml; reflect.insertBefore(mL, bodyEl); }
     if(_ciCompare){ var d=document.createElement('div'); d.className='uxswitch'; d.innerHTML=ciSwitcherInner(); reflect.insertBefore(d, bodyEl); }
     bodyEl.innerHTML = CI_UX==='accordion' ? renderAccordion() : CI_UX==='swipe' ? renderSwipe() : renderPage();
     bodyEl.scrollTop=0;
@@ -5971,7 +5975,9 @@
 
   /* ---- boot ---- */
   function boot(){ setBelt(GEUP_I, false); renderToday(); scheduleBlink();
-    requestAnimationFrame(moveNavHL); setTimeout(moveNavHL, 320); }
+    requestAnimationFrame(moveNavHL); setTimeout(moveNavHL, 320);
+    // preview deep-link: ?open=1 (optionally &ci=goal|reflect) opens the weekly check-in on load
+    if(/[?&]open=1/.test(location.search||'')) setTimeout(function(){ openCheckin(_ciOverride||'reflect'); }, 90); }
   if(poomsae.length){ boot(); }
   else {
     // data not ready yet (shouldn't happen — script loaded before)
