@@ -1075,6 +1075,10 @@
   .ux-swipe .qcard{padding:8px 22px 12px}
   /* first card sits below the overlaid title; later cards use the full height */
   .ux-swipe .qcard:first-child{justify-content:flex-start;padding-top:224px}
+  /* reflect: the belt lies flat under the title, so the first card starts lower and the
+     title reclaims the full width (no right gutter for a side mascot) */
+  .ux-swipe.rf-reflect .qcard:first-child{padding-top:252px}
+  .ux-swipe .ci-topttl.has-belt .ci-tt-txt{padding-right:0}
   .ux-swipe .qcard-in{background:var(--surface);border:1.5px solid var(--line);border-radius:22px;
     box-shadow:0 22px 46px -26px rgba(20,23,18,.42),inset 0 1px 0 rgba(255,255,255,.7);
     padding:22px 20px 22px;position:relative;z-index:1}
@@ -1091,6 +1095,11 @@
     -webkit-mask:url(assets/img/reflect-belt-dark.png) no-repeat center/contain;
     mask:url(assets/img/reflect-belt-dark.png) no-repeat center/contain}
   .bb-belt .cb-ink{background:url(assets/img/reflect-belt-ink.png) no-repeat center/contain}
+  /* reflect (swipe): lay the coiled belt flat as a wide horizontal band beneath the title */
+  .ux-swipe .ci-topmasc.has-belt{display:block;top:150px;padding:0 24px}
+  .ux-swipe .ci-topmasc.has-belt .ci-tt-belt{width:100%;height:90px;margin:0}
+  .ux-swipe .ci-topmasc.has-belt .ci-tt-belt .bb-belt{left:50%;top:50%;width:88px;height:242px;
+    transform:translate(-50%,-50%) rotate(-90deg)}
 
   /* Begeleide drill (woorden/sparring): vaste kop (kicker + titel + telling + uitleg) die NIET
      meescrollt. Alleen de lijst scrollt eronder door, met een zachte fade aan de bovenkant.
@@ -5932,6 +5941,7 @@
     if(!reflect) return;
     var m=ciMeta();
     reflect.classList.remove('ux-page','ux-accordion','ux-swipe'); reflect.classList.add('ux-'+CI_UX);
+    reflect.classList.toggle('rf-reflect', rfMode!=='goal');
     ['.swipedots','.uxswitch','.ci-topttl','.ci-topmasc','.ci-beltband'].forEach(function(sel){ var e=reflect.querySelector(sel); if(e) e.parentNode.removeChild(e); });
     var bodyEl=reflect.querySelector('#rfbody'), footEl=reflect.querySelector('#rffoot');
     // greeting-style title at the top (like Vandaag); goal shows the cheering kid, reflect the coiled belt
