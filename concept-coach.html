@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Poom Academy">
 <link rel="stylesheet" href="fonts/inter.css">
 <link rel="stylesheet" href="fonts/poster.css">
@@ -69,20 +69,13 @@
   @media (prefers-reduced-motion:reduce){ .vsb{transition:none} }
   .pad{padding:0 22px 130px}
   #today-surface .pad{padding-bottom:56px}
-  /* Installed iOS app runs fullscreen (black-translucent status bar): the system clock/
-     battery render white. A soft warm scrim in the safe-area strip keeps them legible on
-     light screens; it is hidden on the dark Oefentimer (body.tmr-fs) so the timer gradient
-     runs edge to edge under the Dynamic Island. */
-  .topscrim{display:none;position:absolute;left:0;right:0;top:0;z-index:500;pointer-events:none;
-    height:calc(env(safe-area-inset-top) + 8px);
-    background:linear-gradient(rgba(26,23,18,.4), rgba(26,23,18,.4) 52%, rgba(26,23,18,0))}
-  body.tmr-fs .topscrim{display:none}
+  /* The app shell is a fixed native-style screen: lock the document so nothing (the
+     Oefentimer included) can scroll or rubber-band on iOS; inner lists scroll on their own. */
   @media (max-width:440px){
     html{overflow:hidden}
     body{padding:0;background:var(--page);position:fixed;inset:0;width:100%;overflow:hidden;overscroll-behavior:none}
     .device{width:100vw;height:100vh;height:100dvh;border-radius:0;border:0;box-shadow:none}
     .concept-flag{display:none}
-    .topscrim{display:block}
   }
 
   /* ---------- Status row ---------- */
@@ -1907,7 +1900,6 @@
 <body>
   <div class="device">
     <div class="stage" id="stage"></div>
-    <div class="topscrim" aria-hidden="true"></div>
     <div class="navdock" id="navdock">
     <nav class="fnav" id="fnav">
       <span class="fnav-hl" id="fnav-hl" aria-hidden="true"></span>
@@ -4433,18 +4425,10 @@
   // Tint the iOS Safari top bar to match the current screen. The Vandaag/handboek
   // screens are cream (--page); the Oefentimer is its element-coloured gradient, so
   // we point the theme-color at that gradient's top (--el) while the timer is open.
-  function isDarkColor(c){
-    c=String(c||'').trim(); var m=/^#?([0-9a-fA-F]{6})$/.exec(c); if(!m) return false;
-    var n=parseInt(m[1],16), r=(n>>16)&255, g=(n>>8)&255, b=n&255;
-    return (r*299+g*587+b*114)/1000 < 150;   // ITU-R brightness (<~0.59) reads as dark
-  }
   function setTopBar(color){
-    var m=document.querySelector('meta[name="theme-color"]');
-    var c=String(color||getComputedStyle(document.documentElement).getPropertyValue('--page')||'#F4F1EA').trim();
-    if(m) m.setAttribute('content', c);
-    // Fullscreen app -> white iOS status glyphs. Hide the light-page scrim on dark screens
-    // (Oefentimer) so the gradient reaches the top; show it on light screens for legibility.
-    document.body.classList.toggle('tmr-fs', isDarkColor(c));
+    var m=document.querySelector('meta[name="theme-color"]'); if(!m) return;
+    var c=(color||getComputedStyle(document.documentElement).getPropertyValue('--page')||'#F4F1EA');
+    m.setAttribute('content', String(c).trim());
   }
 
   // Standalone practice timer — reachable any time via the round nav button (reuses the pt-* engine)
