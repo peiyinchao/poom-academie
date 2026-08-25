@@ -1955,6 +1955,25 @@
     node.style.setProperty('--elline',t.line); node.style.setProperty('--hot',t.hot);
     node.style.setProperty('--elink',t.ink);
   }
+  /* Oefentimer background only: collapse the element themes into 4 colours,
+     one colour per two grades, cycling Wind(groen) → Thunder(paars) → Water(blauw) → Fire(rood).
+     10e+8e=groen · 6e+4e=paars · 3e+2e=blauw · 1e geup+1e poom=rood · 2e poom wraps to groen.
+     The shared THEME (daily hero, check-in, seals, belt picker) is intentionally left untouched. */
+  var TMR_PAL = [
+    {el:'#2F9E56',deep:'#1B6B3A',glow:'#6BE08A',tint:'#EDFBF0',line:'rgba(27,107,58,.15)',hot:'#8FE6A9',ink:'#0B2A18'}, // Wind · groen
+    {el:'#8B45E6',deep:'#5A1E9E',glow:'#C77DFF',tint:'#F6EEFF',line:'rgba(90,30,158,.15)',hot:'#CDA8FF',ink:'#200A3A'}, // Thunder · paars
+    {el:'#2468D6',deep:'#143F8F',glow:'#4FB0FF',tint:'#EAF2FF',line:'rgba(20,63,143,.15)',hot:'#93C4FF',ink:'#0A1A3A'}, // Water · blauw
+    {el:'#F0522B',deep:'#B01430',glow:'#FF7A18',tint:'#FFF4EF',line:'rgba(207,60,35,.15)',hot:'#F8A487',ink:'#3A0F14'}  // Fire · rood
+  ];
+  var TMR_ORB = ['o','sa','yuk','sam'];  // orb layout follows the colour's element (Wind/Thunder/Water/Fire)
+  function timerGroup(){ return Math.floor((GEUP_I|0)/2) % TMR_PAL.length; }
+  function applyTimerTheme(node){
+    var t = TMR_PAL[timerGroup()];
+    node.style.setProperty('--el',t.el); node.style.setProperty('--deep',t.deep);
+    node.style.setProperty('--glow',t.glow); node.style.setProperty('--tint',t.tint);
+    node.style.setProperty('--elline',t.line); node.style.setProperty('--hot',t.hot);
+    node.style.setProperty('--elink',t.ink);
+  }
 
   /* ---- Trigram SVG (from Unicode bagua, matches app) ---- */
   function trigramSVG(ch){
@@ -4446,9 +4465,10 @@
     if(timerScreen) return;
     var el = document.createElement('div');
     el.className='session timerscreen'; el.id='timerscreen';
-    applyTheme(el, CUR);
-    el.setAttribute('data-el', CUR);   // element-themed background (sky / fire / water / earth …)
-    setTopBar(th(CUR).el);             // match the iOS top bar to the timer's gradient
+    var _tg = timerGroup();
+    applyTimerTheme(el);
+    el.setAttribute('data-el', TMR_ORB[_tg]);  // colour + orb layout follow the grade's colour group
+    setTopBar(TMR_PAL[_tg].el);        // match the iOS top bar to the timer's gradient
     var tOpts = OT_TEMPOS.map(function(t){
       return '<button class="ot-topt'+(t.v===otState.speed?' on':'')+'" data-act="otspeed" data-v="'+t.v+'"><span class="ot-tlab">'+t.s+'<span class="ot-tx">×</span></span></button>';
     }).join('');
