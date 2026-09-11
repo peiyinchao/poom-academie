@@ -240,10 +240,10 @@
     display:flex;align-items:center;justify-content:space-between;pointer-events:none;z-index:2}
   .bp-dots i{width:5px;height:5px;border-radius:50%;background:var(--gray);
     transition:background-color .3s ease}
-  .bp-fill{position:absolute;left:0;top:0;bottom:0;width:0;z-index:1;
+  .bp-fill{position:absolute;left:0;top:0;bottom:0;width:0;z-index:1;overflow:hidden;
     transition:width .28s cubic-bezier(.34,1.3,.36,1), background .34s ease}
   .bp-thumb{position:absolute;top:50%;left:26px;width:52px;height:52px;transform:translate(-50%,-50%);
-    border-radius:50%;background:#F4F4F1;border:3px solid rgba(255,255,255,.92);
+    border-radius:50%;background:#F4F4F1;border:3px solid rgba(255,255,255,.92);overflow:hidden;
     box-shadow:0 5px 16px -2px rgba(16,24,40,.55), 0 1px 0 rgba(0,0,0,.06);
     display:flex;align-items:center;justify-content:center;gap:6px;pointer-events:none;
     transition:left .28s cubic-bezier(.34,1.3,.36,1), background .34s ease, border-color .34s ease;z-index:3}
@@ -280,6 +280,19 @@
   .bp-band{transform-origin:center center}
   @keyframes bpPop{0%{transform:scale(.94);opacity:.4}55%{transform:scale(1.04);opacity:1}100%{transform:scale(1);opacity:1}}
   .bp-band.pop{animation:bpPop .4s cubic-bezier(.2,.7,.3,1)}
+  /* No static screens: light sweeps across the belt knob and along the coloured fill, so the
+     grade you picked keeps catching the light (same skewed slice as the Vandaag CTA sheen). */
+  .bp-thumb::after,.bp-fill::after{content:'';position:absolute;top:-60%;bottom:-60%;left:0;
+    pointer-events:none;z-index:2;will-change:transform;
+    transform:translateX(-320%) skewX(-16deg)}
+  .bp-thumb::after{width:46%;filter:blur(3px);
+    background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.04) 24%,rgba(255,255,255,.58) 50%,rgba(255,255,255,.04) 76%,transparent 100%)}
+  .bp-fill::after{width:30%;filter:blur(5px);
+    background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.03) 24%,rgba(255,255,255,.40) 50%,rgba(255,255,255,.03) 76%,transparent 100%)}
+  .bp-thumb.sheen::after{animation:bpSheen 1.15s ease-in-out}
+  .bp-fill.sheen::after{animation:bpSheen 1.5s ease-in-out}
+  @keyframes bpSheen{from{transform:translateX(-320%) skewX(-16deg)}to{transform:translateX(560%) skewX(-16deg)}}
+  @media (prefers-reduced-motion: reduce){ .bp-thumb::after,.bp-fill::after{display:none} }
   /* cross-fade push: old belt-info line pushes aside & fades out, new one slides in & fades in */
   .bp-meta{position:relative;overflow:hidden;padding-bottom:2px}
   .bp-meta-cur,.bp-meta-ghost{display:inline-block;white-space:nowrap}
@@ -2212,6 +2225,26 @@
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
   }
+  /* Belt-picker glint — a light slice sweeps the knob and the coloured fill so the grade keeps
+     catching the light while the sheet is open (matches the Vandaag CTA sheen cadence). */
+  var bpGlintT=null;
+  function bpGlint(){
+    var root=stage.querySelector('.beltpick'); if(!root) return;
+    bpFlash(root.querySelector('#bp-fill'), 'sheen');
+    bpFlash(root.querySelector('#bp-thumb'), 'sheen');
+  }
+  function bpGlintStop(){ if(bpGlintT){ clearTimeout(bpGlintT); bpGlintT=null; } }
+  function bpGlintStart(){
+    bpGlintStop();
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    (function next(delay){
+      bpGlintT=setTimeout(function(){
+        if(!beltSheet){ bpGlintStop(); return; }   // sheet closed → stop sweeping
+        bpGlint();
+        next(4200+Math.random()*3600);
+      }, delay);
+    })(620);
+  }
   // cross-fade the belt-info line: old text pushes aside & fades out while the new text slides in
   // & fades in — both travelling the way the slider moved (right = up a grade, left = down)
   function bpSwapMeta(meta, g, dir){
@@ -2369,7 +2402,7 @@
     var range=beltSheet.querySelector('#bp-range');
     if(range){
       range.addEventListener('input', function(){ beltLive(parseInt(range.value,10)); });
-      range.addEventListener('change', function(){ var kk=parseInt(range.value,10); setBelt(kk, true); bpRenderGrad(kk); });
+      range.addEventListener('change', function(){ var kk=parseInt(range.value,10); setBelt(kk, true); bpRenderGrad(kk); setTimeout(bpGlintStart, 180); });
     }
     // Registering a graduation date (native date entry) promotes Jayden to that grade
     beltSheet.addEventListener('change', function(e){
@@ -2379,10 +2412,11 @@
       var ge=stage.querySelector('#bp-grad'); if(ge) bpFlash(ge,'pop');
       buzz(20); try{ sfx('complete'); }catch(_e){}
     });
-    requestAnimationFrame(function(){ beltSheet.classList.add('show'); beltThumb(GEUP_I); });
+    requestAnimationFrame(function(){ beltSheet.classList.add('show'); beltThumb(GEUP_I); bpGlintStart(); });
   }
   function closeBeltSheet(){
     if(!beltSheet) return;
+    bpGlintStop();
     beltSheet.classList.remove('show');
     var s=beltSheet; beltSheet=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
