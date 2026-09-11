@@ -236,7 +236,7 @@
   .bp-slider{position:relative;height:60px;margin:16px 0 0;touch-action:pan-y;isolation:isolate}
   .bp-track{position:absolute;inset:0;border-radius:999px;overflow:hidden;background:#F1EEE7;
     box-shadow:inset 0 1px 3px rgba(0,0,0,.10), inset 0 0 0 1px rgba(0,0,0,.05)}
-  .bp-dots{position:absolute;left:26px;right:26px;top:50%;transform:translateY(-50%);height:8px;
+  .bp-dots{position:absolute;left:27.5px;right:27.5px;top:50%;transform:translateY(-50%);height:8px;
     display:flex;align-items:center;justify-content:space-between;pointer-events:none;z-index:2}
   .bp-dots i{width:5px;height:5px;border-radius:50%;background:var(--gray);
     transition:background-color .3s ease}
@@ -736,23 +736,20 @@
   @keyframes exdpop{0%{transform:scale(1)}42%{transform:scale(1.55)}100%{transform:scale(1)}}
   /* pass-threshold marker: a subtle separator dot (like the ko·nl mid-dot), not a line + badge */
   .ex-cut{flex:none;align-self:center;width:4px;height:4px;border-radius:50%;background:rgba(20,23,18,.26);margin:0 2px}
-  /* Proefexamen expression companion — reacts to the running fout-marge */
+  /* Proefexamen kop — geen mascotte; de "Vraag x van x" vangt in plaats daarvan traag het licht,
+     zodat het scherm nooit helemaal stil staat (zelfde schuine lichtstreep als de CTA-sheen). */
   .ex-head{display:flex;align-items:center;gap:14px;margin:14px 2px 2px}
   .ex-head .sh{margin:0;flex:1;min-width:0}
+  .ex-qn.glint{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    background-image:linear-gradient(100deg,rgba(255,255,255,0) 43%,color-mix(in srgb, var(--el) 72%, #fff) 50%,rgba(255,255,255,0) 57%),
+      linear-gradient(var(--ink),var(--ink));
+    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:96% 0,0 0;
+    animation:exQnGlint 2.8s ease-in-out}
+  @keyframes exQnGlint{from{background-position:96% 0,0 0}to{background-position:4% 0,0 0}}
+  @media (prefers-reduced-motion:reduce){.ex-qn.glint{animation:none}}
   #ex-sub:empty{display:none}
   #exam .sfoot{position:relative}
-  .ex-face{position:relative;flex:none;width:72px;height:72px;border-radius:50%;overflow:hidden;background:#fff;
-    box-shadow:0 6px 14px rgba(20,23,18,.14)}
-  .ex-face img{position:absolute;top:50%;left:50%;width:94%;height:94%;transform:translate(-50%,-50%);display:block;border-radius:50%}
-  .ex-face .ex-face-blink{opacity:0}
-  @media (prefers-reduced-motion:no-preference){.ex-face .ex-face-blink{animation:exFaceBlink 4.8s ease-in-out infinite}}
-  @keyframes exFaceBlink{0%,86%,100%{opacity:0}88%,90%{opacity:1}92%{opacity:0}94%,96%{opacity:1}}
-  .ex-face.rbob{animation:exFaceBob .55s cubic-bezier(.34,1.56,.64,1)}
-  .ex-face.rshake{animation:exFaceShake .5s ease}
-  @keyframes exFaceBob{0%,100%{transform:translateY(0) scale(1)}35%{transform:translateY(-5px) scale(1.07)}70%{transform:translateY(0) scale(1)}}
-  @keyframes exFaceShake{0%,100%{transform:translateX(0) rotate(0)}18%{transform:translateX(-3px) rotate(-5deg)}38%{transform:translateX(3px) rotate(5deg)}58%{transform:translateX(-2px) rotate(-3deg)}78%{transform:translateX(2px) rotate(2deg)}}
   .ex-facebig .ex-mascot{width:150px;height:150px;border-radius:50%}
-  @media (prefers-reduced-motion:reduce){.ex-face.rbob,.ex-face.rshake{animation:none}}
   .ex-q{margin-top:14px;font-size:18px;font-weight:600;color:var(--ink);line-height:1.4}
   .exam .opts{margin-top:16px}
   .ex-result{text-align:center;padding:26px 8px 0}
@@ -1822,7 +1819,13 @@
   .hb-exttl{font-family:var(--cond);text-transform:uppercase;letter-spacing:.01em;font-weight:800;font-size:16px;
     color:var(--ink);display:block;line-height:1.15}
   .hb-exttl i{font-family:'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;font-style:normal;font-weight:400;font-size:14px;color:var(--deep);margin-left:5px}
-  .hb-exrow.done .hb-exttl{text-decoration:line-through;text-decoration-thickness:2px;opacity:.72}
+  /* Afstrepen: same hand-drawn scribble as the Vandaag day-card (inked for the light sheet) */
+  .hb-exrow.done .hb-exttl{position:relative;opacity:.72;width:fit-content;max-width:100%}
+  .hb-exrow.done .hb-exttl::after{content:'';position:absolute;left:-6px;right:-9px;top:50%;height:.92em;
+    transform:translateY(-52%);pointer-events:none;background:var(--deep,var(--ink));
+    -webkit-mask:var(--sk,url(assets/icons/strike-loop.png)) center/100% 100% no-repeat;
+            mask:var(--sk,url(assets/icons/strike-loop.png)) center/100% 100% no-repeat}
+  .hb-exrow.done.just .hb-exttl::after{animation:strikeIn .36s cubic-bezier(.4,0,.2,1) both}
   .hb-exnl{display:block;font-size:12.5px;color:var(--gray);margin-top:2px}
   .hb-exeis{display:block;font-size:12.5px;line-height:1.5;color:var(--ink);margin-top:7px}
   /* Handboek detail rows + sections */
@@ -2320,7 +2323,10 @@
     var inp=root.querySelector('#bp-range'), thumb=root.querySelector('#bp-thumb'),
         fill=root.querySelector('#bp-fill'); if(!inp||!thumb) return;
     var g=geupInfo(k), W=inp.clientWidth||0, TH=52, frac=(GEUPS.length>1)?k/(GEUPS.length-1):0;
-    var cx = TH/2 + frac*(W-TH);
+    // Inset the travel so the thumb keeps the same gap at the ends as it does top/bottom
+    // ((track 60 − thumb 52) / 2), instead of running flush into the track's end caps.
+    var PAD = Math.max(0, (root.querySelector('.bp-track').clientHeight - TH) / 2) || 0;
+    var cx = PAD + TH/2 + frac*(W - TH - 2*PAD);
     thumb.style.left = cx+'px';
     thumb.style.background = g.col2
       ? 'linear-gradient(90deg,'+g.col+' 0 50%,'+g.col2+' 50% 100%)'
@@ -3778,7 +3784,8 @@
             '<span class="hb-prog-n">'+done+'/'+ond.length+'</span></div>';
     var rows = ond.map(function(o){
       var dn = !!EXAM_CHK[o.id];
-      return '<button class="hb-exrow'+(dn?' done':'')+'" data-act="examchk" data-k="'+esc(o.id)+'" aria-pressed="'+(dn?'true':'false')+'">'+
+      return '<button class="hb-exrow'+(dn?' done':'')+'" '+(dn?'style="--sk:'+strikeVar()+'" ':'')+
+        'data-act="examchk" data-k="'+esc(o.id)+'" aria-pressed="'+(dn?'true':'false')+'">'+
         '<span class="hb-exck">'+(dn?IC.check:'')+'</span>'+
         '<span class="hb-extx">'+
           '<span class="hb-exttl">'+esc(o.roman||o.nl)+(o.ko?' <i>'+esc(o.ko)+'</i>':'')+'</span>'+
@@ -3791,8 +3798,20 @@
   }
   function toggleExamChk(id){
     if(!id) return;
+    var nowOn = !EXAM_CHK[id];
     if(EXAM_CHK[id]) delete EXAM_CHK[id]; else EXAM_CHK[id]=1;
-    if(hbSheet){ var body=hbSheet.querySelector('.cs-body'); if(body) body.innerHTML=hbBody('examen'); }
+    buzz(nowOn?12:6);
+    sfx(nowOn?'check':'uncheck');                       // same scratch as the Vandaag day-card
+    if(hbSheet){
+      var body=hbSheet.querySelector('.cs-body');
+      if(body){
+        body.innerHTML=hbBody('examen');
+        if(nowOn){                                      // draw the scribble on the row you just ticked
+          var row=body.querySelector('.hb-exrow[data-k="'+id+'"]');
+          if(row) row.classList.add('just');
+        }
+      }
+    }
   }
   function hbBody(key){
     var cat=hbCat(key);
@@ -4435,6 +4454,7 @@
   }
   function closeExam(){
     if(!examEl) return;
+    exGlintStop();
     examEl.classList.remove('show');
     fnav.classList.remove('hide');
     var s = examEl; examEl=null; examState=null;
@@ -4459,7 +4479,6 @@
     var dot = track.querySelector('.exd[data-d="'+idx+'"]');
     if(dot){ dot.classList.remove('dpop'); void dot.offsetWidth; dot.classList.add(ok?'ok':'bad','dpop'); }
   }
-  var EXAM_SEX='boy'; // Jayden — expression companion; 'girl' for a girl profile
   var EX_MOOD_I={win:-1,great:0,ok:1,worried:2,sad:3};
   function examMood(s){
     if(s.pass && s.goed >= s.pass) return 'win';   // pass al binnen — dolblij
@@ -4481,31 +4500,28 @@
   function examHead(s){
     var mood=examMood(s);
     return '<div class="ex-head">'+
-      '<div class="sh"><div class="k">Proef examen</div><h2>Vraag '+(s.i+1)+' van '+s.qs.length+'</h2>'+
+      '<div class="sh"><div class="k">Proef examen</div><h2 class="ex-qn" id="ex-qn">Vraag '+(s.i+1)+' van '+s.qs.length+'</h2>'+
         '<p class="sub" id="ex-sub">'+examMoodSub(s,mood)+'</p></div>'+
-      examFace(s)+
     '</div>';
   }
-  function examFace(s){
-    var mood=examMood(s);
-    return '<span class="ex-face x-'+mood+'" id="ex-face" data-x="'+mood+'">'+
-        '<img class="ex-face-base" src="assets/mascot/face/face-'+EXAM_SEX+'-'+mood+'.png" alt="" aria-hidden="true">'+
-        '<img class="ex-face-blink" src="assets/mascot/face/face-'+EXAM_SEX+'-'+mood+'-blink.png" alt="" aria-hidden="true"></span>';
+  /* No static screens: the "Vraag x van x" kop vangt traag het licht (de mascotte is weg). */
+  var exGlintT=null;
+  function exGlintStop(){ if(exGlintT){ clearTimeout(exGlintT); exGlintT=null; } }
+  function exGlintStart(){
+    exGlintStop();
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    (function next(delay){
+      exGlintT=setTimeout(function(){
+        var h=examEl && examEl.querySelector('#ex-qn');
+        if(!h){ exGlintStop(); return; }                 // examen dicht of uitslag in beeld
+        h.classList.remove('glint'); void h.offsetWidth; h.classList.add('glint');
+        next(4600+Math.random()*3200);
+      }, delay);
+    })(900);
   }
   function setExamFace(s, outcome){
     if(!examEl) return;
-    var wrap=examEl.querySelector('#ex-face'); if(!wrap) return;
-    var mood=examMood(s), prev=wrap.getAttribute('data-x');
-    wrap.setAttribute('data-x',mood);
-    wrap.className='ex-face x-'+mood;
-    var img=wrap.querySelector('.ex-face-base'); if(img) img.src='assets/mascot/face/face-'+EXAM_SEX+'-'+mood+'.png';
-    var blk=wrap.querySelector('.ex-face-blink'); if(blk) blk.src='assets/mascot/face/face-'+EXAM_SEX+'-'+mood+'-blink.png';
-    var sub=examEl.querySelector('#ex-sub'); if(sub) sub.textContent=examMoodSub(s,mood);
-    if(outcome){
-      var worse = prev && EX_MOOD_I[mood]>EX_MOOD_I[prev];
-      var anim = (mood==='win') ? 'rbob' : ((outcome==='wrong'||worse) ? 'rshake' : 'rbob');
-      wrap.classList.remove('rshake','rbob'); void wrap.offsetWidth; wrap.classList.add(anim);
-    }
+    var sub=examEl.querySelector('#ex-sub'); if(sub) sub.textContent=examMoodSub(s,examMood(s));
   }
   function renderExamQ(){
     var s = examState; if(!s) return;
@@ -4528,6 +4544,7 @@
     foot.innerHTML = '<button class="nextbtn ghost" id="ex-next" data-act="exnext" disabled style="opacity:.45">Kies een antwoord</button>';
     body.scrollTop = 0;
     s.answered = false;
+    exGlintStart();
   }
   function examAnswer(btn){
     var s = examState; if(!s || s.answered) return;
@@ -4551,6 +4568,7 @@
   }
   function renderExamDone(){
     var s = examState; if(!s) return;
+    exGlintStop();
     var passed = s.fout <= s.maxFout;
     var body = examEl.querySelector('#ex-body');
     var foot = examEl.querySelector('#ex-foot');
