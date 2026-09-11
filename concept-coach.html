@@ -2330,7 +2330,9 @@
     thumb.classList.toggle('poom', !!g.lines);
     thumb.innerHTML = pl;
     if(fill){
-      fill.style.width = cx+'px';
+      // At the top grade the belt colour runs out to the track's end cap, so the whole bar reads
+      // as complete; below it the fill stops at the thumb's centre (hidden under the thumb).
+      fill.style.width = ((k===GEUPS.length-1) ? W : cx)+'px';
       fill.style.background = dualBg(g);
     }
     // stop marks: dark on the light track, light over a dark fill → keeps AA (≥3:1) either way,
