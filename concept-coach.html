@@ -1815,7 +1815,7 @@
     background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:13px 14px;
     transition:border-color .18s ease,background .18s ease}
   .hb-exrow.done{border-color:transparent;
-    background:linear-gradient(160deg,rgba(255,255,255,.72),rgba(255,255,255,.92)),linear-gradient(160deg,rgba(0,0,0,0),rgba(0,0,0,.4)),linear-gradient(var(--accent,var(--el)),var(--accent,var(--el)))}
+    background:color-mix(in srgb, var(--accent,var(--el)) 18%, #fff)}
   .hb-exck{flex:none;width:26px;height:26px;margin-top:1px;border-radius:50%;border:2px solid var(--line);
     display:grid;place-items:center;color:#fff;transition:background .2s ease,border-color .2s ease}
   .hb-exrow.done .hb-exck{background:var(--accent,var(--el));border-color:var(--accent,var(--el))}
@@ -3575,7 +3575,7 @@
   var UI_BLUE = '#3E5BD6';
   var HB_CATS=[
     {key:'standen',    title:'Standen',         han:'서', el:UI_BLUE,   sub:'Voetposities',       unit:'standen',     grp:1},
-    {key:'technieken', title:'Technieken',      han:'술', el:UI_BLUE,   sub:'Blok · stoot · trap',unit:'technieken',  grp:1},
+    {key:'technieken', title:'Technieken',      han:'술', el:UI_BLUE,   sub:'Blok · stoot · slag · trap',unit:'technieken',  grp:1},
     {key:'poomsae',    title:'Poomsae',         han:'품', el:UI_BLUE,   sub:'De vormen',          unit:'vormen',      grp:2, wide:true},
     {key:'ilbo',       title:'Ilbo Taeryon',    han:'일', el:UI_BLUE,   sub:'Stapsparren',        unit:'afwerkingen', grp:2},
     {key:'hosinsul',   title:'Hosinsul',        han:'호', el:UI_BLUE,   sub:'Zelfverdediging',    unit:'technieken',  grp:2},
