@@ -29,6 +29,8 @@
     /* live element tokens (set per form by JS; fire default) */
     --el:#F0522B; --deep:#B01430; --glow:#FF7A18; --tint:#FFF4EF;
     --elline:rgba(207,60,35,.15); --hot:#F8A487; --elink:#3A0F14;
+    /* Fixed UI blue — never themed. Used by app chrome that must stay put while --el shifts. */
+    --blue:#3E5BD6;
   }
   *{box-sizing:border-box}
   html,body{margin:0;touch-action:manipulation}
@@ -243,8 +245,8 @@
   .bp-fill{position:absolute;left:0;top:0;bottom:0;width:0;z-index:1;
     transition:width .28s cubic-bezier(.34,1.3,.36,1), background .34s ease}
   .bp-thumb{position:absolute;top:50%;left:26px;width:52px;height:52px;transform:translate(-50%,-50%);
-    border-radius:50%;background:#F4F4F1;border:3px solid rgba(255,255,255,.92);overflow:hidden;
-    box-shadow:0 5px 16px -2px rgba(16,24,40,.55), 0 1px 0 rgba(0,0,0,.06);
+    border-radius:50%;background:#F4F4F1;background-clip:padding-box;border:3px solid #fff;overflow:hidden;
+    box-shadow:0 1px 9px rgba(16,24,40,.28), 0 0 0 1px rgba(16,24,40,.08);
     display:flex;align-items:center;justify-content:center;gap:6px;pointer-events:none;
     transition:left .28s cubic-bezier(.34,1.3,.36,1), background .34s ease, border-color .34s ease;z-index:3}
   .bp-thumb.poom{flex-direction:column;gap:5px}
@@ -270,9 +272,9 @@
   .bp-grad-txt b{font-size:13.5px;color:var(--ink);font-weight:800;letter-spacing:.004em}
   .bp-grad-sub{font-size:12px;color:var(--gray);line-height:1.25}
   .bp-gradbtn{position:relative;margin-left:auto;flex:none;display:inline-flex;align-items:center;
-    background:var(--el);color:#fff;border-radius:999px;padding:9px 16px;
+    background:var(--blue);color:#fff;border-radius:999px;padding:9px 16px;
     font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;font-weight:800;font-size:12.5px;
-    box-shadow:0 7px 16px -8px var(--el);cursor:pointer;-webkit-tap-highlight-color:transparent}
+    box-shadow:0 7px 16px -8px var(--blue);cursor:pointer;-webkit-tap-highlight-color:transparent}
   .bp-gradbtn:active{transform:translateY(1px)}
   .bp-gradbtn .bp-graddate{position:absolute;inset:0;width:100%;height:100%;opacity:0;
     margin:0;padding:0;border:0;background:none;cursor:pointer;font-size:16px}
@@ -318,7 +320,7 @@
   .bs-grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:2px auto 12px}
   .bs-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px}
   .bs-head h3{font-family:var(--cond);text-transform:uppercase;letter-spacing:.02em;font-size:21px;color:var(--ink)}
-  .bs-done{font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;font-size:13.5px;color:var(--el);
+  .bs-done{font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;font-size:13.5px;color:var(--blue);
     background:none;border:0;cursor:pointer;padding:6px 2px;font-weight:700}
   .beltsheet .beltpick{margin:14px 0 0}
   /* Reis grade chip (opens the belt sheet) */
@@ -858,7 +860,7 @@
     display:flex;flex-direction:column;min-height:300px;
     background:
       radial-gradient(130% 100% at 88% 4%, rgba(255,255,255,.16), transparent 55%),
-      linear-gradient(152deg, var(--el) 0%, var(--deep) 92%);
+      var(--el);
     box-shadow:0 20px 40px -26px rgba(16,24,40,.5);padding:26px 22px 20px}
   .trainday::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.18;mix-blend-mode:overlay;
     background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="140" height="140" filter="url(%23n)" opacity="0.5"/></svg>')}
@@ -1400,7 +1402,9 @@
   .timerscreen[data-mode="count"] .ot-nudge{display:none}
 
   /* Tijd mode: the dial always shows MM:SS (even while setting) — no Korean word / in-ring prompt */
-  .timerscreen .pt-num.ot-tnum{font-family:var(--cond);font-weight:800;font-size:66px;line-height:1;height:auto;
+  /* 100px in Big Shoulders gives an 81.7px digit — matching Tellen's 82.1px at 120px Black Han Sans.
+     Matching the px value instead would render 16px taller and crowd the ring. */
+  .timerscreen .pt-num.ot-tnum{font-family:var(--cond);font-weight:800;font-size:100px;line-height:1;height:auto;
     letter-spacing:.01em;font-variant-numeric:tabular-nums}
   .timerscreen[data-mode="time"] .ptimer.idle .pt-num{display:flex}
   .timerscreen[data-mode="time"] .ptimer.idle .pt-word,
@@ -2306,15 +2310,13 @@
     while(contrast('#FFFFFF',c) < 4.6 && guard++<26){ c = shade(c,-8); }
     return c;
   }
-  /* De "Training van vandaag"-kaart draagt de band van de leerling: het verloop komt uit zijn
-     graad in plaats van uit het element van de poomsae. Dubbele banden lopen van kleur 1 naar
-     kleur 2 (blauw→rood, rood→zwart); effen banden krijgen een donkerder eigen tint. */
+  /* De "Training van vandaag"-kaart draagt de band van de leerling: één effen vlak in dezelfde
+     accentkleur als de rest van het startscherm (navpil, quote, streak). Dubbele banden liepen
+     eerder van kleur 1 naar kleur 2 en gingen daardoor door paars; nu volgt de kaart het accent.
+     inkSafeBg houdt witte tekst leesbaar op lichte banden — bij rood verandert er niets. */
   function beltHero(g){
-    var a = inkSafeBg(g.col);
-    var b = g.col2 ? inkSafeBg(g.col2) : shade(a,-34);
-    if(!g.col2 && lum(a) < 0.05){ b = a; a = shade(a,22); } // zwarte band: grafietkop boven diep zwart
-    if(contrast(a,b) < 1.15) b = shade(b,-26);           // houd zichtbare diepte in het verloop
-    return { el:a, deep:b };
+    var solid = inkSafeBg(beltStroke(g));
+    return { el:solid, deep:shade(solid,-30) };   // --deep blijft alleen als fallback voor .ti-ck
   }
   // Colour the active-tab highlight + label to match the student's belt grade (adaptive ink for legibility)
   function paintNav(){
@@ -2349,7 +2351,12 @@
     thumb.style.background = g.col2
       ? 'linear-gradient(90deg,'+g.col+' 0 50%,'+g.col2+' 50% 100%)'
       : g.col;
-    thumb.style.borderColor = (g.col==='#F4F4F1') ? 'rgba(0,0,0,.14)' : 'rgba(255,255,255,.92)';
+    // must follow the shorthand above — `background:` resets background-clip to border-box,
+    // which would let the belt colour paint under the ring again.
+    thumb.style.backgroundClip = 'padding-box';
+    // Opaque ring colours: with background-clip:padding-box the belt no longer tints the border,
+    // and an opaque ring can't pick up the shadow behind it either.
+    thumb.style.borderColor = (g.col==='#F4F4F1') ? '#CFCDC7' : '#fff';
     var pl=''; if(g.lines){ for(var d=0; d<g.lines; d++) pl+='<i class="pline"></i>'; }
     thumb.classList.toggle('poom', !!g.lines);
     thumb.innerHTML = pl;
@@ -3562,20 +3569,24 @@
   /* =========================================================
      HANDBOEK — reference manual hub + frosted detail sheets
      ========================================================= */
+  /* One shared UI blue for Handboek + the fixed accent buttons, kept identical to the
+     --blue CSS token and to the Woorden "Algemeen" accent so the sections can't drift apart.
+     It has to stay a hex literal: shade() parses it, so var(--blue) would not work here. */
+  var UI_BLUE = '#3E5BD6';
   var HB_CATS=[
-    {key:'standen',    title:'Standen',         han:'서', el:'#2468D6', sub:'Voetposities',       unit:'standen',     grp:1},
-    {key:'technieken', title:'Technieken',      han:'술', el:'#2468D6', sub:'Blok · stoot · trap',unit:'technieken',  grp:1},
-    {key:'poomsae',    title:'Poomsae',         han:'품', el:'#2468D6', sub:'De vormen',          unit:'vormen',      grp:2, wide:true},
-    {key:'ilbo',       title:'Ilbo Taeryon',    han:'일', el:'#2468D6', sub:'Stapsparren',        unit:'afwerkingen', grp:2},
-    {key:'hosinsul',   title:'Hosinsul',        han:'호', el:'#2468D6', sub:'Zelfverdediging',    unit:'technieken',  grp:2},
-    {key:'gyeorugi',   title:'Gyeorugi',        han:'겨', el:'#2468D6', sub:'Sparren',            unit:'sparren',     grp:2,
+    {key:'standen',    title:'Standen',         han:'서', el:UI_BLUE,   sub:'Voetposities',       unit:'standen',     grp:1},
+    {key:'technieken', title:'Technieken',      han:'술', el:UI_BLUE,   sub:'Blok · stoot · trap',unit:'technieken',  grp:1},
+    {key:'poomsae',    title:'Poomsae',         han:'품', el:UI_BLUE,   sub:'De vormen',          unit:'vormen',      grp:2, wide:true},
+    {key:'ilbo',       title:'Ilbo Taeryon',    han:'일', el:UI_BLUE,   sub:'Stapsparren',        unit:'afwerkingen', grp:2},
+    {key:'hosinsul',   title:'Hosinsul',        han:'호', el:UI_BLUE,   sub:'Zelfverdediging',    unit:'technieken',  grp:2},
+    {key:'gyeorugi',   title:'Gyeorugi',        han:'겨', el:UI_BLUE,   sub:'Sparren',            unit:'sparren',     grp:2,
       kind:'onderdeel', odid:'gyeorugi', ko:'겨루기', roman:'Gyeorugi', show:hasGyeorugi,
       eis:'Op je examen spar je één of meer korte rondjes met een partner, met volledige bescherming (hogu en helm). De examinator let op controle, timing en afstand en op sportief gedrag — niet op winnen.'},
-    {key:'gyeokpa',    title:'Gyeokpa',         han:'격', el:'#2468D6', sub:'Breektest',          unit:'breektest',   grp:2,
+    {key:'gyeokpa',    title:'Gyeokpa',         han:'격', el:UI_BLUE,   sub:'Breektest',          unit:'breektest',   grp:2,
       kind:'onderdeel', odid:'gyepa', ko:'격파', roman:'Gyeokpa', show:hasGyeokpa,
       eis:'Op je examen breek je één plank met een techniek die bij je band past. Je krijgt meestal een paar pogingen; blijf rustig en gefocust. Altijd samen met je trainer.'},
-    {key:'theorie',    title:'Theorie',         han:'론', el:'#2468D6', sub:'Wat & waarom',       unit:'onderwerpen', grp:3},
-    {key:'examen',     title:'Examenkaart',     han:'시', el:'#2468D6', sub:'Wat je moet kunnen', unit:'onderdelen',  grp:3}
+    {key:'theorie',    title:'Theorie',         han:'론', el:UI_BLUE,   sub:'Wat & waarom',       unit:'onderwerpen', grp:3},
+    {key:'examen',     title:'Examenkaart',     han:'시', el:UI_BLUE,   sub:'Wat je moet kunnen', unit:'onderdelen',  grp:3}
   ];
   // Only the onderdelen die bij de huidige graad horen (Gyeorugi vanaf 8e, Gyeokpa vanaf 6e geup).
   function hbCatsActive(){ return HB_CATS.filter(function(c){ return !c.show || c.show(); }); }
@@ -4047,7 +4058,7 @@
     poomPagerSaved=activePager; activePager=null;
     poomSheet=document.createElement('div');
     poomSheet.className='session catsheet hbcat poomdetail';
-    applyCatAccent(poomSheet, '#2468D6');
+    applyCatAccent(poomSheet, UI_BLUE);
     poomSheet.innerHTML=
       '<div class="cs-hero">'+
         '<div class="pd-head">'+
@@ -4722,7 +4733,7 @@
     if(_tap){
       _tap.addEventListener('pointerdown', function(e){
         if(otState.mode!=='time' || (otState.phase!=='idle' && otState.phase!=='done')) return;
-        otState._pd={x:e.clientX, y:e.clientY, moved:false};
+        otState._pd={x:e.clientX, y:e.clientY, moved:false, cont:null, deg:0};
         otState.dragC=otDialCenter();
         try{ _tap.setPointerCapture(e.pointerId); }catch(_){}
       });
@@ -4732,7 +4743,7 @@
         if(!pd.moved && (dx*dx+dy*dy)<16) return;      // ~4px slop before it counts as a drag
         pd.moved=true; otState._dragged=true;
         if(otState.phase==='done') otState.phase='idle';
-        var nd=otAngleDur(e.clientX, e.clientY, otState.dragC);
+        var nd=otDegDur(otDragDeg(pd, otAngleDeg(e.clientX, e.clientY, otState.dragC)));
         if(nd!==otState.dur){ otSetDur(nd); buzz(5); } else { otRenderTime({noTrans:true}); }
       });
       var _endDrag=function(e){
@@ -5103,7 +5114,9 @@
   /* Herhaal-opties: 2× / 4× / 10× / oneindig. reps=0 = uit (speelt één keer). */
   var OT_REPS = [ {v:2}, {v:4}, {v:10}, {v:Infinity} ];
   function otRepV(s){ return s==='inf' ? Infinity : parseInt(s,10); }
-  var OT_BASE = 850, OT_READY = 3, OT_DRAIN = 520;
+  /* 1× is one count per second, matching the 준비 lead-in beat. OT_LEADIN holds that same beat
+     across the hand-off into the count, so the cadence never jumps. */
+  var OT_BASE = 1000, OT_READY = 3, OT_LEADIN = 1000;
   var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, reps:0, left:0, _lastFrac:0, _wrapT:null,
                   mode:'count', dur:120, total:0, endAt:0, raf:null, _lastSec:0, _dragged:false, _windT:null, dragC:null, _pd:null };
   var otTmT=null; // tempo fold-out collapse/close timer
@@ -5375,14 +5388,14 @@
   function otTick(){
     if(otState.phase==='ready'){
       otState.ready--;
-      if(otState.ready>0){ otRender(); buzz(6); sfx('beep'); otSchedule(); return; }
-      // ready hit 0: let the third (last) dot finish draining before the count begins
-      otRender(); buzz(6); sfx('beep');            // renders ○○○ — the last pip animates out over ~0.5s
+      if(otState.ready>0){ otRender(); buzz(6); otSchedule(); return; }
+      // ready hit 0: the last pip drains over its .5s CSS transition, then the count starts on the beat
+      otRender(); buzz(6);
       clearTimeout(otState.iv);
       otState.iv=setTimeout(function(){
         if(otState.phase!=='ready') return;
         otState.phase='count'; otState.i=0; otRender(); otPop(); speak(COUNT[0][0]); buzz(14); otSchedule();
-      }, OT_DRAIN);
+      }, OT_LEADIN);
       return;
     }
     if(otState.i>=COUNT.length-1){
@@ -5402,7 +5415,7 @@
     if(timerScreen) timerScreen.classList.remove('ot-paused');
     otState.phase='ready'; otState.ready=OT_READY; otState.i=0; otState.running=true;
     otState.left=(otState.reps===Infinity?Infinity:otState.reps);
-    otRender(); otSyncControls(); speak('준비'); buzz(16); otSchedule();  // no beep here — the ready beats start on the first tick, after the 준비 voice
+    otRender(); otSyncControls(); speak('준비'); buzz(16); otSchedule();  // lead-in is silent apart from 준비 — the pips are haptic only
   }
   function otPause(){
     otState.running=false; clearTimeout(otState.iv);
@@ -5643,11 +5656,26 @@
     var r=svg.getBoundingClientRect();
     return { x:r.left+r.width/2, y:r.top+r.height/2 };
   }
-  function otAngleDur(x,y,c){
+  var OT_MIN_DEG=30/600*360;                       // 0:30 — the floor of the dial
+  function otAngleDeg(x,y,c){
     var ang=Math.atan2(y-c.y, x-c.x);              // 0 = 3 o'clock
-    var deg=(ang*180/Math.PI + 90 + 360)%360;      // 0 at 12 o'clock, clockwise
-    var frac=deg/360;
-    return Math.max(30, Math.min(600, Math.round(frac*600/30)*30));
+    return (ang*180/Math.PI + 90 + 360)%360;       // 0 at 12 o'clock, clockwise
+  }
+  function otDegDur(deg){
+    return Math.max(30, Math.min(600, Math.round(deg/360*600/30)*30));
+  }
+  function otAngleDur(x,y,c){ return otDegDur(otAngleDeg(x,y,c)); }
+  // Unwrap a drag so it cannot jump the 12 o'clock seam: track the travelled angle and
+  // let it stick at 0:30 / 10:00 instead of flipping to the other end of the dial.
+  function otDragDeg(pd,deg){
+    if(pd.cont==null){ pd.cont=deg; pd.deg=deg; }  // first move jumps to the finger, as before
+    else{
+      var d=deg-pd.deg;
+      if(d>180) d-=360; else if(d<-180) d+=360;    // shortest way round = the way the finger actually went
+      pd.deg=deg;
+      pd.cont=Math.max(OT_MIN_DEG, Math.min(360, pd.cont+d));
+    }
+    return pd.cont;
   }
   function otSetDur(sec){
     otState.dur=Math.max(30, Math.min(600, Math.round(sec/30)*30));
