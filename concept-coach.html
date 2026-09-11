@@ -1351,6 +1351,37 @@
   .ot-rep.open:not(.has-sel) .ot-ropt.inf{color:var(--deep)}     /* ...defaulting to ∞ when nothing is set yet */
   .ot-rep.collapsing .ot-ropt:not(.on){opacity:0;transition:opacity .18s ease}  /* select-close: fade the rest, like tempo */
 
+  /* ===== Oefentimer: mode toggle (Tellen 1–10 / Tijd-aftellen) ===== */
+  .timerscreen .shead .ot-hspacer{flex:1 1 0;min-width:0}
+  .timerscreen .shead .ot-hspacer-r{display:flex;justify-content:flex-end}
+  .ot-modeseg{position:relative;z-index:1;flex:none;display:inline-flex;align-items:center;padding:4px;border-radius:22px;
+    background:rgba(16,8,4,.30);border:1px solid rgba(255,255,255,.22);
+    -webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3)}
+  .ot-mseg{position:relative;z-index:1;border:0;background:transparent;cursor:pointer;
+    font-family:var(--cond);font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:13px;
+    color:rgba(255,255,255,.84);padding:8px 20px;border-radius:18px;line-height:1;white-space:nowrap;transition:color .3s ease}
+  .ot-mseg.on{color:var(--deep)}
+  .ot-mseg-thumb{position:absolute;top:4px;left:0;z-index:0;height:calc(100% - 8px);width:0;border-radius:18px;
+    background:#fff;box-shadow:0 4px 12px -5px rgba(0,0,0,.5);
+    transition:transform .42s cubic-bezier(.34,1.3,.4,1), width .42s cubic-bezier(.34,1.3,.4,1)}
+
+  /* ± duration nudgers (Tijd mode) reuse the .ot-fab styling; their labels stay visible */
+  .ot-nudge .ot-fab{font-family:var(--cond);font-weight:800}
+  .ot-nudge svg{width:26px;height:26px}
+  .timerscreen[data-mode="time"] .ot-nudge .ot-lab{opacity:1}
+
+  /* Swap the bottom controls per mode: Herhaal+Tempo for counting, −/+ for the countdown */
+  .timerscreen[data-mode="time"] .ot-rep,
+  .timerscreen[data-mode="time"] .ot-tempo{display:none}
+  .timerscreen[data-mode="count"] .ot-nudge{display:none}
+
+  /* Tijd mode: the dial always shows MM:SS (even while setting) — no Korean word / in-ring prompt */
+  .timerscreen .pt-num.ot-tnum{font-family:var(--cond);font-weight:800;font-size:66px;line-height:1;height:auto;
+    letter-spacing:.01em;font-variant-numeric:tabular-nums}
+  .timerscreen[data-mode="time"] .ptimer.idle .pt-num{display:flex}
+  .timerscreen[data-mode="time"] .ptimer.idle .pt-word,
+  .timerscreen[data-mode="time"] .ptimer.idle .pt-start{display:none}
+
   /* ===== Korean visual motifs ===== */
   .stage{
     background:
@@ -4465,6 +4496,10 @@
     if(timerScreen) return;
     var el = document.createElement('div');
     el.className='session timerscreen'; el.id='timerscreen';
+    // Restore last-used mode + duration for the Tijd (countdown) mode
+    try{ var _sm=localStorage.getItem('poom_ot_mode'); if(_sm==='time'||_sm==='count') otState.mode=_sm; }catch(e){}
+    try{ var _sd=parseInt(localStorage.getItem('poom_ot_dur'),10); if(_sd>=30&&_sd<=600) otState.dur=Math.round(_sd/30)*30; }catch(e){}
+    el.setAttribute('data-mode', otState.mode);
     var _tg = timerGroup();
     applyTimerTheme(el);
     el.setAttribute('data-el', TMR_ORB[_tg]);  // colour + orb layout follow the grade's colour group
@@ -4488,8 +4523,13 @@
       '<div class="pt-noise"></div>'+
       '<div class="ot-tap" data-act="ottap" role="button" aria-label="Start of pauzeer de timer"></div>'+
       '<div class="shead">'+
-        '<span class="tmr-eye">Oefentimer<span class="ko"> · 연습</span></span>'+
-        '<button class="sx" data-act="timerclose" aria-label="Sluiten">'+IC.x+'</button>'+
+        '<span class="ot-hspacer" aria-hidden="true"></span>'+
+        '<div class="ot-modeseg" role="tablist" aria-label="Timer-modus">'+
+          '<span class="ot-mseg-thumb" id="ot-mseg-thumb"></span>'+
+          '<button class="ot-mseg'+(otState.mode==='count'?' on':'')+'" data-act="otmode" data-m="count" role="tab" aria-selected="'+(otState.mode==='count')+'">Tellen</button>'+
+          '<button class="ot-mseg'+(otState.mode==='time'?' on':'')+'" data-act="otmode" data-m="time" role="tab" aria-selected="'+(otState.mode==='time')+'">Tijd</button>'+
+        '</div>'+
+        '<div class="ot-hspacer ot-hspacer-r"><button class="sx" data-act="timerclose" aria-label="Sluiten">'+IC.x+'</button></div>'+
       '</div>'+
       '<div class="sbody tmr-body">'+
         '<div class="ptimer teller bare">'+
@@ -4527,6 +4567,12 @@
             '<button class="ot-fab ot-tempo-fab" data-act="ottempo" aria-label="Tempo">'+
               '<span class="ot-tempo-cur" id="ot-tempo-cur">'+otTempoLabel()+'</span></button>'+
           '</div>'+
+          '<div class="ot-nudge ot-ctl"><span class="ot-lab">−30s</span>'+
+            '<button class="ot-fab" data-act="otminus" aria-label="30 seconden minder">'+
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg></button></div>'+
+          '<div class="ot-nudge ot-ctl"><span class="ot-lab">+30s</span>'+
+            '<button class="ot-fab" data-act="otplus" aria-label="30 seconden meer">'+
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></div>'+
         '</div>'+
         '<div class="ot-ctl" id="ot-reset-ctl"><span class="ot-lab">Opnieuw</span>'+
           '<button class="ot-fab" id="ot-reset" data-act="otreset" aria-label="Opnieuw">'+IC.reset+'</button></div>'+
@@ -4540,7 +4586,34 @@
       var a=new Image(); a.src=s; var b2=new Image(); b2.src=s.replace(/\.png$/,'-blink.png');
     });
     fnav.classList.add('hide');
-    requestAnimationFrame(function(){ el.classList.add('show'); });
+    // Tijd mode: drag anywhere on the dial to set the duration (full ring = 10:00, snaps to 30s)
+    var _tap=el.querySelector('.ot-tap');
+    if(_tap){
+      _tap.addEventListener('pointerdown', function(e){
+        if(otState.mode!=='time' || (otState.phase!=='idle' && otState.phase!=='done')) return;
+        otState._pd={x:e.clientX, y:e.clientY, moved:false};
+        otState.dragC=otDialCenter();
+        try{ _tap.setPointerCapture(e.pointerId); }catch(_){}
+      });
+      _tap.addEventListener('pointermove', function(e){
+        var pd=otState._pd; if(!pd || !otState.dragC) return;
+        var dx=e.clientX-pd.x, dy=e.clientY-pd.y;
+        if(!pd.moved && (dx*dx+dy*dy)<16) return;      // ~4px slop before it counts as a drag
+        pd.moved=true; otState._dragged=true;
+        if(otState.phase==='done') otState.phase='idle';
+        var nd=otAngleDur(e.clientX, e.clientY, otState.dragC);
+        if(nd!==otState.dur){ otSetDur(nd); buzz(5); } else { otRenderTime({noTrans:true}); }
+      });
+      var _endDrag=function(e){
+        var pd=otState._pd; otState._pd=null;
+        if(pd && !pd.moved) otState._dragged=false;    // a clean tap → let it start the timer
+        else if(pd && pd.moved) setTimeout(function(){ otState._dragged=false; }, 350);
+        try{ _tap.releasePointerCapture(e.pointerId); }catch(_){}
+      };
+      _tap.addEventListener('pointerup', _endDrag);
+      _tap.addEventListener('pointercancel', _endDrag);
+    }
+    requestAnimationFrame(function(){ el.classList.add('show'); moveModeThumb(false); });
     otReset();
     var hn=el.querySelector('#ot-start');
     if(hn) hn.addEventListener('animationend', function(e){ if(e.animationName==='hintGlint') this.classList.remove('glint'); });
@@ -4900,7 +4973,8 @@
   var OT_REPS = [ {v:2}, {v:4}, {v:10}, {v:Infinity} ];
   function otRepV(s){ return s==='inf' ? Infinity : parseInt(s,10); }
   var OT_BASE = 850, OT_READY = 3, OT_DRAIN = 520;
-  var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, reps:0, left:0, _lastFrac:0, _wrapT:null };
+  var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, reps:0, left:0, _lastFrac:0, _wrapT:null,
+                  mode:'count', dur:120, total:0, endAt:0, raf:null, _lastSec:0, _dragged:false, _windT:null, dragC:null, _pd:null };
   var otTmT=null; // tempo fold-out collapse/close timer
   var otRepT=null; // herhaal fold-out close timer
   var otGlintT=null; // attention-glint scheduler for the "tik om te starten" hint
@@ -5066,6 +5140,7 @@
         prog=host.querySelector('#ot-prog'), knobg=host.querySelector('#ot-knobg'),
         hint=host.querySelector('#ot-hint'), dial=host.querySelector('.ptimer');
     if(!numEl) return;
+    numEl.classList.remove('ot-tnum');
     var frac=0, C=666;
     if(otState.phase==='ready'){
       if(dial){ dial.classList.add('ready'); dial.classList.remove('idle'); }
@@ -5212,6 +5287,7 @@
     otSyncControls(); otSchedule();
   }
   function otTap(){
+    if(otState.mode==='time'){ otTapTime(); return; }
     var wt=timerScreen&&timerScreen.querySelector('.ot-tempo');
     if(wt && wt.classList.contains('open')){ otCloseFan(); return; }
     var wr=timerScreen&&timerScreen.querySelector('.ot-rep');
@@ -5222,6 +5298,7 @@
     else { otResume(); }
   }
   function otReset(){
+    if(otState.mode==='time'){ otResetTime(); return; }
     otCloseFan(); otCloseReps(); clearTimeout(otState.iv); clearTimeout(otState._wrapT); otState.running=false;
     if(timerScreen) timerScreen.classList.remove('ot-paused');
     otState.phase='idle'; otState.ready=OT_READY; otState.i=0;
@@ -5396,7 +5473,181 @@
     clearTimeout(otTmT);
     otTmT=setTimeout(otCollapseTempo, 250); // beat 2: glide it home as the pill collapses
   }
-  function otStop(){ if(otState.iv){ clearTimeout(otState.iv); otState.iv=null; } clearTimeout(otState._wrapT); otState.running=false; }
+  function otStop(){ if(otState.iv){ clearTimeout(otState.iv); otState.iv=null; }
+    if(otState.raf){ cancelAnimationFrame(otState.raf); otState.raf=null; }
+    clearTimeout(otState._wrapT); clearTimeout(otState._windT); otState.running=false; }
+
+  /* ===== Tijd mode: countdown timer (stretch/spar rounds) — 30s..10:00, drag ring or ±30s ===== */
+  function otFmtTime(sec){ sec=Math.max(0, Math.round(sec)); var m=Math.floor(sec/60), s=sec%60; return m+':'+(s<10?'0':'')+s; }
+  function otSetMode(m){
+    if(m!=='time' && m!=='count') return;
+    if(m!==otState.mode){
+      otStop();
+      otState.mode=m;
+      try{ localStorage.setItem('poom_ot_mode', m); }catch(e){}
+      if(timerScreen) timerScreen.setAttribute('data-mode', m);
+    }
+    var host=timerScreen; if(!host) return;
+    otCloseFan(); otCloseReps();
+    [].forEach.call(host.querySelectorAll('.ot-mseg'),function(b){
+      var on=b.getAttribute('data-m')===otState.mode;
+      b.classList.toggle('on', on); b.setAttribute('aria-selected', on?'true':'false');
+    });
+    moveModeThumb(true);
+    otReset();                                   // branches to the selected mode's idle state
+  }
+  function moveModeThumb(animate){
+    var host=timerScreen; if(!host) return;
+    var seg=host.querySelector('.ot-modeseg'), thumb=host.querySelector('#ot-mseg-thumb');
+    if(!seg||!thumb) return;
+    var on=seg.querySelector('.ot-mseg.on'); if(!on) return;
+    if(!animate) thumb.style.transition='none';
+    thumb.style.width=on.offsetWidth+'px';
+    thumb.style.transform='translateX('+on.offsetLeft+'px)';
+    if(!animate){ void thumb.offsetWidth; thumb.style.transition=''; }
+  }
+  function otDialCenter(){
+    var host=timerScreen; if(!host) return null;
+    var svg=host.querySelector('.pt-svg'); if(!svg) return null;
+    var r=svg.getBoundingClientRect();
+    return { x:r.left+r.width/2, y:r.top+r.height/2 };
+  }
+  function otAngleDur(x,y,c){
+    var ang=Math.atan2(y-c.y, x-c.x);              // 0 = 3 o'clock
+    var deg=(ang*180/Math.PI + 90 + 360)%360;      // 0 at 12 o'clock, clockwise
+    var frac=deg/360;
+    return Math.max(30, Math.min(600, Math.round(frac*600/30)*30));
+  }
+  function otSetDur(sec){
+    otState.dur=Math.max(30, Math.min(600, Math.round(sec/30)*30));
+    try{ localStorage.setItem('poom_ot_dur', String(otState.dur)); }catch(e){}
+    if(otState.phase==='idle') otRenderTime({noTrans:true});
+  }
+  function otNudge(step){
+    if(otState.phase==='run') return;              // don't retime a live countdown
+    if(otState.phase==='done') otState.phase='idle';
+    var before=otState.dur; otSetDur(otState.dur+step);
+    if(otState.dur!==before) buzz(8);
+    otSyncTime();
+  }
+  function otResettableTime(){ return otState.running || otState.phase==='run' || otState.phase==='done'; }
+  function otSyncTime(){
+    var host=timerScreen; if(!host) return;
+    var canReset=otResettableTime();
+    var rs=host.querySelector('#ot-reset'); if(rs) rs.classList.toggle('is-off', !canReset);
+    var rsc=host.querySelector('#ot-reset-ctl'); if(rsc) rsc.classList.toggle('lab-on', canReset);
+  }
+  function otRenderTime(opts){
+    var host=timerScreen; if(!host) return;
+    var numEl=host.querySelector('#ot-num'), wordEl=host.querySelector('#ot-word'),
+        prog=host.querySelector('#ot-prog'), knobg=host.querySelector('#ot-knobg'),
+        hint=host.querySelector('#ot-hint'), dial=host.querySelector('.ptimer');
+    if(!numEl) return;
+    var idle=(otState.phase==='idle'), running=(otState.phase==='run'), done=(otState.phase==='done');
+    if(dial){ dial.classList.remove('ready'); dial.classList.toggle('idle', idle); }
+    numEl.classList.add('ot-tnum');
+    if(wordEl) wordEl.innerHTML='';
+    var shownSec = idle ? otState.dur : Math.max(0, Math.ceil(otState.left - 1e-3));
+    numEl.textContent=otFmtTime(shownSec);
+    var frac = idle ? (otState.dur/600) : (otState.total>0 ? Math.max(0, otState.left/otState.total) : 0);
+    var C=666, noTrans=!!(opts&&opts.noTrans);
+    if(prog){ if(noTrans) prog.style.transition='none'; prog.style.strokeDashoffset=String(C*(1-frac)); }
+    if(knobg){ if(noTrans) knobg.style.transition='none'; knobg.style.transform='rotate('+(frac*360).toFixed(2)+'deg)'; }
+    if(hint){
+      hint.classList.remove('glint');
+      if(running && otState.running){ hint.textContent=''; hint.style.opacity='0'; }
+      else if(running){ hint.textContent='gepauzeerd — tik om verder te gaan'; hint.style.opacity='1'; }
+      else if(done){ hint.textContent='klaar! · tik voor opnieuw'; hint.style.opacity='1'; }
+      else { hint.textContent='sleep de ring of ± om in te stellen'; hint.style.opacity='1'; }
+    }
+    host.classList.toggle('running', running && otState.running);
+  }
+  function otResetTime(){
+    otStop();
+    if(timerScreen) timerScreen.classList.remove('ot-paused','running');
+    otState.phase='idle'; otState.left=otState.dur; otState._lastSec=0; otState._dragged=false;
+    var pr=timerScreen&&timerScreen.querySelector('#ot-prog'), kg=timerScreen&&timerScreen.querySelector('#ot-knobg');
+    if(pr){ pr.style.opacity=''; pr.style.transition='none'; }
+    if(kg){ kg.style.opacity=''; kg.style.transition='none'; }
+    otRenderTime({noTrans:true});
+    otSyncTime();
+  }
+  function otStartTime(){
+    var host=timerScreen; if(!host) return;
+    otStop();
+    host.classList.remove('ot-paused');
+    var dial=host.querySelector('.ptimer'); if(dial) dial.classList.remove('idle','ready');
+    otState.phase='run'; otState.running=true;
+    otState.total=otState.dur; otState.left=otState.dur; otState._lastSec=Math.ceil(otState.dur);
+    var numEl=host.querySelector('#ot-num'); if(numEl){ numEl.classList.add('ot-tnum'); numEl.textContent=otFmtTime(otState.dur); }
+    var wordEl=host.querySelector('#ot-word'); if(wordEl) wordEl.innerHTML='';
+    var hint=host.querySelector('#ot-hint'); if(hint){ hint.classList.remove('glint'); hint.textContent=''; hint.style.opacity='0'; }
+    host.classList.add('running'); buzz(16); otSyncTime();
+    // Wind the ring UP from the set fraction to full, then start draining over the set time
+    var prog=host.querySelector('#ot-prog'), knobg=host.querySelector('#ot-knobg');
+    var frac0=otState.dur/600, C=666, WIND=480;
+    if(prog){ prog.style.transition='none'; prog.style.strokeDashoffset=String(C*(1-frac0)); }
+    if(knobg){ knobg.style.transition='none'; knobg.style.transform='rotate('+(frac0*360).toFixed(2)+'deg)'; }
+    void host.offsetWidth;
+    if(prog){ prog.style.transition='stroke-dashoffset '+WIND+'ms cubic-bezier(.4,0,.2,1)'; prog.style.strokeDashoffset='0'; }
+    if(knobg){ knobg.style.transition='transform '+WIND+'ms cubic-bezier(.4,0,.2,1)'; knobg.style.transform='rotate(360deg)'; }
+    clearTimeout(otState._windT);
+    otState._windT=setTimeout(function(){
+      if(!timerScreen || otState.phase!=='run' || !otState.running) return;
+      var h=timerScreen, pr=h.querySelector('#ot-prog'), kg=h.querySelector('#ot-knobg');
+      if(pr) pr.style.transition='none'; if(kg) kg.style.transition='none';
+      otState.endAt=performance.now()+otState.total*1000;
+      otState._lastSec=Math.ceil(otState.total);
+      otState.raf=requestAnimationFrame(otCountFrame);
+    }, WIND);
+  }
+  function otCountFrame(){
+    if(!timerScreen || otState.mode!=='time' || !otState.running || otState.phase!=='run'){ return; }
+    var left=Math.max(0, (otState.endAt-performance.now())/1000);
+    otState.left=left;
+    otRenderTime({noTrans:true});
+    var sec=Math.ceil(left - 1e-3);
+    if(sec!==otState._lastSec){
+      if(sec>=1 && sec<=3){ sfx('beep'); buzz(10); }     // 3 · 2 · 1 lead-out before zero
+      otState._lastSec=sec;
+    }
+    if(left<=0.001){ otFinishTime(); return; }
+    otState.raf=requestAnimationFrame(otCountFrame);
+  }
+  function otFinishTime(){
+    var host=timerScreen; if(!host) return;
+    if(otState.raf){ cancelAnimationFrame(otState.raf); otState.raf=null; }
+    clearTimeout(otState._windT);
+    otState.running=false; otState.phase='done'; otState.left=0;
+    otRenderTime({noTrans:true});
+    host.classList.remove('running');
+    sfx('complete'); buzz(30);
+    otSyncTime();
+    if(Math.random()<0.6) otMascotPeek();
+  }
+  function otPauseTime(){
+    if(otState.raf){ cancelAnimationFrame(otState.raf); otState.raf=null; }
+    clearTimeout(otState._windT);
+    otState.running=false;
+    if(timerScreen) timerScreen.classList.add('ot-paused');
+    otRenderTime({noTrans:true});
+    otSyncTime();
+  }
+  function otResumeTime(){
+    otState.running=true;
+    if(timerScreen) timerScreen.classList.remove('ot-paused');
+    otState.endAt=performance.now()+otState.left*1000;
+    otState._lastSec=Math.ceil(otState.left - 1e-3);
+    otRenderTime({noTrans:true});
+    otSyncTime();
+    otState.raf=requestAnimationFrame(otCountFrame);
+  }
+  function otTapTime(){
+    if(otState._dragged){ otState._dragged=false; return; }   // swallow the click that ends a ring-drag
+    if(otState.running){ otPauseTime(); return; }
+    if(otState.phase==='run'){ otResumeTime(); return; }       // paused mid-countdown
+    otStartTime();                                             // idle or finished → (re)start
+  }
   /* When a set finishes, now and then a mascot rises from the bottom to greet Jayden — large face,
      stopping as it reaches the counter ring, layered behind the transport buttons for depth. */
   function otMascotPeek(){
@@ -5558,6 +5809,9 @@
     else if(a==='tlspeed'){ tlSpeed(act.getAttribute('data-v')); }
     else if(a==='ottap'){ otTap(); }
     else if(a==='otreset'){ otReset(); }
+    else if(a==='otmode'){ otSetMode(act.getAttribute('data-m')); }
+    else if(a==='otminus'){ otNudge(-30); }
+    else if(a==='otplus'){ otNudge(30); }
     else if(a==='otrepeat'){ otRepeatMenu(); }
     else if(a==='otrep'){ otPickRep(act.getAttribute('data-v')); }
     else if(a==='ottempo'){ otTempo(); }
