@@ -1369,6 +1369,10 @@
   .ot-nudge .ot-fab{font-family:var(--cond);font-weight:800}
   .ot-nudge svg{width:26px;height:26px}
   .timerscreen[data-mode="time"] .ot-nudge .ot-lab{opacity:1}
+  /* while the countdown is running (or paused mid-run) the ± nudgers can't change the
+     duration, so fade them out to avoid confusion; they return in idle/done */
+  .ot-nudge{transition:opacity .25s ease}
+  .timerscreen[data-mode="time"].ot-counting .ot-nudge{opacity:0;pointer-events:none}
 
   /* Swap the bottom controls per mode: Herhaal+Tempo for counting, −/+ for the countdown */
   .timerscreen[data-mode="time"] .ot-rep,
@@ -5561,10 +5565,11 @@
       else { hint.textContent='sleep de ring of ± om in te stellen'; hint.style.opacity='1'; }
     }
     host.classList.toggle('running', running && otState.running);
+    host.classList.toggle('ot-counting', running);
   }
   function otResetTime(){
     otStop();
-    if(timerScreen) timerScreen.classList.remove('ot-paused','running');
+    if(timerScreen) timerScreen.classList.remove('ot-paused','running','ot-counting');
     otState.phase='idle'; otState.left=otState.dur; otState._lastSec=0; otState._dragged=false;
     var pr=timerScreen&&timerScreen.querySelector('#ot-prog'), kg=timerScreen&&timerScreen.querySelector('#ot-knobg');
     if(pr){ pr.style.opacity=''; pr.style.transition='none'; }
@@ -5582,7 +5587,7 @@
     var numEl=host.querySelector('#ot-num'); if(numEl){ numEl.classList.add('ot-tnum'); numEl.textContent=otFmtTime(otState.dur); }
     var wordEl=host.querySelector('#ot-word'); if(wordEl) wordEl.innerHTML='';
     var hint=host.querySelector('#ot-hint'); if(hint){ hint.classList.remove('glint'); hint.textContent=''; hint.style.opacity='0'; }
-    host.classList.add('running'); buzz(16); otSyncTime();
+    host.classList.add('running','ot-counting'); buzz(16); otSyncTime();
     // Wind the ring UP from the set fraction to full, then start draining over the set time
     var prog=host.querySelector('#ot-prog'), knobg=host.querySelector('#ot-knobg');
     var frac0=otState.dur/600, C=666, WIND=480;
