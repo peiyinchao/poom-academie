@@ -1355,7 +1355,7 @@
   .timerscreen .shead .ot-hspacer{flex:1 1 0;min-width:0}
   .timerscreen .shead .ot-hspacer-r{display:flex;justify-content:flex-end}
   .ot-modeseg{position:relative;z-index:1;flex:none;display:inline-flex;align-items:center;padding:4px;border-radius:22px;
-    background:rgba(16,8,4,.30);border:1px solid rgba(255,255,255,.22);
+    background:rgba(16,8,4,.30);border:0;
     -webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3)}
   .ot-mseg{position:relative;z-index:1;border:0;background:transparent;cursor:pointer;
     font-family:var(--cond);font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:13px;
@@ -1367,14 +1367,10 @@
 
   /* ± duration nudgers (Tijd mode): the amount lives inside the button, no floating label */
   .ot-nudge .ot-fab{font-family:var(--cond);font-weight:800}
-  .ot-nlab{font-family:var(--cond);font-weight:800;font-size:23px;line-height:1;letter-spacing:.01em;
+  .ot-nlab{font-family:var(--cond);font-weight:800;font-size:17px;line-height:1;letter-spacing:.02em;
     font-variant-numeric:tabular-nums}
-  .ot-nlab .ot-nsign{font-size:26px;margin-right:1px}
-  .ot-nlab .ot-nunit{font-size:15px;opacity:.66;margin-left:1px}
-  /* while the countdown is running (or paused mid-run) the ± nudgers can't change the
-     duration, so fade them out to avoid confusion; they return in idle/done */
-  .ot-nudge{transition:opacity .25s ease}
-  .timerscreen[data-mode="time"].ot-counting .ot-nudge{opacity:0;pointer-events:none}
+  .ot-nlab .ot-nsign{font-size:19px;margin-right:1px}
+  .ot-nlab .ot-nunit{font-size:11px;opacity:.66;margin-left:1px}
 
   /* Swap the bottom controls per mode: Herhaal+Tempo for counting, −/+ for the countdown */
   .timerscreen[data-mode="time"] .ot-rep,
@@ -5530,7 +5526,16 @@
     if(otState.phase==='idle') otRenderTime({noTrans:true});
   }
   function otNudge(step){
-    if(otState.phase==='run') return;              // don't retime a live countdown
+    if(otState.phase==='run'){                       // live countdown: add/subtract on the fly
+      var nl=Math.max(5, Math.min(600, otState.left+step));
+      if(Math.abs(nl-otState.left)<0.5) return;      // already at a limit
+      otState.left=nl;
+      if(nl>otState.total) otState.total=nl;         // grow the ring reference if extended past the start
+      otState._lastSec=Math.ceil(nl - 1e-3);         // keep the 3·2·1 beep boundary aligned
+      if(otState.running) otState.endAt=performance.now()+nl*1000;
+      otRenderTime({noTrans:true}); buzz(8);
+      return;
+    }
     if(otState.phase==='done') otState.phase='idle';
     var before=otState.dur; otSetDur(otState.dur+step);
     if(otState.dur!==before) buzz(8);
@@ -5567,11 +5572,10 @@
       else { hint.textContent='sleep de ring of ± om in te stellen'; hint.style.opacity='1'; }
     }
     host.classList.toggle('running', running && otState.running);
-    host.classList.toggle('ot-counting', running);
   }
   function otResetTime(){
     otStop();
-    if(timerScreen) timerScreen.classList.remove('ot-paused','running','ot-counting');
+    if(timerScreen) timerScreen.classList.remove('ot-paused','running');
     otState.phase='idle'; otState.left=otState.dur; otState._lastSec=0; otState._dragged=false;
     var pr=timerScreen&&timerScreen.querySelector('#ot-prog'), kg=timerScreen&&timerScreen.querySelector('#ot-knobg');
     if(pr){ pr.style.opacity=''; pr.style.transition='none'; }
@@ -5589,7 +5593,7 @@
     var numEl=host.querySelector('#ot-num'); if(numEl){ numEl.classList.add('ot-tnum'); numEl.textContent=otFmtTime(otState.dur); }
     var wordEl=host.querySelector('#ot-word'); if(wordEl) wordEl.innerHTML='';
     var hint=host.querySelector('#ot-hint'); if(hint){ hint.classList.remove('glint'); hint.textContent=''; hint.style.opacity='0'; }
-    host.classList.add('running','ot-counting'); buzz(16); otSyncTime();
+    host.classList.add('running'); buzz(16); otSyncTime();
     // Wind the ring UP from the set fraction to full, then start draining over the set time
     var prog=host.querySelector('#ot-prog'), knobg=host.querySelector('#ot-knobg');
     var frac0=otState.dur/600, C=666, WIND=480;
