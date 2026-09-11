@@ -98,15 +98,13 @@
   .status-when{display:flex;flex-direction:column;gap:3px;min-width:0;align-items:flex-start}
   .status-next{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:11.5px;
     color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:216px;
-    cursor:pointer;-webkit-tap-highlight-color:transparent}
+    cursor:pointer;-webkit-tap-highlight-color:transparent;
+    /* room for the count's underline: overflow:hidden (needed for the ellipsis) clips to the
+       padding box, so without this the underline is cut off */
+    padding-bottom:2px}
   .status-next:active{opacity:.55}
-  .status-next b{color:var(--blue);font-weight:800}
-  .streakchip{display:inline-flex;align-items:center;gap:6px;background:rgba(240,82,43,.14);color:#C4431C;
-    border:1px solid rgba(240,82,43,.26);
-    border-radius:999px;padding:5px 11px;font-family:var(--cond);font-weight:700;font-size:13px}
-  .streakchip .fl{font-size:13px}
-  .streakchip.flare{animation:flare .7s ease}
-  @keyframes flare{0%{transform:scale(1)}40%{transform:scale(1.16)}100%{transform:scale(1)}}
+  .status-next b{color:var(--blue);font-weight:800;
+    text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}
   .status-end{display:flex;align-items:center;gap:10px}
   .avatar{width:37px;height:37px;border-radius:50%;flex:none;padding:3px;box-sizing:border-box;cursor:pointer;
     box-shadow:0 1px 4px rgba(0,0,0,.16);background:var(--soft)}
@@ -849,10 +847,6 @@
   .done h1{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:34px;margin:8px 0 0;color:var(--ink)}
   .done .dl{font-size:15.5px;color:#4A4438;margin:12px auto 0;max-width:30ch;line-height:1.55}
   .done .dl b{color:var(--ink)}
-  .streakup{display:inline-flex;align-items:center;gap:9px;margin-top:20px;background:rgba(240,82,43,.17);color:var(--el);
-    border:1px solid rgba(240,82,43,.28);
-    border-radius:999px;padding:11px 18px;font-family:var(--cond);text-transform:uppercase;font-weight:700;font-size:15px}
-  .streakup .fl{font-size:18px}
   .tmrw{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 17px;
     display:flex;align-items:center;gap:14px;text-align:left}
   .tmrw .tm-ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;color:#fff;
@@ -1764,14 +1758,14 @@
   /* punch-bag impact sparks: near-black (scoped so the to-do completion sparks stay cream) */
   .pbag .hit-pop{background:var(--ink)}
   /* Handboek header height matches Woorden (142px) so the title + list bottom-align the same.
-     The bag hangs from a thin ceiling rail (::before) that runs under the profile + streak,
+     The bag hangs from a thin ceiling rail (::before) that runs under the profile avatar,
      tying it to the top status row; the bag is sized to stop just above the first list card. */
   .wlib .whead-hb{height:142px;position:relative}
-  /* The rail is a FIXED bar spanning the avatar->streak cluster (the whole top-right control group),
-     directly underneath it. The hook's footprint (l..r) splits it into a left (::before) + right
+  /* The rail is a FIXED bar of RAIL_W px ending at the avatar's right edge, directly underneath the
+     top-right control group. The hook's footprint (l..r) splits it into a left (::before) + right
      (::after) segment so the "?" hook drapes through; the bag is constrained (down()) so the hook
      only travels to the ends. Calm neutral tone (var(--gray)) so it reads as hardware, not a focal point. */
-  .wlib .whead-hb::before{content:"";position:absolute;left:var(--rail-a-left,276px);width:var(--rail-a-width,45px);top:16px;height:3px;z-index:3;
+  .wlib .whead-hb::before{content:"";position:absolute;left:var(--rail-a-left,236px);width:var(--rail-a-width,85px);top:16px;height:3px;z-index:3;
    background:var(--gray);border-radius:2px;pointer-events:none}
   .wlib .whead-hb::after{content:"";position:absolute;left:var(--rail-b-left,334px);width:var(--rail-b-width,34px);top:16px;height:3px;z-index:3;
    background:var(--gray);border-radius:2px;pointer-events:none}
@@ -2192,7 +2186,6 @@
   var DONE = {il:true, i:true};
   var CUR = 'sam';           // today's focus form
   var NEXT_ID = 'sa';        // tomorrow
-  var STREAK = 5;
 
   /* Guep/Poom stepper — Kukkiwon grades the student can pick:
      10e Wit·Il · 8e Geel·I · 6e Groen·Sam+Sa · 4e Blauw·O · 3e Blauw-Rood·Yuk ·
@@ -2803,6 +2796,11 @@
   // of 695 across the rail's image-y 121–162 band). Drive the two rails' inner edges so the gap
   // between the left/right rail segments always clears the hook, wherever the bag is dragged.
   var ARCH_L=255/695, ARCH_R=424/695;
+  // Rail span in px. It used to be measured from the avatar to the streak chip's right edge; with
+  // the streak gone the avatar is the only thing left up there, so the span is fixed at what that
+  // cluster used to measure. That keeps the bag's travel — a rail the width of just the avatar
+  // would leave it nowhere to slide.
+  var RAIL_W=132;
   function updateRail(hdr){
     if(!hdr||!hdr.style) return;
     var span=hdr.querySelector('.whead-bag'); if(!span) return;
@@ -2811,16 +2809,14 @@
     var r=(sr.left-hr.left)+ARCH_R*sr.width;   // hook arch right outer edge
     hdr.style.setProperty('--rail-l', Math.max(0,l).toFixed(1)+'px');
     hdr.style.setProperty('--rail-r', Math.max(0,r).toFixed(1)+'px');
-    // Fixed rail = the avatar->streak cluster's span, directly underneath it. The hook gap (l..r)
-    // splits it into a left + right segment. The bag is constrained (see down()) so l/r stay within
-    // that span, so the rail's outer ends stay pinned to the avatar/chip edges — it never grows on drag.
+    // Fixed rail, sitting directly underneath the top-right control cluster and ending at the
+    // avatar's right edge. The hook gap (l..r) splits it into a left + right segment. The bag is
+    // constrained (see down()) so l/r stay within that span — the rail never grows on drag.
     var root=hdr.closest('.surface');
-    var chip=root?root.querySelector('.streakchip'):null;
     var av=root?root.querySelector('.avatar'):null;
-    if(chip){
-      var cr=chip.getBoundingClientRect();
-      var cR=cr.right-hr.left;                                    // rail right end = streak chip's right edge
-      var railL=av?(av.getBoundingClientRect().left-hr.left):(cr.left-hr.left); // rail left end = avatar's left edge
+    if(av){
+      var cR=av.getBoundingClientRect().right-hr.left;   // rail right end = avatar's right edge
+      var railL=cR-RAIL_W;                               // rail left end
       hdr.style.setProperty('--rail-a-left', railL.toFixed(1)+'px');
       hdr.style.setProperty('--rail-a-width', Math.max(0,l-railL).toFixed(1)+'px');
       hdr.style.setProperty('--rail-b-left', r.toFixed(1)+'px');
@@ -2838,10 +2834,9 @@
       lastX=e.clientX; lastT=now();
       var hr=hdr.getBoundingClientRect(), sr=span.getBoundingClientRect();
       var w=sr.width, U=(sr.left-hr.left)-PBAG.x;              // untranslated hook-span left (header coords)
-      var root=hdr.closest('.surface'), chip=root?root.querySelector('.streakchip'):null, av=root?root.querySelector('.avatar'):null;
-      var cr=chip?chip.getBoundingClientRect():null;
-      var cl=av?(av.getBoundingClientRect().left-hr.left):(cr?cr.left-hr.left:hr.width-116); // rail left end = avatar's left edge
-      var cR=cr?(cr.right-hr.left):(hr.width-24);              // rail right end = streak chip's right edge
+      var root=hdr.closest('.surface'), av=root?root.querySelector('.avatar'):null;
+      var cR=av?(av.getBoundingClientRect().right-hr.left):(hr.width-24);  // rail right end = avatar's right edge
+      var cl=cR-RAIL_W;                                                    // rail left end
       minTx=cl-U-ARCH_L*w;                                     // hook's left edge reaches the rail's left end
       maxTx=cR-U-ARCH_R*w;                                     // hook's right edge reaches the rail's right end
       if(minTx>maxTx){ minTx=maxTx=(minTx+maxTx)/2; }
@@ -3108,7 +3103,6 @@
     return '<div class="status">'+lead+
       '<span class="status-end">'+
         '<span class="avatar" title="Kies je graad" role="button" data-act="beltsheet" style="background:'+beltRingCss(geupInfo(GEUP_I))+'"><img src="assets/avatar/jayden.png" alt="Profiel"></span>'+
-        '<span class="streakchip" id="streakchip"><span class="fl">🔥</span>'+STREAK+' dagen</span>'+
       '</span></div>';
   }
   function renderToday(){
@@ -4653,7 +4647,6 @@
       }
     }
     if(allDone){
-      var chip = stage.querySelector('#streakchip'); if(chip){ chip.classList.remove('flare'); void chip.offsetWidth; chip.classList.add('flare'); }
       confetti();
     }
   }
@@ -5195,7 +5188,6 @@
           '<div class="donek han-lab">오늘의 도장 · vandaag behaald</div>'+
           '<h1>Sterk gedaan!</h1>'+
           '<div class="dl">Je liep je hele training van vandaag door en verdiende je stempel. Weer een stap hoger op de berg.</div>'+
-          '<div class="streakup"><span class="fl">🔥</span>Streak '+STREAK+' → '+(STREAK+1)+'</div>'+
           tomorrowCard()+
         '</div>';
       footHtml = '<button class="nextbtn" data-act="sclose">Terug naar vandaag</button>';
@@ -6305,7 +6297,6 @@
       }
     }
     if(allDone){
-      var chip = stage.querySelector('#streakchip'); if(chip){ chip.classList.remove('flare'); void chip.offsetWidth; chip.classList.add('flare'); }
       confetti();
     }
   }
