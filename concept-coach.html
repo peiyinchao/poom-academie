@@ -3563,8 +3563,8 @@
      HANDBOEK — reference manual hub + frosted detail sheets
      ========================================================= */
   var HB_CATS=[
-    {key:'standen',    title:'Standen',         han:'서', el:'#2F9E56', sub:'Voetposities',       unit:'standen',     grp:1},
-    {key:'technieken', title:'Technieken',      han:'술', el:'#2F9E56', sub:'Blok · stoot · trap',unit:'technieken',  grp:1},
+    {key:'standen',    title:'Standen',         han:'서', el:'#2468D6', sub:'Voetposities',       unit:'standen',     grp:1},
+    {key:'technieken', title:'Technieken',      han:'술', el:'#2468D6', sub:'Blok · stoot · trap',unit:'technieken',  grp:1},
     {key:'poomsae',    title:'Poomsae',         han:'품', el:'#2468D6', sub:'De vormen',          unit:'vormen',      grp:2, wide:true},
     {key:'ilbo',       title:'Ilbo Taeryon',    han:'일', el:'#2468D6', sub:'Stapsparren',        unit:'afwerkingen', grp:2},
     {key:'hosinsul',   title:'Hosinsul',        han:'호', el:'#2468D6', sub:'Zelfverdediging',    unit:'technieken',  grp:2},
@@ -3574,8 +3574,8 @@
     {key:'gyeokpa',    title:'Gyeokpa',         han:'격', el:'#2468D6', sub:'Breektest',          unit:'breektest',   grp:2,
       kind:'onderdeel', odid:'gyepa', ko:'격파', roman:'Gyeokpa', show:hasGyeokpa,
       eis:'Op je examen breek je één plank met een techniek die bij je band past. Je krijgt meestal een paar pogingen; blijf rustig en gefocust. Altijd samen met je trainer.'},
-    {key:'theorie',    title:'Theorie',         han:'론', el:'#8B45E6', sub:'Wat & waarom',       unit:'onderwerpen', grp:3},
-    {key:'examen',     title:'Examenkaart',     han:'시', el:'#8B45E6', sub:'Wat je moet kunnen', unit:'onderdelen',  grp:3}
+    {key:'theorie',    title:'Theorie',         han:'론', el:'#2468D6', sub:'Wat & waarom',       unit:'onderwerpen', grp:3},
+    {key:'examen',     title:'Examenkaart',     han:'시', el:'#2468D6', sub:'Wat je moet kunnen', unit:'onderdelen',  grp:3}
   ];
   // Only the onderdelen die bij de huidige graad horen (Gyeorugi vanaf 8e, Gyeokpa vanaf 6e geup).
   function hbCatsActive(){ return HB_CATS.filter(function(c){ return !c.show || c.show(); }); }
