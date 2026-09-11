@@ -92,6 +92,20 @@
     -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
     -webkit-mask-image:linear-gradient(#000,transparent);mask-image:linear-gradient(#000,transparent)}
   .status .date{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:11.5px;color:var(--gray)}
+  /* Agenda teaser: the date grows a second line counting down to the next exam/wedstrijd/cursus.
+     The whole block (date + countdown + "+") is one tap target that opens the agenda sheet,
+     the same idiom as tapping the avatar for the belt sheet. */
+  .status-lead{display:flex;align-items:center;gap:9px;min-width:0;cursor:pointer;
+    -webkit-tap-highlight-color:transparent}
+  .status-lead:active{opacity:.6}
+  .status-when{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .status-next{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:11.5px;
+    color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:208px}
+  .status-next b{color:var(--ink);font-weight:800}
+  .status-add{width:19px;height:19px;border-radius:50%;flex:none;display:inline-flex;
+    align-items:center;justify-content:center;background:var(--soft);border:1px solid var(--line);
+    color:var(--gray);font-family:var(--cond);font-style:normal;font-weight:800;font-size:14px;
+    line-height:1;padding-bottom:1px}
   .streakchip{display:inline-flex;align-items:center;gap:6px;background:rgba(240,82,43,.14);color:#C4431C;
     border:1px solid rgba(240,82,43,.26);
     border-radius:999px;padding:5px 11px;font-family:var(--cond);font-weight:700;font-size:13px}
@@ -323,6 +337,34 @@
   .bs-done{font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;font-size:13.5px;color:var(--blue);
     background:none;border:0;cursor:pointer;padding:6px 2px;font-weight:700}
   .beltsheet .beltpick{margin:14px 0 0}
+  /* Agenda sheet — reuses the belt sheet's chrome (backdrop, grab handle, head, slide-up)
+     so the motion is identical; only the body below is agenda-specific. */
+  .ag-list{display:flex;flex-direction:column;gap:8px;margin:16px 0 0}
+  .ag-item{display:flex;align-items:center;gap:11px;background:var(--surface);
+    border:1px solid var(--line);border-radius:16px;padding:10px 8px 10px 13px}
+  .ag-ico{font-size:19px;line-height:1;flex:none}
+  .ag-txt{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+  .ag-txt b{font-size:13.5px;color:var(--ink);font-weight:800;letter-spacing:.004em;line-height:1.25}
+  .ag-sub{font-size:12px;color:var(--gray);line-height:1.25}
+  .ag-cnt{font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;font-size:12px;
+    font-weight:800;color:var(--ink);flex:none;white-space:nowrap}
+  .ag-del{flex:none;width:28px;height:28px;border:0;background:none;cursor:pointer;
+    color:var(--gray);font-size:19px;line-height:1;padding:0;-webkit-tap-highlight-color:transparent}
+  .ag-del:active{transform:scale(.9)}
+  .ag-empty{font-size:12.5px;color:var(--gray);line-height:1.45;padding:2px 2px 0}
+  .ag-new{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:16px;
+    border-top:1px solid var(--line);padding-top:15px}
+  .ag-chips{display:flex;gap:7px;width:100%}
+  .ag-chip{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;
+    background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 4px;
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.03em;font-weight:700;
+    font-size:12px;color:var(--gray);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .ag-chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .ag-title{flex:1;min-width:0;border:1px solid var(--line);border-radius:13px;background:var(--surface);
+    padding:10px 12px;font-family:inherit;font-size:14px;color:var(--ink);-webkit-appearance:none}
+  .ag-title::placeholder{color:var(--gray)}
+  .ag-title:focus{outline:none;border-color:var(--blue)}
+  .ag-datebtn{margin-left:0}
   /* Reis grade chip (opens the belt sheet) */
   .gradechip{display:inline-flex;align-items:center;gap:9px;margin-top:14px;cursor:pointer;
     background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px 7px 9px;
@@ -2154,6 +2196,52 @@
   var NL_MON=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
   function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
   function fmtDateNL(iso){ if(!iso) return ''; var p=String(iso).split('-'); if(p.length<3) return iso; return (+p[2])+' '+NL_MON[(+p[1]-1)]+' '+p[0]; }
+
+  /* ---------- Agenda ---------- */
+  // Wedstrijden, examens en cursussen that the student enters themselves. Unlike GEUP_DATES
+  // (in-memory demo data) these are real user input, so they persist in localStorage.
+  var AG_TYPES = [
+    {k:'wedstrijd', ico:'🏆', label:'Wedstrijd'},
+    {k:'examen',    ico:'🥋', label:'Examen'},
+    {k:'cursus',    ico:'📚', label:'Cursus'}
+  ];
+  var AGENDA = [];
+  function agType(k){ for(var i=0;i<AG_TYPES.length;i++){ if(AG_TYPES[i].k===k) return AG_TYPES[i]; } return AG_TYPES[0]; }
+  function agLoad(){
+    try{ var r=JSON.parse(localStorage.getItem('poom_agenda')); if(r&&r.length){ AGENDA=r; return; } }catch(e){}
+    AGENDA=[
+      {id:'a1',type:'wedstrijd',title:'Ilyo Open Poomsae 2026',       date:'2026-09-26',                  where:'Aarschot, België'},
+      {id:'a2',type:'cursus',   title:'Poomsae Autumn Camp',          date:'2026-10-16',end:'2026-10-18', where:'Oss, Nederland'},
+      {id:'a3',type:'wedstrijd',title:'Max Thümann Cup Poomsae 2026', date:'2026-10-25',                  where:"'s-Hertogenbosch, Nederland"},
+      {id:'a4',type:'wedstrijd',title:'Team ontmoeting Chin Hûng',    date:'2026-11-08',                  where:'Meijel, Nederland'}
+    ];
+  }
+  function agSave(){ try{ localStorage.setItem('poom_agenda', JSON.stringify(AGENDA)); }catch(e){} }
+  // Whole days from today, compared as calendar dates (UTC maths, so DST can't shift the count).
+  function agDays(iso){
+    var a=todayISO().split('-'), b=String(iso).split('-');
+    return Math.round((Date.UTC(+b[0],+b[1]-1,+b[2]) - Date.UTC(+a[0],+a[1]-1,+a[2]))/86400000);
+  }
+  // A multi-day event stays listed until its last day has passed, so it survives its own camp.
+  function agUpcoming(){
+    return AGENDA.filter(function(e){ return agDays(e.end||e.date)>=0; })
+                 .sort(function(x,y){ return x.date<y.date?-1:(x.date>y.date?1:0); });
+  }
+  function agNext(){ var u=agUpcoming(); return u.length?u[0]:null; }
+  function agCount(e){
+    var n=agDays(e.date);
+    if(n>1) return 'nog <b>'+n+' dagen</b>';
+    if(n===1) return 'Morgen';
+    if(n===0) return 'Vandaag';
+    return 'Bezig';
+  }
+  // "16–18 okt 2026" when a range sits inside one month, otherwise both dates in full.
+  function agWhen(e){
+    if(!e.end || e.end===e.date) return fmtDateNL(e.date);
+    var a=e.date.split('-'), b=e.end.split('-');
+    return (a[0]===b[0] && a[1]===b[1]) ? (+a[2])+'–'+fmtDateNL(e.end) : fmtDateNL(e.date)+' – '+fmtDateNL(e.end);
+  }
+  agLoad();
   function geupSpan(fromISO, toISO){
     if(!fromISO) return '';
     var a=new Date(fromISO+'T00:00:00'), b=toISO? new Date(toISO+'T00:00:00') : new Date();
@@ -2342,12 +2430,18 @@
     var root=stage.querySelector('.beltpick'); if(!root) return;
     var inp=root.querySelector('#bp-range'), thumb=root.querySelector('#bp-thumb'),
         fill=root.querySelector('#bp-fill'); if(!inp||!thumb) return;
-    var g=geupInfo(k), W=inp.clientWidth||0, TH=52, frac=(GEUPS.length>1)?k/(GEUPS.length-1):0;
+    var g=geupInfo(k), TH=52, frac=(GEUPS.length>1)?k/(GEUPS.length-1):0;
     // Inset the travel so the thumb keeps the same gap at the ends as it does top/bottom
     // ((track 60 − thumb 52) / 2), instead of running flush into the track's end caps.
-    var PAD = Math.max(0, (root.querySelector('.bp-track').clientHeight - TH) / 2) || 0;
-    var cx = PAD + TH/2 + frac*(W - TH - 2*PAD);
-    thumb.style.left = cx+'px';
+    // The offset is a calc() percentage rather than a measured pixel value: iOS Safari can
+    // report a zero width for the range input while the sheet is still being laid out, which
+    // resolved to a negative offset and parked the thumb outside the track's left cap (and
+    // collapsed the fill). calc() resolves at paint time, so it also survives a resize.
+    var TRK = (root.querySelector('.bp-track')||{}).clientHeight || 60;
+    var PAD = Math.max(0, (TRK - TH) / 2);
+    var off = PAD + TH/2 - frac*(TH + 2*PAD);
+    var cx = 'calc('+(frac*100)+'% '+(off<0 ? '- '+Math.abs(off) : '+ '+off)+'px)';
+    thumb.style.left = cx;
     thumb.style.background = g.col2
       ? 'linear-gradient(90deg,'+g.col+' 0 50%,'+g.col2+' 50% 100%)'
       : g.col;
@@ -2363,7 +2457,7 @@
     if(fill){
       // At the top grade the belt colour runs out to the track's end cap, so the whole bar reads
       // as complete; below it the fill stops at the thumb's centre (hidden under the thumb).
-      fill.style.width = ((k===GEUPS.length-1) ? W : cx)+'px';
+      fill.style.width = (k===GEUPS.length-1) ? '100%' : cx;
       fill.style.background = dualBg(g);
     }
     // stop marks: dark on the light track, light over a dark fill → keeps AA (≥3:1) either way,
@@ -2451,6 +2545,73 @@
     fnav.classList.remove('hide');
   }
 
+  /* ---- Agenda sheet (reuses the belt sheet's chrome + native date entry) ---- */
+  var agSheet=null, agNewType='wedstrijd';
+  function agItemHtml(e){
+    var t=agType(e.type);
+    return '<div class="ag-item">'+
+      '<span class="ag-ico">'+t.ico+'</span>'+
+      '<span class="ag-txt"><b>'+esc(e.title||t.label)+'</b>'+
+        '<span class="ag-sub">'+esc(agWhen(e)+(e.where?' · '+e.where:''))+'</span></span>'+
+      '<span class="ag-cnt">'+agCount(e)+'</span>'+
+      '<button class="ag-del" data-act="agdel" data-id="'+esc(e.id)+'" aria-label="Verwijderen">×</button>'+
+    '</div>';
+  }
+  function agBodyHtml(){
+    var up=agUpcoming();
+    return (up.length
+        ? '<div class="ag-list">'+up.map(agItemHtml).join('')+'</div>'
+        : '<p class="ag-empty">Nog niets gepland. Kies hieronder wat het is, geef het een naam en tik de datum aan.</p>')+
+      '<div class="ag-new">'+
+        '<div class="ag-chips">'+AG_TYPES.map(function(t){
+          return '<button class="ag-chip'+(t.k===agNewType?' on':'')+'" data-act="agtype" data-k="'+t.k+'">'+t.ico+' '+t.label+'</button>';
+        }).join('')+'</div>'+
+        '<input class="ag-title" id="ag-title" type="text" autocomplete="off" placeholder="Naam (bijv. Ilyo Open Poomsae)">'+
+        '<label class="bp-gradbtn ag-datebtn">Datum<input type="date" class="bp-graddate" id="ag-date"></label>'+
+      '</div>';
+  }
+  function agRender(){ if(!agSheet) return; var b=agSheet.querySelector('#ag-body'); if(b) b.innerHTML=agBodyHtml(); }
+  // Keep the header's countdown in step without re-rendering the whole Vandaag screen.
+  function refreshStatusNext(){
+    var w=stage.querySelector('.status-when'); if(!w) return;
+    var old=w.querySelector('.status-next'), nx=agNext();
+    if(!nx){ if(old&&old.parentNode) old.parentNode.removeChild(old); return; }
+    var html=agCount(nx)+' · '+esc(nx.title||agType(nx.type).label);
+    if(old){ old.innerHTML=html; return; }
+    var s=document.createElement('span'); s.className='status-next'; s.innerHTML=html; w.appendChild(s);
+  }
+  function openAgendaSheet(){
+    if(agSheet) return;
+    agSheet=document.createElement('div');
+    agSheet.className='beltsheet-ov'; agSheet.id='agenda-ov';
+    applyTheme(agSheet, CUR);
+    agSheet.innerHTML=
+      '<div class="bs-backdrop" data-act="agendaclose"></div>'+
+      '<div class="beltsheet">'+
+        '<div class="bs-grab"></div>'+
+        '<div class="bs-head"><h3>Agenda</h3>'+
+          '<button class="bs-done" data-act="agendaclose">Klaar</button></div>'+
+        '<div id="ag-body">'+agBodyHtml()+'</div>'+
+      '</div>';
+    stage.appendChild(agSheet);
+    fnav.classList.add('hide');
+    // Picking a date is the commit step — no separate save button, same as the graduation date.
+    agSheet.addEventListener('change', function(ev){
+      var inp=ev.target.closest && ev.target.closest('.bp-graddate'); if(!inp||!inp.value) return;
+      var ti=agSheet.querySelector('#ag-title');
+      AGENDA.push({id:'a'+Date.now(), type:agNewType, title:(ti&&ti.value.trim())||'', date:inp.value});
+      agSave(); agRender(); refreshStatusNext();
+      buzz(20); try{ sfx('complete'); }catch(_e){}
+    });
+    requestAnimationFrame(function(){ agSheet.classList.add('show'); });
+  }
+  function closeAgendaSheet(){
+    if(!agSheet) return;
+    agSheet.classList.remove('show');
+    var s=agSheet; agSheet=null;
+    setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
+    fnav.classList.remove('hide');
+  }
   /* ---- Woordenschat (termen categories) ---- */
   var TERMEN = C.termen || [];
   // "Struggle/bookmark" data (roman → true): the words Jayden marks as hard.
@@ -2877,8 +3038,20 @@
     var MO=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
     var d=new Date(); return WD[d.getDay()]+' '+d.getDate()+' '+MO[d.getMonth()];
   }
-  function statusBar(){
-    return '<div class="status"><span class="date">'+esc(dateStr())+'</span>'+
+  // `withNext` grows the date into the agenda teaser (countdown + "+"); the Woorden shells keep
+  // the plain date so their header stays a single quiet line.
+  function statusBar(withNext){
+    var lead;
+    if(withNext){
+      var nx=agNext();
+      lead='<span class="status-lead" role="button" data-act="agenda" title="Agenda">'+
+        '<span class="status-when"><span class="date">'+esc(dateStr())+'</span>'+
+          (nx ? '<span class="status-next">'+agCount(nx)+' · '+esc(nx.title||agType(nx.type).label)+'</span>' : '')+
+        '</span><i class="status-add">+</i></span>';
+    } else {
+      lead='<span class="date">'+esc(dateStr())+'</span>';
+    }
+    return '<div class="status">'+lead+
       '<span class="status-end">'+
         '<span class="avatar" title="Kies je graad" role="button" data-act="beltsheet" style="background:'+beltRingCss(geupInfo(GEUP_I))+'"><img src="assets/avatar/jayden.png" alt="Profiel"></span>'+
         '<span class="streakchip" id="streakchip"><span class="fl">🔥</span>'+STREAK+' dagen</span>'+
@@ -2938,7 +3111,7 @@
 
     var html =
     '<div class="surface" id="today-surface"><div>'+
-      statusBar()+
+      statusBar(true)+
       '<div class="pad">'+
         '<div class="greet">'+
           '<div class="greet-txt">'+
@@ -3861,7 +4034,9 @@
     else if(key==='standen') standenList().forEach(function(s){ rows+=stanceRow(s); });
     else if(key==='theorie') (C.theorie||[]).forEach(function(t){
       if(t.id==='taegeuk'){
-        var img='<img class="hb-figure" src="assets/mascot/flag-kid-bust.png" alt="Kind met de Koreaanse vlag" loading="lazy">';
+        // width/height give the float an intrinsic ratio, so the text wraps around a reserved
+        // 150×120 box instead of reflowing after decode (iOS Safari let the text run under it).
+        var img='<img class="hb-figure" src="assets/mascot/flag-kid-bust.png" alt="Kind met de Koreaanse vlag" width="328" height="263" decoding="async">';
         var parts=t.body.split('. ');
         var lead=parts.slice(0,2).join('. ')+'.';
         var tail=parts.slice(2).join('. ');
@@ -5991,6 +6166,13 @@
     else if(a==='cireflect'){ openCheckin('reflect'); }
     else if(a==='beltsheet'){ openBeltSheet(); }
     else if(a==='beltsheetclose'){ closeBeltSheet(); }
+    else if(a==='agenda'){ openAgendaSheet(); }
+    else if(a==='agendaclose'){ closeAgendaSheet(); }
+    else if(a==='agtype'){ agNewType=act.getAttribute('data-k');
+      if(agSheet){ [].forEach.call(agSheet.querySelectorAll('.ag-chip'), function(c){ c.classList.toggle('on', c.getAttribute('data-k')===agNewType); }); } }
+    else if(a==='agdel'){ var _aid=act.getAttribute('data-id');
+      AGENDA=AGENDA.filter(function(e){ return e.id!==_aid; });
+      agSave(); agRender(); refreshStatusNext(); buzz(12); }
     else if(a==='opencat'){ openCat(act.getAttribute('data-groep')); }
     else if(a==='openhard'){ openCat('Moeilijk'); }
     else if(a==='catclose'){ closeCat(); }
