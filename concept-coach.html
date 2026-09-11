@@ -2617,10 +2617,12 @@
     var done=agSheet.querySelector('.bs-done'); if(done) done.style.display=(agMode==='form'?'none':'');
   }
   // Keep the header's countdown in step without re-rendering the whole Vandaag screen.
+  // Every screen carries a countdown now, and screens overlap during a transition, so update them all.
   function refreshStatusNext(){
-    var el=stage.querySelector('.status-next'); if(!el) return;
     var nx=agNext();
-    el.innerHTML = nx ? (agCount(nx)+' · '+esc(nx.title||agType(nx.type).label)) : '<b>Niets gepland</b>';
+    var html = nx ? (agCount(nx)+' · '+esc(nx.title||agType(nx.type).label)) : '<b>Niets gepland</b>';
+    var all=stage.querySelectorAll('.status-next');
+    for(var i=0;i<all.length;i++) all[i].innerHTML=html;
   }
   function openAgendaSheet(){
     if(agSheet) return;
@@ -3086,21 +3088,16 @@
     var MO=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
     var d=new Date(); return WD[d.getDay()]+' '+d.getDate()+' '+MO[d.getMonth()];
   }
-  // `withNext` grows the date into the agenda teaser; the Woorden shells keep the plain date so
-  // their header stays a single quiet line. The countdown line doubles as the agenda's entry
-  // point, and falls back to "Niets gepland" so that entry point survives an empty agenda.
-  function statusBar(withNext){
-    var lead;
-    if(withNext){
-      var nx=agNext();
-      lead='<span class="status-when"><span class="date">'+esc(dateStr())+'</span>'+
+  // The date always carries the agenda teaser: a countdown to the next wedstrijd, examen or cursus
+  // that doubles as the agenda's entry point, on every screen. It falls back to "Niets gepland" so
+  // that entry point survives an empty agenda.
+  function statusBar(){
+    var nx=agNext();
+    return '<div class="status">'+
+      '<span class="status-when"><span class="date">'+esc(dateStr())+'</span>'+
         '<span class="status-next" role="button" data-act="agenda" title="Agenda">'+
           (nx ? agCount(nx)+' · '+esc(nx.title||agType(nx.type).label) : '<b>Niets gepland</b>')+
-        '</span></span>';
-    } else {
-      lead='<span class="date">'+esc(dateStr())+'</span>';
-    }
-    return '<div class="status">'+lead+
+        '</span></span>'+
       '<span class="status-end">'+
         '<span class="avatar" title="Kies je graad" role="button" data-act="beltsheet" style="background:'+beltRingCss(geupInfo(GEUP_I))+'"><img src="assets/avatar/jayden.png" alt="Profiel"></span>'+
       '</span></div>';
@@ -3159,7 +3156,7 @@
 
     var html =
     '<div class="surface" id="today-surface"><div>'+
-      statusBar(true)+
+      statusBar()+
       '<div class="pad">'+
         '<div class="greet">'+
           '<div class="greet-txt">'+
