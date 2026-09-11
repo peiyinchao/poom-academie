@@ -1370,6 +1370,7 @@
   .ot-nlab{font-family:var(--cond);font-weight:800;font-size:23px;line-height:1;letter-spacing:.01em;
     font-variant-numeric:tabular-nums}
   .ot-nlab .ot-nsign{font-size:26px;margin-right:1px}
+  .ot-nlab .ot-nunit{font-size:15px;opacity:.66;margin-left:1px}
   /* while the countdown is running (or paused mid-run) the ± nudgers can't change the
      duration, so fade them out to avoid confusion; they return in idle/done */
   .ot-nudge{transition:opacity .25s ease}
@@ -4574,10 +4575,10 @@
           '</div>'+
           '<div class="ot-nudge ot-ctl">'+
             '<button class="ot-fab ot-nudge-fab" data-act="otminus" aria-label="30 seconden minder">'+
-              '<span class="ot-nlab"><span class="ot-nsign">−</span>30</span></button></div>'+
+              '<span class="ot-nlab"><span class="ot-nsign">−</span>30<span class="ot-nunit">s</span></span></button></div>'+
           '<div class="ot-nudge ot-ctl">'+
             '<button class="ot-fab ot-nudge-fab" data-act="otplus" aria-label="30 seconden meer">'+
-              '<span class="ot-nlab"><span class="ot-nsign">+</span>30</span></button></div>'+
+              '<span class="ot-nlab"><span class="ot-nsign">+</span>30<span class="ot-nunit">s</span></span></button></div>'+
         '</div>'+
         '<div class="ot-ctl" id="ot-reset-ctl"><span class="ot-lab">Opnieuw</span>'+
           '<button class="ot-fab" id="ot-reset" data-act="otreset" aria-label="Opnieuw">'+IC.reset+'</button></div>'+
