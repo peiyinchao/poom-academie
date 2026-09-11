@@ -261,6 +261,21 @@
   .bp-slider input[type=range]:focus{outline:none}
   .bp-meta{margin-top:16px;font-size:13.5px;color:var(--gray)}
   .bp-meta b{color:var(--ink);font-weight:700}
+  /* Graduation registration: obtained date + time-in-grade, or a "Gegradueerd" date entry */
+  .bp-grad{margin-top:14px;display:flex;align-items:center;gap:10px;min-height:40px}
+  .bp-grad.pop{animation:bpPop .42s cubic-bezier(.2,.7,.3,1)}
+  .bp-grad-badge{font-size:19px;line-height:1;flex:none}
+  .bp-grad-badge.dim{opacity:.4;filter:grayscale(.5)}
+  .bp-grad-txt{display:flex;flex-direction:column;gap:1px;min-width:0}
+  .bp-grad-txt b{font-size:13.5px;color:var(--ink);font-weight:800;letter-spacing:.004em}
+  .bp-grad-sub{font-size:12px;color:var(--gray);line-height:1.25}
+  .bp-gradbtn{position:relative;margin-left:auto;flex:none;display:inline-flex;align-items:center;
+    background:var(--el);color:#fff;border-radius:999px;padding:9px 16px;
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;font-weight:800;font-size:12.5px;
+    box-shadow:0 7px 16px -8px var(--el);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .bp-gradbtn:active{transform:translateY(1px)}
+  .bp-gradbtn .bp-graddate{position:absolute;inset:0;width:100%;height:100%;opacity:0;
+    margin:0;padding:0;border:0;background:none;cursor:pointer;font-size:16px}
   /* micro-animations: grade number pops; belt-info line slides in from the sliding direction */
   .bp-band{transform-origin:center center}
   @keyframes bpPop{0%{transform:scale(.94);opacity:.4}55%{transform:scale(1.04);opacity:1}100%{transform:scale(1);opacity:1}}
@@ -2114,6 +2129,26 @@
     {stop:'P2', grade:'2e poom',  band:'Zwart',      form:'keumgang',          col:'#242327', lines:2}
   ];
   var GEUP_I = 4;            // Jayden: 3e geup (blauw-rood) → trains Taegeuk Yuk Jang
+  /* Behaalde graden — de datum waarop Jayden elke graad haalde (index in GEUPS → ISO-datum).
+     Leerlingen zijn trots op elke promotie; we tonen de datum én hoe lang hij de graad al draagt. */
+  var GEUP_DATES = { 0:'2024-01-09', 1:'2024-03-29', 2:'2025-01-02', 3:'2025-11-23', 4:'2026-09-04' };
+  function geupHighest(){ var h=-1; for(var k in GEUP_DATES){ if(GEUP_DATES.hasOwnProperty(k)&&GEUP_DATES[k]){ var i=+k; if(i>h) h=i; } } return h; }
+  var NL_MON=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+  function fmtDateNL(iso){ if(!iso) return ''; var p=String(iso).split('-'); if(p.length<3) return iso; return (+p[2])+' '+NL_MON[(+p[1]-1)]+' '+p[0]; }
+  function geupSpan(fromISO, toISO){
+    if(!fromISO) return '';
+    var a=new Date(fromISO+'T00:00:00'), b=toISO? new Date(toISO+'T00:00:00') : new Date();
+    var days=Math.floor((b-a)/86400000);
+    if(days<=0) return 'vandaag';
+    if(days<14) return days+(days===1?' dag':' dagen');
+    if(days<56){ var w=Math.round(days/7); return w+(w===1?' week':' weken'); }
+    var mo=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth())-(b.getDate()<a.getDate()?1:0);
+    if(mo<1) mo=1;
+    if(mo<12) return mo+(mo===1?' maand':' maanden');
+    var y=Math.floor(mo/12), r=mo%12;
+    return r? (y+' jaar '+r+' mnd') : (y+' jaar');
+  }
   function geupInfo(k){ return GEUPS[Math.max(0,Math.min(GEUPS.length-1,k|0))]; }
   function geupForm(g){
     var f=byId(g.form); if(!f) return '';
@@ -2169,6 +2204,7 @@
     bpSwapMeta(root.querySelector('.bp-meta'), g, dir);
     beltThumb(k);
     paintGuepBand(k);
+    bpRenderGrad(k);
   }
   // re-trigger a CSS animation class on each step (reflow to restart); skip under reduced motion
   function bpFlash(el, cls){
@@ -2278,6 +2314,24 @@
       marks[i].style.background = (i===k) ? 'transparent' : (i<k ? onFill : DARK);
     }
   }
+  // Graduation status for the belt sheet: obtained → date + time-in-grade; not yet → "Gegradueerd" date entry
+  function bpGradHtml(k){
+    if(GEUP_DATES.hasOwnProperty(k) && GEUP_DATES[k]){
+      var high=geupHighest(), isCur=(k>=high), toISO=null;
+      if(!isCur){ for(var j=k+1;j<GEUPS.length;j++){ if(GEUP_DATES[j]){ toISO=GEUP_DATES[j]; break; } } }
+      var sub=(isCur?'al ':'')+geupSpan(GEUP_DATES[k], toISO)+' in deze graad';
+      return '<span class="bp-grad-badge">🎓</span>'+
+        '<span class="bp-grad-txt"><b>Behaald op '+esc(fmtDateNL(GEUP_DATES[k]))+'</b>'+
+        '<span class="bp-grad-sub">'+esc(sub)+'</span></span>';
+    }
+    return '<span class="bp-grad-badge dim">🎓</span>'+
+      '<span class="bp-grad-txt"><b>Nog niet behaald</b>'+
+      '<span class="bp-grad-sub">leg de datum vast zodra je slaagt</span></span>'+
+      '<label class="bp-gradbtn">Gegradueerd'+
+        '<input type="date" class="bp-graddate" max="'+todayISO()+'" aria-label="Datum van gradueren">'+
+      '</label>';
+  }
+  function bpRenderGrad(k){ var el=stage.querySelector('#bp-grad'); if(el) el.innerHTML=bpGradHtml(k); }
   // Belt/guep slider markup (used by the profile belt sheet)
   function beltPickHtml(){
     var g0=geupInfo(GEUP_I);
@@ -2292,6 +2346,7 @@
           'id="bp-range" data-act="belt" aria-label="Kies je graad"></div>'+
       '<div class="bp-meta"><span class="bp-meta-cur"><b id="bp-grade">'+esc(g0.band)+'</b> · '+
         '<span id="bp-form">'+esc(geupForm(g0))+'</span></span></div>'+
+      '<div class="bp-grad" id="bp-grad">'+bpGradHtml(GEUP_I)+'</div>'+
     '</div>';
   }
   // Belt sheet — tap the profile avatar to change grade; updates oefenstof, mascotte & profielring
@@ -2315,8 +2370,16 @@
     var range=beltSheet.querySelector('#bp-range');
     if(range){
       range.addEventListener('input', function(){ beltLive(parseInt(range.value,10)); });
-      range.addEventListener('change', function(){ setBelt(parseInt(range.value,10), true); });
+      range.addEventListener('change', function(){ var kk=parseInt(range.value,10); setBelt(kk, true); bpRenderGrad(kk); });
     }
+    // Registering a graduation date (native date entry) promotes Jayden to that grade
+    beltSheet.addEventListener('change', function(e){
+      var inp=e.target.closest && e.target.closest('.bp-graddate'); if(!inp || !inp.value) return;
+      var rng=beltSheet.querySelector('#bp-range'); var k=rng? parseInt(rng.value,10) : GEUP_I;
+      GEUP_DATES[k]=inp.value; setBelt(k, true); bpRenderGrad(k);
+      var ge=stage.querySelector('#bp-grad'); if(ge) bpFlash(ge,'pop');
+      buzz(20); try{ sfx('complete'); }catch(_e){}
+    });
     requestAnimationFrame(function(){ beltSheet.classList.add('show'); beltThumb(GEUP_I); });
   }
   function closeBeltSheet(){
