@@ -2298,6 +2298,22 @@
     while(contrast(c,'#F4F1EA') < 3.4 && guard++<48){ c = shade(c,-6); }
     return c;
   }
+  // Darken a belt hex until white text sits legibly on top of it.
+  function inkSafeBg(hex){
+    var c = hex || '#242327', guard=0;
+    while(contrast('#FFFFFF',c) < 4.6 && guard++<26){ c = shade(c,-8); }
+    return c;
+  }
+  /* De "Training van vandaag"-kaart draagt de band van de leerling: het verloop komt uit zijn
+     graad in plaats van uit het element van de poomsae. Dubbele banden lopen van kleur 1 naar
+     kleur 2 (blauw→rood, rood→zwart); effen banden krijgen een donkerder eigen tint. */
+  function beltHero(g){
+    var a = inkSafeBg(g.col);
+    var b = g.col2 ? inkSafeBg(g.col2) : shade(a,-34);
+    if(!g.col2 && lum(a) < 0.05){ b = a; a = shade(a,22); } // zwarte band: grafietkop boven diep zwart
+    if(contrast(a,b) < 1.15) b = shade(b,-26);           // houd zichtbare diepte in het verloop
+    return { el:a, deep:b };
+  }
   // Colour the active-tab highlight + label to match the student's belt grade (adaptive ink for legibility)
   function paintNav(){
     var g = geupInfo(GEUP_I), hl = document.getElementById('fnav-hl');
@@ -2860,7 +2876,7 @@
       '</span></div>';
   }
   function renderToday(){
-    var f = byId(CUR), t = th(CUR);
+    var f = byId(CUR), t = th(CUR), bh = beltHero(geupInfo(GEUP_I));
     var doneCount = JOURNEY.filter(function(id){return DONE[id];}).length;
     var curIndex = JOURNEY.indexOf(CUR);
     var track = JOURNEY.map(function(id,i){
@@ -2928,7 +2944,7 @@
 
         checkin +
 
-        '<div class="trainday" style="--el:'+t.el+';--deep:'+t.deep+';--accent:'+beltStroke(geupInfo(GEUP_I))+'">'+
+        '<div class="trainday" style="--el:'+bh.el+';--deep:'+bh.deep+';--accent:'+beltStroke(geupInfo(GEUP_I))+'">'+
           '<img class="td-wm" src="assets/wm-kick.png" alt="" aria-hidden="true">'+
           '<div class="td-head">'+
             '<div class="td-titlewrap">'+
