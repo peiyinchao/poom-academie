@@ -92,20 +92,15 @@
     -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
     -webkit-mask-image:linear-gradient(#000,transparent);mask-image:linear-gradient(#000,transparent)}
   .status .date{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:11.5px;color:var(--gray)}
-  /* Agenda teaser: the date grows a second line counting down to the next exam/wedstrijd/cursus.
-     The whole block (date + countdown + "+") is one tap target that opens the agenda sheet,
-     the same idiom as tapping the avatar for the belt sheet. */
-  .status-lead{display:flex;align-items:center;gap:9px;min-width:0;cursor:pointer;
-    -webkit-tap-highlight-color:transparent}
-  .status-lead:active{opacity:.6}
-  .status-when{display:flex;flex-direction:column;gap:3px;min-width:0}
+  /* Agenda teaser: the date grows a second line counting down to the next wedstrijd, examen or
+     cursus. That line is itself the tap target — its count token is painted blue so it reads as
+     tappable without adding a second button to an already busy header. */
+  .status-when{display:flex;flex-direction:column;gap:3px;min-width:0;align-items:flex-start}
   .status-next{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:11.5px;
-    color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:208px}
-  .status-next b{color:var(--ink);font-weight:800}
-  .status-add{width:19px;height:19px;border-radius:50%;flex:none;display:inline-flex;
-    align-items:center;justify-content:center;background:var(--soft);border:1px solid var(--line);
-    color:var(--gray);font-family:var(--cond);font-style:normal;font-weight:800;font-size:14px;
-    line-height:1;padding-bottom:1px}
+    color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:216px;
+    cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .status-next:active{opacity:.55}
+  .status-next b{color:var(--blue);font-weight:800}
   .streakchip{display:inline-flex;align-items:center;gap:6px;background:rgba(240,82,43,.14);color:#C4431C;
     border:1px solid rgba(240,82,43,.26);
     border-radius:999px;padding:5px 11px;font-family:var(--cond);font-weight:700;font-size:13px}
@@ -352,19 +347,44 @@
     color:var(--gray);font-size:19px;line-height:1;padding:0;-webkit-tap-highlight-color:transparent}
   .ag-del:active{transform:scale(.9)}
   .ag-empty{font-size:12.5px;color:var(--gray);line-height:1.45;padding:2px 2px 0}
-  .ag-new{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:16px;
-    border-top:1px solid var(--line);padding-top:15px}
+  /* List mode: the events plus a single button that swaps the sheet over to the form. */
+  .ag-addbtn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:14px;
+    background:var(--surface);border:1px dashed var(--line);border-radius:16px;padding:13px 12px;
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-weight:800;font-size:12.5px;
+    color:var(--gray);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .ag-addbtn:active{transform:scale(.99)}
+  /* Form mode: type, name and the date range each get their own row. */
+  .ag-form{display:flex;flex-direction:column;gap:11px;margin-top:16px}
   .ag-chips{display:flex;gap:7px;width:100%}
   .ag-chip{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;
     background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 4px;
     font-family:var(--cond);text-transform:uppercase;letter-spacing:.03em;font-weight:700;
     font-size:12px;color:var(--gray);cursor:pointer;-webkit-tap-highlight-color:transparent}
   .ag-chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
-  .ag-title{flex:1;min-width:0;border:1px solid var(--line);border-radius:13px;background:var(--surface);
+  .ag-title{width:100%;border:1px solid var(--line);border-radius:13px;background:var(--surface);
     padding:10px 12px;font-family:inherit;font-size:14px;color:var(--ink);-webkit-appearance:none}
   .ag-title::placeholder{color:var(--gray)}
   .ag-title:focus{outline:none;border-color:var(--blue)}
-  .ag-datebtn{margin-left:0}
+  /* Two native date fields side by side; the label reads back the pick in 3-letter month form. */
+  .ag-dates{display:flex;gap:9px}
+  .ag-date{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;
+    background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:8px 12px 9px;
+    cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .ag-date span{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;
+    font-size:10px;font-weight:700;color:var(--gray)}
+  .ag-date b{font-size:13.5px;font-weight:800;color:var(--ink);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .ag-date b.dim{color:var(--gray);font-weight:600}
+  .ag-date input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;padding:0;
+    border:0;background:none;cursor:pointer;font-size:16px}
+  .ag-formact{display:flex;gap:9px;margin-top:4px}
+  .ag-cancel,.ag-save{flex:1;border-radius:999px;padding:12px 14px;border:1px solid var(--line);
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;font-weight:800;font-size:12.5px;
+    cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .ag-cancel{background:var(--surface);color:var(--gray)}
+  .ag-save{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 7px 16px -8px var(--blue)}
+  .ag-save[disabled]{opacity:.42;box-shadow:none;cursor:default}
+  .ag-cancel:active,.ag-save:active{transform:translateY(1px)}
   /* Reis grade chip (opens the belt sheet) */
   .gradechip{display:inline-flex;align-items:center;gap:9px;margin-top:14px;cursor:pointer;
     background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px 7px 9px;
@@ -2228,12 +2248,14 @@
                  .sort(function(x,y){ return x.date<y.date?-1:(x.date>y.date?1:0); });
   }
   function agNext(){ var u=agUpcoming(); return u.length?u[0]:null; }
+  // Every state wraps its count token in <b>: the header paints that token blue as the tap
+  // affordance, so "Morgen"/"Vandaag" keep the same hint that "nog 14 dagen" has.
   function agCount(e){
     var n=agDays(e.date);
     if(n>1) return 'nog <b>'+n+' dagen</b>';
-    if(n===1) return 'Morgen';
-    if(n===0) return 'Vandaag';
-    return 'Bezig';
+    if(n===1) return '<b>Morgen</b>';
+    if(n===0) return '<b>Vandaag</b>';
+    return '<b>Bezig</b>';
   }
   // "16–18 okt 2026" when a range sits inside one month, otherwise both dates in full.
   function agWhen(e){
@@ -2546,7 +2568,10 @@
   }
 
   /* ---- Agenda sheet (reuses the belt sheet's chrome + native date entry) ---- */
-  var agSheet=null, agNewType='wedstrijd';
+  // Two modes in one sheet: the list of what's planned, and a separate form for entering a new
+  // event. Keeping them apart stops the sheet turning into one dense block of controls.
+  var agSheet=null, agMode='list', agDraft=null;
+  function agBlankDraft(){ return {type:'wedstrijd', title:'', date:'', end:''}; }
   function agItemHtml(e){
     var t=agType(e.type);
     return '<div class="ag-item">'+
@@ -2557,31 +2582,56 @@
       '<button class="ag-del" data-act="agdel" data-id="'+esc(e.id)+'" aria-label="Verwijderen">×</button>'+
     '</div>';
   }
-  function agBodyHtml(){
+  function agListHtml(){
     var up=agUpcoming();
     return (up.length
         ? '<div class="ag-list">'+up.map(agItemHtml).join('')+'</div>'
-        : '<p class="ag-empty">Nog niets gepland. Kies hieronder wat het is, geef het een naam en tik de datum aan.</p>')+
-      '<div class="ag-new">'+
-        '<div class="ag-chips">'+AG_TYPES.map(function(t){
-          return '<button class="ag-chip'+(t.k===agNewType?' on':'')+'" data-act="agtype" data-k="'+t.k+'">'+t.ico+' '+t.label+'</button>';
-        }).join('')+'</div>'+
-        '<input class="ag-title" id="ag-title" type="text" autocomplete="off" placeholder="Naam (bijv. Ilyo Open Poomsae)">'+
-        '<label class="bp-gradbtn ag-datebtn">Datum<input type="date" class="bp-graddate" id="ag-date"></label>'+
-      '</div>';
+        : '<p class="ag-empty">Nog niets gepland. Voeg je eerste wedstrijd, examen of cursus toe.</p>')+
+      '<button class="ag-addbtn" data-act="agnew">+ Nieuw event</button>';
   }
-  function agRender(){ if(!agSheet) return; var b=agSheet.querySelector('#ag-body'); if(b) b.innerHTML=agBodyHtml(); }
+  function agDateHtml(role, label, val, ph){
+    return '<label class="ag-date"><span>'+esc(label)+'</span>'+
+      '<b'+(val?'':' class="dim"')+'>'+esc(val?fmtDateNL(val):ph)+'</b>'+
+      '<input type="date" data-role="'+role+'"'+(val?' value="'+esc(val)+'"':'')+'></label>';
+  }
+  function agFormHtml(){
+    var d=agDraft||agBlankDraft();
+    return '<div class="ag-form">'+
+      '<div class="ag-chips">'+AG_TYPES.map(function(t){
+        return '<button class="ag-chip'+(t.k===d.type?' on':'')+'" data-act="agtype" data-k="'+t.k+'">'+t.ico+' '+t.label+'</button>';
+      }).join('')+'</div>'+
+      '<input class="ag-title" id="ag-title" type="text" autocomplete="off" value="'+esc(d.title)+'" placeholder="Naam (bijv. Ilyo Open Poomsae)">'+
+      '<div class="ag-dates">'+
+        agDateHtml('start','Datum', d.date, 'Kies…')+
+        agDateHtml('end','t/m (optioneel)', d.end, '—')+
+      '</div>'+
+      '<div class="ag-formact">'+
+        '<button class="ag-cancel" data-act="agcancel">Annuleer</button>'+
+        '<button class="ag-save" data-act="agsave"'+(d.date?'':' disabled')+'>Bewaar</button>'+
+      '</div>'+
+    '</div>';
+  }
+  function agBodyHtml(){ return agMode==='form' ? agFormHtml() : agListHtml(); }
+  // Read the free-text field back into the draft before anything re-renders the form.
+  function agSync(){
+    if(!agSheet || agMode!=='form' || !agDraft) return;
+    var t=agSheet.querySelector('#ag-title'); if(t) agDraft.title=t.value;
+  }
+  function agRender(){
+    if(!agSheet) return;
+    var b=agSheet.querySelector('#ag-body'); if(b) b.innerHTML=agBodyHtml();
+    var h=agSheet.querySelector('#ag-head-title'); if(h) h.textContent=(agMode==='form'?'Nieuw event':'Agenda');
+    var done=agSheet.querySelector('.bs-done'); if(done) done.style.display=(agMode==='form'?'none':'');
+  }
   // Keep the header's countdown in step without re-rendering the whole Vandaag screen.
   function refreshStatusNext(){
-    var w=stage.querySelector('.status-when'); if(!w) return;
-    var old=w.querySelector('.status-next'), nx=agNext();
-    if(!nx){ if(old&&old.parentNode) old.parentNode.removeChild(old); return; }
-    var html=agCount(nx)+' · '+esc(nx.title||agType(nx.type).label);
-    if(old){ old.innerHTML=html; return; }
-    var s=document.createElement('span'); s.className='status-next'; s.innerHTML=html; w.appendChild(s);
+    var el=stage.querySelector('.status-next'); if(!el) return;
+    var nx=agNext();
+    el.innerHTML = nx ? (agCount(nx)+' · '+esc(nx.title||agType(nx.type).label)) : '<b>Niets gepland</b>';
   }
   function openAgendaSheet(){
     if(agSheet) return;
+    agMode='list'; agDraft=null;
     agSheet=document.createElement('div');
     agSheet.className='beltsheet-ov'; agSheet.id='agenda-ov';
     applyTheme(agSheet, CUR);
@@ -2589,26 +2639,29 @@
       '<div class="bs-backdrop" data-act="agendaclose"></div>'+
       '<div class="beltsheet">'+
         '<div class="bs-grab"></div>'+
-        '<div class="bs-head"><h3>Agenda</h3>'+
+        '<div class="bs-head"><h3 id="ag-head-title">Agenda</h3>'+
           '<button class="bs-done" data-act="agendaclose">Klaar</button></div>'+
         '<div id="ag-body">'+agBodyHtml()+'</div>'+
       '</div>';
     stage.appendChild(agSheet);
     fnav.classList.add('hide');
-    // Picking a date is the commit step — no separate save button, same as the graduation date.
     agSheet.addEventListener('change', function(ev){
-      var inp=ev.target.closest && ev.target.closest('.bp-graddate'); if(!inp||!inp.value) return;
-      var ti=agSheet.querySelector('#ag-title');
-      AGENDA.push({id:'a'+Date.now(), type:agNewType, title:(ti&&ti.value.trim())||'', date:inp.value});
-      agSave(); agRender(); refreshStatusNext();
-      buzz(20); try{ sfx('complete'); }catch(_e){}
+      var inp=ev.target.closest && ev.target.closest('.ag-date input'); if(!inp || !agDraft) return;
+      agSync();
+      if(inp.getAttribute('data-role')==='start'){
+        agDraft.date=inp.value;
+        if(agDraft.end && agDraft.end < agDraft.date) agDraft.end='';   // a range can't end before it starts
+      } else {
+        agDraft.end=inp.value;
+      }
+      agRender();
     });
     requestAnimationFrame(function(){ agSheet.classList.add('show'); });
   }
   function closeAgendaSheet(){
     if(!agSheet) return;
     agSheet.classList.remove('show');
-    var s=agSheet; agSheet=null;
+    var s=agSheet; agSheet=null; agMode='list'; agDraft=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
     fnav.classList.remove('hide');
   }
@@ -3038,16 +3091,17 @@
     var MO=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
     var d=new Date(); return WD[d.getDay()]+' '+d.getDate()+' '+MO[d.getMonth()];
   }
-  // `withNext` grows the date into the agenda teaser (countdown + "+"); the Woorden shells keep
-  // the plain date so their header stays a single quiet line.
+  // `withNext` grows the date into the agenda teaser; the Woorden shells keep the plain date so
+  // their header stays a single quiet line. The countdown line doubles as the agenda's entry
+  // point, and falls back to "Niets gepland" so that entry point survives an empty agenda.
   function statusBar(withNext){
     var lead;
     if(withNext){
       var nx=agNext();
-      lead='<span class="status-lead" role="button" data-act="agenda" title="Agenda">'+
-        '<span class="status-when"><span class="date">'+esc(dateStr())+'</span>'+
-          (nx ? '<span class="status-next">'+agCount(nx)+' · '+esc(nx.title||agType(nx.type).label)+'</span>' : '')+
-        '</span><i class="status-add">+</i></span>';
+      lead='<span class="status-when"><span class="date">'+esc(dateStr())+'</span>'+
+        '<span class="status-next" role="button" data-act="agenda" title="Agenda">'+
+          (nx ? agCount(nx)+' · '+esc(nx.title||agType(nx.type).label) : '<b>Niets gepland</b>')+
+        '</span></span>';
     } else {
       lead='<span class="date">'+esc(dateStr())+'</span>';
     }
@@ -6168,8 +6222,18 @@
     else if(a==='beltsheetclose'){ closeBeltSheet(); }
     else if(a==='agenda'){ openAgendaSheet(); }
     else if(a==='agendaclose'){ closeAgendaSheet(); }
-    else if(a==='agtype'){ agNewType=act.getAttribute('data-k');
-      if(agSheet){ [].forEach.call(agSheet.querySelectorAll('.ag-chip'), function(c){ c.classList.toggle('on', c.getAttribute('data-k')===agNewType); }); } }
+    else if(a==='agtype'){ if(!agDraft||!agSheet) return; agDraft.type=act.getAttribute('data-k');
+      [].forEach.call(agSheet.querySelectorAll('.ag-chip'), function(c){ c.classList.toggle('on', c.getAttribute('data-k')===agDraft.type); }); }
+    else if(a==='agnew'){ agDraft=agBlankDraft(); agMode='form'; agRender(); }
+    else if(a==='agcancel'){ agMode='list'; agDraft=null; agRender(); }
+    else if(a==='agsave'){ agSync();
+      if(agDraft && agDraft.date){
+        var _ev={id:'a'+Date.now(), type:agDraft.type, title:agDraft.title.trim(), date:agDraft.date};
+        if(agDraft.end && agDraft.end>agDraft.date) _ev.end=agDraft.end;
+        AGENDA.push(_ev); agSave(); refreshStatusNext();
+        agMode='list'; agDraft=null; agRender();
+        buzz(20); try{ sfx('complete'); }catch(_e){}
+      } }
     else if(a==='agdel'){ var _aid=act.getAttribute('data-id');
       AGENDA=AGENDA.filter(function(e){ return e.id!==_aid; });
       agSave(); agRender(); refreshStatusNext(); buzz(12); }
