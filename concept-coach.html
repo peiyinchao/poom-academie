@@ -240,7 +240,7 @@
     display:flex;align-items:center;justify-content:space-between;pointer-events:none;z-index:2}
   .bp-dots i{width:5px;height:5px;border-radius:50%;background:var(--gray);
     transition:background-color .3s ease}
-  .bp-fill{position:absolute;left:0;top:0;bottom:0;width:0;z-index:1;overflow:hidden;
+  .bp-fill{position:absolute;left:0;top:0;bottom:0;width:0;z-index:1;
     transition:width .28s cubic-bezier(.34,1.3,.36,1), background .34s ease}
   .bp-thumb{position:absolute;top:50%;left:26px;width:52px;height:52px;transform:translate(-50%,-50%);
     border-radius:50%;background:#F4F4F1;border:3px solid rgba(255,255,255,.92);overflow:hidden;
@@ -280,19 +280,15 @@
   .bp-band{transform-origin:center center}
   @keyframes bpPop{0%{transform:scale(.94);opacity:.4}55%{transform:scale(1.04);opacity:1}100%{transform:scale(1);opacity:1}}
   .bp-band.pop{animation:bpPop .4s cubic-bezier(.2,.7,.3,1)}
-  /* No static screens: light sweeps across the belt knob and along the coloured fill, so the
-     grade you picked keeps catching the light (same skewed slice as the Vandaag CTA sheen). */
-  .bp-thumb::after,.bp-fill::after{content:'';position:absolute;top:-60%;bottom:-60%;left:0;
-    pointer-events:none;z-index:2;will-change:transform;
+  /* No static screens: a slow light slice sweeps across the belt scrubber, so the grade you
+     picked keeps catching the light (same skewed slice as the Vandaag CTA sheen). */
+  .bp-thumb::after{content:'';position:absolute;top:-60%;bottom:-60%;left:0;width:46%;
+    pointer-events:none;z-index:2;will-change:transform;filter:blur(3px);
+    background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.04) 24%,rgba(255,255,255,.58) 50%,rgba(255,255,255,.04) 76%,transparent 100%);
     transform:translateX(-320%) skewX(-16deg)}
-  .bp-thumb::after{width:46%;filter:blur(3px);
-    background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.04) 24%,rgba(255,255,255,.58) 50%,rgba(255,255,255,.04) 76%,transparent 100%)}
-  .bp-fill::after{width:30%;filter:blur(5px);
-    background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.03) 24%,rgba(255,255,255,.40) 50%,rgba(255,255,255,.03) 76%,transparent 100%)}
-  .bp-thumb.sheen::after{animation:bpSheen 1.15s ease-in-out}
-  .bp-fill.sheen::after{animation:bpSheen 1.5s ease-in-out}
+  .bp-thumb.sheen::after{animation:bpSheen 2.6s ease-in-out}
   @keyframes bpSheen{from{transform:translateX(-320%) skewX(-16deg)}to{transform:translateX(560%) skewX(-16deg)}}
-  @media (prefers-reduced-motion: reduce){ .bp-thumb::after,.bp-fill::after{display:none} }
+  @media (prefers-reduced-motion: reduce){ .bp-thumb::after{display:none} }
   /* cross-fade push: old belt-info line pushes aside & fades out, new one slides in & fades in */
   .bp-meta{position:relative;overflow:hidden;padding-bottom:2px}
   .bp-meta-cur,.bp-meta-ghost{display:inline-block;white-space:nowrap}
@@ -2225,12 +2221,11 @@
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
   }
-  /* Belt-picker glint — a light slice sweeps the knob and the coloured fill so the grade keeps
-     catching the light while the sheet is open (matches the Vandaag CTA sheen cadence). */
+  /* Belt-picker glint — a slow light slice sweeps the scrubber so the grade keeps catching the
+     light while the sheet is open (matches the Vandaag CTA sheen cadence). */
   var bpGlintT=null;
   function bpGlint(){
     var root=stage.querySelector('.beltpick'); if(!root) return;
-    bpFlash(root.querySelector('#bp-fill'), 'sheen');
     bpFlash(root.querySelector('#bp-thumb'), 'sheen');
   }
   function bpGlintStop(){ if(bpGlintT){ clearTimeout(bpGlintT); bpGlintT=null; } }
