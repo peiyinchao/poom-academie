@@ -405,7 +405,8 @@
   .vd-tlink{display:block;text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent}
   .vd-tlink:active{opacity:.72}
   .vd-thumb{position:relative;display:grid;place-items:center;width:232px;height:130px;border-radius:14px;
-    overflow:hidden;background:var(--soft);border:1px solid var(--line)}
+    overflow:hidden;border:1px solid var(--line);
+    background:repeating-linear-gradient(135deg,var(--soft) 0 9px,rgba(20,17,13,.035) 9px 18px)}
   .vd-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
   /* The play badge stays on top of the artwork, so a thumbnail that never arrives (no YouTube id,
      offline, blocked request) still leaves a readable placeholder rather than a bare grey box. */
@@ -2085,8 +2086,10 @@
   .ic-woorden{-webkit-mask-image:url('assets/icons/Woorden.png');mask-image:url('assets/icons/Woorden.png')}
   /* No drawn asset for this one yet — an inline SVG mask keeps it in step with the others, which
      are all painted with currentColor through a mask. */
-  .ic-filmpjes{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linejoin='round'%3E%3Crect x='2.7' y='4.7' width='18.6' height='14.6' rx='3.4'/%3E%3Cpath d='M10.3 9.4 15 12l-4.7 2.6Z' fill='%23000'/%3E%3C/svg%3E");
-    mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linejoin='round'%3E%3Crect x='2.7' y='4.7' width='18.6' height='14.6' rx='3.4'/%3E%3Cpath d='M10.3 9.4 15 12l-4.7 2.6Z' fill='%23000'/%3E%3C/svg%3E")}
+  /* Clapperboard rather than a play triangle in a rounded rect: the latter reads as the YouTube
+     logo, and this screen also holds links from other sources. */
+  .ic-filmpjes{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linejoin='round' stroke-linecap='round'%3E%3Crect x='2.7' y='8.6' width='18.6' height='10.8' rx='2.6'/%3E%3Cpath d='M2.9 8.6 5.6 4.7M8.6 8.6 11.3 4.7M14.3 8.6 17 4.7'/%3E%3Cpath d='M2.7 8.6 5.4 4.7h15.9v3.9Z'/%3E%3C/svg%3E");
+    mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linejoin='round' stroke-linecap='round'%3E%3Crect x='2.7' y='8.6' width='18.6' height='10.8' rx='2.6'/%3E%3Cpath d='M2.9 8.6 5.6 4.7M8.6 8.6 11.3 4.7M14.3 8.6 17 4.7'/%3E%3Cpath d='M2.7 8.6 5.4 4.7h15.9v3.9Z'/%3E%3C/svg%3E")}
 
   @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -3457,8 +3460,21 @@
     }
     return VD_CATS.map(vdRowHtml).join('');
   }
+  /* A thumbnail can fail in two ways. A real network error fires `error`, but a removed clip gets a
+     120x90 grey "not found" tile from YouTube that loads fine, so size is the only tell (a genuine
+     hqdefault is always 480x360). Either way, dropping the <img> falls back to the striped
+     placeholder, which reads as intentional. */
+  function vdBindThumbs(root){
+    (root||stage).querySelectorAll('.vd-thumb img').forEach(function(im){
+      var drop  = function(){ if(im.parentNode) im.remove(); };
+      var check = function(){ if(im.naturalWidth <= 160) drop(); };
+      if(im.complete){ if(im.naturalWidth === 0) drop(); else check(); return; }
+      im.addEventListener('error', drop, {once:true});
+      im.addEventListener('load',  check, {once:true});
+    });
+  }
   function vdRefresh(){
-    var w=stage.querySelector('#vd-scroll'); if(w) w.innerHTML=vdBodyHtml();
+    var w=stage.querySelector('#vd-scroll'); if(w){ w.innerHTML=vdBodyHtml(); vdBindThumbs(w); }
     var a=stage.querySelector('.vd-add'); if(a) a.style.display=(VIDEOS.length?'':'none');
   }
   function renderVideos(){
@@ -3473,7 +3489,9 @@
       '<div class="wscroll" id="vd-scroll">'+vdBodyHtml()+'</div>'+
     '</div>';
     stage.insertAdjacentHTML('beforeend', wrapScreen(html));
-    return stage.lastElementChild;
+    var el = stage.lastElementChild;
+    vdBindThumbs(el);
+    return el;
   }
 
   /* ---- Filmpje toevoegen/bewerken (reuses the agenda sheet's chrome and form styling) ---- */
