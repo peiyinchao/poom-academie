@@ -2242,6 +2242,64 @@
       '</g><circle cx="50" cy="50" r="48" fill="none" stroke="rgba(0,0,0,.06)" stroke-width="1.5"/></svg>';
   }
 
+  /* ---- Opslag -----------------------------------------------------------------
+     Alles wat de leerling zelf aanpast moet het afsluiten van de app overleven: een
+     test die weken loopt heeft geen waarde als de gordel en de bookmarks bij elke
+     start terugspringen. localStorage past bij deze hoeveelheid (een paar kB), en
+     één wrapper houdt de foutafhandeling op één plek — Safari gooit een error bij
+     schrijven in privémodus en als het quotum vol zit, en daar mag een PWA niet op
+     stukvallen; dan draait hij gewoon verder zonder te bewaren.
+
+     SCHEMA gaat omhoog zodra een bewaarde vorm verandert, zodat oude data niet aan
+     code gevoerd wordt die iets anders verwacht. */
+  var SCHEMA = 1;
+  var STORE_KEYS = ['poom_agenda','poom_videos','poom_belt','poom_hard','poom_mastery',
+                    'poom_missions','poom_ot_mode','poom_ot_dur','ciUx'];
+  var store = (function(){
+    var ok = true;
+    try{ localStorage.setItem('poom_probe','1'); localStorage.removeItem('poom_probe'); }
+    catch(e){ ok = false; }
+    return {
+      ok: ok,
+      get: function(k, dflt){
+        if(!ok) return dflt;
+        try{ var r = localStorage.getItem(k); return r===null ? dflt : JSON.parse(r); }
+        catch(e){ return dflt; }
+      },
+      set: function(k, v){
+        if(!ok) return false;
+        try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; }
+      },
+      clear: function(){
+        if(!ok) return;
+        STORE_KEYS.concat(['poom_schema']).forEach(function(k){
+          try{ localStorage.removeItem(k); }catch(e){}
+        });
+      }
+    };
+  })();
+  /* ?reset=1 wist alle opgeslagen voortgang. Nu er niets meer vanzelf terugspringt is dit de enige
+     manier om de app vers te tonen. De parameter wordt meteen uit de URL gehaald: zou hij blijven
+     staan, dan zou een PWA die met deze start-URL geïnstalleerd is elke keer alles wissen. */
+  (function(){
+    if(!/[?&]reset=1/.test(location.search||'')) return;
+    store.clear();
+    try{
+      var q = (location.search||'').replace(/(^\?|&)reset=1(&|$)/, function(m,a,b){ return (a==='?'&&b==='&') ? '?' : (b==='&' ? a : ''); });
+      if(q==='?') q='';
+      history.replaceState(null, '', location.pathname + q + location.hash);
+    }catch(e){}
+  })();
+  /* Alleen een echte versiesprong wist data. Een tester die de agenda en filmpjes al
+     gevuld heeft van vóór de versiestempel houdt die — die vorm is ongewijzigd. */
+  (function(){
+    var v = store.get('poom_schema', null);
+    if(v === SCHEMA) return;
+    if(v !== null) store.clear();
+    store.set('poom_schema', SCHEMA);
+  })();
+  function plainObj(r){ return (r && typeof r==='object' && !Array.isArray(r)) ? r : null; }
+
   /* ---- Korean counting (native) ---- */
   var COUNT = [['하나','Hana'],['둘','Dul'],['셋','Set'],['넷','Net'],['다섯','Daseot'],
     ['여섯','Yeoseot'],['일곱','Ilgop'],['여덟','Yeodeol'],['아홉','Ahop'],['열','Yeol']];
@@ -2267,6 +2325,13 @@
     {stop:'P2', grade:'2e poom',  band:'Zwart',      form:'keumgang',          col:'#242327', lines:2}
   ];
   var GEUP_I = 4;            // Jayden: 3e geup (blauw-rood) → trains Taegeuk Yuk Jang
+  // Gekozen graad terughalen. Dit is de meest zichtbare instelling van de app: hij bepaalt de
+  // kleuren, de mascotte én welke poomsae je traint, dus hij moet als eerste terug zijn.
+  (function(){
+    var k = store.get('poom_belt', null);
+    if(typeof k === 'number' && k === (k|0) && k >= 0 && k < GEUPS.length) GEUP_I = k;
+  })();
+  function beltSave(){ store.set('poom_belt', GEUP_I); }
   /* Behaalde graden — de datum waarop Jayden elke graad haalde (index in GEUPS → ISO-datum).
      Leerlingen zijn trots op elke promotie; we tonen de datum én hoe lang hij de graad al draagt. */
   var GEUP_DATES = { 0:'2024-01-09', 1:'2024-03-29', 2:'2025-01-02', 3:'2025-11-23', 4:'2026-09-04' };
@@ -2418,6 +2483,7 @@
   function setBelt(k, commit){
     k = Math.max(0, Math.min(GEUPS.length-1, k|0));
     GEUP_I = k;
+    beltSave();
     var g = GEUPS[k];
     DONE = {};
     var fi = JOURNEY.indexOf(g.form);
@@ -2781,8 +2847,9 @@
   /* ---- Woordenschat (termen categories) ---- */
   var TERMEN = C.termen || [];
   // "Struggle/bookmark" data (roman → true): the words Jayden marks as hard.
-  // Starts empty in the prototype — the default Moeilijk count is 0 until he bookmarks a word.
-  var HARD = {};
+  // Begint leeg; zodra hij een woord bewaart blijft dat staan, ook na afsluiten.
+  var HARD = plainObj(store.get('poom_hard', null)) || {};
+  function hardSave(){ store.set('poom_hard', HARD); }
   // Per-category accent + Korean (hangul) emblem
   var CAT_META = {
     'Algemeen':{el:'#3E5BD6',han:'기'},
@@ -2863,6 +2930,16 @@
   var POOM = "1";
   var MISSION_IDS = ['poomsae','woorden','hosinsul','ilbo','ibo','examen'];
   var missionDone = {poomsae:false, woorden:false, hosinsul:false, ilbo:false, ibo:false, examen:false};
+  /* De dagkaart is nadrukkelijk van vandaag. De vinkjes moeten een herstart binnen dezelfde dag
+     overleven (de app gaat tussendoor dicht), maar morgen weer schoon zijn — daarom staat de datum
+     erbij en wordt alles genegeerd zodra die niet meer klopt. */
+  (function(){
+    var r = plainObj(store.get('poom_missions', null));
+    if(!r || r.d !== todayISO()) return;
+    var d = plainObj(r.done); if(!d) return;
+    for(var k in missionDone) if(d[k] === true) missionDone[k] = true;
+  })();
+  function missionsSave(){ store.set('poom_missions', {d: todayISO(), done: missionDone}); }
   // hand-drawn marker cross-out — one style chosen per day, consistent across all items
   var STRIKES = ['strike-loop','strike-scribble','strike-double'];
   function dayStrike(){ return STRIKES[dseed() % STRIKES.length]; }
@@ -3650,6 +3727,7 @@
     if(!roman) return;
     var on = !HARD[roman];
     if(on) HARD[roman]=1; else delete HARD[roman];
+    hardSave();
     if(btn){
       btn.classList.toggle('on', on);
       btn.setAttribute('aria-pressed', on?'true':'false');
@@ -3675,7 +3753,14 @@
   }
 
   /* ---- mastery growth (seed -> sprout -> bloom, per category) ---- */
-  var MASTERY = {};   /* category name -> 1 (sprout) | 2 (bloom); absent = 0 (seed) */
+  /* category name -> 1 (sprout) | 2 (bloom); absent = 0 (seed). Alleen die twee waarden worden
+     teruggelezen, zodat rommel in de opslag nooit een onbekend groeistadium oplevert. */
+  var MASTERY = (function(){
+    var r = plainObj(store.get('poom_mastery', null)), out = {};
+    for(var k in r) if(r.hasOwnProperty(k) && (r[k]===1 || r[k]===2)) out[k]=r[k];
+    return out;
+  })();
+  function masterySave(){ store.set('poom_mastery', MASTERY); }
   var BLOOM_FILES=['Bloom1','Bloom3','Bloom4','Bloom5','Bloom6','Bloom7','Bloom8','Bloom9'];
   // Bloom colours — deliberately NEVER green (vs the sprout) and NEVER red (vs the red bookmarks).
   var BLOOM_COLS =['#D06BA8','#EE7A3D','#3E86D6','#E4A62C','#9B5FD0','#C94DA6','#6A63DB','#B0568F'];
@@ -3738,6 +3823,7 @@
     if(!name) return;
     var cur = MASTERY[name]||0; if(cur===s) return; // already at this stage → no re-pop / re-sound
     if(s) MASTERY[name]=s; else delete MASTERY[name];
+    masterySave();
     if(catSheet){
       var opts=catSheet.querySelectorAll('.cs-ropt');
       for(var i=0;i<opts.length;i++){ opts[i].classList.toggle('on', (+opts[i].getAttribute('data-stage'))===s); }
@@ -4942,6 +5028,7 @@
     var before = todayIds.every(function(x){return missionDone[x];});
     var was = missionDone[id];
     missionDone[id] = true;
+    missionsSave();
     var after = todayIds.every(function(x){return missionDone[x];});
     var allDone = after && !before;
     if(!was){ buzz(12); sfx(allDone ? 'complete' : 'check'); }
@@ -5137,7 +5224,7 @@
     var passed = s.fout <= s.maxFout;
     var body = examEl.querySelector('#ex-body');
     var foot = examEl.querySelector('#ex-foot');
-    if(passed && ('examen' in missionDone)) missionDone.examen = true;
+    if(passed && ('examen' in missionDone)){ missionDone.examen = true; missionsSave(); }
     var mSlug = mascotBelt(geupInfo(GEUP_I));   // result hero belt matches the profile grade
     var coachFace = (s.goed >= Math.ceil(s.pass*0.6)) ? 'coach-point' : 'coach-point-serious'; // gentle when close, calm-serious when the score was low
     var hero = passed
@@ -5515,6 +5602,7 @@
       DONE[CUR]=true;
       // Begeleide training rondt ALLE dagacties af → vink ze alle drie af.
       todayMissionIds().forEach(function(id){ if(id in missionDone) missionDone[id]=true; });
+      missionsSave();
       var seal = body.querySelector('#stampseal');
       requestAnimationFrame(function(){ setTimeout(function(){
         var rf = body.querySelector('#rf'); if(rf) rf.style.strokeDashoffset='0';
@@ -6601,6 +6689,7 @@
     var todayIds = todayMissionIds();
     var before = todayIds.every(function(id){return missionDone[id];});
     missionDone[id] = !missionDone[id];
+    missionsSave();
     var nowOn = missionDone[id];
     var after = todayIds.every(function(id){return missionDone[id];});
     var allDone = after && !before;
