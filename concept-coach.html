@@ -442,6 +442,128 @@
   .vd-status.err{color:#B23A48}
   .ag-save[disabled]{opacity:.42;box-shadow:none;cursor:default}
   .ag-cancel:active,.ag-save:active{transform:translateY(1px)}
+
+  /* ---- Coach: eigen weekprogramma ---- */
+  .coachscreen .shead{padding-bottom:4px}
+  .pl-title{flex:1;min-width:0;order:0}
+  .pl-title .han-lab{display:block;font-size:11px;letter-spacing:.05em;color:var(--gray);line-height:1}
+  .pl-title h2{margin:3px 0 0;font-family:var(--cond);text-transform:uppercase;letter-spacing:.02em;
+    font-size:23px;font-weight:800;color:var(--ink);line-height:1}
+  #pl-scroll{padding-top:0}
+  /* Weekstrip: zeven vaste kolommen, dus hij schuift niet en de dag van vandaag staat altijd
+     op dezelfde plek. De strip plakt boven de lijst mee met de scroll. */
+  .pl-week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;
+    position:sticky;top:0;z-index:3;background:var(--page);padding:10px 0 12px}
+  .pl-day{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;
+    border:1px solid var(--line);border-radius:13px;background:var(--surface);padding:9px 0 8px;
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;
+    font-weight:800;color:var(--gray);cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:background .18s ease,color .18s ease,border-color .18s ease}
+  .pl-day:active{transform:scale(.94)}
+  .pl-dots{display:flex;gap:2.5px;height:4px;align-items:center}
+  .pl-dots i{width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.45;display:block}
+  .pl-day.today{border-color:var(--beltfill,var(--el));color:var(--beltfill,var(--el))}
+  .pl-day.on{background:var(--beltfill,var(--el));border-color:var(--beltfill,var(--el));color:var(--beltink,#fff)}
+  .pl-day.on .pl-dots i{opacity:.9}
+  .pl-dnum{font-size:13px;line-height:1}
+
+  .pl-head{display:flex;align-items:baseline;gap:8px;margin:2px 0 10px}
+  .pl-headt{flex:1;font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;
+    font-size:13.5px;font-weight:800;color:var(--ink)}
+  .pl-headn{font-size:11.5px;font-weight:700;color:var(--gray);letter-spacing:.04em}
+
+  .pl-list{display:flex;flex-direction:column;gap:10px;margin:0 0 18px}
+  .pl-item{border:1px solid var(--line);border-radius:17px;background:var(--surface);
+    overflow:hidden;transition:opacity .2s ease}
+  .pl-item.done{opacity:.62}
+  .pl-top{display:flex;align-items:stretch}
+  /* Net als de dagkaart: een brede tekstknop die navigeert, met het vinkje en ••• ernaast. */
+  .pl-ck{flex:none;width:52px;border:0;background:transparent;display:grid;place-items:center;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0}
+  .pl-ck span{width:25px;height:25px;border-radius:50%;box-sizing:border-box;
+    border:2px solid var(--line);display:grid;place-items:center;color:transparent;
+    transition:background .18s ease,border-color .18s ease,color .18s ease}
+  .pl-ck svg{width:14px;height:14px}
+  .pl-item.done .pl-ck span{background:var(--beltfill,var(--el));border-color:var(--beltfill,var(--el));color:var(--beltink,#fff)}
+  .pl-ck:active{transform:scale(.9)}
+  .pl-ckoff{display:block}
+  .pl-go{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:10px;border:0;background:transparent;
+    padding:14px 6px 14px 0;text-align:left;font:inherit;color:inherit;cursor:pointer;
+    -webkit-tap-highlight-color:transparent}
+  .pl-go:active{opacity:.7}
+  .pl-ico{flex:none;font-size:19px;line-height:1}
+  .pl-txt{flex:1;min-width:0}
+  .pl-lab{display:block;font-size:15px;font-weight:800;color:var(--ink);line-height:1.2}
+  .pl-item.done .pl-lab{text-decoration:line-through;text-decoration-color:var(--gray)}
+  .pl-sub{display:block;font-size:11.5px;color:var(--gray);line-height:1.35;margin-top:2px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pl-go .pl-chev{flex:none;width:15px;height:15px;color:var(--gray)}
+  .pl-more{flex:none;width:44px;border:0;background:transparent;color:var(--gray);
+    font-size:15px;letter-spacing:.5px;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .pl-more:active{opacity:.5}
+
+  /* Timer en filmpjes hangen onder de regel: losse knoppen, want een knop in een knop mag niet. */
+  .pl-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;
+    padding:0 14px 13px 52px;-webkit-overflow-scrolling:touch}
+  .pl-chips::-webkit-scrollbar{display:none}
+  .pl-chip{flex:none;display:inline-flex;align-items:center;gap:6px;max-width:190px;
+    border:1px solid var(--line);border-radius:999px;background:var(--page);padding:6px 12px 6px 8px;
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.03em;font-size:11.5px;
+    font-weight:800;color:var(--ink);text-decoration:none;cursor:pointer;
+    -webkit-tap-highlight-color:transparent}
+  .pl-chip:active{opacity:.65}
+  .pl-chip b{font-weight:800}
+  .pl-chip .pl-ctx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:none;
+    letter-spacing:0;font-weight:700;font-size:12px}
+  .pl-chip.tmr{border-color:var(--beltfill,var(--el));color:var(--beltfill,var(--el))}
+  .pl-cthumb{flex:none;width:30px;height:19px;border-radius:5px;object-fit:cover;display:block;
+    background:repeating-linear-gradient(135deg,var(--soft) 0 6px,rgba(20,17,13,.04) 6px 12px)}
+  .pl-cdot{flex:none;width:15px;height:15px;color:var(--gray)}
+
+  .pl-add{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border:1.5px dashed var(--line);
+    border-radius:17px;padding:15px;background:transparent;color:var(--gray);cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:12.5px;font-weight:800}
+  .pl-add:active{transform:translateY(1px);opacity:.7}
+  .pl-empty{font-size:13.5px;color:var(--gray);line-height:1.5;text-align:center;padding:22px 10px 16px}
+  .pl-cta{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border:0;border-radius:16px;
+    padding:15px;margin:0 0 12px;background:var(--beltfill,var(--el));color:var(--beltink,#fff);
+    box-shadow:0 10px 22px -12px rgba(40,28,18,.55);cursor:pointer;
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:13px;font-weight:800}
+  .pl-cta:active{transform:translateY(1px)}
+
+  /* Kiezer: alle onderdelen als tegels, twee op een rij. */
+  .pl-pick{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .pl-pi{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:15px;
+    padding:13px 12px;background:var(--surface);color:var(--ink);text-align:left;cursor:pointer;
+    -webkit-tap-highlight-color:transparent}
+  .pl-pi:active{opacity:.7}
+  .pl-pi .pl-ico{font-size:18px}
+  .pl-pl{font-size:13.5px;font-weight:800;line-height:1.15}
+  .pl-ph{font-size:10.5px;color:var(--gray);line-height:1.25;margin-top:1px}
+  /* Bewerken: timer, filmpjes en volgorde in één vel. */
+  .pl-sect{font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:11.5px;
+    font-weight:800;color:var(--gray);margin:2px 0 8px}
+  .pl-mins{display:flex;gap:6px;margin-bottom:16px}
+  .pl-vlist{display:flex;flex-direction:column;gap:7px;max-height:196px;overflow-y:auto;margin-bottom:16px;
+    scrollbar-width:none}
+  .pl-vlist::-webkit-scrollbar{display:none}
+  .pl-vi{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:13px;
+    padding:7px 11px 7px 7px;background:var(--surface);color:var(--ink);text-align:left;cursor:pointer;
+    -webkit-tap-highlight-color:transparent}
+  .pl-vi:active{opacity:.7}
+  .pl-vi.on{border-color:var(--beltfill,var(--el))}
+  .pl-vthumb{flex:none;width:52px;height:32px;border-radius:7px;object-fit:cover;display:block;
+    background:repeating-linear-gradient(135deg,var(--soft) 0 6px,rgba(20,17,13,.04) 6px 12px)}
+  .pl-vt{flex:1;min-width:0;font-size:13px;font-weight:700;line-height:1.25;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pl-vck{flex:none;width:21px;height:21px;border-radius:50%;box-sizing:border-box;border:2px solid var(--line);
+    display:grid;place-items:center;color:transparent}
+  .pl-vck svg{width:12px;height:12px}
+  .pl-vi.on .pl-vck{background:var(--beltfill,var(--el));border-color:var(--beltfill,var(--el));color:var(--beltink,#fff)}
+  .pl-ord{display:flex;gap:8px;margin-bottom:9px}
+  .pl-ord .vd-mi{justify-content:center}
+  .pl-ord .vd-mi[disabled]{opacity:.35;cursor:default}
   /* Reis grade chip (opens the belt sheet) */
   .gradechip{display:inline-flex;align-items:center;gap:9px;margin-top:14px;cursor:pointer;
     background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px 7px 9px;
@@ -2270,7 +2392,7 @@
      code gevoerd wordt die iets anders verwacht. */
   var SCHEMA = 1;
   var STORE_KEYS = ['poom_agenda','poom_videos','poom_belt','poom_hard','poom_mastery',
-                    'poom_missions','poom_ot_mode','poom_ot_dur','ciUx'];
+                    'poom_missions','poom_ot_mode','poom_ot_dur','poom_plan','poom_plandone','ciUx'];
   var store = (function(){
     var ok = true;
     try{ localStorage.setItem('poom_probe','1'); localStorage.removeItem('poom_probe'); }
@@ -2455,6 +2577,73 @@
       .then(function(r){ if(!r.ok) throw new Error('oembed '+r.status); return r.json(); });
   }
   vdLoad();
+
+  /* ---- Coach: een eigen weekprogramma ----
+     Het vaste lesplan is vervangen door een programma dat de student zelf samenstelt: per dag
+     van de week een rijtje onderdelen, elk met een timer en/of filmpjes uit de eigen verzameling.
+     De sleutel is de JS-weekdag (0=zondag), zodat "vandaag" altijd zonder omrekenen klopt. */
+  var PL_COMPS = [
+    {k:'auto',     ico:'✨', label:'Auto',         hint:'De missies van vandaag'},
+    {k:'opwarmen', ico:'🔥', label:'Opwarmen',     hint:'Losmaken en strekken',       min:5},
+    {k:'poomsae',  ico:'🥋', label:'Poomsae',      hint:'Vormen van je band'},
+    {k:'gyeorugi', ico:'🥊', label:'Gyeorugi',     hint:'Sparren'},
+    {k:'taeryon',  ico:'👥', label:'Taeryon',      hint:'Stapsparren met een partner'},
+    {k:'hosinsul', ico:'🛡️', label:'Hosinsul',     hint:'Zelfverdediging'},
+    {k:'woorden',  ico:'🇰🇷', label:'Woorden',      hint:'Koreaanse woorden'},
+    {k:'cooling',  ico:'🌬️', label:'Cooling down', hint:'Rustig uitlopen',            min:3}
+  ];
+  function plComp(k){
+    for(var i=0;i<PL_COMPS.length;i++) if(PL_COMPS[i].k===k) return PL_COMPS[i];
+    return null;
+  }
+  var PL_DAYS = [
+    {d:1,s:'ma',label:'Maandag'},   {d:2,s:'di',label:'Dinsdag'}, {d:3,s:'wo',label:'Woensdag'},
+    {d:4,s:'do',label:'Donderdag'}, {d:5,s:'vr',label:'Vrijdag'}, {d:6,s:'za',label:'Zaterdag'},
+    {d:0,s:'zo',label:'Zondag'}
+  ];
+  function plDayLabel(d){ for(var i=0;i<PL_DAYS.length;i++) if(PL_DAYS[i].d===d) return PL_DAYS[i].label; return ''; }
+  var PLAN = {};
+  // Een onbekende component-sleutel wordt stilzwijgend overgeslagen: dan verdwijnt één regel in
+  // plaats van dat het hele programma op een oude sleutel stukloopt.
+  function plLoad(){
+    var raw = store.get('poom_plan', null), out = {};
+    for(var d=0; d<7; d++){
+      var src = (raw && raw[d]) || [], list = [];
+      for(var i=0;i<src.length;i++){
+        var it = src[i]; if(!it || !plComp(it.k)) continue;
+        list.push({ id: it.id || plId(), k: it.k,
+                    min: plClampMin(it.min), vids: (it.vids||[]).slice(0,8) });
+      }
+      out[d] = list;
+    }
+    PLAN = out;
+  }
+  function plSave(){ store.set('poom_plan', PLAN); }
+  function plId(){ return 'pl'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36); }
+  // De oefentimer accepteert 30–600 seconden; buiten dat bereik telt het als "geen timer".
+  function plClampMin(m){ m = parseInt(m,10); return (m>=1 && m<=10) ? m : 0; }
+  function plDay(d){ return PLAN[d] || (PLAN[d]=[]); }
+  function plFind(d,id){ var l=plDay(d); for(var i=0;i<l.length;i++) if(l[i].id===id) return l[i]; return null; }
+  function plIdx(d,id){ var l=plDay(d); for(var i=0;i<l.length;i++) if(l[i].id===id) return i; return -1; }
+  function plWeekCount(){ var n=0; for(var d=0;d<7;d++) n+=plDay(d).length; return n; }
+  plLoad();
+
+  /* Afvinken telt alleen voor vandaag: bij een nieuwe dag begint het programma weer leeg, want
+     ritme opbouwen is juist het punt. Dezelfde datumstempel-aanpak als de dagkaart. */
+  var PLDONE = { date:'', ids:{} };
+  function plDoneLoad(){
+    var r = store.get('poom_plandone', null);
+    PLDONE = (r && r.date===todayISO()) ? {date:r.date, ids:r.ids||{}} : {date:todayISO(), ids:{}};
+  }
+  function plDoneSave(){ PLDONE.date=todayISO(); store.set('poom_plandone', PLDONE); }
+  function plIsDone(id){ return PLDONE.date===todayISO() && !!PLDONE.ids[id]; }
+  function plToggleDone(id){
+    if(PLDONE.date!==todayISO()){ PLDONE={date:todayISO(), ids:{}}; }
+    if(PLDONE.ids[id]) delete PLDONE.ids[id]; else PLDONE.ids[id]=1;
+    plDoneSave();
+  }
+  plDoneLoad();
+
   function geupSpan(fromISO, toISO){
     if(!fromISO) return '';
     var a=new Date(fromISO+'T00:00:00'), b=toISO? new Date(toISO+'T00:00:00') : new Date();
@@ -3417,7 +3606,7 @@
               '<div class="td-title">Training van vandaag</div>'+
               '<div class="td-goal">'+trainSub+'</div>'+
             '</div>'+
-            '<button class="startbtn compact" data-act="start" aria-label="Start geleide training" title="Start geleide training"><span class="startbtn-ic" aria-hidden="true"></span></button>'+
+            '<button class="startbtn compact" data-act="start" aria-label="Open je coachprogramma" title="Coach — stel je training samen"><span class="startbtn-ic" aria-hidden="true"></span></button>'+
           '</div>'+
           '<div class="td-list">'+missionCols+'</div>'+
         '</div>'+ ddBanner +
@@ -3746,6 +3935,264 @@
     var s=vdMenuSheet; vdMenuSheet=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
     if(!keepNav) fnav.classList.remove('hide');
+  }
+
+  /* ---- Coach-scherm ---------------------------------------------------------------
+     Eén pagina per weekdag. De dag van vandaag staat vooraan geselecteerd, zodat de app
+     bij het openen meteen laat zien wat er vandaag te doen is; de andere dagen zijn er om
+     vooruit te plannen. Elke regel is een snelkoppeling naar het echte onderdeel in de
+     app, met daaronder de timer en de filmpjes die eraan gekoppeld zijn. */
+  var plSel = null;                                  // gekozen weekdag; null = volg vandaag
+  function plToday(){ return new Date().getDay(); }
+  function plCur(){ return plSel===null ? plToday() : plSel; }
+
+  function plWeekHtml(){
+    var today=plToday(), cur=plCur();
+    return '<div class="pl-week">'+PL_DAYS.map(function(d){
+      var n=plDay(d.d).length;
+      var dots=''; for(var i=0;i<Math.min(n,3);i++) dots+='<i></i>';
+      return '<button class="pl-day'+(d.d===cur?' on':'')+(d.d===today?' today':'')+'" '+
+        'data-act="plday" data-d="'+d.d+'" aria-label="'+esc(d.label)+' — '+n+' onderdelen"'+
+        (d.d===cur?' aria-current="true"':'')+'>'+
+        '<span class="pl-dnum">'+d.s.toUpperCase()+'</span>'+
+        '<span class="pl-dots">'+dots+'</span>'+
+      '</button>';
+    }).join('')+'</div>';
+  }
+  // "Auto" heeft geen eigen inhoud: het leent de missies van de dagkaart. Op een andere dag dan
+  // vandaag zijn dat de missies die dán gelden, dus daar tonen we alleen de belofte.
+  function plAutoChips(isToday){
+    if(!isToday) return '<span class="pl-chip"><span class="pl-ctx">De missies van die dag</span></span>';
+    return todaysMissions().map(function(m){
+      return '<button class="pl-chip" data-act="plmiss" data-id="'+esc(m.id)+'">'+
+        '<span class="pl-cdot">'+IC.chev+'</span><span class="pl-ctx">'+esc(m.label)+'</span></button>';
+    }).join('');
+  }
+  function plChipsHtml(it, isToday){
+    var out='';
+    if(it.k==='auto') out += plAutoChips(isToday);
+    if(it.min) out += '<button class="pl-chip tmr" data-act="pltimer" data-min="'+it.min+'">'+
+      '⏱ <b>'+it.min+' min</b></button>';
+    (it.vids||[]).forEach(function(vid){
+      var v=vdById(vid); if(!v) return;
+      var th=vdThumb(v);
+      out += '<a class="pl-chip" href="'+esc(vdUrl(v))+'" target="_blank" rel="noopener noreferrer">'+
+        (th?'<img class="pl-cthumb" src="'+esc(th)+'" alt="" loading="lazy" decoding="async">':'')+
+        '<span class="pl-ctx">'+esc(v.title||'Filmpje')+'</span></a>';
+    });
+    return out ? '<div class="pl-chips">'+out+'</div>' : '';
+  }
+  function plItemHtml(it, isToday){
+    var c=plComp(it.k); if(!c) return '';
+    var nv=(it.vids||[]).filter(function(id){ return !!vdById(id); }).length;
+    var bits=[]; if(it.min) bits.push(it.min+' min');
+    if(nv) bits.push(nv+(nv===1?' filmpje':' filmpjes'));
+    var sub = bits.length ? bits.join(' · ') : c.hint;
+    var done = isToday && plIsDone(it.id);
+    return '<div class="pl-item'+(done?' done':'')+'">'+
+      '<div class="pl-top">'+
+        (isToday
+          ? '<button class="pl-ck" data-act="plcheck" data-id="'+esc(it.id)+'" aria-pressed="'+(done?'true':'false')+'" aria-label="'+esc(c.label)+' afvinken"><span>'+IC.check+'</span></button>'
+          : '<span class="pl-ck pl-ckoff" aria-hidden="true"></span>')+
+        '<button class="pl-go" data-act="plgo" data-k="'+esc(it.k)+'" data-min="'+(it.min||0)+'">'+
+          '<span class="pl-ico">'+c.ico+'</span>'+
+          '<span class="pl-txt"><span class="pl-lab">'+esc(c.label)+'</span>'+
+            '<span class="pl-sub">'+esc(sub)+'</span></span>'+
+          '<span class="pl-chev">'+IC.chev+'</span>'+
+        '</button>'+
+        '<button class="pl-more" data-act="pledit" data-id="'+esc(it.id)+'" aria-label="Opties voor '+esc(c.label)+'">•••</button>'+
+      '</div>'+
+      plChipsHtml(it, isToday)+
+    '</div>';
+  }
+  function plBodyHtml(){
+    var d=plCur(), list=plDay(d), isToday=(d===plToday());
+    var head='<div class="pl-head"><span class="pl-headt">'+esc(plDayLabel(d))+
+      (isToday?' · vandaag':'')+'</span>'+
+      (list.length?'<span class="pl-headn">'+list.length+(list.length===1?' onderdeel':' onderdelen')+'</span>':'')+'</div>';
+    if(!list.length){
+      return head+
+        '<p class="pl-empty">Nog niets gepland voor '+esc(plDayLabel(d).toLowerCase())+'.<br>'+
+          'Stel je eigen training samen: kies onderdelen en hang er een timer of filmpjes aan.</p>'+
+        '<button class="pl-cta" data-act="plquick">Snelle start</button>'+
+        '<button class="pl-add" data-act="pladd">+ Onderdeel</button>';
+    }
+    return head+'<div class="pl-list">'+list.map(function(it){ return plItemHtml(it,isToday); }).join('')+'</div>'+
+      '<button class="pl-add" data-act="pladd">+ Onderdeel</button>';
+  }
+  /* Coach opent als volledig scherm boven de dagkaart — dezelfde laag als de oefentimer en het
+     examen, want het is een modus en geen aparte sectie van de app. */
+  var coachScreen=null;
+  function openCoach(){
+    if(coachScreen) return coachScreen;
+    plSel=null; plDoneLoad();
+    var el=document.createElement('div');
+    el.className='session coachscreen'; el.id='coachscreen';
+    applyTheme(el, CUR);
+    el.innerHTML=
+      '<div class="shead">'+
+        '<button class="sx" data-act="plexit" aria-label="Sluiten">'+IC.x+'</button>'+
+        '<div class="pl-title"><span class="han-lab">코치 · Kochi</span><h2>Coach</h2></div>'+
+      '</div>'+
+      '<div class="sbody" id="pl-scroll">'+plWeekHtml()+plBodyHtml()+'</div>';
+    stage.appendChild(el);
+    coachScreen=el;
+    fnav.classList.add('hide');
+    requestAnimationFrame(function(){ el.classList.add('show'); });
+    vdBindThumbs(el);
+    return el;
+  }
+  function closeCoach(){
+    if(!coachScreen) return;
+    plCloseSheet();
+    coachScreen.classList.remove('show');
+    fnav.classList.remove('hide');
+    var s=coachScreen; coachScreen=null;
+    setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 380);
+  }
+  // Alleen de scrollinhoud verversen: de kop en de scrollpositie blijven dan staan.
+  function plRefresh(){
+    var w=stage.querySelector('#pl-scroll'); if(!w) return;
+    var y=w.scrollTop;
+    w.innerHTML=plWeekHtml()+plBodyHtml();
+    vdBindThumbs(w); w.scrollTop=y;
+  }
+  function plPickDay(d){
+    d=parseInt(d,10); if(!(d>=0&&d<=6)) return;
+    plSel = d; plRefresh();
+  }
+  // Een eerste dag in één tik: opwarmen, de missies van de dag, uitlopen.
+  function plQuickStart(){
+    var d=plCur();
+    PLAN[d]=[{id:plId(),k:'opwarmen',min:5,vids:[]},
+             {id:plId(),k:'auto',min:0,vids:[]},
+             {id:plId(),k:'cooling',min:3,vids:[]}];
+    plSave(); plRefresh(); buzz(18); try{ sfx('complete'); }catch(_e){}
+  }
+  /* Wat een regel opent. Poomsae, hosinsul en woorden hebben al een echte plek in de app; de
+     onderdelen die dat niet hebben (opwarmen, cooling down, taeryon) openen de oefentimer, want
+     dat is daar het bruikbaarste gereedschap. */
+  function plGo(k, min){
+    if(k==='auto'){ closeCoach(); showScreen('today'); return; }
+    if(k==='poomsae' || k==='hosinsul' || k==='woorden'){ closeCoach(); missionGo(k); return; }
+    if(k==='gyeorugi' && hbCat('gyeorugi') && (!hbCat('gyeorugi').show || hbCat('gyeorugi').show())){
+      closeCoach(); showScreen('handboek'); openHb('gyeorugi'); return;
+    }
+    if(k==='taeryon'){ openDrill('ilbo'); return; }   // stapsparren = de ilbo-oefengids
+    plOpenTimer(min || plComp(k).min || 3);
+  }
+  // De oefentimer leest zijn stand uit localStorage, dus eerst zetten en dan pas openen.
+  function plOpenTimer(min){
+    var sec=Math.max(30, Math.min(600, (plClampMin(min)||3)*60));
+    try{ otSetMode('time'); otSetDur(sec); }catch(e){}
+    openTimer();
+  }
+
+  /* ---- Onderdeel kiezen ---- */
+  var plSheet=null, plEditId=null;
+  function plOpenSheet(title, body, id){
+    if(plSheet) return;
+    plSheet=document.createElement('div');
+    plSheet.className='beltsheet-ov'; plSheet.id=id;
+    applyTheme(plSheet, CUR);
+    plSheet.innerHTML=
+      '<div class="bs-backdrop" data-act="plclose"></div>'+
+      '<div class="beltsheet">'+
+        '<div class="bs-grab"></div>'+
+        '<div class="bs-head"><h3>'+esc(title)+'</h3></div>'+
+        '<div id="pl-sheet-body">'+body+'</div>'+
+      '</div>';
+    stage.appendChild(plSheet);
+    fnav.classList.add('hide');
+    requestAnimationFrame(function(){ plSheet.classList.add('show'); });
+  }
+  function plCloseSheet(){
+    if(!plSheet) return;
+    plSheet.classList.remove('show');
+    var s=plSheet; plSheet=null; plEditId=null;
+    setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
+    fnav.classList.remove('hide');
+  }
+  function plOpenAdd(){
+    plOpenSheet('Onderdeel toevoegen',
+      '<div class="pl-pick">'+PL_COMPS.map(function(c){
+        return '<button class="pl-pi" data-act="plpick" data-k="'+esc(c.k)+'">'+
+          '<span class="pl-ico">'+c.ico+'</span>'+
+          '<span><span class="pl-pl">'+esc(c.label)+'</span>'+
+            '<span class="pl-ph">'+esc(c.hint)+'</span></span></button>';
+      }).join('')+'</div>', 'plan-add-ov');
+  }
+  function plAdd(k){
+    var c=plComp(k); if(!c) return;
+    plDay(plCur()).push({id:plId(), k:k, min:c.min||0, vids:[]});
+    plSave(); plCloseSheet(); plRefresh(); buzz(14);
+  }
+
+  /* ---- Onderdeel bewerken: timer, filmpjes en volgorde in één vel ---- */
+  var PL_MINS = [0,1,2,3,5,10];
+  function plEditBody(){
+    var d=plCur(), it=plFind(d,plEditId); if(!it) return '';
+    var i=plIdx(d,plEditId), last=plDay(d).length-1;
+    var mins='<div class="pl-sect">Timer</div><div class="pl-mins">'+PL_MINS.map(function(m){
+      return '<button class="ag-chip'+(m===it.min?' on':'')+'" data-act="plmin" data-v="'+m+'">'+
+        (m?m+'m':'Geen')+'</button>';
+    }).join('')+'</div>';
+    var vids='<div class="pl-sect">Filmpjes uit je verzameling</div>';
+    if(!VIDEOS.length){
+      vids+='<p class="pl-empty" style="padding:4px 2px 14px;text-align:left">'+
+        'Je hebt nog geen filmpjes bewaard. Voeg ze toe bij Filmpjes, dan kun je ze hier koppelen.</p>';
+    } else {
+      vids+='<div class="pl-vlist">'+VIDEOS.map(function(v){
+        var on=(it.vids||[]).indexOf(v.id)>=0, th=vdThumb(v);
+        return '<button class="pl-vi'+(on?' on':'')+'" data-act="plvid" data-id="'+esc(v.id)+'">'+
+          '<img class="pl-vthumb" src="'+esc(th||'')+'" alt="" loading="lazy" decoding="async">'+
+          '<span class="pl-vt">'+esc(v.title||'Filmpje')+'</span>'+
+          '<span class="pl-vck">'+IC.check+'</span></button>';
+      }).join('')+'</div>';
+    }
+    var ord='<div class="pl-ord">'+
+      '<button class="vd-mi" data-act="plmove" data-v="-1"'+(i<=0?' disabled':'')+'>↑ Omhoog</button>'+
+      '<button class="vd-mi" data-act="plmove" data-v="1"'+(i>=last?' disabled':'')+'>↓ Omlaag</button>'+
+    '</div>'+
+    '<div class="vd-menu">'+
+      '<button class="vd-mi danger" data-act="pldel">🗑️ Verwijderen</button>'+
+      '<button class="vd-mi cancel" data-act="plclose">Klaar</button>'+
+    '</div>';
+    return mins+vids+ord;
+  }
+  function plOpenEdit(id){
+    var it=plFind(plCur(), id); if(!it || plSheet) return;
+    plEditId=id;
+    var c=plComp(it.k);
+    plOpenSheet(c.ico+' '+c.label, plEditBody(), 'plan-edit-ov');
+    vdBindThumbs(plSheet);
+  }
+  // Het vel opnieuw vullen zonder het te sluiten, zodat een keuze meteen zichtbaar is.
+  function plEditRefresh(){
+    var b=plSheet && plSheet.querySelector('#pl-sheet-body'); if(!b) return;
+    b.innerHTML=plEditBody(); vdBindThumbs(b);
+  }
+  function plSetMin(v){
+    var it=plFind(plCur(), plEditId); if(!it) return;
+    it.min=plClampMin(v); plSave(); plEditRefresh(); plRefresh(); buzz(10);
+  }
+  function plToggleVid(vid){
+    var it=plFind(plCur(), plEditId); if(!it) return;
+    it.vids=it.vids||[];
+    var i=it.vids.indexOf(vid);
+    if(i>=0) it.vids.splice(i,1); else if(it.vids.length<8) it.vids.push(vid);
+    plSave(); plEditRefresh(); plRefresh(); buzz(10);
+  }
+  function plMove(step){
+    var d=plCur(), list=plDay(d), i=plIdx(d, plEditId);
+    var j=i+step; if(i<0 || j<0 || j>=list.length) return;
+    list.splice(j,0,list.splice(i,1)[0]);
+    plSave(); plEditRefresh(); plRefresh(); buzz(12);
+  }
+  function plDelete(){
+    var d=plCur(), i=plIdx(d, plEditId); if(i<0) return;
+    plDay(d).splice(i,1);
+    plSave(); plCloseSheet(); plRefresh(); buzz(16);
   }
   /* conventional bookmark icon: outline when idle, filled seal when on */
   function bkmk(o){ o=o||{};
@@ -6614,7 +7061,7 @@
     var act = e.target.closest && e.target.closest('[data-act]');
     if(!act) return;
     var a = act.getAttribute('data-act');
-    if(a==='start'){ openSession(); }
+    if(a==='start'){ openCoach(); }
     else if(a==='startexam'){ openExam(); }
     else if(a==='drill'){ openDrill(act.getAttribute('data-id')); }
     else if(a==='drilldone'){ drillDone(); }
@@ -6677,6 +7124,22 @@
       AGENDA=AGENDA.filter(function(e){ return e.id!==_aid; });
       agSave(); agRender(); refreshStatusNext(); buzz(12); }
     else if(a==='vdnew'){ openVideoSheet(); buzz(12); }
+    /* ---- Coach: weekprogramma ---- */
+    else if(a==='plday'){ plPickDay(act.getAttribute('data-d')); buzz(10); }
+    else if(a==='pladd'){ plOpenAdd(); buzz(12); }
+    else if(a==='plpick'){ plAdd(act.getAttribute('data-k')); }
+    else if(a==='plquick'){ plQuickStart(); }
+    else if(a==='plclose'){ plCloseSheet(); }
+    else if(a==='pledit'){ plOpenEdit(act.getAttribute('data-id')); buzz(10); }
+    else if(a==='plmin'){ plSetMin(act.getAttribute('data-v')); }
+    else if(a==='plvid'){ plToggleVid(act.getAttribute('data-id')); }
+    else if(a==='plmove'){ plMove(parseInt(act.getAttribute('data-v'),10)); }
+    else if(a==='pldel'){ plDelete(); }
+    else if(a==='plcheck'){ plToggleDone(act.getAttribute('data-id')); plRefresh(); buzz(14); }
+    else if(a==='plgo'){ plGo(act.getAttribute('data-k'), parseInt(act.getAttribute('data-min'),10)||0); }
+    else if(a==='pltimer'){ plOpenTimer(parseInt(act.getAttribute('data-min'),10)); buzz(12); }
+    else if(a==='plmiss'){ closeCoach(); missionGo(act.getAttribute('data-id')); }
+    else if(a==='plexit'){ closeCoach(); buzz(10); }
     else if(a==='vdclose'){ closeVideoSheet(); }
     else if(a==='vdcat'){ if(vdDraft){ vdDraft.cat=act.getAttribute('data-k');
       [].forEach.call(vdSheet.querySelectorAll('.ag-chip'),function(c){ c.classList.toggle('on', c===act); });
