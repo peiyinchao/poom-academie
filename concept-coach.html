@@ -1742,16 +1742,42 @@
     transition:transform .42s cubic-bezier(.34,1.3,.4,1), width .42s cubic-bezier(.34,1.3,.4,1)}
 
   /* ± duration nudgers (Tijd mode): the amount lives inside the button, no floating label */
-  .ot-nudge .ot-fab{font-family:var(--cond);font-weight:800}
-  .ot-nlab{font-family:var(--cond);font-weight:800;font-size:17px;line-height:1;letter-spacing:.02em;
-    font-variant-numeric:tabular-nums}
-  .ot-nlab .ot-nsign{font-size:19px;margin-right:1px}
-  .ot-nlab .ot-nunit{font-size:11px;opacity:.66;margin-left:1px}
 
-  /* Swap the bottom controls per mode: Herhaal+Tempo for counting, −/+ for the countdown */
+  /* Swap the bottom controls per mode: Herhaal+Tempo for counting, de duurkiezer voor de countdown */
   .timerscreen[data-mode="time"] .ot-rep,
   .timerscreen[data-mode="time"] .ot-tempo{display:none}
-  .timerscreen[data-mode="count"] .ot-nudge{display:none}
+  .timerscreen[data-mode="count"] .ot-dur{display:none}
+
+  /* ===== Oefentimer: duurkiezer (zelfde chrome als de tempokiezer, maar met een baan) =====
+     Tempo heeft vier waarden en past dus als losse schijven; de duur loopt van 30s tot 10:00
+     in stappen van 30s — twintig stuks. Daarom vouwt deze knop een baan uit in plaats van
+     opties: hetzelfde gebaar en dezelfde pil, alleen sleep je erover. */
+  .ot-dur{position:relative;width:64px;height:64px}
+  .ot-dur.open{z-index:6}
+  .ot-dur.open .ot-lab{opacity:1}
+  .ot-dur-fab{position:absolute;left:0;bottom:0;z-index:1;transition:opacity .24s ease}
+  .ot-dur.open .ot-dur-fab{opacity:0;pointer-events:none}
+  .ot-dur-cur{font-family:var(--cond);font-weight:800;font-size:17px;line-height:1;letter-spacing:.01em;
+    font-variant-numeric:tabular-nums}
+  .ot-dmenu{position:absolute;left:0;bottom:3px;height:58px;width:64px;z-index:2;overflow:hidden;
+    display:flex;align-items:center;justify-content:flex-start;padding:6px 14px 6px 12px;box-sizing:border-box;
+    border-radius:29px;background:rgba(16,8,4,.52);border:1px solid rgba(255,255,255,.24);
+    -webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);
+    box-shadow:0 18px 44px -16px rgba(0,0,0,.72);
+    opacity:0;visibility:hidden;pointer-events:none;
+    transition:width .44s cubic-bezier(.33,1.28,.4,1), opacity .22s ease, visibility .44s}
+  .ot-dur.open .ot-dmenu{opacity:1;visibility:visible;pointer-events:auto}
+  .ot-dmenu-inner{display:flex;align-items:center;gap:12px;height:44px}
+  .ot-dval{font-family:var(--cond);font-weight:800;font-size:19px;line-height:1;color:#fff;
+    font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+  .ot-dtrack{-webkit-appearance:none;appearance:none;width:186px;height:30px;background:transparent;
+    margin:0;touch-action:auto;cursor:pointer}
+  .ot-dtrack::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:rgba(255,255,255,.26)}
+  .ot-dtrack::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;
+    border-radius:50%;background:#fff;box-shadow:0 5px 14px -5px rgba(0,0,0,.5);margin-top:-10px}
+  .ot-dtrack::-moz-range-track{height:6px;border-radius:3px;background:rgba(255,255,255,.26)}
+  .ot-dtrack::-moz-range-thumb{width:26px;height:26px;border:0;border-radius:50%;background:#fff;
+    box-shadow:0 5px 14px -5px rgba(0,0,0,.5)}
 
   /* Tijd mode: the dial always shows MM:SS (even while setting) — no Korean word / in-ring prompt */
   /* 100px in Big Shoulders gives an 81.7px digit — matching Tellen's 82.1px at 120px Black Han Sans.
@@ -1759,8 +1785,11 @@
   .timerscreen .pt-num.ot-tnum{font-family:var(--cond);font-weight:800;font-size:100px;line-height:1;height:auto;
     letter-spacing:.01em;font-variant-numeric:tabular-nums}
   .timerscreen[data-mode="time"] .ptimer.idle .pt-num{display:flex}
-  .timerscreen[data-mode="time"] .ptimer.idle .pt-word,
+  /* De uitleg staat nu ook bij Tijd ín de ring, onder de tijd — zelfde plek als bij Tellen. */
+  .timerscreen[data-mode="time"] .ptimer.idle .pt-word{display:flex}
   .timerscreen[data-mode="time"] .ptimer.idle .pt-start{display:none}
+  .timerscreen .ot-tsub{font-family:var(--cond);font-weight:800;text-transform:uppercase;
+    letter-spacing:.14em;font-size:12.5px;color:rgba(255,255,255,.84)}
 
   /* ===== Korean visual motifs ===== */
   .stage{
@@ -6378,12 +6407,16 @@
             '<button class="ot-fab ot-tempo-fab" data-act="ottempo" aria-label="Tempo">'+
               '<span class="ot-tempo-cur" id="ot-tempo-cur">'+otTempoLabel()+'</span></button>'+
           '</div>'+
-          '<div class="ot-nudge ot-ctl">'+
-            '<button class="ot-fab ot-nudge-fab" data-act="otminus" aria-label="30 seconden minder">'+
-              '<span class="ot-nlab"><span class="ot-nsign">−</span>30<span class="ot-nunit">s</span></span></button></div>'+
-          '<div class="ot-nudge ot-ctl">'+
-            '<button class="ot-fab ot-nudge-fab" data-act="otplus" aria-label="30 seconden meer">'+
-              '<span class="ot-nlab"><span class="ot-nsign">+</span>30<span class="ot-nunit">s</span></span></button></div>'+
+          '<div class="ot-dur">'+
+            '<span class="ot-lab">Duur</span>'+
+            '<div class="ot-dmenu"><div class="ot-dmenu-inner">'+
+              '<input class="ot-dtrack" id="ot-dtrack" type="range" min="30" max="600" step="30" '+
+                'value="'+otState.dur+'" aria-label="Duur in stappen van 30 seconden">'+
+              '<span class="ot-dval" id="ot-dval">'+otFmtTime(otState.dur)+'</span>'+
+            '</div></div>'+
+            '<button class="ot-fab ot-dur-fab" data-act="otdur" aria-label="Duur instellen">'+
+              '<span class="ot-dur-cur" id="ot-dur-cur">'+otFmtTime(otState.dur)+'</span></button>'+
+          '</div>'+
         '</div>'+
         '<div class="ot-ctl" id="ot-reset-ctl"><span class="ot-lab">Opnieuw</span>'+
           '<button class="ot-fab" id="ot-reset" data-act="otreset" aria-label="Opnieuw">'+IC.reset+'</button></div>'+
@@ -6398,6 +6431,12 @@
     });
     fnav.classList.add('hide');
     // Tijd mode: drag anywhere on the dial to set the duration (full ring = 10:00, snaps to 30s)
+    var _dtr=el.querySelector('#ot-dtrack');
+    if(_dtr){
+      var _dset=function(){ otSetDur(+_dtr.value); buzz(4); };
+      _dtr.addEventListener('input', _dset);
+      _dtr.addEventListener('change', _dset);
+    }
     var _tap=el.querySelector('.ot-tap');
     if(_tap){
       _tap.addEventListener('pointerdown', function(e){
@@ -6787,7 +6826,7 @@
      across the hand-off into the count, so the cadence never jumps. */
   var OT_BASE = 1000, OT_READY = 3, OT_LEADIN = 1000;
   var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, reps:0, left:0, _lastFrac:0, _wrapT:null,
-                  mode:'count', dur:120, total:0, endAt:0, raf:null, _lastSec:0, _dragged:false, _windT:null, dragC:null, _pd:null };
+                  mode:'count', dur:60, total:0, endAt:0, raf:null, _lastSec:0, _dragged:false, _windT:null, dragC:null, _pd:null };
   var otTmT=null; // tempo fold-out collapse/close timer
   var otRepT=null; // herhaal fold-out close timer
   var otGlintT=null; // attention-glint scheduler for the "tik om te starten" hint
@@ -7311,7 +7350,7 @@
       if(timerScreen) timerScreen.setAttribute('data-mode', m);
     }
     var host=timerScreen; if(!host) return;
-    otCloseFan(); otCloseReps();
+    otCloseFan(); otCloseReps(); otCloseDur();
     [].forEach.call(host.querySelectorAll('.ot-mseg'),function(b){
       var on=b.getAttribute('data-m')===otState.mode;
       b.classList.toggle('on', on); b.setAttribute('aria-selected', on?'true':'false');
@@ -7359,25 +7398,36 @@
   function otSetDur(sec){
     otState.dur=Math.max(30, Math.min(600, Math.round(sec/30)*30));
     try{ localStorage.setItem('poom_ot_dur', String(otState.dur)); }catch(e){}
+    otSyncDur();
     if(otState.phase==='idle') otRenderTime({noTrans:true});
   }
-  function otNudge(step){
-    if(otState.phase==='run'){                       // live countdown: add/subtract on the fly
-      var nl=Math.max(5, Math.min(600, otState.left+step));
-      if(Math.abs(nl-otState.left)<0.5) return;      // already at a limit
-      otState.left=nl;
-      if(nl>otState.total) otState.total=nl;         // grow the ring reference if extended past the start
-      otState._lastSec=Math.ceil(nl - 1e-3);         // keep the 3·2·1 beep boundary aligned
-      if(otState.running) otState.endAt=performance.now()+nl*1000;
-      otRenderTime({noTrans:true}); buzz(8);
-      return;
-    }
-    if(otState.phase==='done') otState.phase='idle';
-    var before=otState.dur; otSetDur(otState.dur+step);
-    if(otState.dur!==before) buzz(8);
-    otSyncTime();
+  /* Duurkiezer: dezelfde pil als de tempokiezer, maar met een baan in plaats van losse
+     opties — twintig schijven zouden nooit op een telefoon passen. */
+  function otSyncDur(){
+    var host=timerScreen; if(!host) return;
+    var lbl=otFmtTime(otState.dur);
+    var cur=host.querySelector('#ot-dur-cur'); if(cur) cur.textContent=lbl;
+    var val=host.querySelector('#ot-dval');    if(val) val.textContent=lbl;
+    var tr=host.querySelector('#ot-dtrack');
+    if(tr && +tr.value!==otState.dur) tr.value=String(otState.dur);
   }
-  function otResettableTime(){ return otState.running || otState.phase==='run' || otState.phase==='done'; }
+  function otDurMenu(){
+    var host=timerScreen; if(!host) return;
+    var w=host.querySelector('.ot-dur'); if(!w) return;
+    if(w.classList.contains('open')){ otCloseDur(); return; }
+    otCloseFan(); otCloseReps();                     // maar één uitklapper tegelijk
+    otSyncDur();
+    var menu=w.querySelector('.ot-dmenu'), inner=w.querySelector('.ot-dmenu-inner');
+    w.classList.add('open');
+    if(menu&&inner) menu.style.width=(inner.offsetWidth+26)+'px';  // 26 = 12px + 14px padding
+  }
+  function otCloseDur(){
+    var host=timerScreen; if(!host) return;
+    var w=host.querySelector('.ot-dur'); if(!w || !w.classList.contains('open')) return;
+    w.classList.remove('open');
+    var menu=w.querySelector('.ot-dmenu'); if(menu){ menu.style.transition=''; menu.style.width=''; }
+  }
+  function otResettableTime(){ return otState.running || otState.phase==='ready' || otState.phase==='run' || otState.phase==='done'; }
   function otSyncTime(){
     var host=timerScreen; if(!host) return;
     var canReset=otResettableTime();
@@ -7391,11 +7441,24 @@
         hint=host.querySelector('#ot-hint'), dial=host.querySelector('.ptimer');
     if(!numEl) return;
     var idle=(otState.phase==='idle'), running=(otState.phase==='run'), done=(otState.phase==='done');
-    if(dial){ dial.classList.remove('ready'); dial.classList.toggle('idle', idle); }
+    var ready=(otState.phase==='ready');
+    if(dial){ dial.classList.toggle('ready', ready); dial.classList.toggle('idle', idle); }
+    if(ready){
+      // Junbi-aanloop: dezelfde drie stippen als bij Tellen, met 시작 op de laatste tel.
+      numEl.classList.remove('ot-tnum');
+      otShowDots(numEl, OT_READY - otState.ready);
+      if(wordEl) wordEl.innerHTML = otState.ready>0
+        ? '<span class="w-ko">준비</span><span class="w-dot">·</span><span class="w-ro">Junbi</span>'
+        : '<span class="w-ko">시작</span><span class="w-dot">·</span><span class="w-ro">Sijak</span>';
+      if(hint){ hint.classList.remove('glint'); hint.textContent='maak je klaar'; hint.style.opacity='1'; }
+      host.classList.toggle('running', true);
+      return;
+    }
     numEl.classList.add('ot-tnum');
-    if(wordEl) wordEl.innerHTML='';
     var shownSec = idle ? otState.dur : Math.max(0, Math.ceil(otState.left - 1e-3));
     numEl.textContent=otFmtTime(shownSec);
+    // De uitleg hoort in de ring, net als bij Tellen; buiten de ring blijft alleen de extra tip.
+    if(wordEl) wordEl.innerHTML = idle ? '<span class="ot-tsub">Tik om te starten</span>' : '';
     var frac = idle ? (otState.dur/600) : (otState.total>0 ? Math.max(0, otState.left/otState.total) : 0);
     var C=666, noTrans=!!(opts&&opts.noTrans);
     if(prog){ if(noTrans) prog.style.transition='none'; prog.style.strokeDashoffset=String(C*(1-frac)); }
@@ -7405,12 +7468,12 @@
       if(running && otState.running){ hint.textContent=''; hint.style.opacity='0'; }
       else if(running){ hint.textContent='gepauzeerd — tik om verder te gaan'; hint.style.opacity='1'; }
       else if(done){ hint.textContent='klaar! · tik voor opnieuw'; hint.style.opacity='1'; }
-      else { hint.textContent='sleep de ring of ± om in te stellen'; hint.style.opacity='1'; }
+      else { hint.textContent='sleep de ring of kies een duur'; hint.style.opacity='1'; }
     }
     host.classList.toggle('running', running && otState.running);
   }
   function otResetTime(){
-    otStop();
+    otStop(); otCloseDur();
     if(timerScreen) timerScreen.classList.remove('ot-paused','running');
     otState.phase='idle'; otState.left=otState.dur; otState._lastSec=0; otState._dragged=false;
     var pr=timerScreen&&timerScreen.querySelector('#ot-prog'), kg=timerScreen&&timerScreen.querySelector('#ot-knobg');
@@ -7421,8 +7484,31 @@
   }
   function otStartTime(){
     var host=timerScreen; if(!host) return;
-    otStop();
+    otStop(); otCloseDur();
     host.classList.remove('ot-paused');
+    // Eerst drie tellen Junbi, eindigend op Sijak — precies zoals bij Tellen, zodat je
+    // je klaar kunt zetten voordat de tijd loopt.
+    otState.phase='ready'; otState.ready=OT_READY; otState.running=true;
+    otState._dragged=false;
+    var pr0=host.querySelector('#ot-prog'), kg0=host.querySelector('#ot-knobg');
+    if(pr0){ pr0.style.transition='none'; pr0.style.strokeDashoffset='666'; }
+    if(kg0){ kg0.style.transition='none'; kg0.style.transform='rotate(0deg)'; }
+    otRenderTime({noTrans:true}); otSyncTime();
+    speak('준비'); buzz(16);
+    otState.iv=setTimeout(otReadyTick, 1000);
+  }
+  function otReadyTick(){
+    if(!timerScreen || otState.mode!=='time' || otState.phase!=='ready') return;
+    otState.ready--;
+    if(otState.ready>0){ otRenderTime({noTrans:true}); buzz(6); otState.iv=setTimeout(otReadyTick, 1000); return; }
+    otRenderTime({noTrans:true}); speak('시작'); buzz(14);
+    otState.iv=setTimeout(function(){
+      if(!timerScreen || otState.mode!=='time' || otState.phase!=='ready') return;
+      otRunTime();
+    }, OT_LEADIN);
+  }
+  function otRunTime(){
+    var host=timerScreen; if(!host) return;
     var dial=host.querySelector('.ptimer'); if(dial) dial.classList.remove('idle','ready');
     otState.phase='run'; otState.running=true;
     otState.total=otState.dur; otState.left=otState.dur; otState._lastSec=Math.ceil(otState.dur);
@@ -7491,6 +7577,9 @@
   }
   function otTapTime(){
     if(otState._dragged){ otState._dragged=false; return; }   // swallow the click that ends a ring-drag
+    var wd=timerScreen&&timerScreen.querySelector('.ot-dur');
+    if(wd && wd.classList.contains('open')){ otCloseDur(); return; }  // eerst de uitklapper wegdoen
+    if(otState.phase==='ready'){ otResetTime(); buzz(10); return; }  // tik tijdens Junbi → afbreken
     if(otState.running){ otPauseTime(); return; }
     if(otState.phase==='run'){ otResumeTime(); return; }       // paused mid-countdown
     otStartTime();                                             // idle or finished → (re)start
@@ -7658,8 +7747,7 @@
     else if(a==='ottap'){ otTap(); }
     else if(a==='otreset'){ otReset(); }
     else if(a==='otmode'){ otSetMode(act.getAttribute('data-m')); }
-    else if(a==='otminus'){ otNudge(-30); }
-    else if(a==='otplus'){ otNudge(30); }
+    else if(a==='otdur'){ otDurMenu(); buzz(8); }
     else if(a==='otrepeat'){ otRepeatMenu(); }
     else if(a==='otrep'){ otPickRep(act.getAttribute('data-v')); }
     else if(a==='ottempo'){ otTempo(); }
