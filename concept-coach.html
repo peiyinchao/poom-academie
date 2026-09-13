@@ -110,6 +110,15 @@
     box-shadow:0 1px 4px rgba(0,0,0,.16);background:var(--soft)}
   .avatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%;
     border:1.6px solid var(--page);box-sizing:border-box;background:var(--soft)}
+  /* Tijdlijn zit naast de avatar: allebei gaan ze over jou, niet over de training van vandaag.
+     Het raakvlak is 37px zodat hij even makkelijk te tikken is als de avatar. */
+  .tlbtn{width:37px;height:37px;flex:none;border:0;padding:0;border-radius:50%;cursor:pointer;
+    background:var(--soft);box-shadow:0 1px 4px rgba(0,0,0,.16);
+    display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
+  .tlbtn::after{content:"";width:19px;height:19px;background:var(--ink);opacity:.78;
+    -webkit-mask:url(assets/icons/Timeline.png) center/contain no-repeat;
+    mask:url(assets/icons/Timeline.png) center/contain no-repeat}
+  .tlbtn:active{opacity:.62;transform:translateY(1px)}
 
   /* ---------- Coach greeting ---------- */
   .greet{padding:28px 0 4px;display:flex;align-items:flex-end;gap:8px}
@@ -442,6 +451,65 @@
   .vd-status.err{color:#B23A48}
   .ag-save[disabled]{opacity:.42;box-shadow:none;cursor:default}
   .ag-cancel:active,.ag-save:active{transform:translateY(1px)}
+  /* Foto bij een event: de knop is het hele vlak, de gekozen foto staat er als voorbeeld boven. */
+  .ag-photo{position:relative;display:flex;align-items:center;justify-content:center;margin-top:10px}
+  .ag-photo img{display:block;width:100%;max-height:190px;object-fit:cover;border-radius:14px;
+    border:1px solid var(--line)}
+  .ag-phbtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+    border:1px dashed var(--line);border-radius:14px;padding:16px;background:var(--soft);
+    color:var(--gray);font-size:13.5px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .ag-photo.has .ag-phbtn{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);width:auto;
+    border:0;padding:8px 14px;border-radius:999px;background:rgba(20,17,13,.6);color:#fff;
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .ag-phbtn:active{opacity:.68}
+  .ag-phbtn input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+  .ag-phdel{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;border:0;
+    background:rgba(20,17,13,.55);color:#fff;font-size:16px;line-height:1;display:grid;place-items:center;
+    cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .ag-phdel:active{opacity:.6}
+  /* ---- Tijdlijn ---- */
+  .tl-lead{margin:0 0 14px;font-size:12.5px;color:var(--gray);letter-spacing:.01em}
+  .tl-empty{font-size:13.5px;color:var(--gray);line-height:1.55;text-align:center;padding:30px 12px 20px}
+  /* Eén doorlopende lijn achter alle stippen: dat is wat het een tijdlijn maakt in plaats van een lijst. */
+  .tl-line{position:relative;padding-left:34px}
+  .tl-line::before{content:"";position:absolute;left:14px;top:6px;bottom:10px;width:2px;border-radius:2px;
+    background:linear-gradient(180deg,var(--line),var(--line) 82%,transparent)}
+  .tl-year{position:relative;margin:2px 0 10px;padding-top:4px}
+  .tl-year span{display:inline-block;font-family:var(--cond);font-size:12px;font-weight:800;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--gray)}
+  .tl-year::before{content:"";position:absolute;left:-27px;top:8px;width:16px;height:2px;border-radius:2px;
+    background:var(--line)}
+  .tl-item{position:relative;margin-bottom:12px}
+  .tl-item.fut{opacity:.82}
+  .tl-dot{position:absolute;left:-27px;top:14px;width:24px;height:24px;border-radius:50%;
+    display:grid;place-items:center;font-size:12px;line-height:1;
+    background:var(--surface);border:2px solid var(--line);box-shadow:0 0 0 4px var(--bg)}
+  .tl-dot.belt{border-color:rgba(20,17,13,.16)}
+  .tl-card{border:1px solid var(--line);border-radius:16px;padding:13px 15px;background:var(--surface)}
+  .tl-item.fut .tl-card{border-style:dashed;background:transparent}
+  .tl-date{display:block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--gray);font-family:var(--cond)}
+  .tl-ttl{display:block;margin-top:3px;font-size:15.5px;font-weight:800;line-height:1.25;color:var(--ink)}
+  .tl-meta{display:block;margin-top:3px;font-size:12.5px;color:var(--gray)}
+  .tl-meta i{font-style:normal;font-weight:700;color:var(--el)}
+  .tl-res{display:inline-block;margin-top:7px;padding:4px 10px;border-radius:999px;
+    background:var(--beltfill,var(--el));color:var(--beltink,#fff);font-size:12px;font-weight:800}
+  .tl-photo{display:block;width:100%;max-height:210px;object-fit:cover;border-radius:12px;margin-top:10px}
+  .tl-edit{margin-top:10px;border:0;border-radius:999px;padding:7px 13px;background:var(--soft);
+    color:var(--gray);font-size:12px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .tl-edit:active{opacity:.65}
+  .tl-grad{display:block;margin-top:7px;font-size:12px;font-weight:700;color:var(--gray)}
+  .tl-add{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:6px;
+    border:0;border-radius:16px;padding:15px;background:var(--beltfill,var(--el));color:var(--beltink,#fff);
+    box-shadow:0 10px 22px -12px rgba(40,28,18,.55);cursor:pointer;
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:13px;font-weight:800}
+  .tl-add:active{transform:translateY(1px)}
+  /* Korte melding, boven alles — ook boven sheets (z-index 120) en schermen (90). */
+  .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translate(-50%,14px);
+    z-index:400;max-width:min(88vw,420px);padding:12px 18px;border-radius:999px;
+    background:rgba(20,17,13,.92);color:#fff;font-size:13px;font-weight:700;line-height:1.35;text-align:center;
+    opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
 
   /* ---- Coach: eigen weekprogramma ---- */
   .coachscreen .shead{padding-bottom:4px}
@@ -2392,7 +2460,8 @@
      code gevoerd wordt die iets anders verwacht. */
   var SCHEMA = 1;
   var STORE_KEYS = ['poom_agenda','poom_videos','poom_belt','poom_hard','poom_mastery',
-                    'poom_missions','poom_ot_mode','poom_ot_dur','poom_plan','poom_plandone','ciUx'];
+                    'poom_missions','poom_ot_mode','poom_ot_dur','poom_plan','poom_plandone',
+                    'poom_photos','ciUx'];
   var store = (function(){
     var ok = true;
     try{ localStorage.setItem('poom_probe','1'); localStorage.removeItem('poom_probe'); }
@@ -2498,6 +2567,40 @@
     ];
   }
   function agSave(){ try{ localStorage.setItem('poom_agenda', JSON.stringify(AGENDA)); }catch(e){} }
+  function agById(id){ for(var i=0;i<AGENDA.length;i++) if(AGENDA[i].id===id) return AGENDA[i]; return null; }
+  /* Foto's staan apart van de agenda: ze zijn vele malen groter dan de rest en zo blijft de
+     agenda klein genoeg om altijd te kunnen bewaren, ook als het fotoquotum vol zit. */
+  var PHOTOS = {};
+  function phLoad(){ var r=store.get('poom_photos', null); PHOTOS=(r&&typeof r==='object')?r:{}; }
+  function phSave(){ return store.set('poom_photos', PHOTOS); }
+  function phGet(id){ return (id && PHOTOS[id]) || ''; }
+  function phSet(id, dataUrl){
+    if(!id) return true;
+    if(dataUrl) PHOTOS[id]=dataUrl; else delete PHOTOS[id];
+    if(phSave()) return true;
+    delete PHOTOS[id]; phSave();      // quotum vol → de foto valt weg, de rest blijft heel
+    return false;
+  }
+  // Een telefoonfoto is zo 4 MB; localStorage heeft er een paar. Verkleinen tot maximaal 1000px
+  // en als jpeg wegschrijven houdt hem rond de 100 kB zonder dat je het op dit scherm ziet.
+  function phShrink(file){
+    return new Promise(function(res, rej){
+      if(!file || !/^image\//.test(file.type||'')) { rej(new Error('geen afbeelding')); return; }
+      var url=URL.createObjectURL(file), im=new Image();
+      im.onload=function(){
+        var mx=1000, w=im.naturalWidth, h=im.naturalHeight;
+        var s=Math.min(1, mx/Math.max(w,h));
+        var c=document.createElement('canvas');
+        c.width=Math.max(1,Math.round(w*s)); c.height=Math.max(1,Math.round(h*s));
+        c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+        URL.revokeObjectURL(url);
+        try{ res(c.toDataURL('image/jpeg', .72)); }catch(e){ rej(e); }
+      };
+      im.onerror=function(){ URL.revokeObjectURL(url); rej(new Error('laden mislukt')); };
+      im.src=url;
+    });
+  }
+  phLoad();
   // Whole days from today, compared as calendar dates (UTC maths, so DST can't shift the count).
   function agDays(iso){
     var a=todayISO().split('-'), b=String(iso).split('-');
@@ -2952,8 +3055,12 @@
   /* ---- Agenda sheet (reuses the belt sheet's chrome + native date entry) ---- */
   // Two modes in one sheet: the list of what's planned, and a separate form for entering a new
   // event. Keeping them apart stops the sheet turning into one dense block of controls.
-  var agSheet=null, agMode='list', agDraft=null;
-  function agBlankDraft(){ return {type:'wedstrijd', title:'', date:'', end:''}; }
+  var agSheet=null, agMode='list', agDraft=null, agEditId=null, agAfterSave=null;
+  function agBlankDraft(){ return {type:'wedstrijd', title:'', date:'', end:'', where:'', result:'', photo:''}; }
+  function agEditDraft(e){
+    return {type:agType(e.type).k, title:e.title||'', date:e.date||'', end:e.end||'',
+            where:e.where||'', result:e.result||'', photo:phGet(e.id)};
+  }
   function agItemHtml(e){
     var t=agType(e.type);
     return '<div class="ag-item">'+
@@ -2978,15 +3085,29 @@
   }
   function agFormHtml(){
     var d=agDraft||agBlankDraft();
+    var ph=d.photo||'';
     return '<div class="ag-form">'+
       '<div class="ag-chips">'+AG_TYPES.map(function(t){
         return '<button class="ag-chip'+(t.k===d.type?' on':'')+'" data-act="agtype" data-k="'+t.k+'">'+t.ico+' '+t.label+'</button>';
       }).join('')+'</div>'+
       '<input class="ag-title" id="ag-title" type="text" autocomplete="off" value="'+esc(d.title)+'" placeholder="Naam (bijv. Ilyo Open Poomsae)">'+
+      '<input class="ag-title" id="ag-where" type="text" autocomplete="off" value="'+esc(d.where||'')+'" placeholder="Plaats (bijv. Aarschot)">'+
       '<div class="ag-dates">'+
         agDateHtml('start','Datum', d.date, 'Kies…')+
         agDateHtml('end','t/m (optioneel)', d.end, '—')+
       '</div>'+
+      // Een uitslag hoort alleen bij een wedstrijd; bij een cursus of examen zou het veld verwarren.
+      (d.type==='wedstrijd'
+        ? '<input class="ag-title" id="ag-result" type="text" autocomplete="off" value="'+esc(d.result||'')+'" placeholder="Uitslag (bijv. 2e plaats poomsae)">'
+        : '')+
+      '<div class="ag-photo'+(ph?' has':'')+'">'+
+        (ph ? '<img src="'+esc(ph)+'" alt="Gekozen foto">' : '')+
+        '<label class="ag-phbtn">'+(ph?'Andere foto':'📷 Foto toevoegen')+
+          '<input type="file" id="ag-photo" accept="image/*">'+
+        '</label>'+
+        (ph ? '<button class="ag-phdel" data-act="agphdel" aria-label="Foto weghalen">×</button>' : '')+
+      '</div>'+
+      '<p class="vd-status'+(d.note&&d.noteErr?' err':'')+'" id="ag-status">'+esc(d.note||'')+'</p>'+
       '<div class="ag-formact">'+
         '<button class="ag-cancel" data-act="agcancel">Annuleer</button>'+
         '<button class="ag-save" data-act="agsave"'+(d.date?'':' disabled')+'>Bewaar</button>'+
@@ -2994,15 +3115,18 @@
     '</div>';
   }
   function agBodyHtml(){ return agMode==='form' ? agFormHtml() : agListHtml(); }
-  // Read the free-text field back into the draft before anything re-renders the form.
+  // Read the free-text fields back into the draft before anything re-renders the form.
   function agSync(){
     if(!agSheet || agMode!=='form' || !agDraft) return;
     var t=agSheet.querySelector('#ag-title'); if(t) agDraft.title=t.value;
+    var w=agSheet.querySelector('#ag-where'); if(w) agDraft.where=w.value;
+    var r=agSheet.querySelector('#ag-result'); if(r) agDraft.result=r.value;
   }
   function agRender(){
     if(!agSheet) return;
     var b=agSheet.querySelector('#ag-body'); if(b) b.innerHTML=agBodyHtml();
-    var h=agSheet.querySelector('#ag-head-title'); if(h) h.textContent=(agMode==='form'?'Nieuw event':'Agenda');
+    var h=agSheet.querySelector('#ag-head-title');
+    if(h) h.textContent=(agMode==='form' ? (agEditId?'Event aanpassen':'Nieuw event') : 'Agenda');
     var done=agSheet.querySelector('.bs-done'); if(done) done.style.display=(agMode==='form'?'none':'');
   }
   // Keep the header's countdown in step without re-rendering the whole Vandaag screen.
@@ -3015,7 +3139,7 @@
   }
   function openAgendaSheet(){
     if(agSheet) return;
-    agMode='list'; agDraft=null;
+    agMode='list'; agDraft=null; agEditId=null;
     agSheet=document.createElement('div');
     agSheet.className='beltsheet-ov'; agSheet.id='agenda-ov';
     applyTheme(agSheet, CUR);
@@ -3030,7 +3154,9 @@
     stage.appendChild(agSheet);
     fnav.classList.add('hide');
     agSheet.addEventListener('change', function(ev){
-      var inp=ev.target.closest && ev.target.closest('.ag-date input'); if(!inp || !agDraft) return;
+      var tg=ev.target;
+      if(tg && tg.id==='ag-photo'){ agPickPhoto(tg.files && tg.files[0]); return; }
+      var inp=tg.closest && tg.closest('.ag-date input'); if(!inp || !agDraft) return;
       agSync();
       if(inp.getAttribute('data-role')==='start'){
         agDraft.date=inp.value;
@@ -3042,12 +3168,35 @@
     });
     requestAnimationFrame(function(){ agSheet.classList.add('show'); });
   }
+  // De tijdlijn hergebruikt hetzelfde formulier, zodat er maar één plek is waar een event
+  // beschreven wordt. after() draait na het bewaren zodat de tijdlijn zichzelf kan bijwerken.
+  function openAgendaForm(id, after){
+    var was=!!agSheet;
+    if(!was) openAgendaSheet();
+    var e=id?agById(id):null;
+    agEditId = e?e.id:null;
+    agDraft = e?agEditDraft(e):agBlankDraft();
+    agAfterSave = after||null;
+    agMode='form'; agRender();
+  }
+  function agPickPhoto(file){
+    if(!file || !agDraft) return;
+    agSync();                                  // anders gaat getypte tekst verloren bij het opnieuw tekenen
+    agDraft.note='Foto verkleinen…'; agDraft.noteErr=false; agRender();
+    phShrink(file).then(function(url){
+      if(!agDraft) return;
+      agDraft.photo=url; agDraft.note=''; agDraft.noteErr=false; agRender();
+    }).catch(function(){
+      if(!agDraft) return;
+      agDraft.note='Deze foto lukte niet. Probeer een andere.'; agDraft.noteErr=true; agRender();
+    });
+  }
   function closeAgendaSheet(){
     if(!agSheet) return;
     agSheet.classList.remove('show');
-    var s=agSheet; agSheet=null; agMode='list'; agDraft=null;
+    var s=agSheet; agSheet=null; agMode='list'; agDraft=null; agEditId=null; agAfterSave=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
-    fnav.classList.remove('hide');
+    if(!tlScreen) fnav.classList.remove('hide');
   }
   /* ---- Woordenschat (termen categories) ---- */
   var TERMEN = C.termen || [];
@@ -3375,10 +3524,11 @@
   }
   function missionGo(id){
     if(id==='examen'){ openExam(); return; }
+    // Woorden is zelf het tabblad, daar valt niets te sluiten — dus ook niets om naar terug te keren.
     if(id==='woorden'){ showScreen('woorden'); return; }
     var hb = MISSION_HB[id];
-    if(hb){
-      showScreen('handboek');
+    if(hb && hbCat(hb)){
+      csEnter('handboek');
       hbTodayFocus = (id==='poomsae') ? poomsaeOfDay() : null;
       openHb(hb);
       return;
@@ -3500,6 +3650,18 @@
   var stage = document.getElementById('stage');
   var fnav = document.getElementById('fnav');
   var state = { screen:'today' };
+  /* Waar de X van een inhoudspagina naartoe moet. Wie vanaf de dagkaart of het coachprogramma
+     naar een onderdeel springt, komt bij het sluiten terug waar hij vandaan kwam — niet op het
+     tabblad waar die inhoud toevallig woont. Blijft null als je al op dat tabblad was. */
+  var csReturn = null;
+  function csEnter(screen){
+    csReturn = (state.screen===screen) ? null : state.screen;
+    showScreen(screen);
+  }
+  function csBack(){
+    var r=csReturn; csReturn=null;
+    if(r && r!==state.screen) showScreen(r);
+  }
 
   /* =========================================================
      TODAY
@@ -3525,6 +3687,7 @@
         '</span></span>'+
       '<span class="status-end">'+
         '<span class="avatar" title="Kies je graad" role="button" data-act="beltsheet" style="background:'+beltRingCss(geupInfo(GEUP_I))+'"><img src="assets/avatar/jayden.png" alt="Profiel"></span>'+
+        '<button class="tlbtn" data-act="timeline" aria-label="Tijdlijn" title="Tijdlijn — je taekwondo-verhaal"></button>'+
       '</span></div>';
   }
   function renderToday(){
@@ -4076,7 +4239,7 @@
     if(k==='auto'){ closeCoach(); showScreen('today'); return; }
     if(k==='poomsae' || k==='hosinsul' || k==='woorden'){ closeCoach(); missionGo(k); return; }
     if(k==='gyeorugi' && hbCat('gyeorugi') && (!hbCat('gyeorugi').show || hbCat('gyeorugi').show())){
-      closeCoach(); showScreen('handboek'); openHb('gyeorugi'); return;
+      closeCoach(); csEnter('handboek'); openHb('gyeorugi'); return;
     }
     if(k==='taeryon'){ openDrill('ilbo'); return; }   // stapsparren = de ilbo-oefengids
     plOpenTimer(min || plComp(k).min || 3);
@@ -4194,7 +4357,125 @@
     plDay(d).splice(i,1);
     plSave(); plCloseSheet(); plRefresh(); buzz(16);
   }
-  /* conventional bookmark icon: outline when idle, filled seal when on */
+  /* ---------- Tijdlijn: de taekwondo-geschiedenis van de leerling ----------
+     Graden en agenda-events stonden al in de app, maar alles wat voorbij was verdween uit beeld.
+     De tijdlijn zet ze samen op één lijn, nieuw naar oud, met plaats, uitslag en foto erbij. */
+  var tlScreen=null;
+  function tlYear(iso){ return String(iso||'').slice(0,4); }
+  function tlItems(){
+    var out=[], high=geupHighest();
+    for(var k in GEUP_DATES){
+      if(!GEUP_DATES.hasOwnProperty(k) || !GEUP_DATES[k]) continue;
+      var ki=+k, g=geupInfo(ki), toISO=null;
+      // Hoe lang hij deze graad droeg: tot de volgende graduatie, of tot vandaag als het de hoogste is.
+      if(ki<high){ for(var j=ki+1;j<GEUPS.length;j++){ if(GEUP_DATES[j]){ toISO=GEUP_DATES[j]; break; } } }
+      var span=geupSpan(GEUP_DATES[k], toISO);
+      out.push({kind:'graad', id:'g'+k, date:GEUP_DATES[k], geup:ki,
+                title:g.grade, sub:g.band, col:g.col,
+                note: span ? ((ki>=high?'al ':'')+span+' in deze graad') : 'Graad behaald'});
+    }
+    for(var i=0;i<AGENDA.length;i++){
+      var e=AGENDA[i], t=agType(e.type);
+      out.push({kind:'event', id:e.id, date:e.date, end:e.end,
+                title:e.title||t.label, ico:t.ico, typ:t.label, ev:e});
+    }
+    out.sort(function(a,b){ return a.date<b.date?1:(a.date>b.date?-1:0); });
+    return out;
+  }
+  function tlWhen(it){
+    var s=fmtDateNL(it.date);
+    if(it.end && it.end>it.date){
+      var a=String(it.date).split('-'), b=String(it.end).split('-');
+      s = (a[0]===b[0] && a[1]===b[1]) ? ((+a[2])+'–'+fmtDateNL(it.end)) : (s+' – '+fmtDateNL(it.end));
+    }
+    return s;
+  }
+  function tlDotHtml(it){
+    if(it.kind==='graad'){
+      var g=geupInfo(it.geup), st=' style="background:'+esc(g.col)+
+        (g.col2?';background:linear-gradient(160deg,'+esc(g.col)+' 0 50%,'+esc(g.col2)+' 50% 100%)':'')+'"';
+      return '<span class="tl-dot belt"'+st+'></span>';
+    }
+    return '<span class="tl-dot">'+it.ico+'</span>';
+  }
+  function tlItemHtml(it, today){
+    var ph = it.kind==='event' ? phGet(it.id) : '';
+    var fut = it.date>today;
+    var meta=[];
+    if(it.kind==='event'){
+      if(it.ev.where) meta.push(esc(it.ev.where));
+      if(fut) meta.push('<i>'+agCount(it.ev)+'</i>');
+    } else meta.push(esc(it.sub));
+    // Bij iets wat nog moet komen valt er nog niks te vertellen; dan is "Aanpassen" eerlijker.
+    var edit = fut ? 'Aanpassen' : ((ph||it.ev&&it.ev.result) ? 'Aanpassen' : 'Foto of uitslag toevoegen');
+    return '<div class="tl-item'+(fut?' fut':'')+'">'+
+      tlDotHtml(it)+
+      '<div class="tl-card">'+
+        '<span class="tl-date">'+esc(tlWhen(it))+'</span>'+
+        '<b class="tl-ttl">'+esc(it.title)+'</b>'+
+        (meta.length?'<span class="tl-meta">'+meta.join(' · ')+'</span>':'')+
+        (it.kind==='event'&&it.ev.result?'<span class="tl-res">🏅 '+esc(it.ev.result)+'</span>':'')+
+        (ph?'<img class="tl-photo" src="'+esc(ph)+'" alt="Foto bij '+esc(it.title)+'">':'')+
+        (it.kind==='event'
+          ? '<button class="tl-edit" data-act="tledit" data-id="'+esc(it.id)+'">'+edit+'</button>'
+          : '<span class="tl-grad">🎓 '+esc(it.note)+'</span>')+
+      '</div>'+
+    '</div>';
+  }
+  function tlBodyHtml(){
+    var all=tlItems(), today=todayISO();
+    if(!all.length){
+      return '<p class="tl-empty">Hier komt je taekwondo-verhaal te staan: je graden, wedstrijden, '+
+        'examens en cursussen. Voeg je eerste gebeurtenis toe.</p>'+
+        '<button class="tl-add" data-act="tlnew">+ Gebeurtenis</button>';
+    }
+    var h='<div class="tl-line">', yr=null;
+    for(var i=0;i<all.length;i++){
+      var y=tlYear(all[i].date);
+      if(y!==yr){ yr=y; h+='<div class="tl-year"><span>'+esc(yr)+'</span></div>'; }
+      h+=tlItemHtml(all[i], today);
+    }
+    return h+'</div><button class="tl-add" data-act="tlnew">+ Gebeurtenis</button>';
+  }
+  function tlCountLine(){
+    var n=tlItems().length;
+    return n+' '+(n===1?'moment':'momenten')+' · jouw taekwondo-verhaal';
+  }
+  function openTimeline(){
+    if(tlScreen) return tlScreen;
+    var el=document.createElement('div');
+    el.className='session tlscreen'; el.id='tlscreen';
+    applyTheme(el, CUR);
+    el.innerHTML=
+      '<div class="shead">'+
+        '<button class="sx" data-act="tlexit" aria-label="Sluiten">'+IC.x+'</button>'+
+        '<div class="pl-title"><span class="han-lab">발자취 · Baljachwi</span><h2>Tijdlijn</h2></div>'+
+      '</div>'+
+      '<div class="sbody" id="tl-scroll">'+
+        '<p class="tl-lead" id="tl-lead">'+esc(tlCountLine())+'</p>'+
+        '<div id="tl-body">'+tlBodyHtml()+'</div>'+
+      '</div>';
+    stage.appendChild(el);
+    tlScreen=el;
+    fnav.classList.add('hide');
+    requestAnimationFrame(function(){ el.classList.add('show'); });
+    return el;
+  }
+  function closeTimeline(){
+    if(!tlScreen) return;
+    tlScreen.classList.remove('show');
+    var s=tlScreen; tlScreen=null;
+    setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 380);
+    fnav.classList.remove('hide');
+  }
+  function tlRefresh(){
+    if(!tlScreen) return;
+    var b=tlScreen.querySelector('#tl-body'); if(b) b.innerHTML=tlBodyHtml();
+    var l=tlScreen.querySelector('#tl-lead'); if(l) l.textContent=tlCountLine();
+  }
+  // Vanuit de tijdlijn open je hetzelfde agendaformulier; na bewaren keert hij hier terug.
+  function tlEdit(id){ openAgendaForm(id||null, tlRefresh); }
+
   function bkmk(o){ o=o||{};
     return '<span class="bkmk'+(o.on?' on':'')+(o.cls?(' '+o.cls):'')+'" aria-hidden="true"></span>';
   }
@@ -4641,6 +4922,7 @@
     s.classList.remove('show');
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 400);
     fnav.classList.remove('hide');
+    csBack();
   }
 
   /* Transient overlay scrollbar: a JS thumb (.vsb) per scroll container, shown while scrolling then faded. */
@@ -5063,6 +5345,7 @@
     s.classList.remove('show');
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 400);
     fnav.classList.remove('hide');
+    csBack();   // het scherm eronder wisselt terwijl de pagina wegschuift
   }
   /* Poomsae Handboek scroll animation: the stance mascotte starts as a big hero illustration and,
      as the list scrolls, shrinks + glides into a small companion docked beside the title. The list
@@ -6238,6 +6521,16 @@
   var otRepT=null; // herhaal fold-out close timer
   var otGlintT=null; // attention-glint scheduler for the "tik om te starten" hint
   function buzz(ms){ var N=window.PoomNative; if(N && typeof N.haptic==='function'){ try{ N.haptic(ms); }catch(e){} return; } if(navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
+  /* Korte melding als iets niet lukte maar de app gewoon doorkan — bijvoorbeeld een foto
+     die niet meer in de opslag paste. Blijft boven alles staan en verdwijnt vanzelf. */
+  var _toastEl=null, _toastT=null;
+  function toast(msg){
+    if(!_toastEl){ _toastEl=document.createElement('div'); _toastEl.className='toast'; document.body.appendChild(_toastEl); }
+    _toastEl.textContent=msg;
+    _toastEl.classList.add('show');
+    clearTimeout(_toastT);
+    _toastT=setTimeout(function(){ if(_toastEl) _toastEl.classList.remove('show'); }, 3200);
+  }
 
   /* ---- Daily wisdom: shake (or tap) the greeting quote to draw a new one ---- */
   function dailyQuote(){ var q=C.quotes||[]; return q.length ? q[new Date().getDate()%q.length] : 'Elke dag een beetje sterker.'; }
@@ -7057,7 +7350,8 @@
   /* ---- global click handling ---- */
   document.addEventListener('click', function(e){
     var navBtn = e.target.closest && e.target.closest('[data-nav]');
-    if(navBtn){ showScreen(navBtn.getAttribute('data-nav')); return; }
+    // Een tab aantikken herdefinieert waar je "was": een X mag je daarna niet meer wegslepen.
+    if(navBtn){ csReturn=null; showScreen(navBtn.getAttribute('data-nav')); return; }
     var act = e.target.closest && e.target.closest('[data-act]');
     if(!act) return;
     var a = act.getAttribute('data-act');
@@ -7108,22 +7402,38 @@
     else if(a==='beltsheetclose'){ closeBeltSheet(); }
     else if(a==='agenda'){ openAgendaSheet(); }
     else if(a==='agendaclose'){ closeAgendaSheet(); }
-    else if(a==='agtype'){ if(!agDraft||!agSheet) return; agDraft.type=act.getAttribute('data-k');
-      [].forEach.call(agSheet.querySelectorAll('.ag-chip'), function(c){ c.classList.toggle('on', c.getAttribute('data-k')===agDraft.type); }); }
-    else if(a==='agnew'){ agDraft=agBlankDraft(); agMode='form'; agRender(); }
-    else if(a==='agcancel'){ agMode='list'; agDraft=null; agRender(); }
+    else if(a==='agtype'){ if(!agDraft||!agSheet) return; agSync(); agDraft.type=act.getAttribute('data-k');
+      agRender(); }
+    else if(a==='agnew'){ agDraft=agBlankDraft(); agEditId=null; agMode='form'; agRender(); }
+    else if(a==='agcancel'){ agMode='list'; agDraft=null; agEditId=null;
+      if(agAfterSave){ agAfterSave=null; closeAgendaSheet(); } else agRender(); }
+    else if(a==='agphdel'){ if(agDraft){ agSync(); agDraft.photo=''; agRender(); buzz(10); } }
     else if(a==='agsave'){ agSync();
       if(agDraft && agDraft.date){
-        var _ev={id:'a'+Date.now(), type:agDraft.type, title:agDraft.title.trim(), date:agDraft.date};
-        if(agDraft.end && agDraft.end>agDraft.date) _ev.end=agDraft.end;
-        AGENDA.push(_ev); agSave(); refreshStatusNext();
-        agMode='list'; agDraft=null; agRender();
+        var _ev = agEditId ? agById(agEditId) : null;
+        if(!_ev){ _ev={id:'a'+Date.now()}; AGENDA.push(_ev); }
+        _ev.type=agDraft.type; _ev.title=(agDraft.title||'').trim(); _ev.date=agDraft.date;
+        if(agDraft.end && agDraft.end>agDraft.date) _ev.end=agDraft.end; else delete _ev.end;
+        if((agDraft.where||'').trim()) _ev.where=agDraft.where.trim(); else delete _ev.where;
+        // Een uitslag hoort alleen bij een wedstrijd; wisselt het type, dan verdwijnt hij mee.
+        if(agDraft.type==='wedstrijd' && (agDraft.result||'').trim()) _ev.result=agDraft.result.trim(); else delete _ev.result;
+        agSave(); refreshStatusNext();
+        var _phok=phSet(_ev.id, agDraft.photo||'');
+        var _after=agAfterSave; agAfterSave=null;
+        agMode='list'; agDraft=null; agEditId=null;
         buzz(20); try{ sfx('complete'); }catch(_e){}
+        if(_after){ closeAgendaSheet(); _after(); } else agRender();
+        if(!_phok) toast('De foto paste er niet meer bij. De rest is wel bewaard.');
       } }
     else if(a==='agdel'){ var _aid=act.getAttribute('data-id');
       AGENDA=AGENDA.filter(function(e){ return e.id!==_aid; });
-      agSave(); agRender(); refreshStatusNext(); buzz(12); }
+      agSave(); phSet(_aid,''); agRender(); refreshStatusNext(); buzz(12); }
     else if(a==='vdnew'){ openVideoSheet(); buzz(12); }
+    /* ---- Tijdlijn ---- */
+    else if(a==='timeline'){ openTimeline(); buzz(12); }
+    else if(a==='tlexit'){ closeTimeline(); buzz(10); }
+    else if(a==='tlnew'){ tlEdit(null); buzz(12); }
+    else if(a==='tledit'){ tlEdit(act.getAttribute('data-id')); buzz(12); }
     /* ---- Coach: weekprogramma ---- */
     else if(a==='plday'){ plPickDay(act.getAttribute('data-d')); buzz(10); }
     else if(a==='pladd'){ plOpenAdd(); buzz(12); }
