@@ -1029,8 +1029,10 @@
   .td-item.done .ti-ck{background:#fff;border-color:#fff;color:var(--accent,var(--deep))}
   .td-item.done .ti-n{opacity:.5}
   .td-item.done .ti-t{opacity:.7}
+  /* Ink is white, never --accent: the card's own background is inkSafeBg(--accent), i.e. that
+     same hue darkened, so a belt-coloured scribble has almost no contrast against it. */
   .td-item.done .ti-t::after{content:'';position:absolute;left:-6px;right:-9px;top:50%;height:.92em;
-    transform:translateY(-52%);pointer-events:none;background:var(--accent,#fff);
+    transform:translateY(-52%);pointer-events:none;background:#fff;
     -webkit-mask:var(--sk,url(assets/icons/strike-loop.png)) center/100% 100% no-repeat;
             mask:var(--sk,url(assets/icons/strike-loop.png)) center/100% 100% no-repeat}
   .td-item.done.just .ti-t::after{animation:strikeIn .36s cubic-bezier(.4,0,.2,1) both}
