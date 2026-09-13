@@ -82,7 +82,7 @@
 
   /* ---------- Status row ---------- */
   .status{position:sticky;top:0;z-index:20;
-    display:flex;align-items:center;justify-content:space-between;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
     padding:calc(env(safe-area-inset-top) + 20px) 22px 10px;
     background:rgba(244,241,234,.62);
     -webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3)}
@@ -95,12 +95,12 @@
   /* Agenda teaser: the date grows a second line counting down to the next wedstrijd, examen or
      cursus. That line is itself the tap target — its count token is painted blue so it reads as
      tappable without adding a second button to an already busy header. */
-  .status-when{display:flex;flex-direction:column;gap:5px;min-width:0;align-items:flex-start}
+  .status-when{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1 1 auto;align-items:flex-start}
   .status-next{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:11.5px;
-    color:var(--gray);max-width:216px;
-    /* Naam én plaats passen zelden op één regel, dus mag hij er twee gebruiken; daarboven
-       kapt hij netjes af. line-clamp vervangt het oude overflow/ellipsis-paar. */
-    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+    color:var(--gray);max-width:100%;
+    /* Altijd één regel: de header mag nooit drie regels hoog worden. Hij pakt wel de volle
+       breedte tot aan de avatar, zodat naam én plaats zo vaak mogelijk passen. */
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     line-height:1.3;
     cursor:pointer;-webkit-tap-highlight-color:transparent;
     /* room for the count's underline: overflow:hidden (needed for the ellipsis) clips to the
@@ -116,10 +116,13 @@
     border:1.6px solid var(--page);box-sizing:border-box;background:var(--soft)}
   /* Tijdlijn zit naast de avatar: allebei gaan ze over jou, niet over de training van vandaag.
      Het raakvlak is 37px zodat hij even makkelijk te tikken is als de avatar. */
+  /* Rustige knop: geen achtergrond naast de profielfoto, zodat de avatar het enige ronde
+     element in de header blijft. Zonder pil is er geen binnenmarge nodig, dus het icoon
+     mag de volle hoogte pakken en blijft het aanraakvlak toch 37px. */
   .tlbtn{width:37px;height:37px;flex:none;border:0;padding:0;border-radius:50%;cursor:pointer;
-    background:var(--soft);box-shadow:0 1px 4px rgba(0,0,0,.16);
+    background:none;box-shadow:none;
     display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
-  .tlbtn::after{content:"";width:19px;height:19px;background:var(--ink);opacity:.78;
+  .tlbtn::after{content:"";width:29px;height:29px;background:var(--ink);opacity:.72;
     -webkit-mask:url(assets/icons/Timeline.png) center/contain no-repeat;
     mask:url(assets/icons/Timeline.png) center/contain no-repeat}
   .tlbtn:active{opacity:.62;transform:translateY(1px)}
@@ -337,7 +340,11 @@
   .bs-backdrop{position:absolute;inset:0;cursor:pointer}
   .beltsheet{position:relative;z-index:1;width:100%;background:var(--page);border-radius:26px 26px 0 0;
     padding:10px 22px 30px;box-shadow:0 -10px 40px rgba(0,0,0,.22);
+    /* De verticale veeg is van ons (sluiten), horizontaal laten we aan de browser. */
+    touch-action:pan-x;
     transform:translateY(100%);transition:transform .34s cubic-bezier(.22,1,.36,1)}
+  .beltsheet input[type=range],.beltsheet input,.beltsheet textarea{touch-action:auto}
+  .beltsheet .pl-vlist{touch-action:pan-y}
   .beltsheet-ov.show .beltsheet{transform:translateY(0)}
   .bs-grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:2px auto 12px}
   .bs-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px}
@@ -2593,16 +2600,20 @@
   function gdSave(){ return store.set('poom_geup_dates', GEUP_DATES); }
   /* Examinator en plaats bij een graduatie. Ze staan los van de datum omdat ze pas later
      ingevuld worden — je weet ze vaak nog wel, maar niet op het moment zelf. */
+  /* Voorbeelddata: in de demo heeft dezelfde examinator alle graden afgenomen. Net als bij
+     GEUP_DATES vervangt een bewaarde versie dit volledig — ook een léég gemaakte examinator
+     moet blijven staan. */
   var GMETA={};
-  (function(){ var r=store.get('poom_geupmeta', null); GMETA=(r&&typeof r==='object'&&!Array.isArray(r))?r:{}; })();
+  (function(){
+    for(var k in GEUP_DATES){ if(GEUP_DATES.hasOwnProperty(k)) GMETA[k]={exam:'R.J. Kawarmala'}; }
+    var r=store.get('poom_geupmeta', null);
+    if(r&&typeof r==='object'&&!Array.isArray(r)) GMETA=r;
+  })();
   function gmGet(k){ var m=GMETA[k]; return (m&&typeof m==='object')?m : {}; }
   function gmSet(k, m){
     var o={};
-    if(m){
-      if((m.exam||'').trim())  o.exam =m.exam.trim();
-      if((m.where||'').trim()) o.where=m.where.trim();
-    }
-    if(o.exam||o.where) GMETA[k]=o; else delete GMETA[k];
+    if(m && (m.exam||'').trim()) o.exam=m.exam.trim();
+    if(o.exam) GMETA[k]=o; else delete GMETA[k];
     return store.set('poom_geupmeta', GMETA);
   }
   function geupHighest(){ var h=-1; for(var k in GEUP_DATES){ if(GEUP_DATES.hasOwnProperty(k)&&GEUP_DATES[k]){ var i=+k; if(i>h) h=i; } } return h; }
@@ -3303,7 +3314,7 @@
   var gxSheet=null, gxDraft=null, gxAfter=null;
   function gxBlank(k){
     var m=gmGet(k);
-    return {k:k, date:GEUP_DATES[k]||'', exam:m.exam||'', where:m.where||'',
+    return {k:k, date:GEUP_DATES[k]||'', exam:m.exam||'',
             photo:phGet('g'+k), note:'', noteErr:false};
   }
   function gxFormHtml(){
@@ -3317,7 +3328,6 @@
           '<input type="date" id="gx-date" max="'+todayISO()+'"'+(d.date?' value="'+esc(d.date)+'"':'')+'></label>'+
       '</div>'+
       '<input class="ag-title" id="gx-exam" type="text" autocomplete="off" value="'+esc(d.exam)+'" placeholder="Examinator (bijv. R.J. Kawarmala)">'+
-      '<input class="ag-title" id="gx-where" type="text" autocomplete="off" value="'+esc(d.where)+'" placeholder="Plaats (bijv. Aarschot)">'+
       '<div class="ag-photo'+(ph?' has':'')+'">'+
         (ph ? '<img src="'+esc(ph)+'" alt="Foto bij deze graduatie">' : '')+
         '<label class="ag-phbtn">'+(ph?'Andere foto':'📷 Foto toevoegen')+
@@ -3337,7 +3347,6 @@
   function gxSync(){
     if(!gxSheet || !gxDraft) return;
     var e=gxSheet.querySelector('#gx-exam');  if(e) gxDraft.exam=e.value;
-    var w=gxSheet.querySelector('#gx-where'); if(w) gxDraft.where=w.value;
   }
   function gxRender(){
     if(!gxSheet) return;
@@ -4597,10 +4606,9 @@
       if(fut) meta.push('<i>'+agCount(it.ev)+'</i>');
     } else {
       meta.push(esc(it.sub));
-      if(it.gm.where) meta.push(esc(it.gm.where));
     }
     // Bij iets wat nog moet komen valt er nog niks te vertellen; dan is "Aanpassen" eerlijker.
-    var rich = it.kind==='event' ? (ph||it.ev.result) : (ph||it.gm.exam||it.gm.where);
+    var rich = it.kind==='event' ? (ph||it.ev.result) : (ph||it.gm.exam);
     var edit = (fut||rich) ? 'Aanpassen' : 'Foto of uitslag toevoegen';
     if(it.kind==='graad' && !rich) edit='Foto of examinator toevoegen';
     return '<div class="tl-item'+(fut?' fut':'')+'">'+
@@ -5094,6 +5102,72 @@
     el.addEventListener('pointercancel', function(){ down=false; });
     el.addEventListener('click', function(e){ if(swiped){ e.stopPropagation(); e.preventDefault(); swiped=false; } }, true);
   }
+  /* Een kaart sluit je met "Klaar" of door ernaast te tikken; een veeg omlaag hoort daar
+     gewoon bij. De kaart volgt je vinger en de achtergrond licht mee op, zodat je halverwege
+     kunt bedenken dat je hem toch wilt houden. Laat je ver genoeg los, dan sluit hij via
+     precies dezelfde weg als tikken naast de kaart — zo houdt elk sheet zijn eigen
+     afsluitregels (een concept weggooien, de graad opslaan, enzovoort). */
+  (function(){
+    var card=null, ov=null, x0=0, y0=0, dy=0, h=1, down=false, drag=false, pid=null;
+    var swallow=false, synth=false;
+    var GRIP_SKIP='input,textarea,select,button,a,label,.pl-vlist';
+    function paint(){
+      card.style.transform = dy ? 'translateY('+dy+'px)' : '';
+      ov.style.background  = 'rgba(16,20,26,'+(0.58*(1-Math.min(dy/h,1))).toFixed(3)+')';
+    }
+    function release(){
+      if(card){ card.style.transition=''; card.style.transform=''; }
+      if(ov){ ov.style.background=''; }
+      card=null; ov=null; down=false; drag=false; dy=0; pid=null;
+    }
+    document.addEventListener('pointerdown', function(e){
+      swallow=false;
+      if(e.pointerType==='mouse' && e.button!==0) return;
+      var t=e.target; if(!t || !t.closest) return;
+      var c=t.closest('.beltsheet-ov.show .beltsheet'); if(!c) return;
+      if(t.closest(GRIP_SKIP)) return;            // knoppen, velden en de schuif houden hun eigen gebaar
+      card=c; ov=c.closest('.beltsheet-ov');
+      x0=e.clientX; y0=e.clientY; h=c.offsetHeight||1;
+      down=true; drag=false; dy=0; pid=e.pointerId;
+    });
+    document.addEventListener('pointermove', function(e){
+      if(!down || e.pointerId!==pid) return;
+      var ax=e.clientX-x0; dy=e.clientY-y0;
+      if(!drag){
+        if(Math.abs(dy)<8 && Math.abs(ax)<8){ dy=0; return; }
+        // Omhoog of vooral zijwaarts is niet ons gebaar; laat het los zodat het niets breekt.
+        if(dy<=0 || Math.abs(dy)<=Math.abs(ax)){ down=false; dy=0; return; }
+        drag=true; card.style.transition='none';
+        try{ card.setPointerCapture(pid); }catch(_e){}
+      }
+      if(dy<0) dy=0;
+      paint(); e.preventDefault();
+    });
+    document.addEventListener('pointerup', function(e){
+      if(!down || e.pointerId!==pid) return;
+      var c=card, o=ov, far=drag && dy>Math.min(110, h*0.28);
+      // Na een veeg mag de tik die erop volgt niets meer aanraken.
+      if(drag) swallow=true;
+      if(far){
+        // Laat hem doorglijden en sluit via de backdrop: dezelfde route als ernaast tikken.
+        c.style.transition='transform .26s cubic-bezier(.32,.72,0,1)';
+        c.style.transform='translateY(100%)';
+        o.style.background='';
+        card=null; ov=null; down=false; drag=false; dy=0; pid=null;
+        var bd=o.querySelector('.bs-backdrop');
+        if(bd){ synth=true; try{ bd.click(); } finally { synth=false; } }
+        return;
+      }
+      if(drag){ c.style.transition=''; c.style.transform=''; o.style.background=''; }
+      release();
+    });
+    document.addEventListener('pointercancel', function(){ if(down) release(); });
+    // Een veeg mag geen tik worden: anders sluit de backdrop of activeert het item eronder.
+    document.addEventListener('click', function(e){
+      if(synth || !swallow) return;
+      swallow=false; e.stopPropagation(); e.preventDefault();
+    }, true);
+  })();
   // Handboek onderdelen are hub-and-spoke: no lateral paging between them. Only a rightward swipe
   // (iOS-style back gesture) returns to the Handboek overview; leftward swipes do nothing.
   function attachHbBackSwipe(el){
@@ -7648,7 +7722,7 @@
       if(gxDraft && gxDraft.date){
         var _gk=gxDraft.k;
         GEUP_DATES[_gk]=gxDraft.date; gdSave();
-        gmSet(_gk, {exam:gxDraft.exam, where:gxDraft.where});
+        gmSet(_gk, {exam:gxDraft.exam});
         var _gphok=phSet('g'+_gk, gxDraft.photo||'');
         // Sta je lager ingesteld dan wat je net invulde, dan klopt je graad niet meer.
         if(_gk>GEUP_I) setBelt(_gk, true);

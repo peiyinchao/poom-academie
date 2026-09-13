@@ -2,7 +2,7 @@
    Mijn Poom Academie — Service Worker (offline-first)
    Verhoog CACHE bij elke inhoud-/codewijziging om te verversen.
    ============================================================ */
-var CACHE = 'poom-v105';
+var CACHE = 'poom-v106';
 
 /* Kern-schil die vooraf wordt gecachet (rest volgt tijdens gebruik). */
 var PRECACHE = [
@@ -57,6 +57,13 @@ self.addEventListener('activate', function (e) {
   );
 });
 
+/* Laatste redmiddel: een echt (leeg) antwoord in plaats van undefined.
+   respondWith(undefined) maakt van een tijdelijke netwerkhapering een harde
+   netwerkfout, waardoor bv. een geluidsbestand definitief faalt. */
+function swOffline() {
+  return new Response('', { status: 504, statusText: 'offline' });
+}
+
 self.addEventListener('fetch', function (e) {
   var req = e.request;
   if (req.method !== 'GET') return;
@@ -73,7 +80,7 @@ self.addEventListener('fetch', function (e) {
         caches.open(CACHE).then(function (c) { c.put(req, copy); });
         return res;
       }).catch(function () {
-        return caches.match(req).then(function (hit) { return hit || caches.match('./index.html'); });
+        return caches.match(req).then(function (hit) { return hit || caches.match('./index.html').then(function (sh) { return sh || swOffline(); }); });
       })
     );
     return;
@@ -89,7 +96,7 @@ self.addEventListener('fetch', function (e) {
           caches.open(CACHE).then(function (c) { c.put(req, copy); });
         }
         return res;
-      }).catch(function () { return caches.match(req); })
+      }).catch(function () { return caches.match(req).then(function (hit) { return hit || swOffline(); }); })
     );
     return;
   }
