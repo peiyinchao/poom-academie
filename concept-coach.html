@@ -97,7 +97,11 @@
      tappable without adding a second button to an already busy header. */
   .status-when{display:flex;flex-direction:column;gap:5px;min-width:0;align-items:flex-start}
   .status-next{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:11.5px;
-    color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:216px;
+    color:var(--gray);max-width:216px;
+    /* Naam én plaats passen zelden op één regel, dus mag hij er twee gebruiken; daarboven
+       kapt hij netjes af. line-clamp vervangt het oude overflow/ellipsis-paar. */
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+    line-height:1.3;
     cursor:pointer;-webkit-tap-highlight-color:transparent;
     /* room for the count's underline: overflow:hidden (needed for the ellipsis) clips to the
        padding box, so without this the underline is cut off */
@@ -251,7 +255,7 @@
     font-weight:700;color:var(--gray)}
   .bp-band{font-family:var(--cond);text-transform:uppercase;font-weight:800;font-size:20px;
     letter-spacing:.01em;color:var(--ink)}
-  .bp-slider{position:relative;height:60px;margin:16px 0 0;touch-action:pan-y;isolation:isolate}
+  .bp-slider{position:relative;height:60px;margin:14px 0 2px;touch-action:pan-y;isolation:isolate}
   .bp-track{position:absolute;inset:0;border-radius:999px;overflow:hidden;background:#F1EEE7;
     box-shadow:inset 0 1px 3px rgba(0,0,0,.10), inset 0 0 0 1px rgba(0,0,0,.05)}
   .bp-dots{position:absolute;left:27.5px;right:27.5px;top:50%;transform:translateY(-50%);height:8px;
@@ -277,10 +281,12 @@
   .bp-slider input[type=range]::-moz-range-thumb{width:56px;height:56px;border-radius:50%;
     background:transparent;border:0}
   .bp-slider input[type=range]:focus{outline:none}
-  .bp-meta{margin-top:16px;font-size:13.5px;color:var(--gray)}
+  .bp-meta{margin-top:5px;font-size:13.5px;color:var(--gray)}
   .bp-meta b{color:var(--ink);font-weight:700}
   /* Graduation registration: obtained date + time-in-grade, or a "Gegradueerd" date entry */
-  .bp-grad{margin-top:14px;display:flex;align-items:center;gap:10px;min-height:40px}
+  /* De hoogte staat vast zodat de schuif eronder niet omhoog en omlaag springt zodra je
+     van graad wisselt — met en zonder examinator is dit blok even hoog. */
+  .bp-grad{margin-top:13px;display:flex;align-items:center;gap:10px;min-height:52px}
   .bp-grad.pop{animation:bpPop .42s cubic-bezier(.2,.7,.3,1)}
   .bp-grad-badge{font-size:19px;line-height:1;flex:none}
   .bp-grad-badge.dim{opacity:.4;filter:grayscale(.5)}
@@ -2119,7 +2125,11 @@
   /* Final reward: fully-bloomed word groups gently, ambiently rotate (per-icon desynced duration + phase) */
   @keyframes bloomSpin{to{transform:rotate(360deg)}}
   .wrow-emb.g-bloom{animation:bloomSpin var(--spin,18s) linear infinite;transform-origin:50% 50%}
-  @media (prefers-reduced-motion: reduce){ .wrow-emb.g-bloom{animation:none} }
+  /* Zodra je "Ken ik" kiest gaat de bloem in de selector meteen draaien — hetzelfde teken als
+     in de woordenlijst, zodat de beloning al zichtbaar is voor je de pagina verlaat. */
+  .cs-ropt.on .cs-ric .gicon.g-bloom{animation:bloomSpin var(--spin,18s) linear infinite;
+    transform-origin:50% 50%}
+  @media (prefers-reduced-motion: reduce){ .wrow-emb.g-bloom,.cs-ropt.on .cs-ric .gicon.g-bloom{animation:none} }
   /* self-rating control in the category sheet */
   .cs-rate{margin:0 0 14px;padding:14px 15px;background:var(--surface);border:1px solid var(--line);border-radius:16px}
   .cs-rate-q{font-family:var(--cond);text-transform:uppercase;letter-spacing:.03em;font-weight:800;font-size:13px;color:var(--ink);margin-bottom:11px}
@@ -3072,20 +3082,22 @@
     if(el){ el.innerHTML=bpGradHtml(k); el.classList.toggle('conf', !!(bpPending&&bpPending.k===k)); }
   }
   // Belt/guep slider markup (used by the profile belt sheet)
+  /* Alles wat je wilt lézen staat bóven de schuif: je vinger ligt op de baan en dekt alles
+     eronder af, dus daar hoort alleen de baan zelf te staan. */
   function beltPickHtml(){
     var g0=geupInfo(GEUP_I);
     return '<div class="beltpick">'+
       '<div class="bp-top"><span class="bp-k">Jouw graad</span>'+
         '<span class="bp-band" id="bp-band">'+esc(g0.grade)+'</span></div>'+
+      '<div class="bp-meta"><span class="bp-meta-cur"><b id="bp-grade">'+esc(g0.band)+'</b> · '+
+        '<span id="bp-form">'+esc(geupForm(g0))+'</span></span></div>'+
+      '<div class="bp-grad" id="bp-grad">'+bpGradHtml(GEUP_I)+'</div>'+
       '<div class="bp-slider">'+
         '<div class="bp-track"><div class="bp-dots">'+GEUPS.map(function(){return '<i></i>';}).join('')+'</div>'+
           '<div class="bp-fill" id="bp-fill"></div></div>'+
         '<div class="bp-thumb" id="bp-thumb"></div>'+
         '<input type="range" min="0" max="'+(GEUPS.length-1)+'" step="1" value="'+GEUP_I+'" '+
           'id="bp-range" data-act="belt" aria-label="Kies je graad"></div>'+
-      '<div class="bp-meta"><span class="bp-meta-cur"><b id="bp-grade">'+esc(g0.band)+'</b> · '+
-        '<span id="bp-form">'+esc(geupForm(g0))+'</span></span></div>'+
-      '<div class="bp-grad" id="bp-grad">'+bpGradHtml(GEUP_I)+'</div>'+
     '</div>';
   }
   // Belt sheet — tap the profile avatar to change grade; updates oefenstof, mascotte & profielring
@@ -3210,9 +3222,16 @@
   // Every screen carries a countdown now, and screens overlap during a transition, so update them all.
   function refreshStatusNext(){
     var nx=agNext();
-    var html = nx ? (agCount(nx)+' · '+esc(nx.title||agType(nx.type).label)) : '<b>Niets gepland</b>';
+    var html = nx ? agNextLine(nx) : '<b>Niets gepland</b>';
     var all=stage.querySelectorAll('.status-next');
     for(var i=0;i<all.length;i++) all[i].innerHTML=html;
+  }
+  // Alleen de plaatsnaam, niet het land: "Aarschot, België" wordt "Aarschot". Het land zegt je
+  // op deze regel niets extra's en kost de ruimte die de naam van het event nodig heeft.
+  function agPlaceShort(e){ return String((e&&e.where)||'').split(',')[0].trim(); }
+  function agNextLine(nx){
+    var pl=agPlaceShort(nx);
+    return agCount(nx)+' · '+esc(nx.title||agType(nx.type).label)+(pl?', '+esc(pl):'');
   }
   function openAgendaSheet(){
     if(agSheet) return;
@@ -3854,7 +3873,7 @@
     return '<div class="status">'+
       '<span class="status-when"><span class="date">'+esc(dateStr())+'</span>'+
         '<span class="status-next" role="button" data-act="agenda" title="Agenda">'+
-          (nx ? agCount(nx)+' · '+esc(nx.title||agType(nx.type).label) : '<b>Niets gepland</b>')+
+          (nx ? agNextLine(nx) : '<b>Niets gepland</b>')+
         '</span></span>'+
       '<span class="status-end">'+
         '<span class="avatar" title="Kies je graad" role="button" data-act="beltsheet" style="background:'+beltRingCss(geupInfo(GEUP_I))+'"><img src="assets/avatar/jayden.png" alt="Profiel"></span>'+
@@ -4733,7 +4752,7 @@
     return '<span class="wrow-emb gicon '+(s===1?'g-sprout':'g-seed')+'"></span>';
   }
   function growGlyph(kind, b){
-    if(kind==='bloom') return '<span class="gicon" style="'+bloomStyle(b)+'"></span>';
+    if(kind==='bloom') return '<span class="gicon g-bloom" style="'+bloomStyle(b)+'"></span>';
     return '<span class="gicon '+(kind==='sprout'?'g-sprout':'g-seed')+'"></span>';
   }
   function rateHtml(name){
