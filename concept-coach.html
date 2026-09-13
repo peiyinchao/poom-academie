@@ -467,6 +467,28 @@
     background:rgba(20,17,13,.55);color:#fff;font-size:16px;line-height:1;display:grid;place-items:center;
     cursor:pointer;-webkit-tap-highlight-color:transparent}
   .ag-phdel:active{opacity:.6}
+  /* ---- Graduatie bewerken ---- */
+  .gx-lead{margin:0 0 12px;font-size:13px;color:var(--gray);letter-spacing:.01em}
+  .gx-lead b{color:var(--ink);font-weight:800}
+  .gx-del{display:block;width:100%;margin-top:14px;border:0;border-radius:12px;padding:11px;
+    background:transparent;color:#C50116;font-size:13px;font-weight:700;font-family:inherit;
+    cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .gx-del:active{opacity:.6}
+  /* Bevestigen van een graduatie: een stap ertussen, want er is geen knop om het terug te draaien. */
+  .bp-conf{display:flex;flex-direction:column;gap:9px;width:100%}
+  .bp-conf p{margin:0;font-size:12.5px;color:var(--gray);line-height:1.45}
+  .bp-conf p b{color:var(--ink);font-weight:800}
+  .bp-conf-act{display:flex;gap:8px}
+  .bp-conf-act button{flex:1;border:0;border-radius:999px;padding:9px;font-size:12.5px;
+    font-weight:800;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .bp-conf-no{background:var(--soft);color:var(--ink)}
+  .bp-conf-yes{background:var(--beltfill,var(--el));color:#fff}
+  .bp-conf-act button:active{opacity:.7}
+  .bp-grad.conf{align-items:stretch}
+  .bp-gradedit{margin-left:auto;flex:none;border:0;border-radius:999px;padding:6px 12px;
+    background:var(--soft);color:var(--ink);font-size:12px;font-weight:700;font-family:inherit;
+    cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .bp-gradedit:active{opacity:.65}
   /* ---- Tijdlijn ---- */
   .tl-lead{margin:0 0 14px;font-size:12.5px;color:var(--gray);letter-spacing:.01em}
   .tl-empty{font-size:13.5px;color:var(--gray);line-height:1.55;text-align:center;padding:30px 12px 20px}
@@ -499,6 +521,8 @@
     color:var(--gray);font-size:12px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .tl-edit:active{opacity:.65}
   .tl-grad{display:block;margin-top:7px;font-size:12px;font-weight:700;color:var(--gray)}
+  /* De examinator is een herinnering, geen prijs; de gekleurde pil blijft voor uitslagen. */
+  .tl-exam{display:block;margin-top:6px;font-size:12px;font-weight:600;color:var(--gray)}
   .tl-add{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:6px;
     border:0;border-radius:16px;padding:15px;background:var(--beltfill,var(--el));color:var(--beltink,#fff);
     box-shadow:0 10px 22px -12px rgba(40,28,18,.55);cursor:pointer;
@@ -2461,7 +2485,7 @@
   var SCHEMA = 1;
   var STORE_KEYS = ['poom_agenda','poom_videos','poom_belt','poom_hard','poom_mastery',
                     'poom_missions','poom_ot_mode','poom_ot_dur','poom_plan','poom_plandone',
-                    'poom_photos','ciUx'];
+                    'poom_photos','poom_geup_dates','poom_geupmeta','ciUx'];
   var store = (function(){
     var ok = true;
     try{ localStorage.setItem('poom_probe','1'); localStorage.removeItem('poom_probe'); }
@@ -2542,6 +2566,35 @@
   /* Behaalde graden — de datum waarop Jayden elke graad haalde (index in GEUPS → ISO-datum).
      Leerlingen zijn trots op elke promotie; we tonen de datum én hoe lang hij de graad al draagt. */
   var GEUP_DATES = { 0:'2024-01-09', 1:'2024-03-29', 2:'2025-01-02', 3:'2025-11-23', 4:'2026-09-04' };
+  /* Een graduatie is het enige moment in de app dat je niet kunt overdoen, dus hij moet een
+     herstart overleven. Staat er iets bewaard, dan telt dat volledig: ook het wéghalen van een
+     graduatie moet blijven staan, en dat lukt niet als we de voorbeelddata eroverheen mengen. */
+  (function(){
+    var r=store.get('poom_geup_dates', null);
+    if(!r || typeof r!=='object' || Array.isArray(r)) return;
+    var out={};
+    for(var k in r){
+      if(!r.hasOwnProperty(k)) continue;
+      var i=+k;
+      if(i===(i|0) && i>=0 && i<GEUPS.length && /^\d{4}-\d{2}-\d{2}$/.test(r[k])) out[i]=r[k];
+    }
+    GEUP_DATES=out;
+  })();
+  function gdSave(){ return store.set('poom_geup_dates', GEUP_DATES); }
+  /* Examinator en plaats bij een graduatie. Ze staan los van de datum omdat ze pas later
+     ingevuld worden — je weet ze vaak nog wel, maar niet op het moment zelf. */
+  var GMETA={};
+  (function(){ var r=store.get('poom_geupmeta', null); GMETA=(r&&typeof r==='object'&&!Array.isArray(r))?r:{}; })();
+  function gmGet(k){ var m=GMETA[k]; return (m&&typeof m==='object')?m : {}; }
+  function gmSet(k, m){
+    var o={};
+    if(m){
+      if((m.exam||'').trim())  o.exam =m.exam.trim();
+      if((m.where||'').trim()) o.where=m.where.trim();
+    }
+    if(o.exam||o.where) GMETA[k]=o; else delete GMETA[k];
+    return store.set('poom_geupmeta', GMETA);
+  }
   function geupHighest(){ var h=-1; for(var k in GEUP_DATES){ if(GEUP_DATES.hasOwnProperty(k)&&GEUP_DATES[k]){ var i=+k; if(i>h) h=i; } } return h; }
   var NL_MON=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
   function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
@@ -2977,14 +3030,36 @@
     }
   }
   // Graduation status for the belt sheet: obtained → date + time-in-grade; not yet → "Gegradueerd" date entry
+  var bpPending=null;   // een gekozen datum die nog bevestigd moet worden
+  // Welke graad staat er nu onder de duim? Die telt, niet per se de graad die je draagt.
+  function bpCurK(){
+    var r=stage.querySelector('#bp-range');
+    return r ? parseInt(r.value,10) : GEUP_I;
+  }
   function bpGradHtml(k){
+    /* Een graduatie vastleggen kan niet per ongeluk gebeuren: tussen het kiezen van de datum en
+       het opslaan zit een bevestiging. Zonder die stap promoveert één misgetikte datum je meteen. */
+    if(bpPending && bpPending.k===k){
+      var gp=geupInfo(k);
+      return '<div class="bp-conf">'+
+        '<p>Je legt vast dat je <b>'+esc(gp.grade)+'</b> hebt behaald op <b>'+esc(fmtDateNL(bpPending.date))+'</b>.</p>'+
+        '<div class="bp-conf-act">'+
+          '<button class="bp-conf-no" data-act="gradno">Annuleer</button>'+
+          '<button class="bp-conf-yes" data-act="gradyes">Ja, bewaar</button>'+
+        '</div>'+
+      '</div>';
+    }
     if(GEUP_DATES.hasOwnProperty(k) && GEUP_DATES[k]){
       var high=geupHighest(), isCur=(k>=high), toISO=null;
       if(!isCur){ for(var j=k+1;j<GEUPS.length;j++){ if(GEUP_DATES[j]){ toISO=GEUP_DATES[j]; break; } } }
       var sub=(isCur?'al ':'')+geupSpan(GEUP_DATES[k], toISO)+' in deze graad';
+      var m=gmGet(k);
       return '<span class="bp-grad-badge">🎓</span>'+
         '<span class="bp-grad-txt"><b>Behaald op '+esc(fmtDateNL(GEUP_DATES[k]))+'</b>'+
-        '<span class="bp-grad-sub">'+esc(sub)+'</span></span>';
+        '<span class="bp-grad-sub">'+esc(sub)+'</span>'+
+        (m.exam?'<span class="bp-grad-sub">Examinator: '+esc(m.exam)+'</span>':'')+
+        '</span>'+
+        '<button class="bp-gradedit" data-act="gradedit" data-k="'+k+'">Aanpassen</button>';
     }
     return '<span class="bp-grad-badge dim">🎓</span>'+
       '<span class="bp-grad-txt"><span class="bp-grad-sub">Nog niet behaald</span></span>'+
@@ -2992,7 +3067,10 @@
         '<input type="date" class="bp-graddate" max="'+todayISO()+'" aria-label="Datum van gradueren">'+
       '</label>';
   }
-  function bpRenderGrad(k){ var el=stage.querySelector('#bp-grad'); if(el) el.innerHTML=bpGradHtml(k); }
+  function bpRenderGrad(k){
+    var el=stage.querySelector('#bp-grad');
+    if(el){ el.innerHTML=bpGradHtml(k); el.classList.toggle('conf', !!(bpPending&&bpPending.k===k)); }
+  }
   // Belt/guep slider markup (used by the profile belt sheet)
   function beltPickHtml(){
     var g0=geupInfo(GEUP_I);
@@ -3031,21 +3109,20 @@
     var range=beltSheet.querySelector('#bp-range');
     if(range){
       range.addEventListener('input', function(){ beltLive(parseInt(range.value,10)); });
-      range.addEventListener('change', function(){ var kk=parseInt(range.value,10); setBelt(kk, true); bpRenderGrad(kk); setTimeout(bpGlintStart, 180); });
+      range.addEventListener('change', function(){ var kk=parseInt(range.value,10); bpPending=null; setBelt(kk, true); bpRenderGrad(kk); setTimeout(bpGlintStart, 180); });
     }
-    // Registering a graduation date (native date entry) promotes Jayden to that grade
+    // Een datum kiezen legt nog niets vast; pas de bevestiging eronder promoveert je echt.
     beltSheet.addEventListener('change', function(e){
       var inp=e.target.closest && e.target.closest('.bp-graddate'); if(!inp || !inp.value) return;
-      var rng=beltSheet.querySelector('#bp-range'); var k=rng? parseInt(rng.value,10) : GEUP_I;
-      GEUP_DATES[k]=inp.value; setBelt(k, true); bpRenderGrad(k);
-      var ge=stage.querySelector('#bp-grad'); if(ge) bpFlash(ge,'pop');
-      buzz(20); try{ sfx('complete'); }catch(_e){}
+      bpPending={k:bpCurK(), date:inp.value};
+      bpRenderGrad(bpPending.k);
+      buzz(10);
     });
     requestAnimationFrame(function(){ beltSheet.classList.add('show'); beltThumb(GEUP_I); bpGlintStart(); });
   }
   function closeBeltSheet(){
     if(!beltSheet) return;
-    bpGlintStop();
+    bpGlintStop(); bpPending=null;
     beltSheet.classList.remove('show');
     var s=beltSheet; beltSheet=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
@@ -3197,6 +3274,100 @@
     var s=agSheet; agSheet=null; agMode='list'; agDraft=null; agEditId=null; agAfterSave=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
     if(!tlScreen) fnav.classList.remove('hide');
+  }
+
+  /* ---- Graduatie bewerken ----------------------------------------------------------------
+     Een graduatie komt niet uit de agenda maar uit GEUP_DATES, dus hij heeft een eigen, klein
+     formulier. Wat je er kwijt kunt is precies wat je je later nog herinnert: de datum, wie
+     examineerde, waar het was en een foto. Dit is ook de enige plek waar je een graduatie weer
+     kunt weghalen — zonder die uitweg is "Gegradueerd" een knop zonder terugweg. */
+  var gxSheet=null, gxDraft=null, gxAfter=null;
+  function gxBlank(k){
+    var m=gmGet(k);
+    return {k:k, date:GEUP_DATES[k]||'', exam:m.exam||'', where:m.where||'',
+            photo:phGet('g'+k), note:'', noteErr:false};
+  }
+  function gxFormHtml(){
+    var d=gxDraft||gxBlank(GEUP_I), g=geupInfo(d.k), ph=d.photo||'';
+    var had=!!GEUP_DATES[d.k];
+    return '<div class="ag-form">'+
+      '<p class="gx-lead"><b>'+esc(g.grade)+'</b> · '+esc(g.band)+'</p>'+
+      '<div class="ag-dates">'+
+        '<label class="ag-date"><span>Behaald op</span>'+
+          '<b'+(d.date?'':' class="dim"')+'>'+esc(d.date?fmtDateNL(d.date):'Kies…')+'</b>'+
+          '<input type="date" id="gx-date" max="'+todayISO()+'"'+(d.date?' value="'+esc(d.date)+'"':'')+'></label>'+
+      '</div>'+
+      '<input class="ag-title" id="gx-exam" type="text" autocomplete="off" value="'+esc(d.exam)+'" placeholder="Examinator (bijv. R.J. Kawarmala)">'+
+      '<input class="ag-title" id="gx-where" type="text" autocomplete="off" value="'+esc(d.where)+'" placeholder="Plaats (bijv. Aarschot)">'+
+      '<div class="ag-photo'+(ph?' has':'')+'">'+
+        (ph ? '<img src="'+esc(ph)+'" alt="Foto bij deze graduatie">' : '')+
+        '<label class="ag-phbtn">'+(ph?'Andere foto':'📷 Foto toevoegen')+
+          '<input type="file" id="gx-photo" accept="image/*">'+
+        '</label>'+
+        (ph ? '<button class="ag-phdel" data-act="gxphdel" aria-label="Foto weghalen">×</button>' : '')+
+      '</div>'+
+      '<p class="vd-status'+(d.note&&d.noteErr?' err':'')+'" id="gx-status">'+esc(d.note||'')+'</p>'+
+      '<div class="ag-formact">'+
+        '<button class="ag-cancel" data-act="gxcancel">Annuleer</button>'+
+        '<button class="ag-save" data-act="gxsave"'+(d.date?'':' disabled')+'>Bewaar</button>'+
+      '</div>'+
+      (had ? '<button class="gx-del" data-act="gxdel">Deze graduatie weghalen</button>' : '')+
+    '</div>';
+  }
+  // Net als bij de agenda: alles wat opnieuw tekent moet eerst de getypte tekst overnemen.
+  function gxSync(){
+    if(!gxSheet || !gxDraft) return;
+    var e=gxSheet.querySelector('#gx-exam');  if(e) gxDraft.exam=e.value;
+    var w=gxSheet.querySelector('#gx-where'); if(w) gxDraft.where=w.value;
+  }
+  function gxRender(){
+    if(!gxSheet) return;
+    var b=gxSheet.querySelector('#gx-body'); if(b) b.innerHTML=gxFormHtml();
+  }
+  function gxPickPhoto(file){
+    if(!file || !gxDraft) return;
+    gxSync();
+    gxDraft.note='Foto verkleinen…'; gxDraft.noteErr=false; gxRender();
+    phShrink(file).then(function(url){
+      if(!gxDraft) return;
+      gxDraft.photo=url; gxDraft.note=''; gxDraft.noteErr=false; gxRender();
+    }).catch(function(){
+      if(!gxDraft) return;
+      gxDraft.note='Deze foto lukte niet. Probeer een andere.'; gxDraft.noteErr=true; gxRender();
+    });
+  }
+  function openGradeSheet(k, after){
+    if(gxSheet) return;
+    gxDraft=gxBlank(k); gxAfter=after||null;
+    gxSheet=document.createElement('div');
+    gxSheet.className='beltsheet-ov'; gxSheet.id='grad-ov';
+    applyTheme(gxSheet, CUR);
+    gxSheet.innerHTML=
+      '<div class="bs-backdrop" data-act="gxcancel"></div>'+
+      '<div class="beltsheet">'+
+        '<div class="bs-grab"></div>'+
+        '<div class="bs-head"><h3>Graduatie</h3></div>'+
+        '<div id="gx-body">'+gxFormHtml()+'</div>'+
+      '</div>';
+    stage.appendChild(gxSheet);
+    fnav.classList.add('hide');
+    gxSheet.addEventListener('change', function(ev){
+      var tg=ev.target;
+      if(tg && tg.id==='gx-photo'){ gxPickPhoto(tg.files && tg.files[0]); return; }
+      if(tg && tg.id==='gx-date' && gxDraft){ gxSync(); gxDraft.date=tg.value; gxRender(); }
+    });
+    requestAnimationFrame(function(){ gxSheet.classList.add('show'); });
+  }
+  function closeGradeSheet(){
+    if(!gxSheet) return;
+    gxSheet.classList.remove('show');
+    var s=gxSheet; gxSheet=null; gxDraft=null;
+    var after=gxAfter; gxAfter=null;
+    setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
+    // De tijdlijn is een volledig scherm dat eronder blijft staan, en de graadsheet kan ook
+    // bovenop de graadkiezer geopend zijn; in beide gevallen hoort de balk weg te blijven.
+    if(!tlScreen && !beltSheet) fnav.classList.remove('hide');
+    if(after) after();
   }
   /* ---- Woordenschat (termen categories) ---- */
   var TERMEN = C.termen || [];
@@ -4370,7 +4541,7 @@
       // Hoe lang hij deze graad droeg: tot de volgende graduatie, of tot vandaag als het de hoogste is.
       if(ki<high){ for(var j=ki+1;j<GEUPS.length;j++){ if(GEUP_DATES[j]){ toISO=GEUP_DATES[j]; break; } } }
       var span=geupSpan(GEUP_DATES[k], toISO);
-      out.push({kind:'graad', id:'g'+k, date:GEUP_DATES[k], geup:ki,
+      out.push({kind:'graad', id:'g'+k, date:GEUP_DATES[k], geup:ki, gm:gmGet(ki),
                 title:g.grade, sub:g.band, col:g.col,
                 note: span ? ((ki>=high?'al ':'')+span+' in deze graad') : 'Graad behaald'});
     }
@@ -4399,15 +4570,20 @@
     return '<span class="tl-dot">'+it.ico+'</span>';
   }
   function tlItemHtml(it, today){
-    var ph = it.kind==='event' ? phGet(it.id) : '';
+    var ph = phGet(it.id);
     var fut = it.date>today;
     var meta=[];
     if(it.kind==='event'){
       if(it.ev.where) meta.push(esc(it.ev.where));
       if(fut) meta.push('<i>'+agCount(it.ev)+'</i>');
-    } else meta.push(esc(it.sub));
+    } else {
+      meta.push(esc(it.sub));
+      if(it.gm.where) meta.push(esc(it.gm.where));
+    }
     // Bij iets wat nog moet komen valt er nog niks te vertellen; dan is "Aanpassen" eerlijker.
-    var edit = fut ? 'Aanpassen' : ((ph||it.ev&&it.ev.result) ? 'Aanpassen' : 'Foto of uitslag toevoegen');
+    var rich = it.kind==='event' ? (ph||it.ev.result) : (ph||it.gm.exam||it.gm.where);
+    var edit = (fut||rich) ? 'Aanpassen' : 'Foto of uitslag toevoegen';
+    if(it.kind==='graad' && !rich) edit='Foto of examinator toevoegen';
     return '<div class="tl-item'+(fut?' fut':'')+'">'+
       tlDotHtml(it)+
       '<div class="tl-card">'+
@@ -4415,10 +4591,12 @@
         '<b class="tl-ttl">'+esc(it.title)+'</b>'+
         (meta.length?'<span class="tl-meta">'+meta.join(' · ')+'</span>':'')+
         (it.kind==='event'&&it.ev.result?'<span class="tl-res">🏅 '+esc(it.ev.result)+'</span>':'')+
+        (it.kind==='graad'&&it.gm.exam?'<span class="tl-exam">👤 Examinator '+esc(it.gm.exam)+'</span>':'')+
         (ph?'<img class="tl-photo" src="'+esc(ph)+'" alt="Foto bij '+esc(it.title)+'">':'')+
+        (it.kind==='graad'?'<span class="tl-grad">🎓 '+esc(it.note)+'</span>':'')+
         (it.kind==='event'
           ? '<button class="tl-edit" data-act="tledit" data-id="'+esc(it.id)+'">'+edit+'</button>'
-          : '<span class="tl-grad">🎓 '+esc(it.note)+'</span>')+
+          : '<button class="tl-edit" data-act="tlgrad" data-k="'+it.geup+'">'+edit+'</button>')+
       '</div>'+
     '</div>';
   }
@@ -7434,6 +7612,44 @@
     else if(a==='tlexit'){ closeTimeline(); buzz(10); }
     else if(a==='tlnew'){ tlEdit(null); buzz(12); }
     else if(a==='tledit'){ tlEdit(act.getAttribute('data-id')); buzz(12); }
+    else if(a==='tlgrad'){ openGradeSheet(parseInt(act.getAttribute('data-k'),10), tlRefresh); buzz(12); }
+    /* ---- Graduatie bewerken ---- */
+    else if(a==='gradedit'){ openGradeSheet(parseInt(act.getAttribute('data-k'),10), function(){ bpRenderGrad(bpCurK()); }); buzz(12); }
+    else if(a==='gradno'){ bpPending=null; bpRenderGrad(bpCurK()); buzz(10); }
+    else if(a==='gradyes'){
+      if(bpPending){
+        var _pk=bpPending.k, _pd=bpPending.date; bpPending=null;
+        GEUP_DATES[_pk]=_pd; gdSave(); setBelt(_pk, true); bpRenderGrad(_pk);
+        var ge=stage.querySelector('#bp-grad'); if(ge) bpFlash(ge,'pop');
+        buzz(20); try{ sfx('complete'); }catch(_e){}
+      } }
+    else if(a==='gxcancel'){ closeGradeSheet(); buzz(10); }
+    else if(a==='gxphdel'){ if(gxDraft){ gxSync(); gxDraft.photo=''; gxRender(); } buzz(10); }
+    else if(a==='gxsave'){ gxSync();
+      if(gxDraft && gxDraft.date){
+        var _gk=gxDraft.k;
+        GEUP_DATES[_gk]=gxDraft.date; gdSave();
+        gmSet(_gk, {exam:gxDraft.exam, where:gxDraft.where});
+        var _gphok=phSet('g'+_gk, gxDraft.photo||'');
+        // Sta je lager ingesteld dan wat je net invulde, dan klopt je graad niet meer.
+        if(_gk>GEUP_I) setBelt(_gk, true);
+        bpRenderGrad(bpCurK());
+        buzz(20); try{ sfx('complete'); }catch(_e){}
+        closeGradeSheet();
+        if(!_gphok) toast('De foto paste er niet meer bij. De rest is wel bewaard.');
+      } }
+    else if(a==='gxdel'){
+      if(gxDraft){
+        var _dk=gxDraft.k;
+        delete GEUP_DATES[_dk]; gdSave(); gmSet(_dk, null); phSet('g'+_dk,'');
+        // Je graad hangt aan de hoogste graduatie; valt die weg, dan zak je terug naar de vorige.
+        var _h=geupHighest();
+        if(GEUP_I>_h) setBelt(Math.max(0,_h), true);
+        bpRenderGrad(bpCurK());
+        buzz(14);
+        closeGradeSheet();
+        toast('Graduatie weggehaald.');
+      } }
     /* ---- Coach: weekprogramma ---- */
     else if(a==='plday'){ plPickDay(act.getAttribute('data-d')); buzz(10); }
     else if(a==='pladd'){ plOpenAdd(); buzz(12); }
