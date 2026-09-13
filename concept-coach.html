@@ -990,20 +990,32 @@
     color:rgba(255,255,255,.72);line-height:1}
   .td-goal{font-size:12.5px;line-height:1.3;color:rgba(255,255,255,.72);margin:-6px 0 0}
   .td-list{display:flex;flex-direction:column;flex:1;justify-content:center}
+  /* Two hit zones per row: the checkbox on the left, and everything right of it opens the
+     matching page. Padding lives on the children so both targets cover the full row height. */
   .td-item{display:flex;align-items:center;gap:16px;width:100%;background:transparent;border:0;color:#fff;
-    cursor:pointer;text-align:left;padding:12px 2px;-webkit-tap-highlight-color:transparent;
-    transition:opacity .2s, transform .12s}
-  .td-item:active{transform:scale(.99)}
+    text-align:left;padding:0 2px;-webkit-tap-highlight-color:transparent;
+    transition:opacity .2s}
   /* sleek to-do: thin horizontal rule BETWEEN rows only (not above first / below last) */
   .td-item + .td-item{border-top:1px solid rgba(255,255,255,.18)}
   .ti-n{font-family:var(--cond);font-weight:800;font-size:30px;line-height:1;font-variant-numeric:tabular-nums;
     min-width:32px;text-align:center;color:rgba(255,255,255,.9)}
-  .ti-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .ti-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;position:relative;
+    background:transparent;border:0;margin:0;padding:12px 24px 12px 0;color:inherit;font:inherit;
+    text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity .12s}
+  .ti-txt:active{opacity:.7}
+  .ti-chev{position:absolute;right:0;top:50%;transform:translateY(-50%);width:17px;height:17px;opacity:.45}
+  .ti-chev svg{display:block;width:100%;height:100%}
   .ti-t{font-family:var(--cond);text-transform:uppercase;letter-spacing:.02em;font-weight:800;font-size:15.5px;line-height:1.05;
     align-self:flex-start;position:relative}
   .ti-s{font-size:12.5px;color:rgba(255,255,255,.72);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .ti-ck{flex:none;position:relative;width:27px;height:27px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:rgba(255,255,255,.14);
-    display:grid;place-items:center;color:transparent;transition:background .18s, border-color .18s, color .18s}
+  .ti-ck{flex:none;position:relative;width:27px;height:27px;margin:0;padding:0;border-radius:50%;
+    border:2px solid rgba(255,255,255,.85);background:rgba(255,255,255,.14);cursor:pointer;
+    -webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;
+    display:grid;place-items:center;color:transparent;
+    transition:background .18s, border-color .18s, color .18s, transform .12s}
+  /* the ring stays 27px, but the tap target reaches the row height and most of the gap */
+  .ti-ck::before{content:'';position:absolute;top:-12px;bottom:-12px;left:-14px;right:-10px}
+  .ti-ck:active{transform:scale(.9)}
   .ti-ck svg{width:15px;height:15px}
   /* hand-drawn "hit" burst that pops around the checkbox on complete */
   .hit-pop{position:absolute;left:-16px;top:-12px;width:18px;height:14px;pointer-events:none;z-index:6;opacity:0;
@@ -1022,10 +1034,6 @@
     30%{opacity:1;transform:translate(var(--hdx),var(--hdy)) scale(calc(1.15*var(--hsc))) rotate(var(--hrot))}
     60%{opacity:1;transform:translate(var(--hdx),var(--hdy)) scale(calc(1*var(--hsc))) rotate(var(--hrot))}
     100%{opacity:0;transform:translate(var(--hdx),var(--hdy)) scale(calc(1.08*var(--hsc))) rotate(var(--hrot))}}
-  /* mission rows launch their drill → play affordance (ringed like the idle checkbox) */
-  .ti-go{flex:none;width:27px;height:27px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:rgba(255,255,255,.14);
-    display:grid;place-items:center;color:#fff}
-  .ti-go svg{width:12px;height:12px;margin-left:1px}
   .td-item.done .ti-ck{background:#fff;border-color:#fff;color:var(--accent,var(--deep))}
   .td-item.done .ti-n{opacity:.5}
   .td-item.done .ti-t{opacity:.7}
@@ -2047,6 +2055,12 @@
   .poom-chev svg{width:100%;height:100%}
   @media (hover:hover){ .poom-row:hover{background:color-mix(in srgb, #6B6459 4%, transparent)} .poom-row:hover .poom-chev{opacity:.85} }
   .poom-row:active{background:color-mix(in srgb, #6B6459 7%, transparent)}
+  /* Vormen van de training van vandaag — alleen gemarkeerd als je via de dagkaart binnenkomt */
+  .poom-row.pm-today{background:color-mix(in srgb, var(--el,#2463E0) 7%, transparent);
+    box-shadow:inset 3px 0 0 var(--el,#2463E0)}
+  .pm-today-tag{font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-size:10px;
+    font-weight:800;color:var(--el,#2463E0);border:1px solid currentColor;border-radius:999px;
+    padding:2px 7px;line-height:1.25;white-space:nowrap}
   /* Poomsae detail sheet (drill-in on top of the poomsae list) */
   /* Drill-down header: back chevron sits on the title band (left), trigram tile on the right. */
   .poomdetail .cs-hero{padding-top:calc(env(safe-area-inset-top) + 16px)}
@@ -3159,6 +3173,31 @@
   }
   function todayMissionIds(){ return ['poomsae'].concat(pickExtras()); }
   function todaysMissions(){ var meta=missionMeta(); return todayMissionIds().map(function(id){return meta[id];}); }
+  /* Waar de tekstkant van een dagkaart-rij heen gaat. De meeste missies hebben een eigen
+     Handboek-onderdeel met de stof; ibo heeft er geen, en woorden wonen in hun eigen sectie. */
+  var MISSION_HB = { poomsae:'poomsae', ilbo:'ilbo', hosinsul:'hosinsul' };
+  // Poomsae-ids van vandaag, alleen gezet zolang je het Handboek via de dagkaart opent.
+  var hbTodayFocus = null;
+  function missionGoLabel(m){
+    if(m.id==='examen')  return 'Start '+m.label;
+    if(m.id==='woorden') return 'Open Koreaanse woorden';
+    if(MISSION_HB[m.id]) return 'Open '+m.label+' in het handboek';
+    return 'Oefen '+m.label;
+  }
+  function missionGo(id){
+    if(id==='examen'){ openExam(); return; }
+    if(id==='woorden'){ showScreen('woorden'); return; }
+    var hb = MISSION_HB[id];
+    if(hb){
+      showScreen('handboek');
+      hbTodayFocus = (id==='poomsae') ? poomsaeOfDay() : null;
+      openHb(hb);
+      return;
+    }
+    openDrill(id);   // geen handboekpagina → de begeleide oefening is de beste plek
+  }
+  // Alleen voor missies waarvan de app de uitslag zelf vaststelt: afvinken = het onderdeel starten.
+  function openMission(id){ if(id==='examen') openExam(); }
   // Begeleide inhoud voor de sparring-/zelfverdedigingsmissies (alleen aantallen in curriculum → korte oefengids).
   var SPAR_INFO = {
     ilbo: { ko:'일보 대련', tag:'Één-stap sparring',
@@ -3334,20 +3373,22 @@
     var doneN = missions.filter(function(m){return missionDone[m.id];}).length;
     var missionCols = missions.map(function(m){
       var dn = missionDone[m.id];
-      var isPoom = m.id==='poomsae';
-      // poomsae is een gewone afvink-actie (kind oefent de vorm zelf, geen app-begeleiding nodig);
-      // examen → proefexamen, rest → woorden/ilbo drill
-      var act = isPoom ? 'mission' : (m.id==='examen' ? 'startexam' : 'drill');
-      var lead = (dn || isPoom)
-        ? '<span class="ti-ck">'+(dn?IC.check:'')+'</span>'
-        : '<span class="ti-go">'+IC.play+'</span>';
-      return '<button class="td-item'+(dn?' done':'')+(m.id==='examen'?' exam':'')+'" '+
+      // Het proefexamen is het enige onderdeel waarvan de app de uitslag zelf kent, dus dat vink
+      // je niet zelf af: de checkbox start het examen. De rest oefen je in de zaal → zelf afvinken.
+      var judged = m.id==='examen';
+      return '<div class="td-item'+(dn?' done':'')+(m.id==='examen'?' exam':'')+'" '+
           (dn?'style="--sk:'+strikeVar()+'" ':'')+
-          'data-act="'+act+'" data-id="'+m.id+'">'+
-          lead+
-          '<span class="ti-txt"><span class="ti-t">'+esc(m.label)+'</span>'+
-            '<span class="ti-s">'+m.sub+'</span></span>'+
-        '</button>';
+          'data-id="'+m.id+'">'+
+          '<button class="ti-ck" data-act="'+(judged?'missopen':'misscheck')+'" data-id="'+m.id+'" '+
+            (judged?'':'aria-pressed="'+(dn?'true':'false')+'" ')+
+            'aria-label="'+esc(judged ? 'Start '+m.label : m.label+' afvinken')+'">'+(dn?IC.check:'')+'</button>'+
+          '<button class="ti-txt" data-act="missgo" data-id="'+m.id+'" '+
+            'aria-label="'+esc(missionGoLabel(m))+'">'+
+            '<span class="ti-t">'+esc(m.label)+'</span>'+
+            '<span class="ti-s">'+m.sub+'</span>'+
+            '<span class="ti-chev" aria-hidden="true">'+IC.chev+'</span>'+
+          '</button>'+
+        '</div>';
     }).join('');
     var ddBanner = '';
 
@@ -4570,7 +4611,7 @@
   }
   function closeHb(){
     if(!hbSheet) return;
-    var s=hbSheet; hbSheet=null; activePager=null;
+    var s=hbSheet; hbSheet=null; activePager=null; hbTodayFocus=null;
     if(s._pmResize){ window.removeEventListener('resize', s._pmResize); s._pmResize=null; }
     s.classList.remove('show');
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 400);
@@ -4635,9 +4676,11 @@
   function poomById(id){ for(var i=0;i<poomsae.length;i++){ if(poomsae[i].id===id) return poomsae[i]; } return null; }
   function standByRoman(r){ var a=C.standen||[]; for(var i=0;i<a.length;i++){ if(a[i].roman===r) return a[i]; } return null; }
   function poomRow(f){
-    return '<div class="ct-row hb-row poom-row" data-act="openpoom" data-id="'+esc(f.id)+'" role="button" tabindex="0">'+
+    var today = !!(hbTodayFocus && hbTodayFocus.indexOf(f.id)>=0);
+    return '<div class="ct-row hb-row poom-row'+(today?' pm-today':'')+'" data-act="openpoom" data-id="'+esc(f.id)+'" role="button" tabindex="0">'+
       '<div class="ct-tx">'+
-        '<div class="poom-nm"><b>'+esc(f.korean)+'</b><span class="poom-hg">'+esc(f.hangul)+'</span></div>'+
+        '<div class="poom-nm"><b>'+esc(f.korean)+'</b><span class="poom-hg">'+esc(f.hangul)+'</span>'+
+          (today?'<span class="pm-today-tag">Vandaag</span>':'')+'</div>'+
         '<div class="hb-sub">'+esc(f.trigramNaam)+' · '+esc(f.element)+' · '+esc(f.band)+' · '+f.bewegingen+' bewegingen</div>'+
         (f.betekenis?'<p class="poom-blurb">'+f.betekenis+'</p>':'')+
       '</div>'+
@@ -6666,7 +6709,9 @@
     else if(a==='setux'){ setCiUx(act.getAttribute('data-ux')); renderCheckin(); }
     else if(a==='cisubmit'){ ciSubmit(); }
     else if(a==='rclose'){ closeCheckin(); }
-    else if(a==='mission'){ toggleMission(act.getAttribute('data-id')); }
+    else if(a==='misscheck'){ toggleMission(act.getAttribute('data-id')); }
+    else if(a==='missopen'){ openMission(act.getAttribute('data-id')); }
+    else if(a==='missgo'){ missionGo(act.getAttribute('data-id')); }
     else if(a==='mascwink'){ mascWink(); }
     else if(a==='shufflequote'){ shuffleQuote(); }
   });
