@@ -41,7 +41,14 @@
     display:flex;justify-content:center;align-items:flex-start;padding:32px 20px 56px;
   }
   .cond{font-family:var(--cond);text-transform:uppercase;line-height:1.02}
-  .poster{font-family:var(--poster);text-transform:uppercase;line-height:.9}
+  /* De aflees-strook voor de iOS-statusbalk: alleen op een telefoonscherm, want op de
+     bureaubladweergave zit er geen statusbalk boven het toestelframe. */
+  #topcap{display:none;position:fixed;top:0;left:0;right:0;z-index:2147483647;pointer-events:none;
+    height:max(16px,env(safe-area-inset-top));background-color:var(--topbar,var(--page));
+    transition:none!important;animation:none!important}
+  #topfade{display:none;position:fixed;left:0;right:0;top:max(16px,env(safe-area-inset-top));
+    height:26px;z-index:2147483646;pointer-events:none;
+    background:linear-gradient(var(--topbar,transparent),transparent)}  .poster{font-family:var(--poster);text-transform:uppercase;line-height:.9}
   button{font-family:inherit;cursor:pointer}
 
   /* ---------- Device frame ---------- */
@@ -75,10 +82,13 @@
      Oefentimer included) can scroll or rubber-band on iOS; inner lists scroll on their own. */
   @media (max-width:440px){
     html{overflow:hidden}
-    /* --topbar wordt gezet zodra een gekleurd scherm opengaat: een geïnstalleerde PWA tekent de
-       statusbalk met de achtergrond van het document, niet met de laag die eroverheen ligt. */
+    /* --topbar wordt gezet zodra een gekleurd scherm opengaat: iOS leest de kleur van de
+       statusbalk af aan de bovenste rij pixels, dus die moet mee veranderen. Geen overgang:
+       een lopende transitie zet dat aflezen uit. */
     body{padding:0;background:var(--topbar,var(--page));position:fixed;inset:0;width:100%;
-      overflow:hidden;overscroll-behavior:none;transition:background-color .34s ease}
+      overflow:hidden;overscroll-behavior:none}
+    #topcap{display:block}
+    html.tint #topfade{display:block}
     .device{width:100vw;height:100vh;height:100dvh;border-radius:0;border:0;box-shadow:none}
     .concept-flag{display:none}
   }
@@ -2538,6 +2548,14 @@
 </style>
 </head>
 <body>
+  <!-- iOS leest de kleur van de statusbalk af aan de bovenste rij pixels van de pagina. Dat
+       lukt alleen bij een echt, ondoorzichtig element zonder verloop, afbeelding of lopende
+       animatie — de timer heeft daar juist een verloop met drijvende orbs. Deze strook vult
+       de ruimte die de koppen toch al vrijhouden en kleurt mee met het scherm. -->
+  <div id="topcap" aria-hidden="true"></div>
+  <!-- Op een gekleurd scherm ligt onder de strook een verloop; dit vlak laat de vlakke kleur
+       er zacht in overlopen, zodat er geen streep te zien is. -->
+  <div id="topfade" aria-hidden="true"></div>
   <div class="device">
     <div class="stage" id="stage"></div>
     <div class="navdock" id="navdock">
@@ -6633,6 +6651,7 @@
   function setTopBar(color){
     var c=String(color||getComputedStyle(document.documentElement).getPropertyValue('--page')||'#F4F1EA').trim();
     var m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute('content', c);
+    document.documentElement.classList.toggle('tint', !!color);
     if(color) document.documentElement.style.setProperty('--topbar', c);
     else document.documentElement.style.removeProperty('--topbar');
   }
