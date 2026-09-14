@@ -1679,9 +1679,15 @@
   /* Staat een uitklapper open, dan schuift het label naar rechts náást de pil in plaats van
      erboven: daar botst het niet met de knop erboven in de stapel en staat het op ooghoogte
      van de opties. --pw is de breedte die de pil bij het openen krijgt. */
-  .ot-rep .ot-lab,.ot-tempo .ot-lab,.ot-dur .ot-lab,.ot-mode .ot-lab{
+  .ot-rep .ot-lab,.ot-tempo .ot-lab,.ot-dur .ot-lab{
     left:calc(var(--pw, 64px) + 14px);bottom:3px;height:58px;margin-bottom:0;transform:none;
     display:flex;align-items:center}
+  /* De moduskiezer vouwt na het kiezen dicht tot alleen de cijfers; het label ernaast blijft
+     staan en zegt welke stand aan is. Tijdens het uitklappen wijkt het, want dan staan de
+     woorden in de opties zelf. */
+  .ot-mode .ot-lab{left:78px;bottom:0;height:64px;margin-bottom:0;transform:none;
+    display:flex;align-items:center;opacity:1}
+  .ot-mode.open .ot-lab,.ot-mode.collapsing .ot-lab{opacity:0}
   .ot-fab.is-off{opacity:.32;pointer-events:none}
   /* Loopt de timer? Dan zijn de instellingen linksonder buiten bedrijf. */
   .timerscreen.ot-locked .ot-left .ot-fab{opacity:.32;pointer-events:none}
@@ -1774,9 +1780,14 @@
      het menu te openen ziet welke stand actief is. Het teken is plat en breed en
      krijgt daarom een eigen maat in plaats van de 26px van de andere iconen. */
   .ot-rico{display:grid;place-items:center}
-  .ot-rico.inf,.ot-rep-fab.is-inf .ot-rico.rep{display:none}
+  .ot-rico.inf,.ot-rico.noloop{display:none}
+  .ot-rep-fab.is-inf .ot-rico.rep,.ot-rep-fab.is-noloop .ot-rico.rep{display:none}
   .ot-rep-fab.is-inf .ot-rico.inf{display:grid}
   .ot-rep-fab .ot-rico.inf svg{width:30px;height:30px}
+  /* Staat herhalen uit, dan draagt de knop hetzelfde doorgestreepte teken als die keuze:
+     zo is wat je ziet altijd wat er staat ingesteld. */
+  .ot-rep-fab.is-noloop .ot-rico.noloop{display:grid}
+  .ot-rep-fab .ot-rico.noloop svg{width:28.5px;height:28.5px;display:block}
   .ot-rmenu{position:absolute;left:0;bottom:3px;height:58px;width:64px;z-index:2;overflow:hidden;
     display:flex;align-items:center;justify-content:flex-start;padding:6px;box-sizing:border-box;
     border-radius:29px;background:rgba(16,8,4,.52);border:1px solid rgba(255,255,255,.24);
@@ -1810,10 +1821,10 @@
   .ot-ropt.off svg{width:28.5px;height:28.5px;display:block}
 
   /* ===== Oefentimer: moduskiezer (Tellen 1–10 / Tijd-aftellen) =====
-     Dezelfde uitklapper als Herhaal, onderaan de stapel. De modus staat in de cijfers zelf:
-     1 2 3 loopt op voor tellen, 3 2 1 loopt terug voor de aftelklok. De cijfers staan op
-     één basislijn; alleen grootte en dekking lopen mee. Een ronde pijlring oogde mooier,
-     maar lijkt te veel op de herhaalknop er vlak boven — duidelijkheid wint hier. */
+     Dezelfde uitklapper als Rondes, onderaan de stapel. Tellen draagt de cijfers zelf: 1 2 3
+     loopt op, op één basislijn, alleen grootte en dekking lopen mee. De timerstand kreeg een
+     zandloper: 3 2 1 was te veel hetzelfde beeld, en een ronde pijlring leek weer te veel op
+     de herhaalknop er vlak boven. */
   .timerscreen .shead .ot-hspacer{flex:1 1 0;min-width:0}
   .timerscreen .shead .ot-hspacer-r{display:flex;justify-content:flex-end}
   .ot-mdig{display:inline-flex;align-items:baseline;gap:2px;line-height:1;
@@ -1822,13 +1833,10 @@
   .ot-mdig i:nth-child(1){font-size:.72em;opacity:.5}
   .ot-mdig i:nth-child(2){font-size:.90em;opacity:.75}
   .ot-mdig i:nth-child(3){font-size:1.14em}
-  .ot-mdig.rev i:nth-child(1){font-size:1.14em;opacity:1}
-  .ot-mdig.rev i:nth-child(3){font-size:.72em;opacity:.5}
   .ot-mode{position:relative;width:64px;height:64px}
   .ot-mode .ot-fab{position:absolute;left:0;bottom:0;z-index:1}
   .ot-mode.open{z-index:6}
   .ot-mode.open .ot-fab{opacity:0;pointer-events:none;transition:opacity .2s ease}
-  .ot-mode.open .ot-lab{opacity:1}
   .ot-mode-fab .ot-mdig{font-size:19px}
   .ot-mico{display:grid;place-items:center}
   .ot-mico.time,.timerscreen[data-mode="time"] .ot-mico.count{display:none}
@@ -1842,14 +1850,21 @@
     transition:width .44s cubic-bezier(.33,1.28,.4,1), opacity .22s ease, visibility .44s}
   .ot-mode.open .ot-mmenu{opacity:1;visibility:visible;pointer-events:auto}
   .ot-mmenu-inner{position:relative;display:flex;align-items:center;gap:12px;height:44px}
-  .ot-mopt{position:relative;z-index:1;width:44px;height:44px;flex:none;border:0;background:transparent;
-    color:rgba(255,255,255,.82);cursor:pointer;border-radius:50%;
-    display:grid;place-items:center;transition:color .3s ease}
+  /* De cijfers laten de richting zien, het woord ernaast zegt wat die richting betekent —
+     zo hoef je niet eerst te tikken om te weten wat 1 2 3 en 3 2 1 doen. */
+  .ot-mopt{position:relative;z-index:1;height:44px;flex:none;border:0;background:transparent;
+    color:rgba(255,255,255,.82);cursor:pointer;border-radius:22px;padding:0 13px;
+    display:inline-flex;align-items:center;gap:8px;transition:color .3s ease}
   .ot-mopt .ot-mdig{font-size:17px}
+  .ot-mhour{display:grid;place-items:center}
+  .ot-mopt .ot-mhour svg{width:21px;height:21px;display:block}
+  .ot-mode-fab .ot-mhour svg{width:25px;height:25px;display:block}
+  .ot-mword{font-family:var(--cond);font-weight:800;text-transform:uppercase;
+    letter-spacing:.05em;font-size:14px;line-height:1}
   .ot-mopt.on{color:var(--deep)}
-  .ot-mthumb{position:absolute;top:0;left:0;height:44px;width:44px;z-index:0;border-radius:50%;
+  .ot-mthumb{position:absolute;top:0;left:0;height:44px;width:44px;z-index:0;border-radius:22px;
     background:#fff;box-shadow:0 5px 14px -5px rgba(0,0,0,.5);opacity:0;
-    transition:transform .46s cubic-bezier(.34,1.35,.36,1), opacity .2s ease}
+    transition:transform .46s cubic-bezier(.34,1.35,.36,1), width .46s cubic-bezier(.34,1.35,.36,1), opacity .2s ease}
   .ot-mode.open .ot-mthumb{opacity:1}
   .ot-mode.collapsing .ot-mopt:not(.on){opacity:0;transition:opacity .18s ease}
 
@@ -1898,13 +1913,15 @@
     transition:transform .16s cubic-bezier(.34,1.4,.4,1)}
   .ot-dok:active{transform:scale(.9)}
   .ot-dok svg{width:19px;height:19px}
-  .ot-dtrack{-webkit-appearance:none;appearance:none;width:124px;height:30px;background:transparent;
+  /* De schuif is zo breed als de pil toelaat zonder het label ernaast te verdringen, en de
+     greep heeft dezelfde maat als de knop op de ring: hetzelfde gebaar, hetzelfde formaat. */
+  .ot-dtrack{-webkit-appearance:none;appearance:none;width:176px;height:30px;background:transparent;
     margin:0;touch-action:auto;cursor:pointer}
   .ot-dtrack::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:rgba(255,255,255,.26)}
-  .ot-dtrack::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;
-    border-radius:50%;background:#fff;box-shadow:0 5px 14px -5px rgba(0,0,0,.5);margin-top:-10px}
+  .ot-dtrack::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:21px;height:21px;
+    border-radius:50%;background:#fff;box-shadow:0 5px 14px -5px rgba(0,0,0,.5);margin-top:-7.5px}
   .ot-dtrack::-moz-range-track{height:6px;border-radius:3px;background:rgba(255,255,255,.26)}
-  .ot-dtrack::-moz-range-thumb{width:26px;height:26px;border:0;border-radius:50%;background:#fff;
+  .ot-dtrack::-moz-range-thumb{width:21px;height:21px;border:0;border-radius:50%;background:#fff;
     box-shadow:0 5px 14px -5px rgba(0,0,0,.5)}
 
   /* Tijd mode: the dial always shows MM:SS (even while setting) — no Korean word / in-ring prompt */
@@ -1918,6 +1935,9 @@
   .timerscreen[data-mode="time"] .ptimer.idle .pt-start{display:none}
   .timerscreen .ot-tsub{font-family:var(--cond);font-weight:800;text-transform:uppercase;
     letter-spacing:.14em;font-size:12.5px;color:rgba(255,255,255,.84)}
+  .timerscreen .ot-tsub.glint{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    background-image:linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,1) 50%,rgba(255,255,255,0) 60%),linear-gradient(rgba(255,255,255,.84),rgba(255,255,255,.84));
+    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:96% 0,0 0;animation:hintGlint 1.2s linear}
 
   /* ===== Korean visual motifs ===== */
   .stage{
@@ -2617,6 +2637,7 @@
        getekend: de lijndikte komt uit op dezelfde 1,63px als de andere iconen, en het
        geheel — streep inbegrepen — is even hoog als het oneindig-teken ernaast. */
     repeatOff:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><mask id="ic-repoff" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff"/><path d="M5.9 16.9 18.1 7.1" stroke="#000" stroke-width="3.6" stroke-linecap="round"/></mask><g mask="url(#ic-repoff)" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9h9a3 3 0 0 1 3 3M17 15H8a3 3 0 0 1-3-3"/><path d="M9.2 6.8 7 9l2.2 2.2M14.8 12.8 17 15l-2.2 2.2"/></g><path stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M5.9 16.9 18.1 7.1"/></svg>',
+    hourglass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3h11M6.5 21h11M16.6 3v3.3c0 1-.4 2-1.1 2.7L12 12.4 8.5 9c-.7-.7-1.1-1.7-1.1-2.7V3M7.4 21v-3.3c0-1 .4-2 1.1-2.7L12 11.6l3.5 3.4c.7.7 1.1 1.7 1.1 2.7V21"/><path fill="currentColor" stroke="none" d="M12 14.1l2.9 2.8c.4.4.6 1 .6 1.6v.9h-7v-.9c0-.6.2-1.2.6-1.6z"/></svg>',
     chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
     compass:'<svg viewBox="0 0 24 24" fill="none"><path stroke="currentColor" stroke-width="1.5" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"/><path fill="currentColor" fill-rule="evenodd" d="M9.908 9.69a.38.38 0 0 0-.218.218L7.296 16.22a.375.375 0 0 0 .483.483l6.313-2.394c.1-.038.18-.117.218-.218l2.394-6.313a.375.375 0 0 0-.483-.483zM12 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3" clip-rule="evenodd"/></svg>',
     target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>',
@@ -6632,10 +6653,11 @@
     // Daarom een eigen knop, die alleen verschijnt als er iets aan staat.
     '<button class="ot-ropt off'+(otState.reps?'':' on')+'" data-act="otrepoff" data-v="0" '+
       'aria-label="Niet herhalen">'+IC.repeatOff+'</button>';
-    var mOpts = [{m:'count',lab:'Tellen',rev:false},{m:'time',lab:'Tijd',rev:true}].map(function(o){
+    var mOpts = [{m:'count',lab:'Herhalingen',rev:false},{m:'time',lab:'Timer',rev:true}].map(function(o){
       var on=otState.mode===o.m;
       return '<button class="ot-mopt'+(on?' on':'')+'" data-act="otmode" data-m="'+o.m+'" role="tab" '+
-        'aria-selected="'+on+'" aria-label="'+o.lab+'">'+otDigits(o.rev)+'</button>';
+        'aria-selected="'+on+'" aria-label="'+o.lab+'">'+otModeIcon(o.m)+
+        '<span class="ot-mword">'+o.lab+'</span></button>';
     }).join('');
     var c0 = COUNT[0];
     var mSlug = mascotBelt(geupInfo(GEUP_I));
@@ -6676,10 +6698,11 @@
       '<div class="ot-bar">'+
         '<div class="ot-left">'+
           '<div class="ot-rep">'+
-            '<span class="ot-lab">Herhaal</span>'+
+            '<span class="ot-lab">Rondes</span>'+
             '<div class="ot-rmenu"><div class="ot-rmenu-inner"><span class="ot-rthumb"></span>'+rOpts+'</div></div>'+
             '<button class="ot-fab ot-rep-fab" id="ot-repeat" data-act="otrepeat" aria-label="Aantal herhalingen">'+
               '<span class="ot-rico rep">'+IC.repeat+'</span><span class="ot-rico inf">'+IC.infinity+'</span>'+
+              '<span class="ot-rico noloop">'+IC.repeatOff+'</span>'+
               '<span class="ot-badge empty" id="ot-rep-badge"></span></button>'+
           '</div>'+
           '<div class="ot-tempo">'+
@@ -6702,11 +6725,11 @@
               '<span class="ot-dunit">min</span></button>'+
           '</div>'+
           '<div class="ot-mode">'+
-            '<span class="ot-lab">Modus</span>'+
+            '<span class="ot-lab" id="ot-mode-lab">'+otModeName()+'</span>'+
             '<div class="ot-mmenu"><div class="ot-mmenu-inner"><span class="ot-mthumb"></span>'+mOpts+'</div></div>'+
-            '<button class="ot-fab ot-mode-fab on" id="ot-mode" data-act="otmodemenu" aria-label="Timer-modus">'+
-              '<span class="ot-mico count">'+otDigits(false)+'</span>'+
-              '<span class="ot-mico time">'+otDigits(true)+'</span></button>'+
+            '<button class="ot-fab ot-mode-fab on" id="ot-mode" data-act="otmodemenu" aria-label="Kies herhalingen of timer">'+
+              '<span class="ot-mico count">'+otModeIcon('count')+'</span>'+
+              '<span class="ot-mico time">'+otModeIcon('time')+'</span></button>'+
           '</div>'+
         '</div>'+
         '<div class="ot-ctl" id="ot-reset-ctl"><span class="ot-lab">Opnieuw</span>'+
@@ -7370,7 +7393,8 @@
     otLockControls();
     var active = otState.reps!==0;
     var rb=host.querySelector('#ot-repeat');
-    if(rb){ rb.classList.toggle('on', active); rb.classList.toggle('is-inf', otState.reps===Infinity); }
+    if(rb){ rb.classList.toggle('on', active); rb.classList.toggle('is-inf', otState.reps===Infinity);
+            rb.classList.toggle('is-noloop', !active); }
     var rw=host.querySelector('.ot-rep'); if(rw) rw.classList.toggle('has-sel', active);
     var badge=host.querySelector('#ot-rep-badge');
     var showNum = active && otState.reps!==Infinity && otState.left>0;
@@ -7677,10 +7701,15 @@
     clearTimeout(otGlintT);
     otGlintT=setTimeout(function(){
       if(!timerScreen) return;
-      var h=timerScreen.querySelector('#ot-start');
+      // Bij Tellen staat de uitnodiging midden in de ring, bij Tijd onder de tijd — beide glinsteren.
+      var h=otState.mode==='time'
+        ? timerScreen.querySelector('#ot-word .ot-tsub')
+        : timerScreen.querySelector('#ot-start');
       var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if(h && !reduce && otState.phase==='idle' && !otState.running){
         h.classList.remove('glint'); void h.offsetWidth; h.classList.add('glint');
+        // De uitleg bij Tijd wordt bij elke render opnieuw gemaakt, dus haakt hij zelf zijn opruimer aan.
+        h.addEventListener('animationend', function(){ this.classList.remove('glint'); }, {once:true});
       }
       otHintGlint();
     }, 2600 + Math.random()*2600);
@@ -7700,9 +7729,14 @@
 
   /* ===== Tijd mode: countdown timer (stretch/spar rounds) — 30s..10:00, drag ring or ±30s ===== */
   /* De modus in cijfers: 1 2 3 loopt op (tellen), 3 2 1 loopt terug (aftellen). */
-  function otDigits(rev){
-    var d = rev ? ['3','2','1'] : ['1','2','3'];
-    return '<span class="ot-mdig'+(rev?' rev':'')+'" aria-hidden="true"><i>'+d[0]+'</i><i>'+d[1]+'</i><i>'+d[2]+'</i></span>';
+  function otModeName(){ return otState.mode==='time' ? 'Timer' : 'Herhalingen'; }
+  /* Tellen laat zijn richting in de cijfers zien; de timerstand krijgt een zandloper —
+     die zegt "de tijd loopt" veel directer dan 3 2 1. */
+  function otModeIcon(m){
+    return m==='time' ? '<span class="ot-mhour" aria-hidden="true">'+IC.hourglass+'</span>' : otDigits();
+  }
+  function otDigits(){
+    return '<span class="ot-mdig" aria-hidden="true"><i>1</i><i>2</i><i>3</i></span>';
   }
   function otFmtTime(sec){ sec=Math.max(0, Math.round(sec)); var m=Math.floor(sec/60), s=sec%60; return m+':'+(s<10?'0':'')+s; }
   function otSetMode(m){
@@ -7720,6 +7754,7 @@
       b.classList.toggle('on', on); b.setAttribute('aria-selected', on?'true':'false');
     });
     moveModeThumb(true);
+    var ml=host.querySelector('#ot-mode-lab'); if(ml) ml.textContent=otModeName();
     otReset();                                   // branches to the selected mode's idle state
   }
   function moveModeThumb(animate){
@@ -7729,6 +7764,7 @@
     var on=inner.querySelector('.ot-mopt.on')||inner.querySelector('.ot-mopt');
     if(!on) return;
     if(!animate) thumb.style.transition='none';
+    thumb.style.width=on.offsetWidth+'px';   // opties zijn niet meer even breed: Tellen is langer dan Tijd
     thumb.style.transform='translateX('+on.offsetLeft+'px)';
     if(!animate){ void thumb.offsetWidth; thumb.style.transition=''; }
   }
