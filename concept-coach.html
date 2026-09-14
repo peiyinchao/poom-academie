@@ -1678,8 +1678,15 @@
   .ot-ctl.lab-on .ot-lab,.ot-tempo.open .ot-lab{opacity:1}
   .ot-fab.is-off{opacity:.32;pointer-events:none}
   .ot-bar{position:absolute;left:22px;right:22px;bottom:calc(env(safe-area-inset-bottom) + 20px);z-index:6;
-    display:flex;align-items:center;justify-content:space-between}
-  .ot-left{display:flex;align-items:center;gap:12px}
+    display:flex;align-items:flex-end;justify-content:space-between;pointer-events:none}
+  /* De balk is nu een hoge band over het hele scherm; alleen de knoppen zelf vangen tikken,
+     zodat de lege ruimte ernaast de timer gewoon start of pauzeert. */
+  .ot-left,.ot-bar .ot-ctl{pointer-events:auto}
+  /* Alle timerinstellingen staan op elkaar gestapeld in de linkeronderhoek: zo liggen ze
+     samen binnen duimbereik en klapt elke knop naar rechts open in de lege ruimte ernaast.
+     De modusknop staat onderaan, want die verspringt niet als de rest per modus wisselt.
+     De tussenruimte is ruim genoeg voor het zwevende labeltje boven elke knop. */
+  .ot-left{display:flex;flex-direction:column;align-items:flex-start;gap:22px}
   .ot-tempo{position:relative;width:64px;height:64px}
   .ot-tempo-fab{position:absolute;left:0;bottom:0;z-index:1;transition:opacity .24s ease;
     background:transparent;border-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
@@ -1738,7 +1745,6 @@
   .ot-rep.open{z-index:6}
   .ot-rep.open .ot-fab{opacity:0;pointer-events:none;transition:opacity .2s ease}
   .ot-rep.open .ot-lab,.ot-rep.has-sel .ot-lab{opacity:1}
-  .ot-left.rep-open .ot-tempo{opacity:0;pointer-events:none;transition:opacity .2s ease}
   /* count badge — number of repeats left (finite); tucked INSIDE the disc, beneath the loop glyph.
      hidden for ∞ and when idle. only ever shown while the button is .on (white), so ink reads on white */
   .ot-badge{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);
@@ -1749,6 +1755,13 @@
   @keyframes otBadgeBump{0%{transform:translateX(-50%) scale(1)}42%{transform:translateX(-50%) scale(1.34)}100%{transform:translateX(-50%) scale(1)}}
   .ot-rep-fab svg{transition:transform .26s cubic-bezier(.34,1.4,.4,1)}
   .ot-rep-fab.has-num svg{transform:translateY(-7px) scale(.9)}
+  /* Bij oneindig herhalen toont de knop het oneindig-teken zelf, zodat je zonder
+     het menu te openen ziet welke stand actief is. Het teken is plat en breed en
+     krijgt daarom een eigen maat in plaats van de 26px van de andere iconen. */
+  .ot-rico{display:grid;place-items:center}
+  .ot-rico.inf,.ot-rep-fab.is-inf .ot-rico.rep{display:none}
+  .ot-rep-fab.is-inf .ot-rico.inf{display:grid}
+  .ot-rep-fab .ot-rico.inf svg{width:30px;height:30px}
   .ot-rmenu{position:absolute;left:0;bottom:3px;height:58px;width:64px;z-index:2;overflow:hidden;
     display:flex;align-items:center;justify-content:flex-start;padding:6px;box-sizing:border-box;
     border-radius:29px;background:rgba(16,8,4,.52);border:1px solid rgba(255,255,255,.24);
@@ -1781,19 +1794,47 @@
   .ot-ropt.off.on{color:var(--deep);opacity:1}
   .ot-ropt.off svg{width:28.5px;height:28.5px;display:block}
 
-  /* ===== Oefentimer: mode toggle (Tellen 1–10 / Tijd-aftellen) ===== */
+  /* ===== Oefentimer: moduskiezer (Tellen 1–10 / Tijd-aftellen) =====
+     Dezelfde uitklapper als Herhaal, onderaan de stapel. De modus staat in de cijfers zelf:
+     1 2 3 loopt op voor tellen, 3 2 1 loopt terug voor de aftelklok. */
   .timerscreen .shead .ot-hspacer{flex:1 1 0;min-width:0}
   .timerscreen .shead .ot-hspacer-r{display:flex;justify-content:flex-end}
-  .ot-modeseg{position:relative;z-index:1;flex:none;display:inline-flex;align-items:center;padding:4px;border-radius:22px;
-    background:rgba(16,8,4,.30);border:0;
-    -webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3)}
-  .ot-mseg{position:relative;z-index:1;border:0;background:transparent;cursor:pointer;
-    font-family:var(--cond);font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:13px;
-    color:rgba(255,255,255,.84);padding:8px 20px;border-radius:18px;line-height:1;white-space:nowrap;transition:color .3s ease}
-  .ot-mseg.on{color:var(--deep)}
-  .ot-mseg-thumb{position:absolute;top:4px;left:0;z-index:0;height:calc(100% - 8px);width:0;border-radius:18px;
-    background:#fff;box-shadow:0 4px 12px -5px rgba(0,0,0,.5);
-    transition:transform .42s cubic-bezier(.34,1.3,.4,1), width .42s cubic-bezier(.34,1.3,.4,1)}
+  .ot-mdig{display:inline-flex;align-items:baseline;gap:2px;line-height:1;
+    font-family:var(--cond);font-weight:800;letter-spacing:0;font-variant-numeric:tabular-nums}
+  .ot-mdig i{font-style:normal}
+  .ot-mdig i:nth-child(1){font-size:.70em;opacity:.55}
+  .ot-mdig i:nth-child(2){font-size:.88em;opacity:.78}
+  .ot-mdig i:nth-child(3){font-size:1.14em}
+  .ot-mdig.rev i:nth-child(1){font-size:1.14em;opacity:1}
+  .ot-mdig.rev i:nth-child(3){font-size:.70em;opacity:.55}
+  .ot-mode{position:relative;width:64px;height:64px}
+  .ot-mode .ot-fab{position:absolute;left:0;bottom:0;z-index:1}
+  .ot-mode.open{z-index:6}
+  .ot-mode.open .ot-fab{opacity:0;pointer-events:none;transition:opacity .2s ease}
+  .ot-mode.open .ot-lab{opacity:1}
+  .ot-mode-fab .ot-mdig{font-size:19px}
+  .ot-mico{display:grid;place-items:center}
+  .ot-mico.time,.timerscreen[data-mode="time"] .ot-mico.count{display:none}
+  .timerscreen[data-mode="time"] .ot-mico.time{display:grid}
+  .ot-mmenu{position:absolute;left:0;bottom:3px;height:58px;width:64px;z-index:2;overflow:hidden;
+    display:flex;align-items:center;justify-content:flex-start;padding:6px;box-sizing:border-box;
+    border-radius:29px;background:rgba(16,8,4,.52);border:1px solid rgba(255,255,255,.24);
+    -webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);
+    box-shadow:0 18px 44px -16px rgba(0,0,0,.72);
+    opacity:0;visibility:hidden;pointer-events:none;
+    transition:width .44s cubic-bezier(.33,1.28,.4,1), opacity .22s ease, visibility .44s}
+  .ot-mode.open .ot-mmenu{opacity:1;visibility:visible;pointer-events:auto}
+  .ot-mmenu-inner{position:relative;display:flex;align-items:center;gap:7px;height:44px}
+  .ot-mopt{position:relative;z-index:1;width:44px;height:44px;flex:none;border:0;background:transparent;
+    color:rgba(255,255,255,.82);cursor:pointer;border-radius:50%;
+    display:grid;place-items:center;transition:color .3s ease}
+  .ot-mopt .ot-mdig{font-size:17px}
+  .ot-mopt.on{color:var(--deep)}
+  .ot-mthumb{position:absolute;top:0;left:0;height:44px;width:44px;z-index:0;border-radius:50%;
+    background:#fff;box-shadow:0 5px 14px -5px rgba(0,0,0,.5);opacity:0;
+    transition:transform .46s cubic-bezier(.34,1.35,.36,1), opacity .2s ease}
+  .ot-mode.open .ot-mthumb{opacity:1}
+  .ot-mode.collapsing .ot-mopt:not(.on){opacity:0;transition:opacity .18s ease}
 
   /* ± duration nudgers (Tijd mode): the amount lives inside the button, no floating label */
 
@@ -2554,6 +2595,7 @@
     pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.3"/><rect x="14" y="5" width="4" height="14" rx="1.3"/></svg>',
     reset:'<svg viewBox="0 0 24 24" fill="none"><circle cx="7" cy="8" r="1.5" fill="currentColor"/><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="M12.5 8h3.19a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-10"/><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="m14.5 5-2.47 2.47a.75.75 0 0 0 0 1.06L14.5 11"/></svg>',
     repeat:'<svg viewBox="0 0 24 24" fill="none"><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="M8 10 4.8 7.6c-.4-.3-.4-.9 0-1.2L8 4m8 10 3.2 2.4c.4.3.4.9 0 1.2L16 20"/><path stroke="currentColor" stroke-width="1.5" d="M4.5 7H16a5 5 0 0 1 4.387 7.4M19 17H8a5 5 0 0 1-5-5c0-.84.207-1.647.574-2.353"/></svg>',
+    infinity:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill="currentColor" d="M18.6 6.62c-1.44 0-2.8.56-3.77 1.53L7.8 14.39c-.64.64-1.49.99-2.4.99-1.87 0-3.39-1.51-3.39-3.38S3.53 8.62 5.4 8.62c.91 0 1.76.35 2.44 1.03l1.13 1 1.51-1.34L9.22 8.2C8.2 7.18 6.84 6.62 5.4 6.62 2.42 6.62 0 9.04 0 12s2.42 5.38 5.4 5.38c1.44 0 2.8-.56 3.77-1.53l7.03-6.24c.64-.64 1.49-.99 2.4-.99 1.87 0 3.39 1.51 3.39 3.38s-1.52 3.38-3.39 3.38c-.9 0-1.76-.35-2.44-1.03l-1.14-1.01-1.51 1.34 1.27 1.12c1.02 1.01 2.37 1.57 3.82 1.57 2.98 0 5.4-2.41 5.4-5.38S21.58 6.62 18.6 6.62z"/></svg>',
     /* Herhalen uit: een platte herhaal-lus met een streep erdoor. Bewust breed en laag
        getekend: de lijndikte komt uit op dezelfde 1,63px als de andere iconen, en het
        geheel — streep inbegrepen — is even hoog als het oneindig-teken ernaast. */
@@ -6566,13 +6608,18 @@
     }).join('');
     var rOpts = OT_REPS.map(function(r){
       var inf=r.v===Infinity, dv=inf?'inf':String(r.v);
-      var lab=inf?'<svg class="ot-inf" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill="currentColor" d="M18.6 6.62c-1.44 0-2.8.56-3.77 1.53L7.8 14.39c-.64.64-1.49.99-2.4.99-1.87 0-3.39-1.51-3.39-3.38S3.53 8.62 5.4 8.62c.91 0 1.76.35 2.44 1.03l1.13 1 1.51-1.34L9.22 8.2C8.2 7.18 6.84 6.62 5.4 6.62 2.42 6.62 0 9.04 0 12s2.42 5.38 5.4 5.38c1.44 0 2.8-.56 3.77-1.53l7.03-6.24c.64-.64 1.49-.99 2.4-.99 1.87 0 3.39 1.51 3.39 3.38s-1.52 3.38-3.39 3.38c-.9 0-1.76-.35-2.44-1.03l-1.14-1.01-1.51 1.34 1.27 1.12c1.02 1.01 2.37 1.57 3.82 1.57 2.98 0 5.4-2.41 5.4-5.38S21.58 6.62 18.6 6.62z"/></svg>':'<span class="ot-rlab">'+r.v+'<span class="ot-tx">×</span></span>';
+      var lab=inf?IC.infinity:'<span class="ot-rlab">'+r.v+'<span class="ot-tx">×</span></span>';
       return '<button class="ot-ropt'+(r.v===otState.reps?' on':'')+(inf?' inf':'')+'" data-act="otrep" data-v="'+dv+'">'+lab+'</button>';
     }).join('') +
     // Opnieuw op de actieve waarde tikken zet herhalen ook uit, maar dat raadt niemand.
     // Daarom een eigen knop, die alleen verschijnt als er iets aan staat.
     '<button class="ot-ropt off'+(otState.reps?'':' on')+'" data-act="otrepoff" data-v="0" '+
       'aria-label="Niet herhalen">'+IC.repeatOff+'</button>';
+    var mOpts = [{m:'count',lab:'Tellen',rev:false},{m:'time',lab:'Tijd',rev:true}].map(function(o){
+      var on=otState.mode===o.m;
+      return '<button class="ot-mopt'+(on?' on':'')+'" data-act="otmode" data-m="'+o.m+'" role="tab" '+
+        'aria-selected="'+on+'" aria-label="'+o.lab+'">'+otDigits(o.rev)+'</button>';
+    }).join('');
     var c0 = COUNT[0];
     var mSlug = mascotBelt(geupInfo(GEUP_I));
     var mPose = ['cheer','ready','guard'][Math.floor(Math.random()*3)];
@@ -6585,11 +6632,6 @@
       '<div class="ot-tap" data-act="ottap" role="button" aria-label="Start of pauzeer de timer"></div>'+
       '<div class="shead">'+
         '<span class="ot-hspacer" aria-hidden="true"></span>'+
-        '<div class="ot-modeseg" role="tablist" aria-label="Timer-modus">'+
-          '<span class="ot-mseg-thumb" id="ot-mseg-thumb"></span>'+
-          '<button class="ot-mseg'+(otState.mode==='count'?' on':'')+'" data-act="otmode" data-m="count" role="tab" aria-selected="'+(otState.mode==='count')+'">Tellen</button>'+
-          '<button class="ot-mseg'+(otState.mode==='time'?' on':'')+'" data-act="otmode" data-m="time" role="tab" aria-selected="'+(otState.mode==='time')+'">Tijd</button>'+
-        '</div>'+
         '<div class="ot-hspacer ot-hspacer-r"><button class="sx" data-act="timerclose" aria-label="Sluiten">'+IC.x+'</button></div>'+
       '</div>'+
       '<div class="sbody tmr-body">'+
@@ -6619,7 +6661,8 @@
           '<div class="ot-rep">'+
             '<span class="ot-lab">Herhaal</span>'+
             '<div class="ot-rmenu"><div class="ot-rmenu-inner"><span class="ot-rthumb"></span>'+rOpts+'</div></div>'+
-            '<button class="ot-fab ot-rep-fab" id="ot-repeat" data-act="otrepeat" aria-label="Aantal herhalingen">'+IC.repeat+
+            '<button class="ot-fab ot-rep-fab" id="ot-repeat" data-act="otrepeat" aria-label="Aantal herhalingen">'+
+              '<span class="ot-rico rep">'+IC.repeat+'</span><span class="ot-rico inf">'+IC.infinity+'</span>'+
               '<span class="ot-badge empty" id="ot-rep-badge"></span></button>'+
           '</div>'+
           '<div class="ot-tempo">'+
@@ -6640,6 +6683,13 @@
             '<button class="ot-fab ot-dur-fab" data-act="otdur" aria-label="Duur instellen">'+
               '<span class="ot-dur-cur" id="ot-dur-cur">'+otFmtTime(otState.dur)+'</span>'+
               '<span class="ot-dunit">min</span></button>'+
+          '</div>'+
+          '<div class="ot-mode">'+
+            '<span class="ot-lab">Modus</span>'+
+            '<div class="ot-mmenu"><div class="ot-mmenu-inner"><span class="ot-mthumb"></span>'+mOpts+'</div></div>'+
+            '<button class="ot-fab ot-mode-fab" id="ot-mode" data-act="otmodemenu" aria-label="Timer-modus">'+
+              '<span class="ot-mico count">'+otDigits(false)+'</span>'+
+              '<span class="ot-mico time">'+otDigits(true)+'</span></button>'+
           '</div>'+
         '</div>'+
         '<div class="ot-ctl" id="ot-reset-ctl"><span class="ot-lab">Opnieuw</span>'+
@@ -6687,16 +6737,48 @@
       _tap.addEventListener('pointerup', _endDrag);
       _tap.addEventListener('pointercancel', _endDrag);
     }
+    attachTimerSwipe(el);
     requestAnimationFrame(function(){ el.classList.add('show'); moveModeThumb(false); });
     otReset();
     var hn=el.querySelector('#ot-start');
     if(hn) hn.addEventListener('animationend', function(e){ if(e.animationName==='hintGlint') this.classList.remove('glint'); });
     otHintGlint();
   }
+  /* Naar rechts vegen sluit de timer, net als in het Handboek. De onderste knoppenrij en de
+     kop doen niet mee, en in Tijd-modus laat de veeg de ring met rust: daar stelt slepen de
+     duur in, dus daar wint de ring van het gebaar. */
+  function attachTimerSwipe(el){
+    var x0=0,y0=0,down=false,swiped=false;
+    el.addEventListener('pointerdown', function(e){
+      down=false; swiped=false;
+      if(e.pointerType==='mouse' && e.button!==0) return;
+      if(e.target && e.target.closest && e.target.closest('.ot-bar,.shead')) return;
+      if(otState.mode==='time' && (otState.phase==='idle'||otState.phase==='done')){
+        var d=el.querySelector('.pt-dial');
+        if(d){
+          var r=d.getBoundingClientRect();
+          if(e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom) return;
+        }
+      }
+      x0=e.clientX; y0=e.clientY; down=true;
+    });
+    el.addEventListener('pointermove', function(e){
+      if(!down || swiped) return;
+      var dx=e.clientX-x0, dy=e.clientY-y0;
+      if(Math.abs(dx)<=Math.abs(dy)*1.4) return;      // verticaal gebaar — laat los
+      if(dx>60){ swiped=true; down=false; closeTimer(); }
+      else if(dx<-40){ down=false; }                  // naar links doet niets
+    });
+    el.addEventListener('pointerup', function(){ down=false; });
+    el.addEventListener('pointercancel', function(){ down=false; });
+    el.addEventListener('click', function(e){
+      if(swiped){ e.stopPropagation(); e.preventDefault(); swiped=false; }
+    }, true);
+  }
   function closeTimer(){
     if(!timerScreen) return;
-    otStop(); otCloseReps();
-    clearTimeout(otGlintT); clearTimeout(otRepT);
+    otStop(); otCloseReps(); otCloseDur(); otCloseMode();
+    clearTimeout(otGlintT); clearTimeout(otRepT); clearTimeout(otModeT);
     setTopBar();                       // restore the cream top bar
     timerScreen.classList.remove('show');
     fnav.classList.remove('hide');
@@ -7053,6 +7135,7 @@
                   mode:'count', dur:60, total:0, endAt:0, raf:null, _lastSec:0, _dragged:false, _windT:null, dragC:null, _pd:null };
   var otTmT=null; // tempo fold-out collapse/close timer
   var otRepT=null; // herhaal fold-out close timer
+  var otModeT=null; // modus fold-out close timer
   var otGlintT=null; // attention-glint scheduler for the "tik om te starten" hint
   function buzz(ms){ var N=window.PoomNative; if(N && typeof N.haptic==='function'){ try{ N.haptic(ms); }catch(e){} return; } if(navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
   /* Korte melding als iets niet lukte maar de app gewoon doorkan — bijvoorbeeld een foto
@@ -7268,7 +7351,8 @@
   function otSyncControls(){
     var host=timerScreen; if(!host) return;
     var active = otState.reps!==0;
-    var rb=host.querySelector('#ot-repeat'); if(rb) rb.classList.toggle('on', active);
+    var rb=host.querySelector('#ot-repeat');
+    if(rb){ rb.classList.toggle('on', active); rb.classList.toggle('is-inf', otState.reps===Infinity); }
     var rw=host.querySelector('.ot-rep'); if(rw) rw.classList.toggle('has-sel', active);
     var badge=host.querySelector('#ot-rep-badge');
     var showNum = active && otState.reps!==Infinity && otState.left>0;
@@ -7356,7 +7440,7 @@
     otState.i++; otRender(); otPop(); speak(COUNT[otState.i][0]); buzz(6); otSchedule();
   }
   function otStart(){
-    otCloseFan(); otCloseReps();
+    otCloseFan(); otCloseReps(); otCloseMode();
     if(timerScreen) timerScreen.classList.remove('ot-paused');
     otState.phase='ready'; otState.ready=OT_READY; otState.i=0; otState.running=true;
     otState.left=(otState.reps===Infinity?Infinity:otState.reps);
@@ -7381,6 +7465,8 @@
     if(wt && wt.classList.contains('open')){ otCloseFan(); return; }
     var wr=timerScreen&&timerScreen.querySelector('.ot-rep');
     if(wr && wr.classList.contains('open')){ otCloseReps(); return; }
+    var wm=timerScreen&&timerScreen.querySelector('.ot-mode');
+    if(wm && wm.classList.contains('open')){ otCloseMode(); return; }
     if(otState.running){ otPause(); return; }
     var finished=(otState.phase==='count' && otState.i>=COUNT.length-1);
     if(otState.phase==='idle' || finished){ otStart(); }
@@ -7388,7 +7474,7 @@
   }
   function otReset(){
     if(otState.mode==='time'){ otResetTime(); return; }
-    otCloseFan(); otCloseReps(); clearTimeout(otState.iv); clearTimeout(otState._wrapT); otState.running=false;
+    otCloseFan(); otCloseReps(); otCloseMode(); clearTimeout(otState.iv); clearTimeout(otState._wrapT); otState.running=false;
     if(timerScreen) timerScreen.classList.remove('ot-paused');
     otState.phase='idle'; otState.ready=OT_READY; otState.i=0;
     otState.left=(otState.reps===Infinity?Infinity:otState.reps);
@@ -7411,8 +7497,7 @@
     var host=timerScreen; if(!host) return;
     var w=host.querySelector('.ot-rep'); if(!w) return;
     if(w.classList.contains('open')){ otCloseReps(); return; }
-    otCloseFan();                                    // only one fold-out open at a time
-    var lft=host.querySelector('.ot-left'); if(lft) lft.classList.add('rep-open');
+    otCloseFan(); otCloseDur(); otCloseMode();       // only one fold-out open at a time
     var menu=w.querySelector('.ot-rmenu'), inner=w.querySelector('.ot-rmenu-inner');
     w.classList.add('open');
     if(menu&&inner) menu.style.width=(inner.offsetWidth+14)+'px'; // +14 = 2×(1px border + 6px padding) → 7px gap each side
@@ -7426,7 +7511,6 @@
     if(!w.classList.contains('open') && !collapsing) return;
     w.classList.remove('open','collapsing');
     var menu=w.querySelector('.ot-rmenu'); if(menu){ menu.style.transition=''; menu.style.width=''; }
-    var lft=host.querySelector('.ot-left'); if(lft) lft.classList.remove('rep-open');
     if(collapsing){                                  // aborted mid-glide → clear the inline travel styles
       var inner=w.querySelector('.ot-rmenu-inner'), thumb=w.querySelector('.ot-rthumb');
       if(inner){ inner.style.transition=''; inner.style.transform=''; }
@@ -7456,7 +7540,6 @@
       if(!timerScreen) return;
       var w2=timerScreen.querySelector('.ot-rep'); if(!w2) return;
       w2.classList.remove('open','collapsing');
-      var lft=timerScreen.querySelector('.ot-left'); if(lft) lft.classList.remove('rep-open'); // restore the tempo button (mutual-exclusion fade)
       var m=w2.querySelector('.ot-rmenu'), inn=w2.querySelector('.ot-rmenu-inner'), th=w2.querySelector('.ot-rthumb');
       if(m){ m.style.transition=''; m.style.width=''; }
       if(inn){ inn.style.transition=''; inn.style.transform=''; }
@@ -7491,7 +7574,7 @@
     var host=timerScreen; if(!host) return;
     var w=host.querySelector('.ot-tempo'); if(!w) return;
     if(w.classList.contains('open')){ otCloseFan(); return; }
-    otCloseReps();                                   // only one fold-out open at a time
+    otCloseReps(); otCloseDur(); otCloseMode();      // only one fold-out open at a time
     var menu=w.querySelector('.ot-tmenu'), inner=w.querySelector('.ot-tmenu-inner');
     w.classList.add('open');
     if(menu&&inner) menu.style.width=(inner.offsetWidth+14)+'px'; // +14 = 2×(1px border + 6px padding) → 7px gap each side
@@ -7579,6 +7662,11 @@
     clearTimeout(otState._wrapT); clearTimeout(otState._windT); otState.running=false; }
 
   /* ===== Tijd mode: countdown timer (stretch/spar rounds) — 30s..10:00, drag ring or ±30s ===== */
+  /* De modus in cijfers: 1 2 3 loopt op (tellen), 3 2 1 loopt terug (aftellen). */
+  function otDigits(rev){
+    var d = rev ? ['3','2','1'] : ['1','2','3'];
+    return '<span class="ot-mdig'+(rev?' rev':'')+'" aria-hidden="true"><i>'+d[0]+'</i><i>'+d[1]+'</i><i>'+d[2]+'</i></span>';
+  }
   function otFmtTime(sec){ sec=Math.max(0, Math.round(sec)); var m=Math.floor(sec/60), s=sec%60; return m+':'+(s<10?'0':'')+s; }
   function otSetMode(m){
     if(m!=='time' && m!=='count') return;
@@ -7590,7 +7678,7 @@
     }
     var host=timerScreen; if(!host) return;
     otCloseFan(); otCloseReps(); otCloseDur();
-    [].forEach.call(host.querySelectorAll('.ot-mseg'),function(b){
+    [].forEach.call(host.querySelectorAll('.ot-mopt'),function(b){
       var on=b.getAttribute('data-m')===otState.mode;
       b.classList.toggle('on', on); b.setAttribute('aria-selected', on?'true':'false');
     });
@@ -7599,13 +7687,42 @@
   }
   function moveModeThumb(animate){
     var host=timerScreen; if(!host) return;
-    var seg=host.querySelector('.ot-modeseg'), thumb=host.querySelector('#ot-mseg-thumb');
-    if(!seg||!thumb) return;
-    var on=seg.querySelector('.ot-mseg.on'); if(!on) return;
+    var inner=host.querySelector('.ot-mmenu-inner'), thumb=host.querySelector('.ot-mthumb');
+    if(!inner||!thumb) return;
+    var on=inner.querySelector('.ot-mopt.on')||inner.querySelector('.ot-mopt');
+    if(!on) return;
     if(!animate) thumb.style.transition='none';
-    thumb.style.width=on.offsetWidth+'px';
     thumb.style.transform='translateX('+on.offsetLeft+'px)';
     if(!animate){ void thumb.offsetWidth; thumb.style.transition=''; }
+  }
+  /* De moduskiezer klapt uit als Herhaal en sluit met dezelfde twee tellen: eerst schuift de
+     schijf naar de gekozen stand, daarna vouwt de pil zich op. */
+  function otModeMenu(){
+    var host=timerScreen; if(!host) return;
+    var w=host.querySelector('.ot-mode'); if(!w) return;
+    if(w.classList.contains('open')){ otCloseMode(); return; }
+    otCloseFan(); otCloseReps(); otCloseDur();       // only one fold-out open at a time
+    var menu=w.querySelector('.ot-mmenu'), inner=w.querySelector('.ot-mmenu-inner');
+    w.classList.add('open');
+    if(menu&&inner) menu.style.width=(inner.offsetWidth+14)+'px';
+    moveModeThumb(false);
+  }
+  function otCloseMode(){
+    var host=timerScreen; if(!host) return;
+    clearTimeout(otModeT);
+    var w=host.querySelector('.ot-mode'); if(!w) return;
+    if(!w.classList.contains('open') && !w.classList.contains('collapsing')) return;
+    w.classList.remove('open','collapsing');
+    var menu=w.querySelector('.ot-mmenu'); if(menu){ menu.style.transition=''; menu.style.width=''; }
+  }
+  function otPickMode(m){
+    var host=timerScreen; if(!host) return;
+    var w=host.querySelector('.ot-mode');
+    otSetMode(m);
+    if(!w || !w.classList.contains('open')){ otCloseMode(); return; }
+    w.classList.add('collapsing');
+    clearTimeout(otModeT);
+    otModeT=setTimeout(otCloseMode, 250);
   }
   function otDialCenter(){
     var host=timerScreen; if(!host) return null;
@@ -7657,7 +7774,7 @@
     var host=timerScreen; if(!host) return;
     var w=host.querySelector('.ot-dur'); if(!w) return;
     if(w.classList.contains('open')){ otCloseDur(); return; }
-    otCloseFan(); otCloseReps();                     // maar één uitklapper tegelijk
+    otCloseFan(); otCloseReps(); otCloseMode();      // maar één uitklapper tegelijk
     otSyncDur();
     var menu=w.querySelector('.ot-dmenu'), inner=w.querySelector('.ot-dmenu-inner');
     w.classList.add('open');
@@ -7822,6 +7939,8 @@
     if(otState._dragged){ otState._dragged=false; return; }   // swallow the click that ends a ring-drag
     var wd=timerScreen&&timerScreen.querySelector('.ot-dur');
     if(wd && wd.classList.contains('open')){ otCloseDur(); return; }  // eerst de uitklapper wegdoen
+    var wm2=timerScreen&&timerScreen.querySelector('.ot-mode');
+    if(wm2 && wm2.classList.contains('open')){ otCloseMode(); return; }
     if(otState.phase==='ready'){ otResetTime(); buzz(10); return; }  // tik tijdens Junbi → afbreken
     if(otState.running){ otPauseTime(); return; }
     if(otState.phase==='run'){ otResumeTime(); return; }       // paused mid-countdown
@@ -7989,7 +8108,8 @@
     else if(a==='tlspeed'){ tlSpeed(act.getAttribute('data-v')); }
     else if(a==='ottap'){ otTap(); }
     else if(a==='otreset'){ otReset(); }
-    else if(a==='otmode'){ otSetMode(act.getAttribute('data-m')); }
+    else if(a==='otmode'){ otPickMode(act.getAttribute('data-m')); buzz(10); }
+    else if(a==='otmodemenu'){ otModeMenu(); buzz(8); }
     else if(a==='otdur'){ otDurMenu(); buzz(8); }
     else if(a==='otdurok'){ otCloseDur(); buzz(10); }
     else if(a==='otrepeat'){ otRepeatMenu(); }
