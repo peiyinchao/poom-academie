@@ -1708,7 +1708,7 @@
     opacity:0;visibility:hidden;pointer-events:none;
     transition:width .44s cubic-bezier(.33,1.28,.4,1), opacity .22s ease, visibility .44s}
   .ot-tempo.open .ot-tmenu{opacity:1;visibility:visible;pointer-events:auto}
-  .ot-tmenu-inner{position:relative;display:flex;align-items:center;gap:3px;height:44px}
+  .ot-tmenu-inner{position:relative;display:flex;align-items:center;gap:7px;height:44px}
   .ot-topt{position:relative;z-index:1;width:44px;height:44px;flex:none;border:0;background:transparent;
     color:rgba(255,255,255,.82);cursor:pointer;border-radius:50%;
     font-family:var(--cond);font-weight:800;font-size:20px;letter-spacing:0;
@@ -1757,7 +1757,7 @@
     opacity:0;visibility:hidden;pointer-events:none;
     transition:width .44s cubic-bezier(.33,1.28,.4,1), opacity .22s ease, visibility .44s}
   .ot-rep.open .ot-rmenu{opacity:1;visibility:visible;pointer-events:auto}
-  .ot-rmenu-inner{position:relative;display:flex;align-items:center;gap:3px;height:44px}
+  .ot-rmenu-inner{position:relative;display:flex;align-items:center;gap:7px;height:44px}
   .ot-ropt{position:relative;z-index:1;width:44px;height:44px;flex:none;border:0;background:transparent;
     color:rgba(255,255,255,.82);cursor:pointer;border-radius:50%;
     font-family:var(--cond);font-weight:800;font-size:20px;letter-spacing:0;
@@ -1769,16 +1769,17 @@
   .ot-rthumb{position:absolute;top:0;left:0;height:44px;width:44px;z-index:0;border-radius:50%;
     background:#fff;box-shadow:0 5px 14px -5px rgba(0,0,0,.5);opacity:0;
     transition:transform .46s cubic-bezier(.34,1.35,.36,1), width .46s cubic-bezier(.34,1.35,.36,1), opacity .2s ease}
-  /* De witte schijf en de donkere tekst markeren de gekozen waarde. Staat herhalen uit,
-     dan hoort er niets gemarkeerd te zijn — anders lijkt ∞ al aan te staan. */
-  .ot-rep.has-sel .ot-rthumb{opacity:1}
+  /* Er is altijd precies één keuze actief — desnoods "niet herhalen" — dus de schijf
+     hoort er zodra het menu open is. */
+  .ot-rep.has-sel .ot-rthumb,
+  .ot-rep.open .ot-rthumb{opacity:1}
   .ot-rep.collapsing .ot-ropt:not(.on){opacity:0;transition:opacity .18s ease}  /* select-close: fade the rest, like tempo */
-  /* De uit-knop hoort er alleen te staan als er iets uit te zetten valt. Tijdens het
-     dichtklappen blijft hij staan, anders verspringt de pil halverwege de animatie. */
-  .ot-ropt.off{display:none;color:rgba(255,255,255,.72)}
-  .ot-rep.has-sel .ot-ropt.off,
-  .ot-rep.collapsing .ot-ropt.off{display:grid}
-  .ot-ropt.off svg{width:29px;height:29px;display:block}
+  /* "Niet herhalen" is gewoon de vijfde keuze en staat aan zolang je niets koos.
+     Massieve kleur met de dekking op de knop zelf: zo dubbelen de pijlpunt en de lus
+     niet op tot lichte vlekken zoals bij een half-doorzichtige lijnkleur. */
+  .ot-ropt.off{color:#fff;opacity:.82}
+  .ot-ropt.off.on{color:var(--deep);opacity:1}
+  .ot-ropt.off svg{width:28.5px;height:28.5px;display:block}
 
   /* ===== Oefentimer: mode toggle (Tellen 1–10 / Tijd-aftellen) ===== */
   .timerscreen .shead .ot-hspacer{flex:1 1 0;min-width:0}
@@ -1825,7 +1826,7 @@
     opacity:0;visibility:hidden;pointer-events:none;
     transition:width .44s cubic-bezier(.33,1.28,.4,1), opacity .22s ease, visibility .44s}
   .ot-dur.open .ot-dmenu{opacity:1;visibility:visible;pointer-events:auto}
-  .ot-dmenu-inner{display:flex;align-items:center;gap:10px;height:44px}
+  .ot-dmenu-inner{display:flex;align-items:center;gap:12px;height:44px}
   /* Getal en eenheid onder elkaar: naast de baan en het vinkje is er geen ruimte voor een regel. */
   .ot-dnum{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:46px}
   .ot-dval{font-family:var(--cond);font-weight:800;font-size:19px;line-height:1;color:#fff;
@@ -2553,8 +2554,10 @@
     pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.3"/><rect x="14" y="5" width="4" height="14" rx="1.3"/></svg>',
     reset:'<svg viewBox="0 0 24 24" fill="none"><circle cx="7" cy="8" r="1.5" fill="currentColor"/><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="M12.5 8h3.19a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-10"/><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="m14.5 5-2.47 2.47a.75.75 0 0 0 0 1.06L14.5 11"/></svg>',
     repeat:'<svg viewBox="0 0 24 24" fill="none"><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="M8 10 4.8 7.6c-.4-.3-.4-.9 0-1.2L8 4m8 10 3.2 2.4c.4.3.4.9 0 1.2L16 20"/><path stroke="currentColor" stroke-width="1.5" d="M4.5 7H16a5 5 0 0 1 4.387 7.4M19 17H8a5 5 0 0 1-5-5c0-.84.207-1.647.574-2.353"/></svg>',
-    /* Herhalen uit: dezelfde lus met een streep erdoor. */
-    repeatOff:'<svg viewBox="0 0 24 24" fill="none"><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="M8 10 4.8 7.6c-.4-.3-.4-.9 0-1.2L8 4m8 10 3.2 2.4c.4.3.4.9 0 1.2L16 20"/><path stroke="currentColor" stroke-width="1.5" d="M4.5 7H16a5 5 0 0 1 4.387 7.4M19 17H8a5 5 0 0 1-5-5c0-.84.207-1.647.574-2.353"/><path stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M4.4 20.2 19.6 3.8"/></svg>',
+    /* Herhalen uit: een platte herhaal-lus met een streep erdoor. Bewust breed en laag
+       getekend: de lijndikte komt uit op dezelfde 1,63px als de andere iconen, en het
+       geheel — streep inbegrepen — is even hoog als het oneindig-teken ernaast. */
+    repeatOff:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><mask id="ic-repoff" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff"/><path d="M5.9 16.9 18.1 7.1" stroke="#000" stroke-width="3.6" stroke-linecap="round"/></mask><g mask="url(#ic-repoff)" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9h9a3 3 0 0 1 3 3M17 15H8a3 3 0 0 1-3-3"/><path d="M9.2 6.8 7 9l2.2 2.2M14.8 12.8 17 15l-2.2 2.2"/></g><path stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M5.9 16.9 18.1 7.1"/></svg>',
     chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
     compass:'<svg viewBox="0 0 24 24" fill="none"><path stroke="currentColor" stroke-width="1.5" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"/><path fill="currentColor" fill-rule="evenodd" d="M9.908 9.69a.38.38 0 0 0-.218.218L7.296 16.22a.375.375 0 0 0 .483.483l6.313-2.394c.1-.038.18-.117.218-.218l2.394-6.313a.375.375 0 0 0-.483-.483zM12 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3" clip-rule="evenodd"/></svg>',
     target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>',
@@ -6568,7 +6571,8 @@
     }).join('') +
     // Opnieuw op de actieve waarde tikken zet herhalen ook uit, maar dat raadt niemand.
     // Daarom een eigen knop, die alleen verschijnt als er iets aan staat.
-    '<button class="ot-ropt off" data-act="otrepoff" aria-label="Herhalen uit">'+IC.repeatOff+'</button>';
+    '<button class="ot-ropt off'+(otState.reps?'':' on')+'" data-act="otrepoff" data-v="0" '+
+      'aria-label="Niet herhalen">'+IC.repeatOff+'</button>';
     var c0 = COUNT[0];
     var mSlug = mascotBelt(geupInfo(GEUP_I));
     var mPose = ['cheer','ready','guard'][Math.floor(Math.random()*3)];
@@ -7341,7 +7345,10 @@
       else if(otState.reps>0){
         otState.left--;
         if(otState.left>0){ otLoopWrap(); otSchedule(); otSyncControls(); otBumpBadge(); }
-        else { otState.reps=0; otState.left=0; otStop(); otRender(); otSyncControls(); buzz(22); if(Math.random()<0.55) otMascotPeek(); }
+        else {                                        // klaar: de keuze blijft staan, alleen de teller staat weer op vol
+          otState.left=otState.reps;
+          otStop(); otRender(); otSyncControls(); buzz(22); if(Math.random()<0.55) otMascotPeek();
+        }
       }
       else { otStop(); otRender(); otSyncControls(); buzz(22); if(Math.random()<0.45) otMascotPeek(); }
       return;
@@ -7394,7 +7401,7 @@
     var host=timerScreen; if(!host) return;
     var inner=host.querySelector('.ot-rmenu-inner'), thumb=host.querySelector('.ot-rthumb');
     if(!inner||!thumb) return;
-    var on=inner.querySelector('.ot-ropt.on') || inner.querySelector('.ot-ropt.inf'); if(!on) return;
+    var on=inner.querySelector('.ot-ropt.on') || inner.querySelector('.ot-ropt.off'); if(!on) return;
     if(!animate) thumb.style.transition='none';
     thumb.style.width=on.offsetWidth+'px';
     thumb.style.transform='translateX('+on.offsetLeft+'px)';
@@ -7458,25 +7465,27 @@
   }
   /* Pick a herhaal count; re-tapping the active value turns repeating off (back to idle). */
   function otPickRep(dv){
-    var v=otRepV(dv), off=(v===otState.reps), wasNone=!otState.reps;
+    var v=otRepV(dv), off=(v===otState.reps);
     if(off){ otState.reps=0; otState.left=0; }
     else { otState.reps=v; otState.left=(v===Infinity?Infinity:v); }
     otSyncControls();
     var thumb=timerScreen&&timerScreen.querySelector('.ot-rthumb');
     if(thumb) thumb.style.transition='transform .24s cubic-bezier(.34,1.28,.4,1), width .24s cubic-bezier(.34,1.28,.4,1), opacity .2s ease';
-    if(!off) moveRepThumb(!wasNone);                  // beat 1: disc onder de keuze; kwam hij net uit het niets,
-                                                      // dan verschijnt hij daar meteen in plaats van weg te glijden
+    moveRepThumb(true);                               // beat 1: schijf onder de nieuwe keuze — bij afzetten is
+                                                      // dat "niet herhalen", dus hij glijdt netjes naar rechts
     clearTimeout(otRepT);
     otRepT=setTimeout(otCollapseReps, 250);           // beat 2: glide it home as the pill collapses (tempo motion)
   }
-  /* De losse uit-knop: hetzelfde resultaat als nog eens op de actieve waarde tikken,
-     maar dan vindbaar. Klapt meteen dicht, want er valt niets te markeren. */
+  /* De uit-knop is gewoon de vijfde keuze; hij beweegt dus in hetzelfde ritme als de rest. */
   function otRepOff(){
-    if(!otState.reps) { otCloseReps(); return; }
+    if(!otState.reps){ otCloseReps(); return; }
     otState.reps=0; otState.left=0;
     otSyncControls(); buzz(10);
+    var thumb=timerScreen&&timerScreen.querySelector('.ot-rthumb');
+    if(thumb) thumb.style.transition='transform .24s cubic-bezier(.34,1.28,.4,1), width .24s cubic-bezier(.34,1.28,.4,1), opacity .2s ease';
+    moveRepThumb(true);
     clearTimeout(otRepT);
-    otCollapseReps();
+    otRepT=setTimeout(otCollapseReps, 250);
   }
   function otTempo(){
     var host=timerScreen; if(!host) return;
