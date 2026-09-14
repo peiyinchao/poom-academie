@@ -1787,7 +1787,9 @@
   /* Staat herhalen uit, dan draagt de knop hetzelfde doorgestreepte teken als die keuze:
      zo is wat je ziet altijd wat er staat ingesteld. */
   .ot-rep-fab.is-noloop .ot-rico.noloop{display:grid}
-  .ot-rep-fab .ot-rico.noloop svg{width:28.5px;height:28.5px;display:block}
+  /* Op de knop zelf mag hij groter dan in het menu: de streep loopt schuin door het teken,
+     waardoor de lus optisch kleiner oogt dan het oneindig-teken van dezelfde maat. */
+  .ot-rep-fab .ot-rico.noloop svg{width:34px;height:34px;display:block}
   .ot-rmenu{position:absolute;left:0;bottom:3px;height:58px;width:64px;z-index:2;overflow:hidden;
     display:flex;align-items:center;justify-content:flex-start;padding:6px;box-sizing:border-box;
     border-radius:29px;background:rgba(16,8,4,.52);border:1px solid rgba(255,255,255,.24);
@@ -6778,6 +6780,7 @@
       _tap.addEventListener('pointercancel', _endDrag);
     }
     attachTimerSwipe(el);
+    attachModeSwipe(el);
     requestAnimationFrame(function(){ el.classList.add('show'); moveModeThumb(false); });
     otReset();
     var hn=el.querySelector('#ot-start');
@@ -6787,6 +6790,31 @@
   /* Naar rechts vegen sluit de timer, net als in het Handboek. De onderste knoppenrij en de
      kop doen niet mee, en in Tijd-modus laat de veeg de ring met rust: daar stelt slepen de
      duur in, dus daar wint de ring van het gebaar. */
+  /* De moduskiezer werkt als een schuifknop: je kunt de witte schijf ook naar de andere
+     keuze vegen in plaats van erop te tikken. De schermveeg laat de knoppenbalk met rust,
+     dus de twee gebaren zitten elkaar niet in de weg. */
+  function attachModeSwipe(el){
+    var menu=el.querySelector('.ot-mmenu'); if(!menu) return;
+    var x0=0, down=false, used=false;
+    menu.addEventListener('pointerdown', function(e){
+      if(e.pointerType==='mouse' && e.button!==0) return;
+      x0=e.clientX; down=true; used=false;
+    });
+    menu.addEventListener('pointermove', function(e){
+      if(!down || used) return;
+      var dx=e.clientX-x0;
+      if(Math.abs(dx)<26) return;                 // korte trilling is geen veeg
+      down=false; used=true;
+      var m = dx>0 ? 'time' : 'count';            // naar rechts is de tweede keuze
+      if(m!==otState.mode) otPickMode(m);
+    });
+    menu.addEventListener('pointerup', function(){ down=false; });
+    menu.addEventListener('pointercancel', function(){ down=false; used=false; });
+    // Na een veeg landt de vinger op een optie; die tik mag niet alsnog iets omzetten.
+    menu.addEventListener('click', function(e){
+      if(used){ e.stopPropagation(); e.preventDefault(); used=false; }
+    }, true);
+  }
   function attachTimerSwipe(el){
     var x0=0,y0=0,down=false,swiped=false;
     el.addEventListener('pointerdown', function(e){
