@@ -1769,9 +1769,9 @@
   .ot-rthumb{position:absolute;top:0;left:0;height:44px;width:44px;z-index:0;border-radius:50%;
     background:#fff;box-shadow:0 5px 14px -5px rgba(0,0,0,.5);opacity:0;
     transition:transform .46s cubic-bezier(.34,1.35,.36,1), width .46s cubic-bezier(.34,1.35,.36,1), opacity .2s ease}
+  /* De witte schijf en de donkere tekst markeren de gekozen waarde. Staat herhalen uit,
+     dan hoort er niets gemarkeerd te zijn — anders lijkt ∞ al aan te staan. */
   .ot-rep.has-sel .ot-rthumb{opacity:1}
-  .ot-rep.open .ot-rthumb{opacity:1}                              /* thumb shows whenever the menu is open... */
-  .ot-rep.open:not(.has-sel) .ot-ropt.inf{color:var(--deep)}     /* ...defaulting to ∞ when nothing is set yet */
   .ot-rep.collapsing .ot-ropt:not(.on){opacity:0;transition:opacity .18s ease}  /* select-close: fade the rest, like tempo */
   /* De uit-knop hoort er alleen te staan als er iets uit te zetten valt. Tijdens het
      dichtklappen blijft hij staan, anders verspringt de pil halverwege de animatie. */
@@ -7458,13 +7458,14 @@
   }
   /* Pick a herhaal count; re-tapping the active value turns repeating off (back to idle). */
   function otPickRep(dv){
-    var v=otRepV(dv), off=(v===otState.reps);
+    var v=otRepV(dv), off=(v===otState.reps), wasNone=!otState.reps;
     if(off){ otState.reps=0; otState.left=0; }
     else { otState.reps=v; otState.left=(v===Infinity?Infinity:v); }
     otSyncControls();
     var thumb=timerScreen&&timerScreen.querySelector('.ot-rthumb');
     if(thumb) thumb.style.transition='transform .24s cubic-bezier(.34,1.28,.4,1), width .24s cubic-bezier(.34,1.28,.4,1), opacity .2s ease';
-    if(!off) moveRepThumb(true);                      // beat 1: snap the disc under the picked value
+    if(!off) moveRepThumb(!wasNone);                  // beat 1: disc onder de keuze; kwam hij net uit het niets,
+                                                      // dan verschijnt hij daar meteen in plaats van weg te glijden
     clearTimeout(otRepT);
     otRepT=setTimeout(otCollapseReps, 250);           // beat 2: glide it home as the pill collapses (tempo motion)
   }
