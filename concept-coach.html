@@ -75,7 +75,10 @@
      Oefentimer included) can scroll or rubber-band on iOS; inner lists scroll on their own. */
   @media (max-width:440px){
     html{overflow:hidden}
-    body{padding:0;background:var(--page);position:fixed;inset:0;width:100%;overflow:hidden;overscroll-behavior:none}
+    /* --topbar wordt gezet zodra een gekleurd scherm opengaat: een geïnstalleerde PWA tekent de
+       statusbalk met de achtergrond van het document, niet met de laag die eroverheen ligt. */
+    body{padding:0;background:var(--topbar,var(--page));position:fixed;inset:0;width:100%;
+      overflow:hidden;overscroll-behavior:none;transition:background-color .34s ease}
     .device{width:100vw;height:100vh;height:100dvh;border-radius:0;border:0;box-shadow:none}
     .concept-flag{display:none}
   }
@@ -6621,13 +6624,17 @@
   }
   function examRetry(){ closeExam(); openExam(); }
 
-  // Tint the iOS Safari top bar to match the current screen. The Vandaag/handboek
+  // Tint the iOS top bar to match the current screen. The Vandaag/handboek
   // screens are cream (--page); the Oefentimer is its element-coloured gradient, so
   // we point the theme-color at that gradient's top (--el) while the timer is open.
+  // Safari volgt theme-color live, maar een geïnstalleerde PWA doet dat niet: die kleurt de
+  // statusbalk met de achtergrond van het document. De timer is een laag *boven* de body, dus
+  // zonder --topbar bleef de balk crème terwijl het scherm blauw was.
   function setTopBar(color){
-    var m=document.querySelector('meta[name="theme-color"]'); if(!m) return;
-    var c=(color||getComputedStyle(document.documentElement).getPropertyValue('--page')||'#F4F1EA');
-    m.setAttribute('content', String(c).trim());
+    var c=String(color||getComputedStyle(document.documentElement).getPropertyValue('--page')||'#F4F1EA').trim();
+    var m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute('content', c);
+    if(color) document.documentElement.style.setProperty('--topbar', c);
+    else document.documentElement.style.removeProperty('--topbar');
   }
 
   // Standalone practice timer — reachable any time via the round nav button (reuses the pt-* engine)
