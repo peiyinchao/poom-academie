@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4F1EA">
+<title>Statusbalk-test (default)</title>
+<link rel="manifest" href="statusbalk.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Balk default">
+<style>
+  :root{--blauw:#2468D6;--creme:#F4F1EA}
+  html{overflow:hidden}
+  body{margin:0;background:var(--creme);color:#151A21;position:fixed;inset:0;overflow-y:auto;
+    font:16px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    padding:calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 32px)}
+  h1{font-size:19px;margin:0 0 4px}
+  p.sub{margin:0 0 18px;color:#5A6472;font-size:14px}
+  .meting{background:#fff;border:1px solid #E2DDD1;border-radius:14px;padding:12px 14px;margin-bottom:18px;
+    font:13px/1.6 ui-monospace,Menlo,monospace;white-space:pre-wrap}
+  button{display:block;width:100%;margin:0 0 10px;padding:14px 16px;border:0;border-radius:14px;
+    background:var(--blauw);color:#fff;font-size:15px;font-weight:600;text-align:left;-webkit-appearance:none}
+  button.uit{background:#8A94A3}
+  .stap{font-size:13px;color:#5A6472;margin:18px 0 6px;text-transform:uppercase;letter-spacing:.08em}
+  a{color:var(--blauw)}
+</style>
+</head>
+<body>
+<h1>Statusbalk-test — stand <code>default</code></h1>
+<p class="sub">Zet deze pagina op je beginscherm (Deel → Zet op beginscherm) en open hem daarvandaan. Tik de knoppen één voor één en kijk of de balk bovenaan van kleur verandert.</p>
+
+<div class="meting" id="meting">…</div>
+
+<div class="stap">Proef 1</div>
+<button data-p="1">theme-color aanpassen → blauw</button>
+<div class="stap">Proef 2</div>
+<button data-p="2">de hele meta-tag vervangen → groen</button>
+<div class="stap">Proef 3</div>
+<button data-p="3">achtergrond van de body → rood</button>
+<div class="stap">Proef 4</div>
+<button data-p="4">alles tegelijk → paars</button>
+<button class="uit" data-p="0">alles terug naar crème</button>
+
+<p class="sub" style="margin-top:22px">Daarna: <a href="statusbalk-bt.html">de tweede test met <code>black-translucent</code></a> — die moet je apart op je beginscherm zetten.</p>
+
+<script>
+  var K = { 1:'#2468D6', 2:'#1E8C5A', 3:'#C0392B', 4:'#6B3FA0', 0:'#F4F1EA' };
+  function meta(){ return document.querySelector('meta[name="theme-color"]'); }
+  function meet(){
+    var d = document.createElement('div');
+    d.style.cssText='position:fixed;top:0;height:env(safe-area-inset-top);visibility:hidden';
+    document.body.appendChild(d);
+    var inset = getComputedStyle(d).height; d.remove();
+    document.getElementById('meting').textContent =
+      'standalone: ' + (window.navigator.standalone ? 'ja (beginscherm)' : 'nee (Safari-tab)') +
+      '\nsafe-area-inset-top: ' + inset +
+      '\ntheme-color nu: ' + (meta() ? meta().content : '—') +
+      '\nbody-achtergrond: ' + getComputedStyle(document.body).backgroundColor;
+  }
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    var p = b.getAttribute('data-p'), c = K[p];
+    if(p==='0'){ meta().setAttribute('content', c); document.body.style.background = c; }
+    if(p==='1'){ meta().setAttribute('content', c); }
+    if(p==='2'){ var oud = meta(); if(oud) oud.remove();
+      var m = document.createElement('meta'); m.name='theme-color'; m.content=c; document.head.appendChild(m); }
+    if(p==='3'){ document.body.style.background = c; }
+    if(p==='4'){ var o2 = meta(); if(o2) o2.remove();
+      var m2 = document.createElement('meta'); m2.name='theme-color'; m2.content=c; document.head.appendChild(m2);
+      document.body.style.background = c; document.documentElement.style.background = c; }
+    meet();
+  });
+  meet();
+</script>
+</body>
+</html>
