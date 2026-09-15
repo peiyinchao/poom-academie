@@ -2094,8 +2094,6 @@
   .cs-body::-webkit-scrollbar{display:none}
   .cs-note{font-size:12.5px;line-height:1.5;color:var(--gray);margin-bottom:16px}
   .cs-note svg{width:14px;height:14px;vertical-align:-2px;margin:0 1px}
-  .cs-note-i{display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:5px;background:currentColor;
-    -webkit-mask:url(assets/icons/Info.png) center/contain no-repeat;mask:url(assets/icons/Info.png) center/contain no-repeat}
   /* Woorden + Handboek category sheets — neutral page, aligned with the list header (no coloured hero) */
   .catsheet.wcat,.catsheet.hbcat{background:var(--page)}
   .wcat .cs-hero,.hbcat .cs-hero{color:var(--ink);background:none;overflow:visible;isolation:auto;
@@ -2108,13 +2106,8 @@
   .wcat .cs-x:active,.hbcat .cs-x:active{transform:scale(.9)}
   /* Bottom dot navigation — small traditional page dots. Press/drag to scrub: dots grow and a
      floating label of the target screen appears; release navigates. Auto-fades like the scrollbar. */
-  .cs-dots{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 16px);transform:translateX(-50%);
-    z-index:60;display:flex;align-items:center;gap:0;padding:6px 10px;border-radius:999px;touch-action:none;
-    background:rgba(252,250,246,.5);-webkit-backdrop-filter:blur(30px) saturate(1.9);backdrop-filter:blur(30px) saturate(1.9);
-    border:1px solid rgba(255,255,255,.55);box-shadow:0 14px 32px -16px rgba(40,24,12,.4), 0 1px 0 rgba(255,255,255,.75) inset;
-    opacity:0;pointer-events:none;transition:opacity .3s ease, padding .2s cubic-bezier(.22,.9,.3,1)}
-  .cs-dots.show{opacity:1;pointer-events:auto}
-  .cs-dots.scrubbing{padding:8px 12px}
+  .cs-dots{position:relative;z-index:60;display:flex;align-items:center;gap:0;margin:11px 0 0 -3.5px;
+    padding:7px 0;touch-action:none;align-self:flex-start}
   .cs-dot{position:relative;width:6px;height:6px;flex:none;border:0;padding:0;margin:0 3.5px;border-radius:50%;
     background-color:rgba(30,22,16,.26);cursor:pointer;-webkit-tap-highlight-color:transparent;
     transition:transform .2s cubic-bezier(.22,.9,.3,1), background-color .22s ease}
@@ -2125,13 +2118,11 @@
   .cs-dots.scrubbing .cs-dot.preview{background-color:var(--el,#3E5BD6);transform:scale(1.75)}
   @media (hover:hover){ .cs-dots:not(.scrubbing) .cs-dot:not(.on):hover{background-color:rgba(30,22,16,.42)} }
   /* Floating target label shown while scrubbing the dots */
-  .cs-dot-tip{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%);
-    max-width:180px;white-space:normal;text-align:center;line-height:1.18;
+  .cs-dot-tip{position:absolute;left:0;top:calc(100% + 8px);
+    max-width:200px;white-space:normal;text-align:left;line-height:1.18;
     font-family:var(--cond);text-transform:uppercase;letter-spacing:.03em;font-weight:800;font-size:12.5px;
     color:#fff;background:rgba(26,23,18,.94);padding:6px 11px;border-radius:9px;
     box-shadow:0 12px 26px -10px rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .16s ease}
-  .cs-dot-tip::after{content:"";position:absolute;left:50%;bottom:-4px;transform:translateX(-50%) rotate(45deg);
-    width:8px;height:8px;background:rgba(26,23,18,.94);border-radius:2px}
   .cs-dots.scrubbing .cs-dot-tip{opacity:1}
   /* Paging between categories: the TITLE and the confidence icons cross-slide (belt-picker style).
      Shared by Woorden woordgroepen and Handboek onderdelen. */
@@ -2150,11 +2141,32 @@
   .wcat .cs-rate-opts-ghost.exit-r{animation:rateExitR .42s cubic-bezier(.22,.9,.3,1) forwards}
   .wcat .cs-note{transition:opacity .17s ease}
   .wcat .cs-note.cs-fading{opacity:0}
-  /* List frame (card bg/border/radius) stays put; only the rows crossfade, and the card
-     height eases when two groups have a different number of rows. */
+  /* List frame (card bg/border/radius) stays put; de rijen schuiven mee met de titel, zodat het
+     wisselen één beweging is in plaats van een titel die schuift boven een lijst die knippert. */
   .wcat .ct-list > :not(.vsb){transition:opacity .17s ease}
   .wcat .ct-list.cs-fading > :not(.vsb){opacity:0}
+  @keyframes ctOutL{from{transform:none}to{transform:translateX(-26px)}}
+  @keyframes ctOutR{from{transform:none}to{transform:translateX(26px)}}
+  @keyframes ctInR{from{transform:translateX(30px)}to{transform:none}}
+  @keyframes ctInL{from{transform:translateX(-30px)}to{transform:none}}
+  .wcat .ct-list.cs-out-l > :not(.vsb){animation:ctOutL .17s ease forwards}
+  .wcat .ct-list.cs-out-r > :not(.vsb){animation:ctOutR .17s ease forwards}
+  .wcat .ct-list.cs-in-r > :not(.vsb){animation:ctInR .4s cubic-bezier(.22,.9,.3,1)}
+  .wcat .ct-list.cs-in-l > :not(.vsb){animation:ctInL .4s cubic-bezier(.22,.9,.3,1)}
+  /* Aan het begin en het eind van de reeks veert het scherm terug in plaats van door te rollen. */
+  @keyframes csBounceL{0%{transform:none}38%{transform:translateX(-13px)}100%{transform:none}}
+  @keyframes csBounceR{0%{transform:none}38%{transform:translateX(13px)}100%{transform:none}}
+  .wcat .cs-body.cs-bounce-l{animation:csBounceL .34s cubic-bezier(.3,.9,.3,1)}
+  .wcat .cs-body.cs-bounce-r{animation:csBounceR .34s cubic-bezier(.3,.9,.3,1)}
+  @media (prefers-reduced-motion:reduce){
+    .wcat .ct-list.cs-out-l > :not(.vsb),.wcat .ct-list.cs-out-r > :not(.vsb),
+    .wcat .ct-list.cs-in-r > :not(.vsb),.wcat .ct-list.cs-in-l > :not(.vsb),
+    .wcat .cs-body.cs-bounce-l,.wcat .cs-body.cs-bounce-r{animation:none}
+  }
   .wcat .cs-head,.hbcat .cs-head{margin-top:92px}
+  /* De kop draagt nu de puntjes, en het zwevende label daarvan valt buiten de kop. Zonder deze
+     laag zou het onder de body (z-index 3) verdwijnen. */
+  .wcat .cs-head{z-index:5}
   .wcat .cs-eye,.hbcat .cs-eye{color:var(--gray)}
   .wcat .cs-title,.hbcat .cs-title{color:var(--ink);font-size:32px;margin-top:0}
   /* Examenkaart grade token, coloured to the belt it represents */
@@ -2173,10 +2185,11 @@
   .wcat .cs-chip.hot{background:color-mix(in srgb, var(--seal) 12%, #fff);color:var(--seal);border-color:transparent}
   .wcat .cs-chip.hot svg{color:var(--seal)}
   .wcat .cs-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;margin-top:0;border-radius:0;box-shadow:none;background:var(--page);
-    padding:14px 20px calc(env(safe-area-inset-bottom) + 56px)}
-  /* Guidance zone (rate control + note) stays fixed; only the term list scrolls underneath it */
+    padding:14px 22px calc(env(safe-area-inset-bottom) + 22px)}
+  /* Guidance zone (rate control + note) stays fixed; only the term list scrolls underneath it.
+     De lijst vult de rest tot onderaan: even ver van de rand als links en rechts. */
   .wcat .cs-rate,.wcat .cs-note{flex:none}
-  .wcat .ct-list{flex:0 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+  .wcat .ct-list{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
   .wcat .ct-list::-webkit-scrollbar{display:none}
   /* Handboek sheet: the whole body scrolls; its content crossfades on paging (no pinned zone) */
   .hbcat .cs-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;margin-top:16px;
@@ -2350,8 +2363,10 @@
     transform-origin:50% 50%}
   @media (prefers-reduced-motion: reduce){ .wrow-emb.g-bloom,.cs-ropt.on .cs-ric .gicon.g-bloom{animation:none} }
   /* self-rating control in the category sheet */
-  .cs-rate{margin:0 0 14px;padding:14px 15px;background:var(--surface);border:1px solid var(--line);border-radius:16px}
-  .cs-rate-q{font-family:var(--cond);text-transform:uppercase;letter-spacing:.03em;font-weight:800;font-size:13px;color:var(--ink);margin-bottom:11px}
+  /* De beoordeling staat vlak op de pagina: de woordenlijst eronder is de enige kaart, en
+     daardoor leest die als de inhoud in plaats van als één van twee even zware blokken. */
+  .cs-rate{margin:0 0 12px;padding:0;background:none;border:0;border-radius:0}
+  .cs-rate-q{font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-weight:700;font-size:10.5px;color:var(--gray);margin-bottom:8px}
   .cs-rate-opts{display:flex;gap:9px;position:relative}
   /* Single sliding highlight (tweens position + colour between options, like the tab bar) */
   .cs-rate-hl{position:absolute;top:0;bottom:0;left:0;width:0;z-index:0;pointer-events:none;border-radius:13px;
@@ -2360,11 +2375,16 @@
     transform:translateX(0);opacity:0;
     transition:transform .42s cubic-bezier(.52,.12,.14,1), width .42s cubic-bezier(.52,.12,.14,1), background-color .42s ease, box-shadow .42s ease, opacity .26s ease}
   .cs-rate-hl.ready{opacity:1}
-  .cs-ropt{flex:1;position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px;background:transparent;
+  .cs-ropt{flex:1;position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:11px 3px 10px;background:transparent;
     border:0;border-radius:13px;cursor:pointer;transition:background-color .2s ease}
-  .cs-ropt .cs-ric{width:48px;height:48px;display:grid;place-items:center}
-  .cs-ric .gicon{width:48px;height:48px;transition:background-color .2s ease}
+  .cs-ropt .cs-ric{width:42px;height:42px;display:grid;place-items:center}
+  .cs-ric .gicon{width:42px;height:42px;transition:background-color .2s ease}
   .cs-rl{font-family:var(--cond);text-transform:uppercase;letter-spacing:.02em;font-weight:700;font-size:10.5px;color:var(--gray);line-height:1;text-align:center;transition:color .2s ease}
+  /* Wat elke keuze betekent staat in de knop zelf, zodat je het ziet vóór je kiest in plaats
+     van op een losse regel eronder die alleen de gemaakte keuze uitlegt. */
+  .cs-rs{font-size:10.5px;line-height:1.25;color:var(--gray);text-align:center;opacity:.78;
+    transition:color .2s ease, opacity .2s ease}
+  .cs-ropt.on .cs-rs{color:var(--ink);opacity:.66}
   /* Non-selected = soft accessible gray (AA non-text ≥3:1), no outline; selected shows in colour */
   .cs-ropt:not(.on) .cs-ric .gicon{background:#877F74}
   .cs-ropt.on .cs-rl{color:var(--ink)}
@@ -5119,25 +5139,19 @@
   }
   function rateHtml(name){
     var s=catStage(name), b=bloomFor(name);
-    function opt(st,kind,label,glyph,col){
+    function opt(st,kind,label,sub,glyph,col){
       return '<button class="cs-ropt'+(s===st?' on':'')+'" style="--ic:'+col+'" data-act="setmastery" data-groep="'+esc(name)+'" data-stage="'+st+'">'+
-        '<span class="cs-ric">'+glyph+'</span><span class="cs-rl">'+label+'</span></button>';
+        '<span class="cs-ric">'+glyph+'</span><span class="cs-rl">'+label+'</span><span class="cs-rs">'+sub+'</span></button>';
     }
     return '<div class="cs-rate">'+
       '<div class="cs-rate-q">Hoe goed ken je deze woordgroep?</div>'+
       '<div class="cs-rate-optswrap"><div class="cs-rate-opts">'+
         '<span class="cs-rate-hl" aria-hidden="true"></span>'+
-        opt(0,'seed','Nog oefenen',growGlyph('seed'),'#B58C5E')+
-        opt(1,'sprout','Bijna',growGlyph('sprout'),'#5AA46B')+
-        opt(2,'bloom','Ken ik',growGlyph('bloom',b),b.col)+
+        opt(0,'seed','Nog oefenen','zoek je nog op',growGlyph('seed'),'#B58C5E')+
+        opt(1,'sprout','Bijna','meeste paraat',growGlyph('sprout'),'#5AA46B')+
+        opt(2,'bloom','Ken ik','uit je hoofd',growGlyph('bloom',b),b.col)+
       '</div></div></div>';
   }
-  var RATE_NOTE=[
-    ['Nog oefenen','je zoekt deze woorden nog meestal op'],
-    ['Bijna','je kent deze woorden bijna allemaal'],
-    ['Ken ik','je kent al deze woorden uit je hoofd']
-  ];
-  function rateNoteHtml(name){ var r=RATE_NOTE[catStage(name)]||RATE_NOTE[0]; return '<span class="cs-note-i" aria-hidden="true"></span><b>'+r[0]+'</b>: '+r[1]+'.'; }
   function paintHubRow(name){
     if(!stage) return;
     var rows=stage.querySelectorAll('.wrow[data-groep]');
@@ -5158,7 +5172,6 @@
       var opts=catSheet.querySelectorAll('.cs-ropt');
       for(var i=0;i<opts.length;i++){ opts[i].classList.toggle('on', (+opts[i].getAttribute('data-stage'))===s); }
       moveRateHL(catSheet.querySelector('.cs-rate'), false);
-      var cnote=catSheet.querySelector('.cs-note'); if(cnote) cnote.innerHTML=rateNoteHtml(name);
     }
     if(btn){ sfx(s>=2?'rate2':(s===1?'rate1':'rate0')); var ic=btn.querySelector('.gicon'); if(ic){ ic.classList.remove('gp'); void ic.offsetWidth; ic.classList.add('gp'); } }
     paintHubRow(name);
@@ -5185,16 +5198,18 @@
       : '<div class="cs-empty">Nog geen moeilijke woorden.<br>Tik op '+bkmk({cls:'bk-inline'})+' bij een woord om het hier te bewaren.</div>';
     var chips = isHard ? ''
       : '<span class="cs-chip glass hot" id="cs-hardchip"'+(hard.length?'':' hidden')+'>'+bkmk({on:true,cls:'bk-inline'})+'<b id="cs-hardn">'+hard.length+'</b> moeilijk</span>';
+    // Alleen de Moeilijk-lijst houdt een losse toelichting; bij een woordgroep staat de
+    // betekenis van de drie keuzes in de knoppen zelf.
     var note = isHard
       ? 'Je moeilijke woorden staan hier bij elkaar — oefen ze tot ze vanzelf gaan.'
-      : rateNoteHtml(name);
+      : '';
     return {
       isHard:isHard,
       accent: isHard ? '#C1121F' : '#3E5BD6',   // consistent blue for woordgroepen; Moeilijk keeps its red identity
       eyebrow:'낱말 · '+(isHard?'MOEILIJK':'WOORDGROEP'),
       titlerow:'<div class="cs-titlewrap"><h2 class="cs-title cs-title-cur">'+esc(name)+'</h2></div><div class="cs-chips">'+chips+'</div>',
       chips:chips, note:note, list:list,
-      body:(isHard?'':rateHtml(name))+'<div class="cs-note">'+note+'</div><div class="ct-list">'+list+'</div>'
+      body:(isHard?'':rateHtml(name))+(note?'<div class="cs-note">'+note+'</div>':'')+'<div class="ct-list">'+list+'</div>'
     };
   }
   function applyCatAccent(el, ac){
@@ -5225,10 +5240,10 @@
         '<div class="cs-head">'+
           '<div class="cs-eye">'+parts.eyebrow+'</div>'+
           '<div class="cs-titlerow">'+parts.titlerow+'</div>'+
+          dots+
         '</div>'+
       '</div>'+
-      '<div class="cs-body">'+parts.body+'</div>'+
-      dots;
+      '<div class="cs-body">'+parts.body+'</div>';
     stage.appendChild(catSheet);
     moveRateHL(catSheet.querySelector('.cs-rate'), true);
     if(multi){ attachCatSwipe(catSheet); attachDotScrub(catSheet); showDots(); }
@@ -5316,18 +5331,22 @@
   }
   // The list card FRAME (bg/border) stays fixed. Old rows fade out, new rows fade in, and the
   // card height eases from the old to the new group's height when the row count differs.
-  function swapCatList(el, html){
+  function swapCatList(el, html, dir){
     if(!el) return;
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ el.innerHTML=html; el.scrollTop=0; return; }
     var h0 = el.offsetHeight;
-    el.classList.add('cs-fading');                 // current rows fade to 0
+    var out = dir<0 ? 'cs-out-r' : 'cs-out-l', into = dir<0 ? 'cs-in-l' : 'cs-in-r';
+    el.classList.remove('cs-in-l','cs-in-r');
+    el.classList.add('cs-fading', out);             // current rows slide out of the way
     setTimeout(function(){
+      el.classList.remove(out);
       el.innerHTML = html; el.scrollTop = 0;        // swap while faded (new rows start at 0 too)
       el.style.flex = ''; el.style.height = '';     // natural flex sizing to measure the target
       void el.offsetHeight;
       var h1 = el.offsetHeight;                     // flex-resolved height for the new content
-      if(Math.abs(h1 - h0) < 1){                    // same height → just fade the rows back in
-        requestAnimationFrame(function(){ el.classList.remove('cs-fading'); });
+      if(Math.abs(h1 - h0) < 1){                    // same height → the new rows slide in
+        requestAnimationFrame(function(){ el.classList.remove('cs-fading'); el.classList.add(into); });
+        setTimeout(function(){ el.classList.remove(into); }, 400);
         return;
       }
       el.style.flex = '0 0 auto';                   // take flex out of the loop while we ease height
@@ -5336,17 +5355,18 @@
       requestAnimationFrame(function(){
         el.style.transition = 'height .3s cubic-bezier(.22,.9,.3,1)';
         el.style.height = h1 + 'px';                // ease the card to the new height
-        el.classList.remove('cs-fading');           // new rows fade in
+        el.classList.remove('cs-fading');           // new rows slide in
+        el.classList.add(into);
       });
       setTimeout(function(){                         // restore normal flex sizing after the ease
         el.style.transition = ''; el.style.height = ''; el.style.flex = '';
-      }, 340);
+        el.classList.remove(into);
+      }, 400);
     }, 170);
   }
   /* ---- Shared bottom dot navigation (Woorden woordgroepen + Handboek onderdelen) ----
      activePager holds the paging model for the sheet currently on screen. */
   var activePager = null;   // { sheet, items:[{id,label}], step(dir), pick(id) }
-  var _dotsHideT = null;
   function buildDotsHtml(items, activeId){
     if(!items || items.length<2) return '';
     var h='<div class="cs-dots"><span class="cs-dot-tip" aria-hidden="true"></span>';
@@ -5356,12 +5376,10 @@
     return h+'</div>';
   }
   function pagerDots(){ return activePager ? activePager.sheet.querySelector('.cs-dots') : null; }
-  function showDots(){
-    var dots=pagerDots(); if(!dots) return;
-    dots.classList.add('show');
-    clearTimeout(_dotsHideT);
-    _dotsHideT=setTimeout(function(){ if(dots && !dots.classList.contains('scrubbing')) dots.classList.remove('show'); }, 1700);
-  }
+  // De puntjes staan vast in beeld: ze vertellen waar je bent, en dat is ook waar als je
+  // even niets doet. Vroeger doofden ze na 1,7 seconde, waardoor je bij elke veeg opnieuw
+  // moest zoeken hoeveel woordgroepen er eigenlijk zijn.
+  function showDots(){}
   function updateDots(activeId){
     var dots=pagerDots(); if(!dots || !activePager) return;
     var btns=dots.querySelectorAll('.cs-dot'), items=activePager.items;
@@ -5383,7 +5401,7 @@
     function preview(idx){
       pvIdx=idx; var b=dotEls(), it=items();
       for(var i=0;i<b.length;i++) b[i].classList.toggle('preview', i===idx);
-      if(tip){ tip.textContent=it[idx]?it[idx].label:''; var d=b[idx]; if(d) tip.style.left=(d.offsetLeft+d.offsetWidth/2)+'px'; }
+      if(tip) tip.textContent=it[idx]?it[idx].label:'';
     }
     function clearPv(){ var b=dotEls(); for(var i=0;i<b.length;i++) b[i].classList.remove('preview'); }
     function finish(nav){
@@ -5396,8 +5414,7 @@
       if(e.pointerType==='mouse' && e.button!==0) return;
       scrubbing=true; handled=true;
       try{ dots.setPointerCapture(e.pointerId); }catch(_){}
-      clearTimeout(_dotsHideT);
-      dots.classList.add('show','scrubbing');
+      dots.classList.add('scrubbing');
       preview(idxFromX(e.clientX));
       e.preventDefault();
     });
@@ -5418,18 +5435,27 @@
     csTitleSwap(catSheet, esc(name), dir);
     csRateSwap(catSheet, name, dir);
     fadeSwap(catSheet.querySelector('.cs-note'), parts.note);
-    swapCatList(catSheet.querySelector('.ct-list'), parts.list);
+    swapCatList(catSheet.querySelector('.ct-list'), parts.list, dir);
     updateDots(name);
   }
-  // Page between woordgroepen in place (dir -1 prev / +1 next), cycling; skips the Moeilijk list.
+  // Page between woordgroepen in place (dir -1 prev / +1 next); skips the Moeilijk list.
+  // Bewust geen lus: voorbij de laatste woordgroep gebeurt er niets. Zo voel je waar de reeks
+  // ophoudt in plaats van onverwacht weer bij de eerste uit te komen.
   function navCat(dir){
     if(!catSheet) return;
     var cur = catSheet.getAttribute('data-cat');
     var names = catNames();
     var i = names.indexOf(cur); if(i<0 || names.length<2) return;
-    var name = names[(i+dir+names.length)%names.length];
-    if(name===cur) return;
-    swapToCat(name, dir);
+    var j = i+dir;
+    if(j<0 || j>=names.length){ catEdgeBounce(dir); return; }
+    swapToCat(names[j], dir);
+  }
+  // Aan het begin of het eind veert het scherm kort terug, zodat de veeg wel antwoord geeft.
+  function catEdgeBounce(dir){
+    var body=catSheet && catSheet.querySelector('.cs-body'); if(!body) return;
+    body.classList.remove('cs-bounce-l','cs-bounce-r'); void body.offsetWidth;
+    body.classList.add(dir<0 ? 'cs-bounce-r' : 'cs-bounce-l');
+    setTimeout(function(){ body.classList.remove('cs-bounce-l','cs-bounce-r'); }, 340);
   }
   // Jump straight to a woordgroep from the dot navigation (direction follows list order).
   function gotoCat(name){
