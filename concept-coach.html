@@ -936,8 +936,8 @@
   .timerscreen .ptimer.idle .pt-num,.timerscreen .ptimer.idle .pt-word{display:none}
   .timerscreen .ptimer.idle .pt-start{display:block}
   .timerscreen .pt-start.glint{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
-    background-image:linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,1) 50%,rgba(255,255,255,0) 60%),linear-gradient(rgba(255,255,255,.8),rgba(255,255,255,.8));
-    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:96% 0,0 0;animation:hintGlint 1.2s linear}
+    background-image:linear-gradient(100deg,rgba(255,255,255,0) 36%,rgba(255,255,255,.22) 45%,rgba(255,255,255,1) 50%,rgba(255,255,255,.22) 55%,rgba(255,255,255,0) 64%),linear-gradient(rgba(255,255,255,.8),rgba(255,255,255,.8));
+    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:118% 0,0 0;animation:hintGlint var(--glansT) var(--glansE)}
   /* Only number + character + romanisation live inside the ring; hint sits BELOW it */
   .timerscreen .ptimer.bare{justify-content:center;align-items:center;gap:24px;padding:0}
   .timerscreen .pt-dial{flex:none;margin:0;transition:opacity .3s}
@@ -1125,8 +1125,8 @@
   .face.front .tap{color:var(--el)}
   /* attention glint over the flip-hint — accent letters catch a bright slice, matching the CTA sheen */
   .face.front .tap.glint{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
-    background-image:linear-gradient(100deg,rgba(255,255,255,0) 42%,rgba(255,255,255,.92) 50%,rgba(255,255,255,0) 58%),linear-gradient(var(--el),var(--el));
-    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:96% 0,0 0;animation:hintGlint 1.15s linear}
+    background-image:linear-gradient(100deg,rgba(255,255,255,0) 36%,rgba(255,255,255,.22) 45%,rgba(255,255,255,.92) 50%,rgba(255,255,255,.22) 55%,rgba(255,255,255,0) 64%),linear-gradient(var(--el),var(--el));
+    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:118% 0,0 0;animation:hintGlint var(--glansT) var(--glansE)}
   .face.back{background:linear-gradient(152deg,var(--el),var(--deep));color:#fff;transform:rotateY(180deg)}
   .face.back .bh{font-size:34px;font-weight:700;line-height:1.1}
   .face.back .br{font-size:16px;font-weight:600;margin-top:6px;color:rgba(255,255,255,.9)}
@@ -1698,10 +1698,16 @@
     color:rgba(255,255,255,.7);transition:opacity .3s;min-height:14px}
   /* attention glint on the "tik om te starten" prompt — a bright slice sweeps through the letters,
      matching the sheen on the Vandaag "Start geleide training" CTA */
+  /* Eén glans voor de hele app: een lichtstreep die in zijn geheel van buiten het woord
+     binnenkomt en er ook weer helemaal uit loopt. Stopte hij eerder net binnen de randen,
+     dan lichtte de tekst bij het eerste beeldje al op en doofde hij bij het laatste met een
+     schok. De band heeft nu zachte schouders om een felle kern, zodat het licht over glas
+     lijkt te lopen in plaats van een witte streep te zijn. */
+  :root{--glansT:2.1s;--glansE:linear}
   .pt-hint.glint{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
-    background-image:linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.96) 50%,rgba(255,255,255,0) 60%),linear-gradient(rgba(255,255,255,.7),rgba(255,255,255,.7));
-    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:96% 0,0 0;animation:hintGlint 1.2s linear}
-  @keyframes hintGlint{from{background-position:96% 0,0 0}to{background-position:4% 0,0 0}}
+    background-image:linear-gradient(100deg,rgba(255,255,255,0) 36%,rgba(255,255,255,.22) 45%,rgba(255,255,255,.96) 50%,rgba(255,255,255,.22) 55%,rgba(255,255,255,0) 64%),linear-gradient(rgba(255,255,255,.7),rgba(255,255,255,.7));
+    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:118% 0,0 0;animation:hintGlint var(--glansT) var(--glansE)}
+  @keyframes hintGlint{from{background-position:118% 0,0 0}to{background-position:-18% 0,0 0}}
   .pt-btn.glass.on{background:#fff;border-color:#fff;color:var(--deep)}
   /* unfolding tempo control */
   .tempo{position:relative;display:grid;place-items:center}
@@ -1941,6 +1947,19 @@
     display:inline-flex;align-items:center;gap:8px;transition:color .3s ease}
   .ot-mopt .ot-mdig{font-size:17px}
   .ot-mhour{display:grid;place-items:center}
+  /* Bij de start keer je het glas om, net als een echte zandloper. De draai gaat om de
+     horizontale as: halverwege staat het glas op zijn kant en zie je er niets van — precies
+     het moment om de twee zandvormen van rol te laten wisselen. Het glas is symmetrisch,
+     dus na die halve slag staat de hoop van onderen op de plek van de kegel van boven.
+     Tijdens de draai zetten we de zandovergang even uit, anders zie je het niveau in de
+     tweede helft van de slag nog nakruipen. */
+  .ot-mode-fab .ot-mhour{transition:transform .62s cubic-bezier(.45,.02,.2,1)}
+  .ot-mode-fab .ot-mhour.om{transform:rotateX(180deg)}
+  .ot-mode-fab .ot-mhour .hg-top,.ot-mode-fab .ot-mhour .hg-bot{transition:transform .9s linear}
+  .ot-mode-fab .ot-mhour.draait .hg-top,.ot-mode-fab .ot-mhour.draait .hg-bot{transition:none}
+  @media (prefers-reduced-motion:reduce){
+    .ot-mode-fab .ot-mhour,.ot-mode-fab .ot-mhour .hg-top,.ot-mode-fab .ot-mhour .hg-bot{transition:none}
+  }
   .ot-mopt .ot-mhour svg{width:21px;height:21px;display:block}
   .ot-mode-fab .ot-mhour svg{width:25px;height:25px;display:block}
   .ot-mrep{display:block;background:currentColor;
@@ -2036,22 +2055,27 @@
   .timerscreen .pt-word.ot-cueonly{margin:0;height:0;min-height:0}
   .timerscreen .ot-tcue{position:absolute;left:0;right:0;top:calc(72.0833% + 25px);
     transform:translateY(-50%);
-    display:grid;place-items:center;color:#fff;opacity:.5;
+    display:grid;place-items:center;color:#fff;opacity:1;
     transition:opacity .22s ease}
   .timerscreen .ot-tcue svg{width:25px;height:25px;display:block}
-  .timerscreen.ot-paused .ot-tcue{opacity:.92}
-  .timerscreen .ot-tsub.glint{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
-    background-image:linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,1) 50%,rgba(255,255,255,0) 60%),linear-gradient(rgba(255,255,255,.84),rgba(255,255,255,.84));
-    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:96% 0,0 0;animation:hintGlint 1.2s linear}
   /* De lichtstreep loopt in één keer over de hele ringinhoud: cijfers én uitnodiging.
      Elk element zijn eigen sweep geven gaf twee losse strepen — over de brede cijfers
      schoof hij trager dan over de smalle regel eronder, en dan leest het niet als één
-     lichtval. Nu draagt de gemeenschappelijke ouder de gradiënt en knipt hij hem op alle
-     letters daarbinnen. De basislaag zit tussen de twee kleuren in, zodat noch de cijfers
-     noch de regel tijdens die 1,2 seconde zichtbaar van toon verspringt. */
-  .timerscreen .pt-center.glint{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
-    background-image:linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,1) 50%,rgba(255,255,255,0) 60%),linear-gradient(rgba(255,255,255,.92),rgba(255,255,255,.92));
-    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:96% 0,0 0;animation:hintGlint 1.2s linear}
+     lichtval.
+     De glans ligt als een losse laag bovenop een stille kopie van die inhoud. Knipten we
+     de streep rechtstreeks op de echte tekst, dan moest die tekst tijdens de glans één
+     basiskleur dragen: de cijfers dimden dan van vol wit naar .92 en de uitnodiging sprong
+     van .70 juist feller op — bij elk begin en eind een zichtbare toonsprong. Deze laag
+     heeft geen basiskleur: buiten de lichtband is hij volledig doorzichtig, dus de echte
+     letters eronder houden gewoon hun eigen kleur en er valt niets te verspringen. */
+  .timerscreen .pt-center .pt-sheen{position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    pointer-events:none;z-index:2;filter:blur(6px);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    background-image:linear-gradient(100deg,rgba(255,255,255,0) 36%,rgba(255,255,255,.22) 45%,rgba(255,255,255,1) 50%,rgba(255,255,255,.22) 55%,rgba(255,255,255,0) 64%),linear-gradient(rgba(255,255,255,0),rgba(255,255,255,0));
+    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:118% 0,0 0}
+  .timerscreen .pt-center.glint .pt-sheen{animation:hintGlint var(--glansT) var(--glansE)}
+  @media (prefers-reduced-motion:reduce){.timerscreen .pt-center .pt-sheen{display:none}}
 
   /* ===== Korean visual motifs ===== */
   .stage{
@@ -2196,39 +2220,24 @@
   .wcat .cs-x svg,.hbcat .cs-x svg{width:25px;height:25px}
   @media (hover:hover){ .wcat .cs-x:hover,.hbcat .cs-x:hover{background:rgba(20,23,18,.05)} }
   .wcat .cs-x:active,.hbcat .cs-x:active{transform:scale(.9)}
-  /* Bottom dot navigation — small traditional page dots. Press/drag to scrub: dots grow and a
-     floating label of the target screen appears; release navigates. Auto-fades like the scrollbar. */
+  /* Bottom dot navigation — small traditional page dots. Tap a dot to jump to that screen.
+     Auto-fades like the scrollbar. */
   .cs-dots{position:relative;z-index:60;display:flex;align-items:center;gap:0;margin:11px 0 0 -3.5px;
-    padding:7px 0;touch-action:none;align-self:flex-start}
+    padding:7px 0;align-self:flex-start}
   .cs-dot{position:relative;width:6px;height:6px;flex:none;border:0;padding:0;margin:0 3.5px;border-radius:50%;
     background-color:rgba(30,22,16,.26);cursor:pointer;-webkit-tap-highlight-color:transparent;
     transition:transform .2s cubic-bezier(.22,.9,.3,1), background-color .22s ease}
   .cs-dot::before{content:"";position:absolute;top:-9px;bottom:-9px;left:-3.5px;right:-3.5px}
-  /* De puntjes vertellen ook wát er op die pagina wacht. Een puntje dat nog aandacht vraagt
-     ademt zachtjes; dat valt op zonder een tweede kleur of een ring die om aandacht schreeuwt.
-     Een lichte vulling betekent dat je die woordgroep al kent. De blauwe vulling blijft
-     voorbehouden aan "hier ben je", zodat de betekenissen elkaar niet verdringen. */
+  /* De puntjes vertellen ook wát er op die pagina wacht. Een puntje dat nog aandacht vraagt is
+     dieper dan de rest; dat valt op zonder een tweede kleur of een ring die om aandacht
+     schreeuwt. Een lichte vulling betekent dat je die woordgroep al kent. De blauwe vulling
+     blijft voorbehouden aan "hier ben je", zodat de betekenissen elkaar niet verdringen.
+     Eerder ademden deze puntjes zachtjes, maar meerdere animaties gelijk laten lopen bleef
+     zichtbaar uit de pas; een stille diepere vulling doet hetzelfde werk zonder die onrust. */
   .cs-dot.st-done{background-color:rgba(30,22,16,.12)}
-  @keyframes dotAdem{ 0%,100%{opacity:1} 50%{opacity:.34} }
-  .cs-dot.st-todo:not(.on){animation:dotAdem 2.6s ease-in-out infinite}
-  /* Scrubben is zelf al beweging: dan staat het ademen stil, anders wordt de balk onrustig. */
-  .cs-dots.scrubbing .cs-dot.st-todo{animation:none;opacity:1}
-  @media (prefers-reduced-motion:reduce){
-    /* Zonder beweging valt het puntje op door dieper te zijn dan de rest. */
-    .cs-dot.st-todo:not(.on){animation:none;background-color:rgba(30,22,16,.62)}
-  }
+  .cs-dot.st-todo:not(.on){background-color:rgba(30,22,16,.62)}
   .cs-dot.on{background-color:var(--el,#3E5BD6)}
-  .cs-dots.scrubbing .cs-dot{transform:scale(1.35)}
-  .cs-dots.scrubbing .cs-dot.on{background-color:rgba(30,22,16,.26)}
-  .cs-dots.scrubbing .cs-dot.preview{background-color:var(--el,#3E5BD6);transform:scale(1.75)}
-  @media (hover:hover){ .cs-dots:not(.scrubbing) .cs-dot:not(.on):hover{background-color:rgba(30,22,16,.42)} }
-  /* Floating target label shown while scrubbing the dots */
-  .cs-dot-tip{position:absolute;left:0;top:calc(100% + 8px);
-    max-width:200px;white-space:normal;text-align:left;line-height:1.18;
-    font-family:var(--cond);text-transform:uppercase;letter-spacing:.03em;font-weight:800;font-size:12.5px;
-    color:#fff;background:rgba(26,23,18,.94);padding:6px 11px;border-radius:9px;
-    box-shadow:0 12px 26px -10px rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .16s ease}
-  .cs-dots.scrubbing .cs-dot-tip{opacity:1}
+  @media (hover:hover){ .cs-dot:not(.on):hover{background-color:rgba(30,22,16,.42)} }
   /* Paging between categories: the TITLE and the confidence icons cross-slide (belt-picker style).
      Shared by Woorden woordgroepen and Handboek onderdelen. */
   .wcat .cs-titlewrap,.hbcat .cs-titlewrap{position:relative;overflow:hidden;flex:1 1 auto;min-width:0}
@@ -2841,8 +2850,8 @@
     /* Herhalen uit: een platte herhaal-lus met een streep erdoor. Bewust breed en laag
        getekend: de lijndikte komt uit op dezelfde 1,63px als de andere iconen, en het
        geheel — streep inbegrepen — is even hoog als het oneindig-teken ernaast. */
-    repeatOff:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><mask id="ic-repoff" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff"/><path d="M5.9 16.9 18.1 7.1" stroke="#000" stroke-width="3.6" stroke-linecap="round"/></mask><g mask="url(#ic-repoff)" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9h9a3 3 0 0 1 3 3M17 15H8a3 3 0 0 1-3-3"/><path d="M9.2 6.8 7 9l2.2 2.2M14.8 12.8 17 15l-2.2 2.2"/></g><path stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M5.9 16.9 18.1 7.1"/></svg>',
-    hourglass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3h11M6.5 21h11M16.6 3v3.3c0 1-.4 2-1.1 2.7L12 12.4 8.5 9c-.7-.7-1.1-1.7-1.1-2.7V3M7.4 21v-3.3c0-1 .4-2 1.1-2.7L12 11.6l3.5 3.4c.7.7 1.1 1.7 1.1 2.7V21"/><path fill="currentColor" stroke="none" d="M12 14.1l2.9 2.8c.4.4.6 1 .6 1.6v.9h-7v-.9c0-.6.2-1.2.6-1.6z"/></svg>',
+    repeatOff:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><mask id="ic-repoff" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff"/><path d="M5.9 16.9 18.1 7.1" stroke="#000" stroke-width="3.2" stroke-linecap="round"/></mask><g mask="url(#ic-repoff)" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9h9a3 3 0 0 1 3 3M17 15H8a3 3 0 0 1-3-3"/><path d="M9.2 6.8 7 9l2.2 2.2M14.8 12.8 17 15l-2.2 2.2"/></g><path stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M5.9 16.9 18.1 7.1"/></svg>',
+    hourglass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3h11M6.5 21h11M16.6 3v3.3c0 1-.4 2-1.1 2.7L12 12.4 8.5 9c-.7-.7-1.1-1.7-1.1-2.7V3M7.4 21v-3.3c0-1 .4-2 1.1-2.7L12 11.6l3.5 3.4c.7.7 1.1 1.7 1.1 2.7V21"/><path class="hg-top" fill="currentColor" stroke="none" transform="translate(12 10.5) scale(0.82) translate(-12 -10.5)" d="M8.8 4.4h6.4v1.95c0 .82-.33 1.6-.9 2.18L12 10.5 9.7 8.53C9.13 7.95 8.8 7.17 8.8 6.35z"/><path class="hg-bot" fill="currentColor" stroke="none" transform="translate(12 19.6) scale(0.001) translate(-12 -19.6)" d="M8.8 19.6h6.4v-1.95c0-.82-.33-1.6-.9-2.18L12 13.5 9.7 15.47C9.13 16.05 8.8 16.83 8.8 17.65z"/></svg>',
     chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
     compass:'<svg viewBox="0 0 24 24" fill="none"><path stroke="currentColor" stroke-width="1.5" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"/><path fill="currentColor" fill-rule="evenodd" d="M9.908 9.69a.38.38 0 0 0-.218.218L7.296 16.22a.375.375 0 0 0 .483.483l6.313-2.394c.1-.038.18-.117.218-.218l2.394-6.313a.375.375 0 0 0-.483-.483zM12 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3" clip-rule="evenodd"/></svg>',
     target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>',
@@ -5527,7 +5536,7 @@
   var activePager = null;   // { sheet, items:[{id,label}], step(dir), pick(id) }
   function buildDotsHtml(items, activeId, stateFor){
     if(!items || items.length<2) return '';
-    var h='<div class="cs-dots"><span class="cs-dot-tip" aria-hidden="true"></span>';
+    var h='<div class="cs-dots">';
     for(var i=0;i<items.length;i++){
       var st = stateFor ? stateFor(items[i].id) : null;
       h+='<button class="cs-dot'+(items[i].id===activeId?' on':'')+(st?(' '+st.cls):'')+'"'+
@@ -5555,20 +5564,11 @@
     var dot=catSheet.querySelector('.cs-dot[data-id="'+(window.CSS&&CSS.escape?CSS.escape(name):name)+'"]');
     if(!dot) return;
     var st=catDotState(name), base=dot.getAttribute('aria-label').split(',')[0];
-    var gingAdem=dot.classList.contains('st-todo');
     dot.classList.remove('st-todo','st-done');
     if(st) dot.classList.add(st.cls);
-    // Nieuw aan het ademen? Dan meteen in de maat van de rest stappen.
-    if(st && st.cls==='st-todo' && !gingAdem) dot.style.animationDelay=dotFase();
     dot.setAttribute('aria-label', base+(st?(', '+st.hint):''));
   }
   function pagerDots(){ return activePager ? activePager.sheet.querySelector('.cs-dots') : null; }
-  /* Een puntje dat .on verliest begint zijn ademhaling opnieuw bij nul. Veeg je door de
-     groepen, dan start elk puntje dus op een ander moment en loopt er een golf door de
-     balk — Knight Rider in plaats van één rustige hartslag. Door de vertraging negatief
-     te zetten op de klok stapt elk puntje in op de fase waar de rest al zit. */
-  var DOT_ADEM=2600;
-  function dotFase(){ return '-'+((Date.now()%DOT_ADEM)/1000).toFixed(2)+'s'; }
   // De puntjes staan vast in beeld: ze vertellen waar je bent, en dat is ook waar als je
   // even niets doet. Vroeger doofden ze na 1,7 seconde, waardoor je bij elke veeg opnieuw
   // moest zoeken hoeveel woordgroepen er eigenlijk zijn.
@@ -5576,52 +5576,16 @@
   function updateDots(activeId){
     var dots=pagerDots(); if(!dots || !activePager) return;
     var btns=dots.querySelectorAll('.cs-dot'), items=activePager.items;
-    var fase=dotFase();
-    for(var i=0;i<btns.length;i++){
-      var aan=!!(items[i] && items[i].id===activeId);
-      // Alleen wie nú gaat ademen krijgt de fase mee; lopende puntjes niet aanraken,
-      // anders springen die zichtbaar bij elke veeg.
-      if(!aan && btns[i].classList.contains('on')) btns[i].style.animationDelay=fase;
-      btns[i].classList.toggle('on', aan);
-    }
+    for(var i=0;i<btns.length;i++){ btns[i].classList.toggle('on', !!(items[i] && items[i].id===activeId)); }
     showDots();
   }
-  // Press/drag the dots to scrub: they grow, a label of the target appears above, release navigates.
+  // Aan de puntjesbalk valt niet te slepen: je tikt een puntje aan en je springt erheen.
+  // De sleepbediening (puntjes groeien, zwevend label van het doel) was een tweede manier
+  // om hetzelfde te doen en ging in de weg zitten bij het gewone vegen.
   function attachDotScrub(sheet){
     var dots=sheet.querySelector('.cs-dots'); if(!dots) return;
-    var tip=dots.querySelector('.cs-dot-tip');
-    var scrubbing=false, handled=false, pvIdx=0;
-    function items(){ return activePager?activePager.items:[]; }
-    function dotEls(){ return dots.querySelectorAll('.cs-dot'); }
-    function idxFromX(x){
-      var b=dotEls(), best=0, bd=Infinity;
-      for(var i=0;i<b.length;i++){ var r=b[i].getBoundingClientRect(), c=r.left+r.width/2, d=Math.abs(x-c); if(d<bd){ bd=d; best=i; } }
-      return best;
-    }
-    function preview(idx){
-      pvIdx=idx; var b=dotEls(), it=items();
-      for(var i=0;i<b.length;i++) b[i].classList.toggle('preview', i===idx);
-      if(tip) tip.textContent=it[idx]?it[idx].label:'';
-    }
-    function clearPv(){ var b=dotEls(); for(var i=0;i<b.length;i++) b[i].classList.remove('preview'); }
-    function finish(nav){
-      if(!scrubbing) return; scrubbing=false;
-      dots.classList.remove('scrubbing'); clearPv();
-      var it=items();
-      if(nav && it[pvIdx] && activePager){ activePager.pick(it[pvIdx].id); } else { showDots(); }
-    }
-    dots.addEventListener('pointerdown', function(e){
-      if(e.pointerType==='mouse' && e.button!==0) return;
-      scrubbing=true; handled=true;
-      try{ dots.setPointerCapture(e.pointerId); }catch(_){}
-      dots.classList.add('scrubbing');
-      preview(idxFromX(e.clientX));
-      e.preventDefault();
-    });
-    dots.addEventListener('pointermove', function(e){ if(scrubbing) preview(idxFromX(e.clientX)); });
-    dots.addEventListener('pointerup', function(){ finish(true); });
-    dots.addEventListener('pointercancel', function(){ finish(false); });
-    dots.addEventListener('click', function(e){ if(handled){ e.stopPropagation(); e.preventDefault(); handled=false; } }, true);
+    // Een sleep die op de puntjes begint doet niets — hij mag ook niet als paginaveeg tellen.
+    dots.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
   }
   // Swap the Woorden sheet to another woordgroep (dir sets the cross-slide direction).
   // Only the title moves (cross-slide); the rate card + note + list stay fixed and their content crossfades.
@@ -5670,7 +5634,7 @@
     var x0=0,y0=0,down=false,swiped=false;
     el.addEventListener('pointerdown', function(e){
       if(e.pointerType==='mouse' && e.button!==0) return;
-      if(e.target && e.target.closest && e.target.closest('.cs-dots')) return;  // let the dots own their scrub
+      if(e.target && e.target.closest && e.target.closest('.cs-dots')) return;  // op de puntjes tik je, je veegt er niet
       x0=e.clientX; y0=e.clientY; down=true; swiped=false;
     });
     el.addEventListener('pointermove', function(e){
@@ -7928,7 +7892,9 @@
   }
   function otReset(){
     if(otState.mode==='time'){ otResetTime(); return; }
-    otCloseFan(); otCloseReps(); otCloseMode(); clearTimeout(otState.iv); clearTimeout(otState._wrapT); otState.running=false;
+    // De moduskiezer blijft met rust: die vouwt zichzelf in twee tellen op na een keuze.
+    // Sloten we hem hier, dan sloeg Herhalingen die tweetakt over terwijl Timer hem wél kreeg.
+    otCloseFan(); otCloseReps(); clearTimeout(otState.iv); clearTimeout(otState._wrapT); otState.running=false;
     if(timerScreen) timerScreen.classList.remove('ot-paused');
     otState.phase='idle'; otState.ready=OT_READY; otState.i=0;
     otState.left=(otState.reps===Infinity?Infinity:otState.reps);
@@ -8094,6 +8060,28 @@
       }, 200); // 50% fade completes right as the grow begins
     }, 380);
   }
+  /* De glans is een losse lichtlaag: een stille kopie van de ringinhoud die bovenop de echte
+     tekst ligt. Alleen daar waar de lichtband staat is die kopie zichtbaar; de rest is
+     doorzichtig, dus de cijfers en de uitnodiging eronder veranderen geen haar van kleur.
+     De kopie gaat zonder ids het document in — anders stond er een tweede #ot-num naast de
+     echte — en zonder tekeningen, want een svg trekt zich van tekstkleur niets aan en zou
+     als dubbele play-knop bovenop de eerste verschijnen. */
+  function otSheen(host){
+    if(!host) return;
+    var oud=host.querySelector('.pt-sheen'); if(oud) oud.remove();
+    var laag=document.createElement('div');
+    laag.className='pt-sheen'; laag.setAttribute('aria-hidden','true');
+    laag.innerHTML=host.innerHTML;
+    [].forEach.call(laag.querySelectorAll('[id]'), function(n){ n.removeAttribute('id'); });
+    [].forEach.call(laag.querySelectorAll('svg,img,canvas,.ot-tcue'), function(n){ n.parentNode.removeChild(n); });
+    host.appendChild(laag);
+    host.classList.remove('glint'); void host.offsetWidth; host.classList.add('glint');
+    laag.addEventListener('animationend', function(e){
+      if(e.target!==laag) return;                 // animaties uit de kopie zelf niet voor de glans aanzien
+      host.classList.remove('glint');
+      if(laag.parentNode) laag.parentNode.removeChild(laag);
+    });
+  }
   /* Periodically glint the "tik om te starten" prompt to invite the first tap — only while the timer
      sits idle (never mid-count), matching the sheen on the Vandaag Start-training CTA. */
   function otHintGlint(){
@@ -8101,18 +8089,14 @@
     otGlintT=setTimeout(function(){
       if(!timerScreen) return;
       // Bij Tellen staat de uitnodiging midden in de ring, bij Tijd onder de tijd — beide glinsteren.
-      // Eén streep over de hele ringinhoud: de gedeelde ouder draagt de glans, zodat de
-      // cijfers en de uitnodiging eronder door hetzelfde licht worden geraakt.
-      var hs=[timerScreen.querySelector('.pt-center')];
+      // Eén streep over de hele ringinhoud, zodat de cijfers en de uitnodiging eronder door
+      // hetzelfde licht worden geraakt.
       var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if(!reduce && otState.phase==='idle' && !otState.running) hs.forEach(function(h){
-        if(!h) return;
-        h.classList.remove('glint'); void h.offsetWidth; h.classList.add('glint');
-        // De uitleg bij Tijd wordt bij elke render opnieuw gemaakt, dus haakt hij zelf zijn opruimer aan.
-        h.addEventListener('animationend', function(){ this.classList.remove('glint'); }, {once:true});
-      });
+      if(!reduce && otState.phase==='idle' && !otState.running) otSheen(timerScreen.querySelector('.pt-center'));
       otHintGlint();
-    }, 2600 + Math.random()*2600);
+      // Ruim de helft langer wachten dan vroeger: met een pauze van nog geen drie tellen
+      // volgde de ene streep zo snel op de andere dat het als geknipper ging lezen.
+    }, 3800 + Math.random()*3400);
   }
   function otSpeed(v){
     otState.speed=parseFloat(v); otSyncControls();
@@ -8125,7 +8109,14 @@
   }
   function otStop(){ if(otState.iv){ clearTimeout(otState.iv); otState.iv=null; }
     if(otState.raf){ cancelAnimationFrame(otState.raf); otState.raf=null; }
+    otSheenWeg();
     clearTimeout(otState._wrapT); clearTimeout(otState._windT); otState.running=false; }
+  // Tik je midden in een glans op start, dan mag de lichtlaag niet met oude cijfers blijven hangen.
+  function otSheenWeg(){
+    var host=timerScreen&&timerScreen.querySelector('.pt-center'); if(!host) return;
+    host.classList.remove('glint');
+    var laag=host.querySelector('.pt-sheen'); if(laag) laag.parentNode.removeChild(laag);
+  }
 
   /* ===== Tijd mode: countdown timer (stretch/spar rounds) — 30s..10:00, drag ring or ±30s ===== */
   /* De modus in cijfers: 1 2 3 loopt op (tellen), 3 2 1 loopt terug (aftellen). */
@@ -8301,6 +8292,43 @@
     var menu=w.querySelector('.ot-dmenu'); if(menu){ menu.style.transition=''; menu.style.width=''; }
   }
   function otResettableTime(){ return otState.running || otState.phase==='ready' || otState.phase==='run' || otState.phase==='done'; }
+  /* ---- De zandloper op de moduskiezer loopt mee met de aftelling ----
+     Het bovenste zand loopt leeg richting de hals, het onderste groeit vanaf de bodem. Beide
+     vormen zijn elkaars spiegelbeeld, dus na een halve slag neemt de een de rol van de ander
+     over; welke van de twee bovenin staat hangt af van de stand van het glas. */
+  var otZandT=null, otZandF=1;
+  var HG_HALS={'hg-top':10.5, 'hg-bot':13.5}, HG_VLOER={'hg-top':4.4, 'hg-bot':19.6};
+  var HG_MAX=0.82;   // vol is niet tot de nok: er blijft lucht onder het deksel, net als in een echt glas
+  function otZandloper(frac){
+    if(typeof frac==='number') otZandF=Math.max(0, Math.min(1, frac));
+    if(otZandT) return;                       // midden in de omslag: het nieuwe niveau wacht op de halve slag
+    var host=timerScreen; if(!host) return;
+    var glas=host.querySelector('.ot-mode-fab .ot-mhour'); if(!glas) return;
+    var om=glas.classList.contains('om');
+    var boven=om?'hg-bot':'hg-top', onder=om?'hg-top':'hg-bot';
+    // De vorm die bovenin hangt krimpt naar zijn eigen hals toe; de vorm onderin groeit
+    // vanaf zijn eigen bodem. Beide houden daarbij de kegelvorm van het glas.
+    zet(glas.querySelector('.'+boven), HG_HALS[boven], otZandF);
+    zet(glas.querySelector('.'+onder), HG_VLOER[onder], 1-otZandF);
+    function zet(el, oy, s){
+      if(!el) return;
+      s=Math.max(0.001, Math.min(1, s)*HG_MAX);   // nul geeft een matrix die niet te keren is
+      el.setAttribute('transform','translate(12 '+oy+') scale('+s.toFixed(3)+') translate(-12 -'+oy+')');
+    }
+  }
+  function otDraaiZandloper(om, frac){
+    var host=timerScreen; if(!host) return;
+    var glas=host.querySelector('.ot-mode-fab .ot-mhour'); if(!glas) return;
+    clearTimeout(otZandT); otZandT=null;
+    if(typeof frac==='number') otZandF=Math.max(0, Math.min(1, frac));
+    if(glas.classList.contains('om')===om){ glas.classList.remove('draait'); otZandloper(); return; }
+    glas.classList.add('draait');
+    glas.classList.toggle('om', om);
+    otZandT=setTimeout(function(){
+      otZandT=null; otZandloper();
+      setTimeout(function(){ glas.classList.remove('draait'); }, 330);
+    }, 310);
+  }
   /* Terwijl de timer loopt staan de instellingen op slot: dan kun je alleen nog pauzeren
      (tik in de ring) of opnieuw beginnen. Zo verspring je niet halverwege een set van
      tempo of modus. Pauzeer je, dan komen ze weer vrij. */
@@ -8325,6 +8353,7 @@
     if(!numEl) return;
     var idle=(otState.phase==='idle'), running=(otState.phase==='run'), done=(otState.phase==='done');
     var ready=(otState.phase==='ready');
+    otZandloper((idle||ready) ? 1 : (otState.total>0 ? Math.max(0, otState.left/otState.total) : 0));
     otSyncDur();
     if(dial){ dial.classList.toggle('ready', ready); dial.classList.toggle('idle', idle); }
     if(ready){
@@ -8370,6 +8399,7 @@
   }
   function otResetTime(){
     otStop(); otCloseDur();
+    otDraaiZandloper(false, 1);                  // het glas komt weer rechtop, vol zand bovenin
     if(timerScreen) timerScreen.classList.remove('ot-paused','running');
     otState.phase='idle'; otState.left=otState.dur; otState._lastSec=0; otState._dragged=false;
     var pr=timerScreen&&timerScreen.querySelector('#ot-prog'), kg=timerScreen&&timerScreen.querySelector('#ot-knobg');
@@ -8386,6 +8416,7 @@
     // je klaar kunt zetten voordat de tijd loopt.
     otState.phase='ready'; otState.ready=OT_READY; otState.running=true;
     otState._dragged=false;
+    otDraaiZandloper(true, 1);                   // het glas gaat om: het zand begint straks te lopen
     var pr0=host.querySelector('#ot-prog'), kg0=host.querySelector('#ot-knobg');
     if(pr0){ pr0.style.transition='none'; pr0.style.strokeDashoffset='666'; }
     if(kg0){ kg0.style.transition='none'; kg0.style.transform='rotate(0deg)'; }
