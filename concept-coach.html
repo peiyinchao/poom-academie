@@ -2262,15 +2262,22 @@
     background-color:rgba(30,22,16,.26);cursor:pointer;-webkit-tap-highlight-color:transparent;
     transition:transform .2s cubic-bezier(.22,.9,.3,1), background-color .22s ease}
   .cs-dot::before{content:"";position:absolute;top:-9px;bottom:-9px;left:-3.5px;right:-3.5px}
-  /* De puntjes vertellen ook wát er op die pagina wacht. Een puntje dat nog aandacht vraagt is
-     dieper dan de rest; dat valt op zonder een tweede kleur of een ring die om aandacht
-     schreeuwt. Een lichte vulling betekent dat je die woordgroep al kent. De blauwe vulling
-     blijft voorbehouden aan "hier ben je", zodat de betekenissen elkaar niet verdringen.
+  /* De puntjes kenden eerder vier tinten: onaangeraakt, licht voor "ken je al", diep voor
+     "vraagt aandacht", en blauw voor "hier ben je". Die diepe tint deed alsof elke woordgroep
+     met één bladwijzer een probleem was, en tussen vier tinten viel juist niet meer op waar je
+     stond. Nu zijn het er nog drie: licht zodra je een groep hebt beoordeeld (of je hem nu al
+     kent, bijna kent of nog moet oefenen), de gewone tint voor wat je nog nooit zag, en blauw
+     alleen voor je huidige pagina. De reden waaróm een groep licht is blijft in het aria-label
+     staan, dus voorlezen verliest niets.
      Eerder ademden deze puntjes zachtjes, maar meerdere animaties gelijk laten lopen bleef
-     zichtbaar uit de pas; een stille diepere vulling doet hetzelfde werk zonder die onrust. */
-  .cs-dot.st-done{background-color:rgba(30,22,16,.12)}
-  .cs-dot.st-todo:not(.on){background-color:rgba(30,22,16,.62)}
-  .cs-dot.on{background-color:var(--el,#3E5BD6)}
+     zichtbaar uit de pas; een stille vulling doet hetzelfde werk zonder die onrust. */
+  .cs-dot.st-done,.cs-dot.st-todo{background-color:rgba(30,22,16,.12)}
+  /* "Hier ben je" mag ook in formaat verschillen, niet alleen in kleur: op een crème scherm
+     leest een maatverschil sneller dan een kleurverschil, en het overleeft kleurenblindheid. */
+  .cs-dot.on{background-color:var(--el,#3E5BD6);transform:scale(1.34)}
+  /* De balk staat links uitgelijnd op de titel. Groeit de eerste stip vanuit zijn midden, dan
+     steekt hij een pixel buiten die lijn; vanaf de linkerrand groeien houdt de kolom recht. */
+  .cs-dot:first-child.on{transform-origin:left center}
   @media (hover:hover){ .cs-dot:not(.on):hover{background-color:rgba(30,22,16,.42)} }
   /* Paging between categories: the TITLE and the confidence icons cross-slide (belt-picker style).
      Shared by Woorden woordgroepen and Handboek onderdelen. */
@@ -2330,8 +2337,12 @@
   .cs-standen-sub b{color:var(--ink);font-weight:800}
   .wcat .cs-chip.glass,.hbcat .cs-chip.glass{background:var(--soft);border:1px solid var(--line);color:var(--gray);
     -webkit-backdrop-filter:none;backdrop-filter:none}
-  .wcat .cs-chip.hot{background:color-mix(in srgb, var(--seal) 12%, #fff);color:var(--seal);border-color:transparent}
-  .wcat .cs-chip.hot svg{color:var(--seal)}
+  /* De rode markering hoefde niet feller: op de 12%-achtergrond haalt hij al 5,07:1. Meer rood
+     in het vlak zou het contrast juist omlaag halen (20% zakt naar 4,38, onder de AA-drempel).
+     Diepere inkt op hetzelfde lichte vlak tilt hem naar 7,7:1 — steviger, zonder dat er meer
+     rood op de pagina komt te staan. */
+  .wcat .cs-chip.hot{background:color-mix(in srgb, var(--seal) 12%, #fff);color:var(--seal-deep);border-color:transparent}
+  .wcat .cs-chip.hot svg{color:var(--seal-deep)}
   .wcat .cs-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
     scrollbar-width:none;margin-top:0;border-radius:0;box-shadow:none;background:var(--page);
     padding:14px 22px calc(env(safe-area-inset-bottom) + 22px)}
