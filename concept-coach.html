@@ -20,7 +20,7 @@
     src:url(fonts/blackhansans-kr.woff2) format('woff2');}
   :root{
     --ink:#1A1712; --mid:#101828; --page:#F4F1EA; --gray:#6B6459; --line:#E7E1D5;
-    --surface:#FFFFFF; --surface0:rgba(255,255,255,0); --soft:#EFEADF;
+    --surface:#FFFFFF; --surface0:rgba(255,255,255,0); --page0:rgba(244,241,234,0); --soft:#EFEADF;
     --seal:#C1121F; --seal-deep:#8E0D17;
     --text:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
     --cond:'Big Shoulders Display',system-ui,sans-serif;
@@ -150,13 +150,13 @@
      op de stok (43,3% / 29%), anders zwaait de hele vlag los van zijn mast. */
   /* De plaatjes hebben een loze rand: de berg beslaat maar 67% van zijn eigen vak. Bij een vak
      van 32px bleef er dus nog geen 22px berg over en verdween het wapperen. Het vak is daarom
-     ruimer dan de knop; de zichtbare berg komt zo op ~36px uit en staat daarmee op ooghoogte
-     met de avatar ernaast. Alleen het vak steekt buiten de knop, de inkt niet, dus het raakt
-     de avatar niet en het aanraakvlak blijft de vertrouwde 37px. */
+     ruimer dan de knop; de zichtbare berg komt zo op ~30px uit en blijft daarmee een maatje
+     kleiner dan de avatar ernaast, die de baas van de kop blijft. Alleen het vak steekt buiten
+     de knop, de inkt niet, dus het aanraakvlak blijft de vertrouwde 37px. */
   .tlbtn{width:37px;height:37px;flex:none;border:0;padding:0;border-radius:50%;cursor:pointer;
     background:none;box-shadow:none;
     display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
-  .tlbtn::before,.tlbtn::after{content:"";grid-area:1/1;width:54px;height:54px;
+  .tlbtn::before,.tlbtn::after{content:"";grid-area:1/1;width:45px;height:45px;
     background:var(--ink);opacity:.74}
   .tlbtn::after{-webkit-mask:url(assets/icons/Journey-berg.png) center/contain no-repeat;
     mask:url(assets/icons/Journey-berg.png) center/contain no-repeat}
@@ -2332,29 +2332,33 @@
     -webkit-backdrop-filter:none;backdrop-filter:none}
   .wcat .cs-chip.hot{background:color-mix(in srgb, var(--seal) 12%, #fff);color:var(--seal);border-color:transparent}
   .wcat .cs-chip.hot svg{color:var(--seal)}
-  .wcat .cs-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;margin-top:0;border-radius:0;box-shadow:none;background:var(--page);
+  .wcat .cs-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
+    scrollbar-width:none;margin-top:0;border-radius:0;box-shadow:none;background:var(--page);
     padding:14px 22px calc(env(safe-area-inset-bottom) + 22px)}
-  /* Guidance zone (rate control + note) stays fixed; only the term list scrolls underneath it.
-     De lijst vult de rest tot onderaan: even ver van de rand als links en rechts. */
+  .wcat .cs-body::-webkit-scrollbar{display:none}
+  /* De woordenlijst werkt nu hetzelfde als die in het Handboek: de kaart is zo hoog als zijn
+     inhoud en het hele lichaam rolt eronderdoor. Vroeger stond de kaart vast en rolden de
+     rijen erbinnen — dan bewoog de inhoud terwijl het kader stil stond, en dat las als twee
+     scrollgebieden boven elkaar. Nu beweegt het kader mee, net als op elke andere pagina.
+     De prijs is dat de vraag &#39;hoe goed ken je deze woordgroep&#39; mee naar boven rolt; dat is
+     bewust, want zo hoort hij bij de lijst in plaats van erboven te blijven hangen. */
   .wcat .cs-rate,.wcat .cs-note{flex:none}
-  /* De lijst zit in een omhulsel. Daardoor hangt de scrollbalk náást de kaart in plaats van
-     erin, waar de afgeronde hoeken hem boven- en onderaan afsneden. Het omhulsel draagt ook
-     de vervaging die laat zien dat er nog meer boven of onder staat.
-     De kaart staat 22px van de schermrand; de balk (5px) hangt midden in die marge. */
-  .ct-wrap{position:relative;flex:1 1 auto;min-height:0;display:flex;flex-direction:column;--vsb-right:-13.5px}
-  .ct-wrap::before,.ct-wrap::after{content:"";position:absolute;left:1px;right:1px;height:30px;
-    pointer-events:none;z-index:2;opacity:0;transition:opacity .2s ease}
-  .ct-wrap::before{top:1px;border-radius:15px 15px 0 0;
-    background:linear-gradient(var(--surface),var(--surface0))}
-  .ct-wrap::after{bottom:1px;border-radius:0 0 15px 15px;
-    background:linear-gradient(var(--surface0),var(--surface))}
-  .ct-wrap.more-up::before,.ct-wrap.more-down::after{opacity:1}
-  @media (prefers-reduced-motion:reduce){ .ct-wrap::before,.ct-wrap::after{transition:none} }
-  /* Scrollers zonder omhulsel dragen hun kaarten zelf op 22px van de rand; ook daar hoort de
-     balk midden in die marge te hangen in plaats van er strak tegenaan. */
-  .wscroll,.hbcat .cs-body{--vsb-right:8.5px}
-  .wcat .ct-list{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
-  .wcat .ct-list::-webkit-scrollbar{display:none}
+  /* De vervaging boven- en onderaan zegt dat er nog meer staat. Hij hoort bij de rand van het
+     kijkvenster, niet bij de inhoud, dus hij hangt aan twee plakkertjes zonder eigen hoogte:
+     die verschuiven niets in de opmaak maar blijven wel aan de boven- en onderkant plakken
+     terwijl de rest eronderdoor rolt. De negatieve zijmarge trekt ze tot in de randmarge van
+     het lichaam, zodat de vervaging over de volle breedte loopt. */
+  .cs-fade{display:block;position:sticky;height:0;z-index:3;pointer-events:none}
+  .cs-fade.up{top:0}   /* de echte waarde wordt door csFades gezet */
+  .cs-fade.dn{bottom:0}
+  .cs-fade::after{content:"";position:absolute;left:0;right:0;height:34px;
+    opacity:0;transition:opacity .2s ease}
+  .cs-fade.up::after{top:0;background:linear-gradient(var(--page),var(--page0))}
+  .cs-fade.dn::after{bottom:0;background:linear-gradient(var(--page0),var(--page))}
+  .more-up > .cs-fade.up::after,.more-down > .cs-fade.dn::after{opacity:1}
+  @media (prefers-reduced-motion:reduce){ .cs-fade::after{transition:none} }
+  /* Scrollers dragen hun kaarten op 22px van de rand; de balk hangt midden in die marge. */
+  .wscroll,.hbcat .cs-body,.wcat .cs-body{--vsb-right:8.5px}
   /* Handboek sheet: the whole body scrolls; its content crossfades on paging (no pinned zone) */
   .hbcat .cs-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;margin-top:16px;
     border-radius:0;box-shadow:none;background:var(--page);
@@ -2602,11 +2606,10 @@
   /* Standen leest als een woordgroep: de uitleg blijft boven staan en alleen de kaart met
      standen rolt, tot even ver van de onderrand als van de zijkanten. Zo krijgt hij ook een
      zichtbaar sluitende hoek onderaan, in plaats van van het scherm af te lopen. */
-  .hbcat[data-hb="standen"] .cs-body{display:flex;flex-direction:column;overflow:hidden;
-    padding-bottom:calc(env(safe-area-inset-bottom) + 22px)}
-  .hbcat[data-hb="standen"] .ct-list{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;
-    scrollbar-width:none;overscroll-behavior:contain}
-  .hbcat[data-hb="standen"] .ct-list::-webkit-scrollbar{display:none}
+  /* Standen volgt het gewone model: het hele lichaam rolt en de lijst is zo hoog als zijn
+     inhoud. Eerder rolde alleen de lijst binnen een vast kader, waardoor je op deze ene
+     Handboek-pagina ineens met twee scrollgebieden te maken had. */
+  .hbcat[data-hb="standen"] .cs-body{padding-bottom:calc(env(safe-area-inset-bottom) + 22px)}
   /* De hele stand-regel spreekt het woord uit — diagram en uitleg horen bij hetzelfde woord,
      dus er is geen reden om alleen de titelstrook aan te wijzen. */
   .hbcat .st-row{display:block;cursor:pointer}
@@ -5411,7 +5414,7 @@
       titlerow:'<div class="cs-titlewrap"><h2 class="cs-title cs-title-cur">'+esc(name)+'</h2></div><div class="cs-chips">'+chips+'</div>',
       chips:chips, note:note, list:list,
       body:(isHard?'':rateHtml(name))+(note?'<div class="cs-note">'+note+'</div>':'')+
-           '<div class="ct-wrap"><div class="ct-list">'+list+'</div></div>'
+           '<div class="ct-list">'+list+'</div>'
     };
   }
   function applyCatAccent(el, ac){
@@ -5535,23 +5538,29 @@
   // card height eases from the old to the new group's height when the row count differs.
   function swapCatList(el, html, dir){
     if(!el) return;
-    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ el.innerHTML=html; el.scrollTop=0; return; }
+    var body = el.closest('.cs-body');
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      el.innerHTML=html; if(body) body.scrollTop=0; return;
+    }
+    if(body) body.scrollTop=0;   // een nieuwe woordgroep begint bovenaan, niet halverwege
     var h0 = el.offsetHeight;
     var out = dir<0 ? 'cs-out-r' : 'cs-out-l', into = dir<0 ? 'cs-in-l' : 'cs-in-r';
     el.classList.remove('cs-in-l','cs-in-r');
     el.classList.add('cs-fading', out);             // current rows slide out of the way
     setTimeout(function(){
       el.classList.remove(out);
-      el.innerHTML = html; el.scrollTop = 0;        // swap while faded (new rows start at 0 too)
-      el.style.flex = ''; el.style.height = '';     // natural flex sizing to measure the target
+      el.innerHTML = html;                          // swap while faded
+      el.style.height = '';                         // natuurlijke hoogte om het doel te meten
       void el.offsetHeight;
-      var h1 = el.offsetHeight;                     // flex-resolved height for the new content
+      var h1 = el.offsetHeight;                     // de hoogte die de nieuwe inhoud vraagt
       if(Math.abs(h1 - h0) < 1){                    // same height → the new rows slide in
         requestAnimationFrame(function(){ el.classList.remove('cs-fading'); el.classList.add(into); });
         setTimeout(function(){ el.classList.remove(into); }, 400);
         return;
       }
-      el.style.flex = '0 0 auto';                   // take flex out of the loop while we ease height
+      // Tijdens het uitzetten is de kaart even lager dan zijn inhoud; zonder afknippen zouden
+      // de onderste rijen er alvast uit hangen.
+      el.style.overflow = 'hidden';
       el.style.height = h0 + 'px';                  // lock the start height
       void el.offsetHeight;                         // commit before animating
       requestAnimationFrame(function(){
@@ -5560,10 +5569,10 @@
         el.classList.remove('cs-fading');           // new rows slide in
         el.classList.add(into);
       });
-      setTimeout(function(){                         // restore normal flex sizing after the ease
-        el.style.transition = ''; el.style.height = ''; el.style.flex = '';
+      setTimeout(function(){                         // restore natural sizing after the ease
+        el.style.transition = ''; el.style.height = ''; el.style.overflow = '';
         el.classList.remove(into);
-        csEdgeFade(el);
+        if(body) csEdgeFade(body);
       }, 400);
     }, 170);
   }
@@ -5776,37 +5785,51 @@
     csBack();
   }
 
-  var VSB_SEL='.surface,.sbody,.cs-body,.ct-list,.wscroll';
-  /* De vervaging boven- en onderaan een lijst zegt dat er nog meer staat. Hij hoort bij het
-     omhulsel, niet bij de scroller zelf, anders zou hij meeschuiven met de inhoud. */
+  var VSB_SEL='.surface,.sbody,.cs-body,.wscroll';
+  /* De vervaging boven- en onderaan een rollend gebied zegt dat er nog meer staat. Hij hangt
+     aan twee plakkertjes in de scroller zelf; die blijven aan de rand van het kijkvenster
+     plakken, dus hij schuift niet mee met de inhoud. Een scroller krijgt ze pas als hij ze
+     nodig heeft — csFades zet ze erin zodra er een blad opengaat. */
+  function csFades(c){
+    if(!c) return;
+    // De inhoud van een blad wordt soms in zijn geheel vervangen; dan zijn de plakkertjes weg
+    // en moeten ze er opnieuw in. We kijken dus of ze er staan, niet of we ze ooit zetten.
+    var up=c.querySelector(':scope > .cs-fade.up'), dn=c.querySelector(':scope > .cs-fade.dn');
+    if(!up){ up=document.createElement('i'); up.className='cs-fade up'; c.insertBefore(up, c.firstChild); }
+    if(!dn){ dn=document.createElement('i'); dn.className='cs-fade dn'; c.appendChild(dn); }
+    // Een plakkertje blijft uit zichzelf bij de rand van de inhoud hangen, dus binnen de
+    // binnenmarge van het blad. Dan bleef er bovenaan een strookje over waar de inhoud
+    // onvervaagd langs schoof. We trekken ze daarom met de eigen marge van het blad mee naar
+    // de echte rand — uitgerekend in plaats van ingetypt, zodat het klopt bij elk blad.
+    var cs=getComputedStyle(c);
+    up.style.top='-'+cs.paddingTop;
+    dn.style.bottom='-'+cs.paddingBottom;
+    up.style.marginLeft=dn.style.marginLeft='-'+cs.paddingLeft;
+    up.style.marginRight=dn.style.marginRight='-'+cs.paddingRight;
+  }
   function csEdgeFade(c){
-    var pa=c.parentNode;
-    if(!pa || !pa.classList || !pa.classList.contains('ct-wrap')) return;
+    if(!c) return;
     var ruimte = c.scrollHeight - c.clientHeight;
-    pa.classList.toggle('more-up',   ruimte>2 && c.scrollTop > 2);
-    pa.classList.toggle('more-down', ruimte>2 && c.scrollTop < ruimte-2);
+    c.classList.toggle('more-up',   ruimte>2 && c.scrollTop > 2);
+    c.classList.toggle('more-down', ruimte>2 && c.scrollTop < ruimte-2);
   }
   // Bij het openen of wisselen van een woordgroep is er nog niet gescrold, dus moeten de
   // vervagingen alvast kloppen voordat de gebruiker iets doet.
   function csEdgeFadeAll(root){
-    var els=(root||document).querySelectorAll('.ct-wrap > .ct-list');
-    for(var i=0;i<els.length;i++) csEdgeFade(els[i]);
+    var els=(root||document).querySelectorAll('.cs-body');
+    for(var i=0;i<els.length;i++){ csFades(els[i]); csEdgeFade(els[i]); }
   }
   /* Transient overlay scrollbar: a JS thumb (.vsb) per scroll container, shown while scrolling then faded. */
   (function(){
     var SEL=VSB_SEL;
-    // Bij een lijst met afgeronde hoeken hangt de duim in het omhulsel ernaast: binnenin
-    // werd hij boven- en onderaan door de hoek afgesneden.
-    function hostFor(c){
-      var pa=c.parentNode;
-      return (pa && pa.classList && pa.classList.contains('ct-wrap')) ? pa : c;
-    }
-    function thumbFor(c, host){
+    // De duim hangt in de scroller zelf en krijgt daarom de scrollpositie mee, anders zou hij
+    // met de inhoud wegschuiven.
+    function thumbFor(c){
       var t=c._vsb;
-      if(!t || t.parentNode!==host){
-        if(getComputedStyle(host).position==='static') host.style.position='relative';
+      if(!t || t.parentNode!==c){
+        if(getComputedStyle(c).position==='static') c.style.position='relative';
         if(!t){ t=document.createElement('div'); t.className='vsb'; c._vsb=t; }
-        host.appendChild(t);
+        c.appendChild(t);
       }
       return t;
     }
@@ -5814,13 +5837,11 @@
       csEdgeFade(c);
       var sh=c.scrollHeight, ch=c.clientHeight;
       if(sh-ch<=6){ if(c._vsb) c._vsb.classList.remove('on'); return; }
-      var host=hostFor(c), t=thumbFor(c, host);
+      var t=thumbFor(c);
       var th=Math.max(28, Math.round(ch*ch/sh)), travel=ch-th;
       var y=(c.scrollTop/(sh-ch))*travel;
       t.style.height=th+'px';
-      // In het omhulsel staat de duim stil ten opzichte van de kaart; in de scroller zelf
-      // moet hij de scrollpositie meekrijgen om op zijn plek te blijven.
-      t.style.transform='translateY('+(host===c ? c.scrollTop+y : y)+'px)';
+      t.style.transform='translateY('+(c.scrollTop+y)+'px)';
       t.classList.add('on');
       clearTimeout(c._vsbHide);
       c._vsbHide=setTimeout(function(){ if(c._vsb) c._vsb.classList.remove('on'); }, 950);
@@ -6179,7 +6200,7 @@
     // Standen heeft zijn uitleg in de kop staan en daaronder één lijst; die kan dus als vast
     // kader mee-ademen met het scherm, net als een woordgroep. De andere onderdelen hebben
     // tussenkopjes of meerdere lijsten en blijven in hun geheel rollen.
-    if(key==='standen') return '<div class="ct-wrap"><div class="ct-list">'+rows+'</div></div>';
+    if(key==='standen') return '<div class="ct-list">'+rows+'</div>';
     return pre+'<div class="ct-list">'+rows+'</div>';
   }
   var hbSheet=null;
@@ -6384,7 +6405,7 @@
     stage.appendChild(poomSheet);
     fnav.classList.add('hide');
     void poomSheet.offsetWidth;
-    requestAnimationFrame(function(){ poomSheet.classList.add('show'); });
+    requestAnimationFrame(function(){ poomSheet.classList.add('show'); csEdgeFadeAll(poomSheet); });
   }
   function closePoomDetail(){
     if(!poomSheet) return;
