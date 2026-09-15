@@ -20,7 +20,7 @@
     src:url(fonts/blackhansans-kr.woff2) format('woff2');}
   :root{
     --ink:#1A1712; --mid:#101828; --page:#F4F1EA; --gray:#6B6459; --line:#E7E1D5;
-    --surface:#FFFFFF; --soft:#EFEADF;
+    --surface:#FFFFFF; --surface0:rgba(255,255,255,0); --soft:#EFEADF;
     --seal:#C1121F; --seal-deep:#8E0D17;
     --text:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
     --cond:'Big Shoulders Display',system-ui,sans-serif;
@@ -79,7 +79,7 @@
   /* Transient overlay scrollbar — auto-shows while scrolling, fades out after a short pause.
      A JS-driven thumb (.vsb) is injected into each scroll container so the length of the list
      is legible on touch + desktop without a persistent bar. */
-  .vsb{position:absolute;top:0;right:3px;width:5px;border-radius:3px;background:rgba(30,22,16,.32);
+  .vsb{position:absolute;top:0;right:var(--vsb-right,3px);width:5px;border-radius:3px;background:rgba(30,22,16,.32);
     opacity:0;pointer-events:none;z-index:6;transition:opacity .35s ease;will-change:transform}
   .vsb.on{opacity:1}
   @media (prefers-reduced-motion:reduce){ .vsb{transition:none} }
@@ -96,10 +96,11 @@
       overflow:hidden;overscroll-behavior:none}
     #topcap{display:block}
     html.tint #topfade{display:block}
-    /* Zodra een kaartje openstaat dimt de strook mee; het verloop eronder valt weg, want dat
-       zou als een onverduisterde band boven de dim-laag blijven liggen. */
+    /* Zodra een kaartje openstaat dimt de strook mee. Hoe donker hij staat zet het script
+       zelf, frame voor frame — een CSS-overgang mag hier niet (zie #topdim). Het verloop
+       eronder dooft in hetzelfde tempo weg, want dat zou anders als een onverduisterde
+       band boven de dim-laag blijven liggen. */
     html.dimmed #topdim{display:block}
-    html.dimmed #topfade{display:none}
     .device{width:100vw;height:100vh;height:100dvh;border-radius:0;border:0;box-shadow:none}
     .concept-flag{display:none}
   }
@@ -143,12 +144,30 @@
   /* Rustige knop: geen achtergrond naast de profielfoto, zodat de avatar het enige ronde
      element in de header blijft. Zonder pil is er geen binnenmarge nodig, dus het icoon
      mag de volle hoogte pakken en blijft het aanraakvlak toch 37px. */
+  /* Je reis is de kern van de app, dus het icoon mag leven. Geen kader eromheen — in plaats
+     daarvan wappert de vlag op de top. Daarvoor staat het icoon in twee lagen: de berg met de
+     stok, en het doek los daarvan, zodat alleen dat doek beweegt. Het draaipunt ligt precies
+     op de stok (43,3% / 29%), anders zwaait de hele vlag los van zijn mast. */
   .tlbtn{width:37px;height:37px;flex:none;border:0;padding:0;border-radius:50%;cursor:pointer;
     background:none;box-shadow:none;
     display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
-  .tlbtn::after{content:"";width:29px;height:29px;background:var(--ink);opacity:.72;
-    -webkit-mask:url(assets/icons/Journey.png) center/contain no-repeat;
-    mask:url(assets/icons/Journey.png) center/contain no-repeat}
+  .tlbtn::before,.tlbtn::after{content:"";grid-area:1/1;width:32px;height:32px;
+    background:var(--ink);opacity:.74}
+  .tlbtn::after{-webkit-mask:url(assets/icons/Journey-berg.png) center/contain no-repeat;
+    mask:url(assets/icons/Journey-berg.png) center/contain no-repeat}
+  .tlbtn::before{-webkit-mask:url(assets/icons/Journey-vlag.png) center/contain no-repeat;
+    mask:url(assets/icons/Journey-vlag.png) center/contain no-repeat;
+    transform-origin:43.3% 29%;will-change:transform;
+    animation:tlWapper 3.6s ease-in-out infinite}
+  /* Het doek bolt op en zakt weer terug: iets smaller worden leest als naar je toe draaien,
+     de lichte scheefstand als de golf die er doorheen loopt. */
+  @keyframes tlWapper{
+    0%,100%{transform:scaleX(1) skewY(0deg)}
+    22%    {transform:scaleX(.955) skewY(2.4deg)}
+    50%    {transform:scaleX(1) skewY(.2deg)}
+    76%    {transform:scaleX(.968) skewY(-2deg)}
+  }
+  @media (prefers-reduced-motion:reduce){ .tlbtn::before{animation:none} }
   .tlbtn:active{opacity:.62;transform:translateY(1px)}
 
   /* ---------- Coach greeting ---------- */
@@ -393,10 +412,9 @@
   .ag-empty{font-size:12.5px;color:var(--gray);line-height:1.45;padding:2px 2px 0}
   /* List mode: the events plus a single button that swaps the sheet over to the form. */
   .ag-addbtn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:14px;
-    background:var(--surface);border:1px dashed var(--line);border-radius:16px;padding:13px 12px;
-    font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-weight:800;font-size:12.5px;
-    color:var(--gray);cursor:pointer;-webkit-tap-highlight-color:transparent}
-  .ag-addbtn:active{transform:scale(.99)}
+    border-radius:16px;padding:15px 12px;
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-weight:800;font-size:13px}
+  .ag-addbtn:active{transform:translateY(1px)}
   /* Form mode: type, name and the date range each get their own row. */
   .ag-form{display:flex;flex-direction:column;gap:11px;margin-top:16px}
   .ag-chips{display:flex;gap:7px;width:100%}
@@ -431,10 +449,8 @@
   /* ---- Filmpjes: a video collection the student curates themselves ---- */
   /* Content-first: one horizontally scrolling shelf per training type, in the order the pair
      actually trains — stretch, then gyeorugi, then poomsae. */
-  .vd-add{flex:0 0 auto;align-self:center;width:46px;height:46px;border-radius:50%;border:0;margin:6px 0 0;
-    background:var(--beltfill,var(--el));color:var(--beltink,#fff);
-    font-size:26px;font-weight:400;line-height:1;display:grid;place-items:center;
-    box-shadow:0 9px 18px -9px rgba(40,28,18,.55);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .vd-add{flex:0 0 auto;align-self:center;width:46px;height:46px;border-radius:50%;margin:6px 0 0;
+    font-size:26px;font-weight:400;line-height:1;display:grid;place-items:center}
   .vd-add:active{transform:translateY(1px);opacity:.9}
   #vd-scroll{padding-top:16px}
   .vd-row{margin:0 0 24px}
@@ -470,9 +486,8 @@
     -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
   .vd-more:active{opacity:.6}
   .vd-empty{font-size:13.5px;color:var(--gray);line-height:1.5;text-align:center;padding:30px 10px 18px}
-  .vd-cta{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border:0;border-radius:16px;
-    padding:15px;background:var(--beltfill,var(--el));color:var(--beltink,#fff);
-    box-shadow:0 10px 22px -12px rgba(40,28,18,.55);cursor:pointer;
+  .vd-cta{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border-radius:16px;
+    padding:15px;
     font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:13px;font-weight:800}
   .vd-cta:active{transform:translateY(1px)}
   /* Per-item menu, as a compact sheet so it matches every other sheet in the app. */
@@ -582,34 +597,46 @@
   /* De examinator is een herinnering, geen prijs; de gekleurde pil blijft voor uitslagen. */
   .tl-exam{display:block;margin-top:6px;font-size:12px;font-weight:600;color:var(--gray)}
   .tl-add{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:6px;
-    border:0;border-radius:16px;padding:15px;background:var(--beltfill,var(--el));color:var(--beltink,#fff);
-    box-shadow:0 10px 22px -12px rgba(40,28,18,.55);cursor:pointer;
+    border-radius:16px;padding:15px;
     font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:13px;font-weight:800}
   .tl-add:active{transform:translateY(1px)}
   /* Zwevende plusknop — zelfde plek en maat als de oefentimer, maar in accentblauw zodat hij
      leest als "hier voeg je iets toe". Je hoeft nu niet meer naar de staart van je verhaal te
      scrollen om een moment te bewaren. */
   .tl-fab{position:absolute;right:22px;bottom:calc(env(safe-area-inset-bottom) + 20px);z-index:40;
-    width:64px;height:64px;border:0;border-radius:50%;cursor:pointer;overflow:hidden;
-    -webkit-tap-highlight-color:transparent;
-    background:var(--blue);color:#fff;display:grid;place-items:center;
-    box-shadow:0 16px 34px -14px rgba(62,91,214,.72), 0 2px 6px -3px rgba(18,26,62,.4),
-               inset 0 1px 0 rgba(255,255,255,.34);
+    width:64px;height:64px;border-radius:50%;
+    display:grid;place-items:center;
     opacity:0;transform:translateY(16px) scale(.88)}
   .tlscreen.show .tl-fab{opacity:1;transform:none;
     transition:opacity .3s ease .16s, transform .4s cubic-bezier(.24,1.25,.4,1) .16s}
   .tlscreen.show .tl-fab:active{transform:scale(.92);transition:transform .12s}
   .tl-fab svg{position:relative;z-index:2;width:27px;height:27px}
-  .tl-fab-glint{position:absolute;top:-60%;bottom:-60%;left:0;width:46%;z-index:1;pointer-events:none;
+
+  /* ---- Eén familie voor alle "voeg toe"-knoppen ---- */
+  /* Agenda, tijdlijn en filmpjes vroegen alledrie om iets toevoegen, maar zagen er alledrie
+     anders uit — op de tijdlijn stonden zelfs twee verschillende plusknoppen op hetzelfde
+     scherm. Nu delen ze kleur, schaduw, veeg en indrukgevoel; alleen de vorm verschilt,
+     want een balk past in een kaart en een rondje in een kop. */
+  .ag-addbtn,.tl-add,.vd-add,.vd-cta,.pl-add,.tl-fab{
+    overflow:hidden;border:0;cursor:pointer;
+    background:var(--blue);color:#fff;-webkit-tap-highlight-color:transparent;
+    box-shadow:0 16px 34px -14px rgba(62,91,214,.72), 0 2px 6px -3px rgba(18,26,62,.4),
+               inset 0 1px 0 rgba(255,255,255,.34)}
+  /* De FAB staat zelf al absoluut; de rest heeft een eigen stapelcontext nodig voor de veeg. */
+  .ag-addbtn,.tl-add,.vd-add,.vd-cta,.pl-add{position:relative}
+  .add-lab{position:relative;z-index:2}
+  .ag-addbtn::after,.tl-add::after,.vd-add::after,.vd-cta::after,.pl-add::after,.tl-fab-glint{
+    content:"";position:absolute;top:-60%;bottom:-60%;left:0;width:46%;z-index:1;pointer-events:none;
     filter:blur(4.5px);transform:translateX(-300%) skewX(-16deg);
     background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.04) 24%,
       rgba(255,255,255,.52) 50%,rgba(255,255,255,.04) 76%,transparent 100%)}
   /* Lange pauze tussen de vegen: een doorlopende glans zou onrustig staan naast de lijst. */
-  @keyframes tlFabGlint{0%{transform:translateX(-300%) skewX(-16deg)}
-    21%{transform:translateX(560%) skewX(-16deg)}
+  @keyframes addGlint{0%{transform:translateX(-300%) skewX(-16deg)}
+    15%{transform:translateX(560%) skewX(-16deg)}
     100%{transform:translateX(560%) skewX(-16deg)}}
   @media (prefers-reduced-motion:no-preference){
-    .tlscreen.show .tl-fab-glint{animation:tlFabGlint 6.4s ease-in-out 1.1s infinite}}
+    .ag-addbtn::after,.tl-add::after,.vd-add::after,.vd-cta::after,.pl-add::after,.tlscreen.show .tl-fab-glint{
+      animation:addGlint 9.2s ease-in-out 1.1s infinite}}
   /* Ruimte onder de lijst zodat de knop nooit het laatste moment afdekt. */
   .tlscreen .sbody{padding-bottom:calc(env(safe-area-inset-bottom) + 104px)}
   /* Korte melding, boven alles — ook boven sheets (z-index 120) en schermen (90). */
@@ -696,11 +723,10 @@
     background:repeating-linear-gradient(135deg,var(--soft) 0 6px,rgba(20,17,13,.04) 6px 12px)}
   .pl-cdot{flex:none;width:15px;height:15px;color:var(--gray)}
 
-  .pl-add{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border:1.5px dashed var(--line);
-    border-radius:17px;padding:15px;background:transparent;color:var(--gray);cursor:pointer;
-    -webkit-tap-highlight-color:transparent;
-    font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:12.5px;font-weight:800}
-  .pl-add:active{transform:translateY(1px);opacity:.7}
+  .pl-add{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+    border-radius:17px;padding:15px;
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:13px;font-weight:800}
+  .pl-add:active{transform:translateY(1px)}
   .pl-empty{font-size:13.5px;color:var(--gray);line-height:1.5;text-align:center;padding:22px 10px 16px}
   .pl-cta{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border:0;border-radius:16px;
     padding:15px;margin:0 0 12px;background:var(--beltfill,var(--el));color:var(--beltink,#fff);
@@ -1725,7 +1751,19 @@
      samen binnen duimbereik en klapt elke knop naar rechts open in de lege ruimte ernaast.
      De modusknop staat onderaan, want die verspringt niet als de rest per modus wisselt.
      De tussenruimte is ruim genoeg voor het zwevende labeltje boven elke knop. */
-  .ot-left{display:flex;flex-direction:column;align-items:flex-start;gap:22px}
+  .ot-left{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:22px}
+  /* Wissel je van stand, dan zakken de instellingen van de oude stand weg achter de
+     moduskiezer en komen die van de nieuwe daar weer vandaan. De vertrekker wordt uit de
+     stapel gelicht (absoluut geplaatst) zodat de rest niet meespringt tijdens de vlucht. */
+  .timerscreen .ot-weg{display:block!important;position:absolute!important;z-index:0;
+    pointer-events:none;animation:otZakWeg .32s cubic-bezier(.45,0,.75,.35) forwards}
+  @keyframes otZakWeg{ to{ transform:translateY(var(--dy,64px)) scale(.62); opacity:0 } }
+  .timerscreen .ot-komt{animation:otKomOp .42s cubic-bezier(.22,1.16,.36,1) both}
+  @keyframes otKomOp{ from{ transform:translateY(var(--dy,64px)) scale(.62); opacity:0 } }
+  @media (prefers-reduced-motion:reduce){
+    .timerscreen .ot-weg,.timerscreen .ot-komt{animation:none}
+    .timerscreen .ot-weg{display:none!important}
+  }
   .ot-tempo{position:relative;width:64px;height:64px}
   .ot-tempo-fab{position:absolute;left:0;bottom:0;z-index:1;transition:opacity .24s ease;
     background:transparent;border-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
@@ -1813,7 +1851,7 @@
   .ot-rep-fab.is-noloop .ot-rico.noloop{display:grid}
   /* Op de knop zelf mag hij groter dan in het menu: de streep loopt schuin door het teken,
      waardoor de lus optisch kleiner oogt dan het oneindig-teken van dezelfde maat. */
-  .ot-rep-fab .ot-rico.noloop svg{width:34px;height:34px;display:block}
+  .ot-rep-fab .ot-rico.noloop svg{width:38px;height:38px;display:block}
   .ot-rmenu{position:absolute;left:0;bottom:3px;height:58px;width:64px;z-index:2;overflow:hidden;
     display:flex;align-items:center;justify-content:flex-start;padding:6px;box-sizing:border-box;
     border-radius:29px;background:rgba(16,8,4,.52);border:1px solid rgba(255,255,255,.24);
@@ -1885,6 +1923,11 @@
   .ot-mhour{display:grid;place-items:center}
   .ot-mopt .ot-mhour svg{width:21px;height:21px;display:block}
   .ot-mode-fab .ot-mhour svg{width:25px;height:25px;display:block}
+  .ot-mrep{display:block;background:currentColor;
+    -webkit-mask:url(assets/icons/Herhalingen.png) center/contain no-repeat;
+    mask:url(assets/icons/Herhalingen.png) center/contain no-repeat}
+  .ot-mopt .ot-mrep{width:22px;height:22px}
+  .ot-mode-fab .ot-mrep{width:26px;height:26px}
   .ot-mword{font-family:var(--cond);font-weight:800;text-transform:uppercase;
     letter-spacing:.05em;font-size:14px;line-height:1}
   .ot-mopt.on{color:var(--deep)}
@@ -1961,8 +2004,26 @@
   .timerscreen[data-mode="time"] .ptimer.idle .pt-start{display:none}
   .timerscreen .ot-tsub{font-family:var(--cond);font-weight:800;text-transform:uppercase;
     letter-spacing:.14em;font-size:12.5px;color:rgba(255,255,255,.84)}
+  /* Het pauzeteken onder de tijd wijst aan wáár je tikt; het blijft ingetogen, want de
+     cijfers zijn de hoofdzaak. Bij pauze staat er een afspeelteken en licht het wat op.
+     Het staat los van de tekstregel en hangt precies halverwege tussen de onderkant van
+     de cijfers en de ringlijn, zodat de tijd zelf gewoon in het midden van de ring blijft.
+     Rekenwerk: ringstraal = 106/240 van de doos, cijfers zijn 100px hoog met lijnhoogte 1,
+     dus het midden ligt op (50% + 50px + 94,17%) / 2. */
+  .timerscreen .pt-word.ot-cueonly{margin:0;height:0;min-height:0}
+  .timerscreen .ot-tcue{position:absolute;left:0;right:0;top:calc(72.0833% + 25px);
+    transform:translateY(-50%);
+    display:grid;place-items:center;color:#fff;opacity:.5;
+    transition:opacity .22s ease}
+  .timerscreen .ot-tcue svg{width:19px;height:19px;display:block}
+  .timerscreen.ot-paused .ot-tcue{opacity:.92}
   .timerscreen .ot-tsub.glint{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
     background-image:linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,1) 50%,rgba(255,255,255,0) 60%),linear-gradient(rgba(255,255,255,.84),rgba(255,255,255,.84));
+    background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:96% 0,0 0;animation:hintGlint 1.2s linear}
+  /* De lichtstreep loopt door de hele ringinhoud: eerst over de tijd, dan over de uitnodiging.
+     Alleen de tekst laten glinsteren liet de grote cijfers er levenloos naast staan. */
+  .timerscreen .pt-num.ot-tnum.glint{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    background-image:linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,1) 50%,rgba(255,255,255,0) 60%),linear-gradient(#fff,#fff);
     background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:96% 0,0 0;animation:hintGlint 1.2s linear}
 
   /* ===== Korean visual motifs ===== */
@@ -2083,6 +2144,10 @@
   .cs-chip{font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;font-size:11.5px;font-weight:700;
     padding:7px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums}
   .cs-chip[hidden]{display:none}   /* honour the hidden attr (base display:inline-flex would otherwise override it) */
+  /* In de woordgroep-kop komt en gaat de "n moeilijk"-pil, maar de kop mag daar niet van
+     opschuiven. Hij houdt zijn plek en wordt alleen onzichtbaar, zodat titel, puntjes en
+     lijst op elke pagina op precies dezelfde hoogte staan. */
+  .wcat .cs-titlerow .cs-chip[hidden]{display:inline-flex;visibility:hidden}
   .cs-chip.glass{background:rgba(255,255,255,.15);-webkit-backdrop-filter:blur(12px) saturate(1.3);
     backdrop-filter:blur(12px) saturate(1.3);border:1px solid rgba(255,255,255,.26);color:#fff}
   .cs-chip.hot{background:rgba(255,255,255,.92);color:var(--deep);border-color:transparent}
@@ -2112,6 +2177,19 @@
     background-color:rgba(30,22,16,.26);cursor:pointer;-webkit-tap-highlight-color:transparent;
     transition:transform .2s cubic-bezier(.22,.9,.3,1), background-color .22s ease}
   .cs-dot::before{content:"";position:absolute;top:-9px;bottom:-9px;left:-3.5px;right:-3.5px}
+  /* De puntjes vertellen ook wát er op die pagina wacht. Een puntje dat nog aandacht vraagt
+     ademt zachtjes; dat valt op zonder een tweede kleur of een ring die om aandacht schreeuwt.
+     Een lichte vulling betekent dat je die woordgroep al kent. De blauwe vulling blijft
+     voorbehouden aan "hier ben je", zodat de betekenissen elkaar niet verdringen. */
+  .cs-dot.st-done{background-color:rgba(30,22,16,.12)}
+  @keyframes dotAdem{ 0%,100%{opacity:1} 50%{opacity:.34} }
+  .cs-dot.st-todo:not(.on){animation:dotAdem 2.6s ease-in-out infinite}
+  /* Scrubben is zelf al beweging: dan staat het ademen stil, anders wordt de balk onrustig. */
+  .cs-dots.scrubbing .cs-dot.st-todo{animation:none;opacity:1}
+  @media (prefers-reduced-motion:reduce){
+    /* Zonder beweging valt het puntje op door dieper te zijn dan de rest. */
+    .cs-dot.st-todo:not(.on){animation:none;background-color:rgba(30,22,16,.62)}
+  }
   .cs-dot.on{background-color:var(--el,#3E5BD6)}
   .cs-dots.scrubbing .cs-dot{transform:scale(1.35)}
   .cs-dots.scrubbing .cs-dot.on{background-color:rgba(30,22,16,.26)}
@@ -2189,12 +2267,28 @@
   /* Guidance zone (rate control + note) stays fixed; only the term list scrolls underneath it.
      De lijst vult de rest tot onderaan: even ver van de rand als links en rechts. */
   .wcat .cs-rate,.wcat .cs-note{flex:none}
+  /* De lijst zit in een omhulsel. Daardoor hangt de scrollbalk náást de kaart in plaats van
+     erin, waar de afgeronde hoeken hem boven- en onderaan afsneden. Het omhulsel draagt ook
+     de vervaging die laat zien dat er nog meer boven of onder staat.
+     De kaart staat 22px van de schermrand; de balk (5px) hangt midden in die marge. */
+  .ct-wrap{position:relative;flex:1 1 auto;min-height:0;display:flex;flex-direction:column;--vsb-right:-13.5px}
+  .ct-wrap::before,.ct-wrap::after{content:"";position:absolute;left:1px;right:1px;height:30px;
+    pointer-events:none;z-index:2;opacity:0;transition:opacity .2s ease}
+  .ct-wrap::before{top:1px;border-radius:15px 15px 0 0;
+    background:linear-gradient(var(--surface),var(--surface0))}
+  .ct-wrap::after{bottom:1px;border-radius:0 0 15px 15px;
+    background:linear-gradient(var(--surface0),var(--surface))}
+  .ct-wrap.more-up::before,.ct-wrap.more-down::after{opacity:1}
+  @media (prefers-reduced-motion:reduce){ .ct-wrap::before,.ct-wrap::after{transition:none} }
+  /* Scrollers zonder omhulsel dragen hun kaarten zelf op 22px van de rand; ook daar hoort de
+     balk midden in die marge te hangen in plaats van er strak tegenaan. */
+  .wscroll,.hbcat .cs-body{--vsb-right:8.5px}
   .wcat .ct-list{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
   .wcat .ct-list::-webkit-scrollbar{display:none}
   /* Handboek sheet: the whole body scrolls; its content crossfades on paging (no pinned zone) */
   .hbcat .cs-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;margin-top:16px;
     border-radius:0;box-shadow:none;background:var(--page);
-    padding:2px 20px calc(env(safe-area-inset-bottom) + 24px);transition:opacity .17s ease}
+    padding:2px 22px calc(env(safe-area-inset-bottom) + 24px);transition:opacity .17s ease}
   .hbcat .cs-body::-webkit-scrollbar{display:none}
   .hbcat .cs-body.cs-fading{opacity:0}
   /* Handboek reference lists share the Woorden grouped-card look (dividers, no per-row cards) */
@@ -2209,6 +2303,9 @@
   .wcat .ct-list{gap:0;background:var(--surface);border:1px solid var(--line);border-radius:16px}
   .wcat .ct-row{position:relative;background:transparent;border:0;border-radius:0;padding:11px 14px;cursor:pointer}
   .wcat .ct-row + .ct-row{border-top:1px solid var(--line)}
+  /* Een gemarkeerd woord kleurt de hele regel zacht rood: je ziet in één blik welke woorden
+     in deze lijst nog aandacht vragen, ook zonder de bladwijzers af te speuren. */
+  .wcat .ct-row.hard{background:color-mix(in srgb, #C1121F 7%, transparent)}
   .ct-tx{flex:1;min-width:0}
   .ct-ko{display:flex;align-items:center;gap:8px;font-size:19px;font-weight:700;color:var(--ink);line-height:1.16}
   .ct-meta{font-size:13px;color:var(--gray);margin-top:2px}
@@ -2330,6 +2427,9 @@
   .wrow-t{display:block;font-family:var(--cond);text-transform:uppercase;letter-spacing:.01em;
     font-weight:800;font-size:16px;color:var(--ink);line-height:1.15}
   .wrow-n{flex:none;font-family:var(--cond);font-weight:700;font-size:13px;color:var(--gray);min-width:16px;text-align:right}
+  /* Voortgang achter de titel — stil naast de naam, en pas in de accentkleur als alles af is. */
+  .wrow-prog{margin-left:7px;font-weight:700;color:var(--gray);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+  .wrow-prog.full{color:var(--el,#3E5BD6)}
   .wrow-ch{flex:none;display:inline-flex;color:#C7C0B2;margin-right:-2px}
   .wrow-ch svg{width:18px;height:18px}
   /* Moeilijk — first row: only the badge is coloured; a full-width rule splits the filter from the groups */
@@ -2365,7 +2465,9 @@
   /* self-rating control in the category sheet */
   /* De beoordeling staat vlak op de pagina: de woordenlijst eronder is de enige kaart, en
      daardoor leest die als de inhoud in plaats van als één van twee even zware blokken. */
-  .cs-rate{margin:0 0 12px;padding:0;background:none;border:0;border-radius:0}
+  /* Evenveel lucht als tussen de puntjes en de vraag erboven, zodat de beoordeling een eigen
+     blok blijft en niet aan de woordenlijst vastplakt. */
+  .cs-rate{margin:0 0 22px;padding:0;background:none;border:0;border-radius:0}
   .cs-rate-q{font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-weight:700;font-size:10.5px;color:var(--gray);margin-bottom:8px}
   .cs-rate-opts{display:flex;gap:9px;position:relative}
   /* Single sliding highlight (tweens position + colour between options, like the tab bar) */
@@ -2426,8 +2528,18 @@
   .ct-row.hb-row{align-items:flex-start}
   .ct-row.hb-row[data-act="say"]{cursor:pointer}
   /* Standen: name row full-width on top; below it the foot-diagram + info (weight + guidance) sit side by side */
-  .hbcat .st-row{display:block}
-  .st-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer}
+  /* Standen leest als een woordgroep: de uitleg blijft boven staan en alleen de kaart met
+     standen rolt, tot even ver van de onderrand als van de zijkanten. Zo krijgt hij ook een
+     zichtbaar sluitende hoek onderaan, in plaats van van het scherm af te lopen. */
+  .hbcat[data-hb="standen"] .cs-body{display:flex;flex-direction:column;overflow:hidden;
+    padding-bottom:calc(env(safe-area-inset-bottom) + 22px)}
+  .hbcat[data-hb="standen"] .ct-list{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;
+    scrollbar-width:none;overscroll-behavior:contain}
+  .hbcat[data-hb="standen"] .ct-list::-webkit-scrollbar{display:none}
+  /* De hele stand-regel spreekt het woord uit — diagram en uitleg horen bij hetzelfde woord,
+     dus er is geen reden om alleen de titelstrook aan te wijzen. */
+  .hbcat .st-row{display:block;cursor:pointer}
+  .st-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
   .st-head .ct-tx{flex:1;min-width:0}
   .st-act{flex:none;margin:1px -4px 0 8px}
   .st-main{display:flex;align-items:flex-start;gap:16px;margin-top:12px}
@@ -2475,7 +2587,9 @@
   @media (prefers-reduced-motion:no-preference){.hb-illusb .hb-blink-r{animation-duration:6.7s}}
   /* Rekwisiet onderaan het onderdeel: de breekplanken en de helm vullen de lege staart van de
      pagina en geven elk onderdeel een eigen herkenningspunt. Puur decoratief. */
-  .hb-prop{display:block;text-align:right;margin:26px -10px 0 0;pointer-events:none}
+  /* Het rekwisiet hangt onder de tekst. Hoeveel lucht daartussen hoort, verschilt per plaatje:
+     de helm heeft nauwelijks eigen witruimte en mag daarom dicht tegen de opsomming aan. */
+  .hb-prop{display:block;text-align:right;margin:var(--pmt,26px) -10px 0 0;pointer-events:none}
   .hb-prop img{display:inline-block;width:var(--pw,190px);height:auto;
     transform:rotate(var(--prot,0deg));
     filter:drop-shadow(0 12px 20px rgba(26,22,18,.14))}
@@ -2686,6 +2800,7 @@
     term:'<svg viewBox="0 0 24 24" fill="none"><path fill="currentColor" d="M8.475 4.412h4.829V5.84h-1.777c-.652 1.795-1.53 3.274-2.65 4.486 1.25.965 2.79 1.681 4.644 2.098-.35.339-.822 1.028-1.052 1.452-1.958-.512-3.535-1.318-4.817-2.406-1.314 1.058-2.885 1.852-4.732 2.43-.17-.363-.63-1.065-.92-1.416 1.803-.474 3.311-1.16 4.546-2.102C5.45 9.135 4.618 7.616 3.965 5.84H2.218V4.412h4.756V2.5h1.5zM5.577 5.84c.515 1.31 1.23 2.475 2.163 3.46.882-.95 1.574-2.094 2.086-3.46zM16.161 12h2.124L22 21.5h-2.044l-.815-2.191h-3.888l-.816 2.191H12.5zm2.472 5.866-.775-2.218q-.148-.423-.334-1.048a39 39 0 0 1-.307-1.103h-.027a52 52 0 0 1-.32 1.062q-.188.585-.362 1.089l-.774 2.218z"/><path stroke="currentColor" stroke-width="1.5" d="M8.5 17v3.25a.75.75 0 0 1-.75.75H4.5M15.52 8.014l-.016-3.25a.75.75 0 0 1 .746-.754l3.25-.016M8 20.5 3 16M16.003 4.512 21 9"/></svg>',
     timer:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6"/><path d="M12 8v6l4 2"/><circle cx="12" cy="14" r="8"/></svg>',
     pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.3"/><rect x="14" y="5" width="4" height="14" rx="1.3"/></svg>',
+    play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.6 4.9a1.2 1.2 0 0 1 1.83-1.02l8.2 6.1a1.2 1.2 0 0 1 0 2.04l-8.2 6.1A1.2 1.2 0 0 1 8.6 17.1z"/></svg>',
     reset:'<svg viewBox="0 0 24 24" fill="none"><circle cx="7" cy="8" r="1.5" fill="currentColor"/><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="M12.5 8h3.19a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-10"/><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="m14.5 5-2.47 2.47a.75.75 0 0 0 0 1.06L14.5 11"/></svg>',
     repeat:'<svg viewBox="0 0 24 24" fill="none"><path stroke="currentColor" stroke-linecap="square" stroke-width="1.5" d="M8 10 4.8 7.6c-.4-.3-.4-.9 0-1.2L8 4m8 10 3.2 2.4c.4.3.4.9 0 1.2L16 20"/><path stroke="currentColor" stroke-width="1.5" d="M4.5 7H16a5 5 0 0 1 4.387 7.4M19 17H8a5 5 0 0 1-5-5c0-.84.207-1.647.574-2.353"/></svg>',
     infinity:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill="currentColor" d="M18.6 6.62c-1.44 0-2.8.56-3.77 1.53L7.8 14.39c-.64.64-1.49.99-2.4.99-1.87 0-3.39-1.51-3.39-3.38S3.53 8.62 5.4 8.62c.91 0 1.76.35 2.44 1.03l1.13 1 1.51-1.34L9.22 8.2C8.2 7.18 6.84 6.62 5.4 6.62 2.42 6.62 0 9.04 0 12s2.42 5.38 5.4 5.38c1.44 0 2.8-.56 3.77-1.53l7.03-6.24c.64-.64 1.49-.99 2.4-.99 1.87 0 3.39 1.51 3.39 3.38s-1.52 3.38-3.39 3.38c-.9 0-1.76-.35-2.44-1.03l-1.14-1.01-1.51 1.34 1.27 1.12c1.02 1.01 2.37 1.57 3.82 1.57 2.98 0 5.4-2.41 5.4-5.38S21.58 6.62 18.6 6.62z"/></svg>',
@@ -3546,7 +3661,7 @@
     return (up.length
         ? '<div class="ag-list">'+up.map(agItemHtml).join('')+'</div>'
         : '<p class="ag-empty">Nog niets gepland. Voeg je eerste wedstrijd, examen of cursus toe.</p>')+
-      '<button class="ag-addbtn" data-act="agnew">+ Nieuw event</button>';
+      '<button class="ag-addbtn" data-act="agnew"><span class="add-lab">+ Nieuw event</span></button>';
   }
   function agDateHtml(role, label, val, ph){
     return '<label class="ag-date"><span>'+esc(label)+'</span>'+
@@ -4493,7 +4608,7 @@
   function vdBodyHtml(){
     if(!VIDEOS.length){
       return '<p class="vd-empty">Nog geen filmpjes. Bewaar hier de mooiste filmpjes van strekwerk, gyeorugi en poomsae die je tegenkomt.</p>'+
-        '<button class="vd-cta" data-act="vdnew">+ Eerste filmpje toevoegen</button>';
+        '<button class="vd-cta" data-act="vdnew"><span class="add-lab">+ Eerste filmpje toevoegen</span></button>';
     }
     return VD_CATS.map(vdRowHtml).join('');
   }
@@ -4521,7 +4636,7 @@
         '<div class="jhead"><div class="jk"><span class="han-lab">영상 · Yeongsang</span></div>'+
           '<h1>Filmpjes</h1>'+
           '<div class="js">Bewaar filmpjes van strekwerk, gyeorugi en poomsae.</div></div>'+
-        '<button class="vd-add" data-act="vdnew" aria-label="Filmpje toevoegen"'+(VIDEOS.length?'':' style="display:none"')+'>+</button>'+
+        '<button class="vd-add" data-act="vdnew" aria-label="Filmpje toevoegen"'+(VIDEOS.length?'':' style="display:none"')+'><span class="add-lab">+</span></button>'+
       '</div>'+
       '<div class="wscroll" id="vd-scroll">'+vdBodyHtml()+'</div>'+
     '</div>';
@@ -4746,10 +4861,10 @@
         '<p class="pl-empty">Nog niets gepland voor '+esc(plDayLabel(d).toLowerCase())+'.<br>'+
           'Stel je eigen training samen: kies onderdelen en hang er een timer of filmpjes aan.</p>'+
         '<button class="pl-cta" data-act="plquick">Snelle start</button>'+
-        '<button class="pl-add" data-act="pladd">+ Onderdeel</button>';
+        '<button class="pl-add" data-act="pladd"><span class="add-lab">+ Onderdeel</span></button>';
     }
     return head+'<div class="pl-list">'+list.map(function(it){ return plItemHtml(it,isToday); }).join('')+'</div>'+
-      '<button class="pl-add" data-act="pladd">+ Onderdeel</button>';
+      '<button class="pl-add" data-act="pladd"><span class="add-lab">+ Onderdeel</span></button>';
   }
   /* Coach opent als volledig scherm boven de dagkaart — dezelfde laag als de oefentimer en het
      examen, want het is een modus en geen aparte sectie van de app. */
@@ -5002,7 +5117,7 @@
     if(!all.length){
       return '<p class="tl-empty">Hier komt je taekwondo-verhaal te staan: je graden, wedstrijden, '+
         'examens en cursussen. Voeg je eerste gebeurtenis toe.</p>'+
-        '<button class="tl-add" data-act="tlnew">+ Gebeurtenis</button>';
+        '<button class="tl-add" data-act="tlnew"><span class="add-lab">+ Gebeurtenis</span></button>';
     }
     var h='<div class="tl-line">', yr=null;
     for(var i=0;i<all.length;i++){
@@ -5087,6 +5202,7 @@
     }
     refreshCatChip();
     refreshHardCount();
+    if(catSheet) refreshCatDot(catSheet.getAttribute('data-cat'));
   }
   function refreshCatChip(){
     if(!catSheet) return;
@@ -5124,6 +5240,9 @@
   }
   function bloomFor(name){ if(!BLOOMS) buildBlooms(); return BLOOMS[name] || {img:'assets/icons/Bloom1.png', col:'#D06BA8'}; }
   function catStage(name){ return MASTERY[name]|0; }
+  // Of je deze woordgroep ooit zelf een niveau hebt gegeven — stage 0 betekent namelijk
+  // net zo goed "nog nooit aangeraakt" als "zoek je nog op".
+  function catRated(name){ return Object.prototype.hasOwnProperty.call(MASTERY, name); }
   function bloomStyle(b){ return 'color:'+b.col+';-webkit-mask-image:url('+b.img+');mask-image:url('+b.img+')'; }
   function growIcon(name){
     var s=catStage(name);
@@ -5175,6 +5294,7 @@
     }
     if(btn){ sfx(s>=2?'rate2':(s===1?'rate1':'rate0')); var ic=btn.querySelector('.gicon'); if(ic){ ic.classList.remove('gp'); void ic.offsetWidth; ic.classList.add('gp'); } }
     paintHubRow(name);
+    refreshCatDot(name);
   }
 
   /* category detail — slide-up sheet with frosted header + mountain depth */
@@ -5209,7 +5329,8 @@
       eyebrow:'낱말 · '+(isHard?'MOEILIJK':'WOORDGROEP'),
       titlerow:'<div class="cs-titlewrap"><h2 class="cs-title cs-title-cur">'+esc(name)+'</h2></div><div class="cs-chips">'+chips+'</div>',
       chips:chips, note:note, list:list,
-      body:(isHard?'':rateHtml(name))+(note?'<div class="cs-note">'+note+'</div>':'')+'<div class="ct-list">'+list+'</div>'
+      body:(isHard?'':rateHtml(name))+(note?'<div class="cs-note">'+note+'</div>':'')+
+           '<div class="ct-wrap"><div class="ct-list">'+list+'</div></div>'
     };
   }
   function applyCatAccent(el, ac){
@@ -5233,7 +5354,7 @@
         step:function(dir){ navCat(dir); },
         pick:function(id){ gotoCat(id); } };
     } else { activePager = null; }
-    var dots = multi ? buildDotsHtml(activePager.items, name) : '';
+    var dots = multi ? buildDotsHtml(activePager.items, name, catDotState) : '';
     catSheet.innerHTML =
       '<div class="cs-hero">'+
         '<button class="cs-x" data-act="catclose" aria-label="Sluiten">'+IC.x+'</button>'+
@@ -5249,7 +5370,7 @@
     if(multi){ attachCatSwipe(catSheet); attachDotScrub(catSheet); showDots(); }
     fnav.classList.add('hide');
     void catSheet.offsetWidth; // capture the off-screen start so the drill-in transition runs
-    requestAnimationFrame(function(){ catSheet.classList.add('show'); });
+    requestAnimationFrame(function(){ catSheet.classList.add('show'); csEdgeFadeAll(catSheet); });
   }
   // Cross-slide only the woordgroep title, mirroring the belt-picker meta swap (old slides out, new in)
   function csTitleSwap(sheet, name, dir){
@@ -5361,19 +5482,46 @@
       setTimeout(function(){                         // restore normal flex sizing after the ease
         el.style.transition = ''; el.style.height = ''; el.style.flex = '';
         el.classList.remove(into);
+        csEdgeFade(el);
       }, 400);
     }, 170);
   }
   /* ---- Shared bottom dot navigation (Woorden woordgroepen + Handboek onderdelen) ----
      activePager holds the paging model for the sheet currently on screen. */
   var activePager = null;   // { sheet, items:[{id,label}], step(dir), pick(id) }
-  function buildDotsHtml(items, activeId){
+  function buildDotsHtml(items, activeId, stateFor){
     if(!items || items.length<2) return '';
     var h='<div class="cs-dots"><span class="cs-dot-tip" aria-hidden="true"></span>';
     for(var i=0;i<items.length;i++){
-      h+='<button class="cs-dot'+(items[i].id===activeId?' on':'')+'" data-act="dotgoto" data-id="'+esc(items[i].id)+'" aria-label="'+esc(items[i].label)+'"></button>';
+      var st = stateFor ? stateFor(items[i].id) : null;
+      h+='<button class="cs-dot'+(items[i].id===activeId?' on':'')+(st?(' '+st.cls):'')+'"'+
+         ' data-act="dotgoto" data-id="'+esc(items[i].id)+'"'+
+         ' aria-label="'+esc(items[i].label)+(st?(', '+st.hint):'')+'"></button>';
     }
     return h+'</div>';
+  }
+  /* Wat een puntje over zijn woordgroep verklapt: moeilijke woorden wegen zwaarder dan
+     "al gekend", want dat is waar je naartoe wilt. */
+  function catDotState(name){
+    var g=catByName(name); if(!g) return null;
+    // Aandacht vragen doet een woordgroep met moeilijke woorden, of eentje die je zelf
+    // onder "ken ik" hebt gezet. Een groep die je nog nooit hebt beoordeeld laten we met
+    // rust: dan zou bij de eerste start de hele balk staan te ademen, en dat zegt niets.
+    if(catHard(g).length) return {cls:'st-todo', hint:'moeilijke woorden'};
+    if(catRated(name) && catStage(name)<2) return {cls:'st-todo', hint:'nog oefenen'};
+    if(catStage(name)>=2) return {cls:'st-done', hint:'ken je al'};
+    return null;
+  }
+  // Na het markeren van een woord of het kiezen van een niveau klopt de staat van het
+  // huidige puntje niet meer; alleen dat ene puntje hoeft bijgewerkt.
+  function refreshCatDot(name){
+    if(!catSheet) return;
+    var dot=catSheet.querySelector('.cs-dot[data-id="'+(window.CSS&&CSS.escape?CSS.escape(name):name)+'"]');
+    if(!dot) return;
+    var st=catDotState(name), base=dot.getAttribute('aria-label').split(',')[0];
+    dot.classList.remove('st-todo','st-done');
+    if(st) dot.classList.add(st.cls);
+    dot.setAttribute('aria-label', base+(st?(', '+st.hint):''));
   }
   function pagerDots(){ return activePager ? activePager.sheet.querySelector('.cs-dots') : null; }
   // De puntjes staan vast in beeld: ze vertellen waar je bent, en dat is ook waar als je
@@ -5576,26 +5724,51 @@
     csBack();
   }
 
+  var VSB_SEL='.surface,.sbody,.cs-body,.ct-list,.wscroll';
+  /* De vervaging boven- en onderaan een lijst zegt dat er nog meer staat. Hij hoort bij het
+     omhulsel, niet bij de scroller zelf, anders zou hij meeschuiven met de inhoud. */
+  function csEdgeFade(c){
+    var pa=c.parentNode;
+    if(!pa || !pa.classList || !pa.classList.contains('ct-wrap')) return;
+    var ruimte = c.scrollHeight - c.clientHeight;
+    pa.classList.toggle('more-up',   ruimte>2 && c.scrollTop > 2);
+    pa.classList.toggle('more-down', ruimte>2 && c.scrollTop < ruimte-2);
+  }
+  // Bij het openen of wisselen van een woordgroep is er nog niet gescrold, dus moeten de
+  // vervagingen alvast kloppen voordat de gebruiker iets doet.
+  function csEdgeFadeAll(root){
+    var els=(root||document).querySelectorAll('.ct-wrap > .ct-list');
+    for(var i=0;i<els.length;i++) csEdgeFade(els[i]);
+  }
   /* Transient overlay scrollbar: a JS thumb (.vsb) per scroll container, shown while scrolling then faded. */
   (function(){
-    var SEL='.surface,.sbody,.cs-body,.ct-list,.wscroll';
-    function thumbFor(c){
+    var SEL=VSB_SEL;
+    // Bij een lijst met afgeronde hoeken hangt de duim in het omhulsel ernaast: binnenin
+    // werd hij boven- en onderaan door de hoek afgesneden.
+    function hostFor(c){
+      var pa=c.parentNode;
+      return (pa && pa.classList && pa.classList.contains('ct-wrap')) ? pa : c;
+    }
+    function thumbFor(c, host){
       var t=c._vsb;
-      if(!t || t.parentNode!==c){
-        if(getComputedStyle(c).position==='static') c.style.position='relative';
+      if(!t || t.parentNode!==host){
+        if(getComputedStyle(host).position==='static') host.style.position='relative';
         if(!t){ t=document.createElement('div'); t.className='vsb'; c._vsb=t; }
-        c.appendChild(t);
+        host.appendChild(t);
       }
       return t;
     }
     function update(c){
+      csEdgeFade(c);
       var sh=c.scrollHeight, ch=c.clientHeight;
       if(sh-ch<=6){ if(c._vsb) c._vsb.classList.remove('on'); return; }
-      var t=thumbFor(c);
+      var host=hostFor(c), t=thumbFor(c, host);
       var th=Math.max(28, Math.round(ch*ch/sh)), travel=ch-th;
       var y=(c.scrollTop/(sh-ch))*travel;
       t.style.height=th+'px';
-      t.style.transform='translateY('+(c.scrollTop+y)+'px)';
+      // In het omhulsel staat de duim stil ten opzichte van de kaart; in de scroller zelf
+      // moet hij de scrollpositie meekrijgen om op zijn plek te blijven.
+      t.style.transform='translateY('+(host===c ? c.scrollTop+y : y)+'px)';
       t.classList.add('on');
       clearTimeout(c._vsbHide);
       c._vsbHide=setTimeout(function(){ if(c._vsb) c._vsb.classList.remove('on'); }, 950);
@@ -5605,6 +5778,7 @@
       if(c && c.nodeType===1 && c.matches && c.matches(SEL)) update(c);
     }, true);
     window.addEventListener('resize', function(){
+      csEdgeFadeAll(document);
       var els=document.querySelectorAll(SEL);
       for(var i=0;i<els.length;i++){ if(els[i]._vsb && els[i]._vsb.classList.contains('on')) update(els[i]); }
     });
@@ -5683,6 +5857,13 @@
   function catTitle(cat){ return cat&&cat.key==='examen' ? examTitle() : (cat?cat.title:''); }
   function catTitleHtml(cat){ return cat&&cat.key==='examen' ? examTitleHtml() : esc(cat?cat.title:''); }
   function catSub(cat){ return cat&&cat.key==='examen' ? examSub() : (cat?cat.sub:''); }
+  /* Hoeveel examenonderdelen al zijn afgevinkt. De examenkaart zelf toont dit als balkje;
+     op de Handboek-hub staat hetzelfde cijfer achter de titel, zodat je van buitenaf ziet
+     hoe ver je bent zonder de kaart te openen. */
+  function examProgress(){
+    var ond=(hbExam().onderdelen)||[];
+    return { done: ond.filter(function(o){ return EXAM_CHK[o.id]; }).length, total: ond.length };
+  }
   function hbCount(key){
     if(key==='poomsae')    return poomsae.length;
     if(key==='standen')    return standenList().length;
@@ -5730,11 +5911,16 @@
     var hdr=root.querySelector('.whead-hb');
     if(hdr){ updateRail(hdr); requestAnimationFrame(function(){ updateRail(hdr); }); }
   }
+  function examProgHtml(cat){
+    if(!cat || cat.key!=='examen') return '';
+    var pr=examProgress(); if(!pr.total) return '';
+    return '<span class="wrow-prog'+(pr.done>=pr.total?' full':'')+'">'+pr.done+'/'+pr.total+'</span>';
+  }
   function renderHandbook(){
     function hbHubRow(cat){
       return '<button class="wrow" data-act="openhb" data-hb="'+cat.key+'">'+
         '<span class="wrow-emb hb-emb" style="--e:'+cat.el+'" aria-hidden="true">'+cat.han+'</span>'+
-        '<span class="wrow-tx"><span class="wrow-t">'+esc(cat.title)+'</span>'+
+        '<span class="wrow-tx"><span class="wrow-t">'+esc(cat.title)+examProgHtml(cat)+'</span>'+
           '<span class="wrow-sub">'+esc(catSub(cat))+'</span></span>'+
         '<span class="wrow-ch">'+IC.chev+'</span>'+
       '</button>';
@@ -5782,8 +5968,9 @@
     var fig=img?'<span class="st-fig"><img src="'+img+'" alt="Voetdiagram '+esc(s.roman)+'" loading="lazy"></span>':'';
     var wt='<div class="st-wt'+(/^\s*50\s*\/\s*50\s*$/.test(s.gewicht||'')?'':' key')+'"><b>Gewicht</b>'+esc(s.gewicht)+'</div>';
     var uit=s.uitleg?'<div class="hb-body">'+esc(s.uitleg)+'</div>':'';
-    return '<div class="ct-row hb-row st-row'+(img?'':' st-nofig')+'">'+
-      '<div class="st-head" data-act="say" data-ko="'+esc(s.ko)+'" aria-label="Zeg '+esc(s.roman)+' hardop">'+
+    return '<div class="ct-row hb-row st-row'+(img?'':' st-nofig')+'"'+
+      ' data-act="say" data-ko="'+esc(s.ko)+'" aria-label="Zeg '+esc(s.roman)+' hardop">'+
+      '<div class="st-head">'+
         '<div class="ct-tx">'+
           '<div class="ct-ko">'+esc(s.ko)+'</div>'+
           '<div class="ct-meta"><b>'+esc(s.roman)+'</b><span class="ct-nl"> · '+esc(s.nl)+'</span></div>'+
@@ -5826,7 +6013,7 @@
   // Rekwisiet dat onder de tekst meeloopt — alleen voor de onderdelen die er een hebben.
   var HB_PROP={
     gyepa:    {src:'Gyeokpa',  w:196, rot:-4},
-    gyeorugi: {src:'Gyeorugi', w:142, rot:6}
+    gyeorugi: {src:'Gyeorugi', w:142, rot:6, mt:-12}
   };
   function illusHtml(slug, tall, delay, pair){
     var base='<img src="assets/mascot/'+slug+'.png" alt="" aria-hidden="true">';
@@ -5852,13 +6039,14 @@
     if(cat.eis)       h+='<div class="hb-eis"><span class="hb-eis-l">Wat je laat zien</span>'+esc(cat.eis)+'</div>';
     if(od&&od.tips&&od.tips.length) h+='<div class="hb-sec"><h4>Let op</h4><ul class="hb-check">'+od.tips.map(function(t){ return '<li>'+esc(t)+'</li>'; }).join('')+'</ul></div>';
     var prop=HB_PROP[cat.odid];
-    if(prop) h+='<div class="hb-prop" style="--pw:'+prop.w+'px;--prot:'+prop.rot+'deg">'+
+    if(prop) h+='<div class="hb-prop" style="--pw:'+prop.w+'px;--prot:'+prop.rot+'deg'+
+      (prop.mt!=null?(';--pmt:'+prop.mt+'px'):'')+'">'+
       '<img src="assets/icons/'+prop.src+'.png" alt="" aria-hidden="true"></div>';
     return h;
   }
   function hbExamBody(){
     var ex = hbExam(), ond = ex.onderdelen||[];
-    var done = ond.filter(function(o){ return EXAM_CHK[o.id]; }).length;
+    var pr = examProgress(), done = pr.done;
     var pct = ond.length ? Math.round(done/ond.length*100) : 0;
     var head = '';
     head += '<div class="hb-prog"><div class="hb-prog-bar"><i style="width:'+pct+'%"></i></div>'+
@@ -5893,6 +6081,15 @@
         }
       }
     }
+    refreshExamProg();
+  }
+  // De Handboek-hub staat achter de kaart nog in beeld; zodra je hier afvinkt moet het
+  // cijfer achter "Examenkaart" meelopen, anders klopt het niet meer als je terugstapt.
+  function refreshExamProg(){
+    var el=document.querySelector('.wrow[data-hb="examen"] .wrow-prog'); if(!el) return;
+    var pr=examProgress();
+    el.textContent=pr.done+'/'+pr.total;
+    el.classList.toggle('full', pr.total>0 && pr.done>=pr.total);
   }
   function hbBody(key){
     var cat=hbCat(key);
@@ -5926,6 +6123,10 @@
       }
     });
     var pre = (key==='poomsae') ? '<div class="pm-spacer" id="pm-spacer" aria-hidden="true"></div>' : '';
+    // Standen heeft zijn uitleg in de kop staan en daaronder één lijst; die kan dus als vast
+    // kader mee-ademen met het scherm, net als een woordgroep. De andere onderdelen hebben
+    // tussenkopjes of meerdere lijsten en blijven in hun geheel rollen.
+    if(key==='standen') return '<div class="ct-wrap"><div class="ct-list">'+rows+'</div></div>';
     return pre+'<div class="ct-list">'+rows+'</div>';
   }
   var hbSheet=null;
@@ -5968,7 +6169,7 @@
     attachHbBackSwipe(hbSheet);
     fnav.classList.add('hide');
     void hbSheet.offsetWidth; // capture the off-screen start so the drill-in transition runs
-    requestAnimationFrame(function(){ hbSheet.classList.add('show'); });
+    requestAnimationFrame(function(){ hbSheet.classList.add('show'); csEdgeFadeAll(hbSheet); });
     if(key==='poomsae') pmSetup(hbSheet);
   }
   // Page between Handboek onderdelen in place (dir -1 prev / +1 next), cycling; body crossfades, title cross-slides.
@@ -5980,6 +6181,7 @@
     var chips=hbSheet.querySelector('.cs-titlerow .cs-chips'); if(chips) chips.innerHTML=hbChips(cat);
     csTitleSwap(hbSheet, catTitleHtml(cat), dir);
     fadeSwap(hbSheet.querySelector('.cs-body'), hbBody(cat.key));
+    setTimeout(function(){ csEdgeFadeAll(hbSheet); }, 220);
     updateDots(key);
   }
   function navHb(dir){
@@ -6699,8 +6901,49 @@
   // statusbalk. Deze schakelaar dimt de aflees-strook mee, zodat de verduistering doorloopt
   // tot bovenaan het scherm. We tellen de open kaartjes uit de DOM, zodat gestapelde
   // kaartjes (bijvoorbeeld het menu boven de filmpjeslijst) vanzelf goed gaan.
+  //
+  // De strook mag geen CSS-overgang hebben: zolang er een transitie loopt, leest iOS de
+  // kleur van de statusbalk niet opnieuw af. Zonder overgang sprong hij echter in één klap
+  // op zwart terwijl de sluier eronder nog rustig indonkerde. Daarom rekenen we de overgang
+  // hier zelf uit: dezelfde duur en dezelfde curve als .beltsheet-ov, maar als gewone
+  // stijlwijziging per frame in plaats van als transitie.
+  var DIM_MS=280, DIM_MAX=.58;
+  // De standaardcurve 'ease' van CSS is cubic-bezier(.25,.1,.25,1); die zoeken we per frame op.
+  function dimEase(t){
+    function bz(a,b,u){ var v=1-u; return 3*v*v*u*a + 3*v*u*u*b + u*u*u; }
+    var lo=0, hi=1, m=0;
+    for(var i=0;i<18;i++){ m=(lo+hi)/2; if(bz(.25,.25,m)<t) lo=m; else hi=m; }
+    return bz(.1,1,(lo+hi)/2);
+  }
+  var dimRaf=0, dimNu=0, dimDoel=0, dimVan=0, dimT0=0;
+  function dimTeken(a){
+    var d=document.getElementById('topdim'), f=document.getElementById('topfade');
+    if(d) d.style.backgroundColor='rgba(16,20,26,'+a.toFixed(3)+')';
+    // Het verloop onder de strook dooft mee; anders blijft er een lichte band boven de dim.
+    if(f) f.style.opacity = a>0 ? String(Math.max(0, 1-a/DIM_MAX)) : '';
+  }
+  function dimStap(){
+    var p=Math.min(1,(performance.now()-dimT0)/DIM_MS);
+    dimNu = dimVan + (dimDoel-dimVan)*dimEase(p);
+    dimTeken(dimNu);
+    if(p<1){ dimRaf=requestAnimationFrame(dimStap); return; }
+    dimRaf=0; dimNu=dimDoel; dimTeken(dimNu);
+    // Pas als de strook helemaal terug is mag de klasse eraf, anders klapt hij alsnog weg.
+    if(!dimDoel){ document.documentElement.classList.remove('dimmed'); dimTeken(0); }
+  }
   function syncTopDim(){
-    document.documentElement.classList.toggle('dimmed', !!document.querySelector('.beltsheet-ov.show'));
+    var aan = !!document.querySelector('.beltsheet-ov.show');
+    var doel = aan ? DIM_MAX : 0;
+    if(doel===dimDoel && !dimRaf) return;
+    dimDoel=doel; dimVan=dimNu; dimT0=performance.now();
+    // Eerst de huidige stand vastzetten en pas daarna tonen: anders staat de strook één
+    // frame lang op de waarde uit het stijlblad en zie je precies de sprong die we wegwerken.
+    dimTeken(dimNu);
+    if(aan) document.documentElement.classList.add('dimmed');
+    var stil = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(stil){ if(dimRaf){ cancelAnimationFrame(dimRaf); dimRaf=0; } dimNu=doel; dimTeken(doel);
+      if(!doel) document.documentElement.classList.remove('dimmed'); return; }
+    if(!dimRaf) dimRaf=requestAnimationFrame(dimStap);
   }
 
   // Standalone practice timer — reachable any time via the round nav button (reuses the pt-* engine)
@@ -7273,7 +7516,7 @@
      across the hand-off into the count, so the cadence never jumps. */
   var OT_BASE = 1000, OT_READY = 3, OT_LEADIN = 1000;
   var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, reps:0, left:0, _lastFrac:0, _wrapT:null,
-                  mode:'count', dur:60, total:0, endAt:0, raf:null, _lastSec:0, _dragged:false, _windT:null, dragC:null, _pd:null };
+                  mode:'time', dur:60, total:0, endAt:0, raf:null, _lastSec:0, _dragged:false, _windT:null, dragC:null, _pd:null };
   var otTmT=null; // tempo fold-out collapse/close timer
   var otRepT=null; // herhaal fold-out close timer
   var otModeT=null; // modus fold-out close timer
@@ -7803,15 +8046,16 @@
     otGlintT=setTimeout(function(){
       if(!timerScreen) return;
       // Bij Tellen staat de uitnodiging midden in de ring, bij Tijd onder de tijd — beide glinsteren.
-      var h=otState.mode==='time'
-        ? timerScreen.querySelector('#ot-word .ot-tsub')
-        : timerScreen.querySelector('#ot-start');
+      var hs=otState.mode==='time'
+        ? [timerScreen.querySelector('#ot-num.ot-tnum'), timerScreen.querySelector('#ot-word .ot-tsub')]
+        : [timerScreen.querySelector('#ot-start')];
       var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if(h && !reduce && otState.phase==='idle' && !otState.running){
+      if(!reduce && otState.phase==='idle' && !otState.running) hs.forEach(function(h){
+        if(!h) return;
         h.classList.remove('glint'); void h.offsetWidth; h.classList.add('glint');
         // De uitleg bij Tijd wordt bij elke render opnieuw gemaakt, dus haakt hij zelf zijn opruimer aan.
         h.addEventListener('animationend', function(){ this.classList.remove('glint'); }, {once:true});
-      }
+      });
       otHintGlint();
     }, 2600 + Math.random()*2600);
   }
@@ -7834,19 +8078,61 @@
   /* Tellen laat zijn richting in de cijfers zien; de timerstand krijgt een zandloper —
      die zegt "de tijd loopt" veel directer dan 3 2 1. */
   function otModeIcon(m){
-    return m==='time' ? '<span class="ot-mhour" aria-hidden="true">'+IC.hourglass+'</span>' : otDigits();
+    return m==='time' ? '<span class="ot-mhour" aria-hidden="true">'+IC.hourglass+'</span>' : otRepIcon();
   }
-  function otDigits(){
+  function otDigits(){ /* verouderd: zie otRepIcon */
     return '<span class="ot-mdig" aria-hidden="true"><i>1</i><i>2</i><i>3</i></span>';
   }
+  /* 1 2 3 vertelde alleen dát er geteld wordt. Deze stand telt de herhalingen hardóp mee,
+     en dat laat een pratende tekstballon met geluidsgolven directer zien. */
+  function otRepIcon(){
+    return '<span class="ot-mrep" aria-hidden="true"></span>';
+  }
   function otFmtTime(sec){ sec=Math.max(0, Math.round(sec)); var m=Math.floor(sec/60), s=sec%60; return m+':'+(s<10?'0':'')+s; }
+  // Welke instelknoppen bij welke stand horen — de moduskiezer zelf blijft altijd staan.
+  var OT_MODE_KNOPPEN={ count:['.ot-rep','.ot-tempo'], time:['.ot-dur'] };
+  // De vertrekkers moeten gemeten worden vóór data-mode omgaat, de nieuwkomers erna.
+  function otModeWissel(vanaf, naar){
+    var host=timerScreen; if(!host) return function(){};
+    if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return function(){};
+    var stapel=host.querySelector('.ot-left'), kiezer=host.querySelector('.ot-mode');
+    if(!stapel||!kiezer) return function(){};
+    var sr=stapel.getBoundingClientRect(), kr=kiezer.getBoundingClientRect();
+    var oud=OT_MODE_KNOPPEN[vanaf]||[], nieuw=OT_MODE_KNOPPEN[naar]||[];
+    oud.filter(function(sel){ return nieuw.indexOf(sel)<0; }).forEach(function(sel){
+      var el=host.querySelector(sel); if(!el) return;
+      var r=el.getBoundingClientRect(); if(!r.height) return;
+      el.style.left=(r.left-sr.left)+'px';
+      el.style.top=(r.top-sr.top)+'px';
+      el.style.setProperty('--dy',(kr.top-r.top)+'px');
+      el.classList.remove('ot-komt'); el.classList.add('ot-weg');
+      el.addEventListener('animationend', function(){
+        el.classList.remove('ot-weg');
+        el.style.left=''; el.style.top=''; el.style.removeProperty('--dy');
+      }, {once:true});
+    });
+    return function(){
+      nieuw.filter(function(sel){ return oud.indexOf(sel)<0; }).forEach(function(sel){
+        var el=host.querySelector(sel); if(!el) return;
+        var r=el.getBoundingClientRect(); if(!r.height) return;
+        el.style.setProperty('--dy',(kr.top-r.top)+'px');
+        el.classList.remove('ot-komt'); void el.offsetWidth; el.classList.add('ot-komt');
+        el.addEventListener('animationend', function(){
+          el.classList.remove('ot-komt'); el.style.removeProperty('--dy');
+        }, {once:true});
+      });
+    };
+  }
   function otSetMode(m){
     if(m!=='time' && m!=='count') return;
+    var naBinnen=null;
     if(m!==otState.mode){
       otStop();
+      naBinnen=otModeWissel(otState.mode, m);
       otState.mode=m;
       try{ localStorage.setItem('poom_ot_mode', m); }catch(e){}
       if(timerScreen) timerScreen.setAttribute('data-mode', m);
+      if(naBinnen) naBinnen();
     }
     var host=timerScreen; if(!host) return;
     otCloseFan(); otCloseReps(); otCloseDur();
@@ -7991,9 +8277,12 @@
       // Junbi-aanloop: dezelfde drie stippen als bij Tellen, met 시작 op de laatste tel.
       numEl.classList.remove('ot-tnum');
       otShowDots(numEl, OT_READY - otState.ready);
-      if(wordEl) wordEl.innerHTML = otState.ready>0
-        ? '<span class="w-ko">준비</span><span class="w-dot">·</span><span class="w-ro">Junbi</span>'
-        : '<span class="w-ko">시작</span><span class="w-dot">·</span><span class="w-ro">Sijak</span>';
+      if(wordEl){
+        wordEl.classList.remove('ot-cueonly');
+        wordEl.innerHTML = otState.ready>0
+          ? '<span class="w-ko">준비</span><span class="w-dot">·</span><span class="w-ro">Junbi</span>'
+          : '<span class="w-ko">시작</span><span class="w-dot">·</span><span class="w-ro">Sijak</span>';
+      }
       if(hint){ hint.classList.remove('glint'); hint.textContent='maak je klaar'; hint.style.opacity='1'; }
       host.classList.toggle('running', true);
       return;
@@ -8002,7 +8291,16 @@
     var shownSec = idle ? otState.dur : Math.max(0, Math.ceil(otState.left - 1e-3));
     numEl.textContent=otFmtTime(shownSec);
     // De uitleg hoort in de ring, net als bij Tellen; buiten de ring blijft alleen de extra tip.
-    if(wordEl) wordEl.innerHTML = idle ? '<span class="ot-tsub">Tik om te starten</span>' : '';
+    // Loopt de tijd, dan staat er een klein pauzeteken onder de cijfers: zonder dat zag je
+    // nergens dát je kunt pauzeren, laat staan waar. Bij pauze wordt het een afspeelteken.
+    if(wordEl){
+      wordEl.innerHTML = idle
+        ? '<span class="ot-tsub">Tik om te starten</span>'
+        : (running ? '<span class="ot-tcue" aria-hidden="true">'+(otState.running?IC.pause:IC.play)+'</span>' : '');
+      // Alleen als het teken er staat mag de regel geen hoogte pakken: zo blijven de
+      // cijfers netjes in het midden van de ring staan.
+      wordEl.classList.toggle('ot-cueonly', !idle && running);
+    }
     var frac = idle ? (otState.dur/600) : (otState.total>0 ? Math.max(0, otState.left/otState.total) : 0);
     var C=666, noTrans=!!(opts&&opts.noTrans);
     if(prog){ if(noTrans) prog.style.transition='none'; prog.style.strokeDashoffset=String(C*(1-frac)); }
