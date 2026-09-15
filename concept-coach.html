@@ -148,10 +148,15 @@
      daarvan wappert de vlag op de top. Daarvoor staat het icoon in twee lagen: de berg met de
      stok, en het doek los daarvan, zodat alleen dat doek beweegt. Het draaipunt ligt precies
      op de stok (43,3% / 29%), anders zwaait de hele vlag los van zijn mast. */
+  /* De plaatjes hebben een loze rand: de berg beslaat maar 67% van zijn eigen vak. Bij een vak
+     van 32px bleef er dus nog geen 22px berg over en verdween het wapperen. Het vak is daarom
+     ruimer dan de knop; de zichtbare berg komt zo op ~36px uit en staat daarmee op ooghoogte
+     met de avatar ernaast. Alleen het vak steekt buiten de knop, de inkt niet, dus het raakt
+     de avatar niet en het aanraakvlak blijft de vertrouwde 37px. */
   .tlbtn{width:37px;height:37px;flex:none;border:0;padding:0;border-radius:50%;cursor:pointer;
     background:none;box-shadow:none;
     display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
-  .tlbtn::before,.tlbtn::after{content:"";grid-area:1/1;width:32px;height:32px;
+  .tlbtn::before,.tlbtn::after{content:"";grid-area:1/1;width:54px;height:54px;
     background:var(--ink);opacity:.74}
   .tlbtn::after{-webkit-mask:url(assets/icons/Journey-berg.png) center/contain no-repeat;
     mask:url(assets/icons/Journey-berg.png) center/contain no-repeat}
@@ -1962,9 +1967,32 @@
      Ga je verder, dan komt het glas terug in zijn oude stand en loopt het weer. */
   .timerscreen.ot-paused .ot-mode-fab .ot-mhour{transform:rotate(90deg)}
   .timerscreen.ot-paused .ot-mode-fab .ot-mhour.om{transform:rotate(270deg)}
-  .ot-mode-fab .ot-mhour .hg-top,.ot-mode-fab .ot-mhour .hg-bot{transition:transform .9s linear}
+  .ot-mode-fab .ot-mhour .hg-top,.ot-mode-fab .ot-mhour .hg-bot{transition:transform .9s linear,opacity .26s ease .2s}
+  /* Ligt het glas op zijn kant, dan hangt het zand niet langer rond de hals maar zakt het naar
+     de onderste wand, met een waterpas oppervlak. Dat is een heel andere vorm dan het staande
+     hoopje, dus er ligt een tweede paar vormen klaar (.hg-pool) dat precies dat vlak toont.
+     De wissel gebeurt halverwege de kanteling, als het icoon toch al draait: dan valt hij niet
+     op als een sprong maar leest hij als zand dat verschuift. */
+  .ot-mhour .hg-pool{opacity:0}
+  .ot-mode-fab .ot-mhour .hg-pool{transition:opacity .26s ease .2s}
+  .timerscreen.ot-paused .ot-mode-fab .ot-mhour .hg-pool{opacity:1}
+  .timerscreen.ot-paused .ot-mode-fab .ot-mhour .hg-top,
+  .timerscreen.ot-paused .ot-mode-fab .ot-mhour .hg-bot{opacity:0}
+  /* De straal door de hals: drie haarlijntjes met streepjes die langs hun eigen pad schuiven.
+     Samen geven ze de korrel van vallend zand, zonder dat je losse korrels hoeft te tekenen.
+     Ze staan vóór het zand in de tekenvolgorde, zodat het groeiende hoopje de straal opslokt. */
+  .ot-mhour .hg-val{opacity:0}
+  .ot-mode-fab .ot-mhour .hg-val{transition:opacity .3s ease}
+  .ot-mode-fab .ot-mhour.om.stroomt .hg-val{opacity:.9}
+  @keyframes hgVal{to{stroke-dashoffset:-12}}
+  @media (prefers-reduced-motion:no-preference){
+    .ot-mode-fab .ot-mhour .hg-v1{animation:hgVal .75s linear infinite}
+    .ot-mode-fab .ot-mhour .hg-v2{animation:hgVal .58s linear infinite}
+    .ot-mode-fab .ot-mhour .hg-v3{animation:hgVal .92s linear infinite}
+  }
   @media (prefers-reduced-motion:reduce){
-    .ot-mode-fab .ot-mhour,.ot-mode-fab .ot-mhour .hg-top,.ot-mode-fab .ot-mhour .hg-bot{transition:none}
+    .ot-mode-fab .ot-mhour,.ot-mode-fab .ot-mhour .hg-top,.ot-mode-fab .ot-mhour .hg-bot,
+    .ot-mode-fab .ot-mhour .hg-pool,.ot-mode-fab .ot-mhour .hg-val{transition:none}
   }
   .ot-mopt .ot-mhour svg{width:21px;height:21px;display:block}
   .ot-mode-fab .ot-mhour svg{width:25px;height:25px;display:block}
@@ -2633,11 +2661,13 @@
   /* Het rekwisiet hangt onder de tekst. Hoeveel lucht daartussen minimaal hoort, verschilt per
      plaatje: de helm heeft nauwelijks eigen witruimte en mag daarom dicht tegen de opsomming aan.
      Het rekwisiet zakt altijd naar de onderrand van het scherm (zie .cs-body hieronder), zodat de
-     planken en de helm op elk toestel op dezelfde lijn eindigen — ook als de pagina niet scrolt. */
+     planken en de helm op elk toestel op dezelfde lijn eindigen — ook als de pagina niet scrolt.
+     De marge onderaan tilt ze van die rand af: helemaal tegen de onderkant aan leken ze eruit te
+     vallen, nu staan ze op de pagina in plaats van erop te balanceren. */
   .hbcat .cs-body:has(.hb-prop){display:flex;flex-direction:column}
   .hbcat .cs-body:has(.hb-prop)>*{flex:0 0 auto}
   .hbcat .cs-body:has(.hb-prop) .hb-prop{margin-top:auto}
-  .hb-prop{display:block;text-align:right;margin:0 -10px 0 0;padding-top:var(--pmt,26px);
+  .hb-prop{display:block;text-align:right;margin:0 -10px 44px 0;padding-top:var(--pmt,26px);
     pointer-events:none}
   .hb-prop img{display:inline-block;width:var(--pw,190px);height:auto;
     transform:rotate(var(--prot,0deg));
@@ -2857,7 +2887,7 @@
        getekend: de lijndikte komt uit op dezelfde 1,63px als de andere iconen, en het
        geheel — streep inbegrepen — is even hoog als het oneindig-teken ernaast. */
     repeatOff:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><mask id="ic-repoff" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff"/><path d="M5.9 16.9 18.1 7.1" stroke="#000" stroke-width="4.4" stroke-linecap="round"/></mask><g mask="url(#ic-repoff)" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9h9a3 3 0 0 1 3 3M17 15H8a3 3 0 0 1-3-3"/><path d="M9.2 6.8 7 9l2.2 2.2M14.8 12.8 17 15l-2.2 2.2"/></g><path stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M5.9 16.9 18.1 7.1"/></svg>',
-    hourglass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3h11M6.5 21h11M16.6 3v3.3c0 1-.4 2-1.1 2.7L12 12.4 8.5 9c-.7-.7-1.1-1.7-1.1-2.7V3M7.4 21v-3.3c0-1 .4-2 1.1-2.7L12 11.6l3.5 3.4c.7.7 1.1 1.7 1.1 2.7V21"/><path class="hg-top" fill="currentColor" stroke="none" transform="translate(12 10.5) scale(0.001) translate(-12 -10.5)" d="M8.8 4.4h6.4v1.95c0 .82-.33 1.6-.9 2.18L12 10.5 9.7 8.53C9.13 7.95 8.8 7.17 8.8 6.35z"/><path class="hg-bot" fill="currentColor" stroke="none" transform="translate(12 19.6) scale(0.82) translate(-12 -19.6)" d="M8.8 19.6h6.4v-1.95c0-.82-.33-1.6-.9-2.18L12 13.5 9.7 15.47C9.13 16.05 8.8 16.83 8.8 17.65z"/></svg>',
+    hourglass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3h11M6.5 21h11M16.6 3v3.3c0 1-.4 2-1.1 2.7L12 12.4 8.5 9c-.7-.7-1.1-1.7-1.1-2.7V3M7.4 21v-3.3c0-1 .4-2 1.1-2.7L12 11.6l3.5 3.4c.7.7 1.1 1.7 1.1 2.7V21"/><g class="hg-val" fill="none" stroke="currentColor" stroke-linecap="round"><path class="hg-v1" d="M12 11.8V6" stroke-width=".44" stroke-dasharray=".72 .28"/><path class="hg-v2" d="M11.66 11.6V6.7" stroke-width=".3" stroke-dasharray=".4 1.6"/><path class="hg-v3" d="M12.34 11.6V7.1" stroke-width=".28" stroke-dasharray=".34 1.66"/></g><path class="hg-top" fill="currentColor" stroke="none" transform="translate(12 10.5) scale(0.001) translate(-12 -10.5)" d="M8.8 4.4h6.4v1.95c0 .82-.33 1.6-.9 2.18L12 10.5 9.7 8.53C9.13 7.95 8.8 7.17 8.8 6.35z"/><path class="hg-pool hg-top-p" fill="currentColor" stroke="none" d="M8.8 4.4h6.4v1.95c0 .82-.33 1.6-.9 2.18L12 10.5 9.7 8.53C9.13 7.95 8.8 7.17 8.8 6.35z"/><path class="hg-bot" fill="currentColor" stroke="none" transform="translate(12 19.6) scale(0.82) translate(-12 -19.6)" d="M8.8 19.6h6.4v-1.95c0-.82-.33-1.6-.9-2.18L12 13.5 9.7 15.47C9.13 16.05 8.8 16.83 8.8 17.65z"/><path class="hg-pool hg-bot-p" fill="currentColor" stroke="none" d="M8.8 19.6h6.4v-1.95c0-.82-.33-1.6-.9-2.18L12 13.5 9.7 15.47C9.13 16.05 8.8 16.83 8.8 17.65z"/></svg>',
     chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
     compass:'<svg viewBox="0 0 24 24" fill="none"><path stroke="currentColor" stroke-width="1.5" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"/><path fill="currentColor" fill-rule="evenodd" d="M9.908 9.69a.38.38 0 0 0-.218.218L7.296 16.22a.375.375 0 0 0 .483.483l6.313-2.394c.1-.038.18-.117.218-.218l2.394-6.313a.375.375 0 0 0-.483-.483zM12 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3" clip-rule="evenodd"/></svg>',
     target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>',
@@ -8312,13 +8342,33 @@
     var boven=om?'hg-bot':'hg-top', onder=om?'hg-top':'hg-bot';
     // De vorm die bovenin hangt krimpt naar zijn eigen hals toe; de vorm onderin groeit
     // vanaf zijn eigen bodem. Beide houden daarbij de kegelvorm van het glas.
-    zet(glas.querySelector('.'+boven), HG_HALS[boven], otZandF);
-    zet(glas.querySelector('.'+onder), HG_VLOER[onder], 1-otZandF);
-    function zet(el, oy, s){
-      if(!el) return;
+    zet(boven, HG_HALS[boven], otZandF);
+    zet(onder, HG_VLOER[onder], 1-otZandF);
+    function zet(klas, oy, s){
+      var el=glas.querySelector('.'+klas); if(!el) return;
       s=Math.max(0.001, Math.min(1, s)*HG_MAX);   // nul geeft een matrix die niet te keren is
       el.setAttribute('transform','translate(12 '+oy+') scale('+s.toFixed(3)+') translate(-12 -'+oy+')');
+      plas(glas.querySelector('.'+klas+'-p'), s, om);
     }
+    /* Legt het glas zich op zijn kant, dan zoekt hetzelfde zand een nieuw evenwicht: het zakt
+       naar de onderste wand en zijn oppervlak komt waterpas te liggen. Er gaat geen korrel bij
+       of af, dus we zoeken de snijlijn waarbij het liggende vlak even groot is als het staande
+       hoopje. De kamer loopt taps toe, dus dat vlak groeit met het kwadraat van de breedte —
+       vandaar de wortel. r loopt van 0 (leeg) tot 2 (de hele kamer vol).
+       Het glas kantelt naar links of naar rechts, en dat bepaalt welke kant nu beneden is. */
+    function plas(el, s, om){
+      if(!el) return;
+      var deel=s*s;                                                     // het hoopje is de kamer, s keer verkleind
+      var r=deel<=0.5 ? Math.sqrt(2*deel) : 2-Math.sqrt(2*(1-deel));
+      var pct=((1-r/2)*100).toFixed(1);
+      el.style.clipPath = om ? 'inset(0 '+pct+'% 0 0)' : 'inset(0 0 0 '+pct+'%)';
+    }
+  }
+  // De straal loopt alleen terwijl de tijd echt wegtikt: in rust, tijdens Junbi en op pauze staat hij stil.
+  function otStroom(aan){
+    var host=timerScreen; if(!host) return;
+    var glas=host.querySelector('.ot-mode-fab .ot-mhour'); if(!glas) return;
+    glas.classList.toggle('stroomt', !!aan);
   }
   function otDraaiZandloper(om, frac){
     var host=timerScreen; if(!host) return;
@@ -8328,10 +8378,13 @@
   }
   /* Terwijl de timer loopt staan de instellingen op slot: dan kun je alleen nog pauzeren
      (tik in de ring) of opnieuw beginnen. Zo verspring je niet halverwege een set van
-     tempo of modus. Pauzeer je, dan komen ze weer vrij. */
+     tempo of modus.
+     Een pauze telt daarbij gewoon mee als bezig. Lichtten de knoppen dan weer op, dan leek
+     de moduskiezer ineens de knop waarmee je verdergaat — terwijl verdergaan altijd in de
+     ring gebeurt. De rail blijft dus gedimd tot je opnieuw begint. */
   function otLockControls(){
     var host=timerScreen; if(!host) return;
-    var busy=!!otState.running;
+    var busy=!!otState.running || host.classList.contains('ot-paused');
     host.classList.toggle('ot-locked', busy);
     if(busy){ otCloseFan(); otCloseReps(); otCloseDur(); otCloseMode(); }
   }
@@ -8351,6 +8404,7 @@
     var idle=(otState.phase==='idle'), running=(otState.phase==='run'), done=(otState.phase==='done');
     var ready=(otState.phase==='ready');
     otZandloper(idle ? 0 : (ready ? 1 : (otState.total>0 ? Math.max(0, otState.left/otState.total) : 0)));
+    otStroom(running && otState.running);
     otSyncDur();
     if(dial){ dial.classList.toggle('ready', ready); dial.classList.toggle('idle', idle); }
     if(ready){
