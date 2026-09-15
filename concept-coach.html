@@ -940,10 +940,17 @@
     background-size:230% 100%,100% 100%;background-repeat:no-repeat;background-position:118% 0,0 0;animation:hintGlint var(--glansT) var(--glansE)}
   /* Only number + character + romanisation live inside the ring; hint sits BELOW it */
   .timerscreen .ptimer.bare{justify-content:center;align-items:center;gap:24px;padding:0}
-  .timerscreen .pt-dial{flex:none;margin:0;transition:opacity .3s}
+  .timerscreen .pt-dial{flex:none;margin:0}
+  .timerscreen .pt-svg,.timerscreen .pt-num,.timerscreen .pt-word,.timerscreen .pt-start{transition:opacity .3s}
   .timerscreen .pt-hint{margin-top:0;font-size:12px;letter-spacing:.14em}
-  /* Paused: dim the dial to signal hold; show the tap-to-continue hint fully opaque */
-  .timerscreen.ot-paused .pt-dial{opacity:.34}
+  /* Paused: dim the dial to signal hold; show the tap-to-continue hint fully opaque.
+     Het dimmen zit op de losse onderdelen en niet op de ring als geheel, want een kind kan
+     nooit helderder zijn dan zijn ouder — en het pauzeteken moet juist vol blijven staan.
+     De woordregel draagt tijdens het lopen alleen dat teken (.ot-cueonly) en dimt dan niet. */
+  .timerscreen.ot-paused .pt-svg,
+  .timerscreen.ot-paused .pt-num,
+  .timerscreen.ot-paused .pt-word:not(.ot-cueonly),
+  .timerscreen.ot-paused .pt-start{opacity:.34}
   .timerscreen.ot-paused .pt-hint{color:#fff;-webkit-text-fill-color:#fff;opacity:1}
   /* Circular soft light orbs — bigger, softer, and arranged per element (see [data-el] below) */
   .timerscreen .pt-bg{background:linear-gradient(158deg, var(--el) 4%, var(--deep) 60%, var(--elink) 128%);filter:saturate(1.06);inset:-3px}
@@ -1950,6 +1957,11 @@
      de omtrek valt na de halve slag exact op zichzelf: je ziet alleen het zand verspringen. */
   .ot-mode-fab .ot-mhour{transition:transform .62s cubic-bezier(.45,.02,.2,1)}
   .ot-mode-fab .ot-mhour.om{transform:rotate(180deg)}
+  /* Pauzeer je, dan legt het glas zich op zijn kant: zo staat de hals niet meer onder het
+     zand en houdt de zwaartekracht op te trekken. Het zand blijft in de kamer waar het zat.
+     Ga je verder, dan komt het glas terug in zijn oude stand en loopt het weer. */
+  .timerscreen.ot-paused .ot-mode-fab .ot-mhour{transform:rotate(90deg)}
+  .timerscreen.ot-paused .ot-mode-fab .ot-mhour.om{transform:rotate(270deg)}
   .ot-mode-fab .ot-mhour .hg-top,.ot-mode-fab .ot-mhour .hg-bot{transition:transform .9s linear}
   @media (prefers-reduced-motion:reduce){
     .ot-mode-fab .ot-mhour,.ot-mode-fab .ot-mhour .hg-top,.ot-mode-fab .ot-mhour .hg-bot{transition:none}
