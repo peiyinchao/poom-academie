@@ -43,12 +43,19 @@
   .cond{font-family:var(--cond);text-transform:uppercase;line-height:1.02}
   /* De aflees-strook voor de iOS-statusbalk: alleen op een telefoonscherm, want op de
      bureaubladweergave zit er geen statusbalk boven het toestelframe. */
-  #topcap{display:none;position:fixed;top:0;left:0;right:0;z-index:2147483647;pointer-events:none;
+  #topcap{display:none;position:fixed;top:0;left:0;right:0;z-index:2147483645;pointer-events:none;
     height:max(16px,env(safe-area-inset-top));background-color:var(--topbar,var(--page));
     transition:none!important;animation:none!important}
   #topfade{display:none;position:fixed;left:0;right:0;top:max(16px,env(safe-area-inset-top));
     height:26px;z-index:2147483646;pointer-events:none;
-    background:linear-gradient(var(--topbar,transparent),transparent)}  .poster{font-family:var(--poster);text-transform:uppercase;line-height:.9}
+    background:linear-gradient(var(--topbar,transparent),transparent)}
+  /* De dim-laag van een kaartje stopt bij het toestelframe, dus onder de aflees-strook. Dit vlak
+     dimt die strook mee, zodat de schaduw doorloopt tot boven in de iOS-statusbalk. Bewust zonder
+     overgang: een lopende transitie zet het aflezen van de balk uit (WebKit hasRunningTransitions). */
+  #topdim{display:none;position:fixed;top:0;left:0;right:0;z-index:2147483647;pointer-events:none;
+    height:max(16px,env(safe-area-inset-top));background-color:rgba(16,20,26,.58);
+    transition:none!important;animation:none!important}
+  .poster{font-family:var(--poster);text-transform:uppercase;line-height:.9}
   button{font-family:inherit;cursor:pointer}
 
   /* ---------- Device frame ---------- */
@@ -89,6 +96,10 @@
       overflow:hidden;overscroll-behavior:none}
     #topcap{display:block}
     html.tint #topfade{display:block}
+    /* Zodra een kaartje openstaat dimt de strook mee; het verloop eronder valt weg, want dat
+       zou als een onverduisterde band boven de dim-laag blijven liggen. */
+    html.dimmed #topdim{display:block}
+    html.dimmed #topfade{display:none}
     .device{width:100vw;height:100vh;height:100dvh;border-radius:0;border:0;box-shadow:none}
     .concept-flag{display:none}
   }
@@ -2556,6 +2567,8 @@
   <!-- Op een gekleurd scherm ligt onder de strook een verloop; dit vlak laat de vlakke kleur
        er zacht in overlopen, zodat er geen streep te zien is. -->
   <div id="topfade" aria-hidden="true"></div>
+  <!-- Dimt de strook mee wanneer er een kaartje openstaat. -->
+  <div id="topdim" aria-hidden="true"></div>
   <div class="device">
     <div class="stage" id="stage"></div>
     <div class="navdock" id="navdock">
@@ -3393,12 +3406,12 @@
       bpRenderGrad(bpPending.k);
       buzz(10);
     });
-    requestAnimationFrame(function(){ beltSheet.classList.add('show'); beltThumb(GEUP_I); bpGlintStart(); });
+    requestAnimationFrame(function(){ beltSheet.classList.add('show'); syncTopDim(); beltThumb(GEUP_I); bpGlintStart(); });
   }
   function closeBeltSheet(){
     if(!beltSheet) return;
     bpGlintStop(); bpPending=null;
-    beltSheet.classList.remove('show');
+    beltSheet.classList.remove('show'); syncTopDim();
     var s=beltSheet; beltSheet=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
     fnav.classList.remove('hide');
@@ -3604,7 +3617,7 @@
       }
       agRender();
     });
-    requestAnimationFrame(function(){ agSheet.classList.add('show'); });
+    requestAnimationFrame(function(){ agSheet.classList.add('show'); syncTopDim(); });
   }
   // De tijdlijn hergebruikt hetzelfde formulier, zodat er maar één plek is waar een event
   // beschreven wordt. after() draait na het bewaren zodat de tijdlijn zichzelf kan bijwerken.
@@ -3631,7 +3644,7 @@
   }
   function closeAgendaSheet(){
     if(!agSheet) return;
-    agSheet.classList.remove('show');
+    agSheet.classList.remove('show'); syncTopDim();
     var s=agSheet; agSheet=null; agMode='list'; agDraft=null; agEditId=null; agAfterSave=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
     if(!tlScreen) fnav.classList.remove('hide');
@@ -3709,11 +3722,11 @@
       if(tg && tg.id==='gx-photo'){ gxPickPhoto(tg.files && tg.files[0]); return; }
       if(tg && tg.id==='gx-date' && gxDraft){ gxSync(); gxDraft.date=tg.value; gxRender(); }
     });
-    requestAnimationFrame(function(){ gxSheet.classList.add('show'); });
+    requestAnimationFrame(function(){ gxSheet.classList.add('show'); syncTopDim(); });
   }
   function closeGradeSheet(){
     if(!gxSheet) return;
-    gxSheet.classList.remove('show');
+    gxSheet.classList.remove('show'); syncTopDim();
     var s=gxSheet; gxSheet=null; gxDraft=null;
     var after=gxAfter; gxAfter=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
@@ -4596,12 +4609,12 @@
       if(t.id==='vd-title'){ vdDraft.titleTouched=true; vdDraft.title=t.value; return; }
       if(t.id==='vd-url'){ vdDraft.url=t.value.trim(); vdSaveable(); vdLookupSoon(); }
     });
-    requestAnimationFrame(function(){ vdSheet.classList.add('show'); });
+    requestAnimationFrame(function(){ vdSheet.classList.add('show'); syncTopDim(); });
   }
   function closeVideoSheet(){
     if(!vdSheet) return;
     clearTimeout(vdTimer); vdSeq++;
-    vdSheet.classList.remove('show');
+    vdSheet.classList.remove('show'); syncTopDim();
     var s=vdSheet; vdSheet=null; vdDraft=null; vdEditId=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
     fnav.classList.remove('hide');
@@ -4625,11 +4638,11 @@
       '</div>';
     stage.appendChild(vdMenuSheet);
     fnav.classList.add('hide');
-    requestAnimationFrame(function(){ vdMenuSheet.classList.add('show'); });
+    requestAnimationFrame(function(){ vdMenuSheet.classList.add('show'); syncTopDim(); });
   }
   function closeVideoMenu(keepNav){
     if(!vdMenuSheet) return;
-    vdMenuSheet.classList.remove('show');
+    vdMenuSheet.classList.remove('show'); syncTopDim();
     var s=vdMenuSheet; vdMenuSheet=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
     if(!keepNav) fnav.classList.remove('hide');
@@ -4802,11 +4815,11 @@
       '</div>';
     stage.appendChild(plSheet);
     fnav.classList.add('hide');
-    requestAnimationFrame(function(){ plSheet.classList.add('show'); });
+    requestAnimationFrame(function(){ plSheet.classList.add('show'); syncTopDim(); });
   }
   function plCloseSheet(){
     if(!plSheet) return;
-    plSheet.classList.remove('show');
+    plSheet.classList.remove('show'); syncTopDim();
     var s=plSheet; plSheet=null; plEditId=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
     fnav.classList.remove('hide');
@@ -6654,6 +6667,14 @@
     document.documentElement.classList.toggle('tint', !!color);
     if(color) document.documentElement.style.setProperty('--topbar', c);
     else document.documentElement.style.removeProperty('--topbar');
+  }
+
+  // De dim-laag van een kaartje ligt binnen het toestelframe en komt dus niet tot in de
+  // statusbalk. Deze schakelaar dimt de aflees-strook mee, zodat de verduistering doorloopt
+  // tot bovenaan het scherm. We tellen de open kaartjes uit de DOM, zodat gestapelde
+  // kaartjes (bijvoorbeeld het menu boven de filmpjeslijst) vanzelf goed gaan.
+  function syncTopDim(){
+    document.documentElement.classList.toggle('dimmed', !!document.querySelector('.beltsheet-ov.show'));
   }
 
   // Standalone practice timer — reachable any time via the round nav button (reuses the pt-* engine)
