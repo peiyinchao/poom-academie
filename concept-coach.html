@@ -1842,7 +1842,7 @@
   .ot-lab{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);margin-bottom:9px;
     font-family:var(--cond);text-transform:uppercase;font-size:10px;letter-spacing:.11em;font-weight:700;
     color:rgba(255,255,255,.72);white-space:nowrap;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.34);
-    opacity:0;transition:opacity .22s ease}
+    opacity:0;transition:opacity .22s ease, left 0s .2s}
   .ot-ctl.lab-on .ot-lab,.ot-tempo.open .ot-lab{opacity:1}
   /* Staat er ergens een uitklapper open, dan verdwijnen de labels van alle ándere knoppen. Die
      uitklapper legt zich over de balk heen, en losse woorden die er half onderuit steken lezen
@@ -1850,6 +1850,20 @@
   .timerscreen:has(.ot-tempo.open,.ot-rep.open,.ot-dur.open,.ot-mode.open) .ot-lab{opacity:0}
   .timerscreen .ot-tempo.open .ot-lab,.timerscreen .ot-rep.open .ot-lab,
   .timerscreen .ot-dur.open .ot-lab{opacity:1}
+  /* Het label van de open kiezer hoort bij een andere plek dan het label van de dichte knop
+     (zie de regel hieronder). Dat verschil liet het woord van de ene naar de andere plek
+     verspringen, alsof het er zelf naartoe liep. Nu dooft het eerst uit waar het stond,
+     verhuist het terwijl je het niet ziet, en komt het op de nieuwe plek weer op — dus twee
+     labels die elkaar afwisselen in plaats van één dat reist. De sprong zelf zit in de
+     vertraging van .2s op left hierboven, precies in het gat waarin het label onzichtbaar is. */
+  @keyframes otLabWissel{0%{opacity:1}26%{opacity:0}56%{opacity:0}100%{opacity:1}}
+  @media (prefers-reduced-motion:no-preference){
+    .timerscreen .ot-tempo.open .ot-lab,.timerscreen .ot-rep.open .ot-lab,
+    .timerscreen .ot-dur.open .ot-lab{animation:otLabWissel .46s ease both}
+  }
+  /* Vouwt de kiezer weer dicht, dan gaat het label op dezelfde manier weg: eerst uit beeld,
+     daarna pas terug naar de plek naast de knop. */
+  .ot-rep.collapsing .ot-lab,.ot-tempo.collapsing .ot-lab,.ot-dur.collapsing .ot-lab{opacity:0}
   /* Staat een uitklapper open, dan schuift het label naar rechts náást de pil in plaats van
      erboven: daar botst het niet met de knop erboven in de stapel en staat het op ooghoogte
      van de opties. --pw is de breedte die de pil bij het openen krijgt. */
@@ -1905,6 +1919,12 @@
     display:inline-flex;align-items:center;gap:2px}
   .ot-tempo-cur .ot-tx,.ot-topt .ot-tx,.ot-ropt .ot-tx{font-size:.94em}
   .ot-topt .ot-tlab{display:inline-flex;align-items:center;gap:2px}
+  /* Een kale "s" achter het getal las als seconden, terwijl het seconden per tel zijn — en dat
+     verschil is nu juist waar de knop over gaat. Daarom staat de eenheid voluit onder het getal.
+     Klein en gedempt: het is een onderschrift, geen tweede waarde, dus het getal blijft de
+     aflezing die je van een afstand ziet. */
+  .ot-tempo-cur,.ot-topt .ot-tlab{flex-direction:column;gap:0;line-height:1}
+  .ot-tu{font-size:8px;font-weight:700;letter-spacing:.03em;opacity:.74;margin-top:2px}
   /* Diagonal fraction (¹ ⁄ ₄) rebuilt from parts so the slash gets real breathing room left & right */
   .ot-tempo.open .ot-tempo-fab{opacity:0;pointer-events:none}
   /* Fold-out pill: same height as the button, grows RIGHTWARD from the left edge; ROUND option thumbs */
@@ -2347,19 +2367,28 @@
     background-color:rgba(30,22,16,.4);cursor:pointer;-webkit-tap-highlight-color:transparent;
     transition:transform .2s cubic-bezier(.22,.9,.3,1), background-color .22s ease}
   .cs-dot::before{content:"";position:absolute;top:-9px;bottom:-9px;left:-3.5px;right:-3.5px}
-  /* De puntjes kenden eerder vier tinten: onaangeraakt, licht voor "ken je al", diep voor
-     "vraagt aandacht", en blauw voor "hier ben je". Die diepe tint deed alsof elke woordgroep
-     met één bladwijzer een probleem was, en tussen vier tinten viel juist niet meer op waar je
-     stond. Nu zijn het er nog drie: licht zodra je een groep hebt beoordeeld (of je hem nu al
-     kent, bijna kent of nog moet oefenen), de gewone tint voor wat je nog nooit zag, en blauw
-     alleen voor je huidige pagina. De reden waaróm een groep licht is blijft in het aria-label
-     staan, dus voorlezen verliest niets.
+  /* De puntjes probeerden het verschil eerder met tinten te vertellen: licht voor "beoordeeld",
+     donker voor "vraagt aandacht". Dat werkte niet — een tintverschil van een paar procent op
+     een stip van 6px zie je simpelweg niet, en je moest raden welke kant de donkere tint op wees.
+     Nu staat er een vinkje waar je klaar bent. Een stip betekent dus: hier moet je nog heen.
+     Dat lees je in één oogopslag, en het overleeft kleurenblindheid.
      Eerder ademden deze puntjes zachtjes, maar meerdere animaties gelijk laten lopen bleef
      zichtbaar uit de pas; een stille vulling doet hetzelfde werk zonder die onrust. */
-  .cs-dot.st-done,.cs-dot.st-todo{background-color:rgba(30,22,16,.12)}
+  .cs-dot.st-done{width:12px;height:12px;border-radius:0;background-color:rgba(30,22,16,.46);
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
   /* "Hier ben je" mag ook in formaat verschillen, niet alleen in kleur: op een crème scherm
      leest een maatverschil sneller dan een kleurverschil, en het overleeft kleurenblindheid. */
   .cs-dot.on{background-color:var(--el,#3E5BD6);transform:scale(1.34)}
+  /* Sta je op een pagina die je al kent, dan moeten beide dingen waar blijven: het blauw zegt
+     waar je bent, het vinkje dat je hier klaar bent. Het vinkje kruipt daarom in de blauwe stip,
+     in wit. Die stip wordt daarvoor wat groter in plaats van geschaald — geschaald zou het
+     vinkje mee uitrekken en wollig worden. */
+  .cs-dot.on.st-done{width:15px;height:15px;border-radius:50%;transform:none;
+    background-color:var(--el,#3E5BD6);-webkit-mask:none;mask:none}
+  .cs-dot.on.st-done::after{content:"";position:absolute;inset:0;background-color:#fff;
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/9px no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/9px no-repeat}
   /* De balk staat links uitgelijnd op de titel. Groeit de eerste stip vanuit zijn midden, dan
      steekt hij een pixel buiten die lijn; vanaf de linkerrand groeien houdt de kolom recht. */
   .cs-dot:first-child.on{transform-origin:left center}
@@ -2778,8 +2807,13 @@
      met een leeg gat eronder. Nu loopt het gewoon mee met de tekst: 20px onder de laatste regel,
      en aan het eind van de pagina nog wat lucht zodat het niet tegen de rand plakt.
      De marge is 27 en niet 20, omdat het scheefgezette plaatje met zijn bovenhoek zo'n 7px boven
-     zijn eigen vak uitsteekt; die hoek is wat je ziet, dus die moet op 20px uitkomen. */
-  .hb-prop{display:block;text-align:right;margin:27px -10px 44px 0;
+     zijn eigen vak uitsteekt; die hoek is wat je ziet, dus die moet op 20px uitkomen. En omdat
+     deze marge samenklapt met de 15px onder .hb-sec telt alleen de grootste van de twee mee —
+     bij een negatieve waarde worden ze juist opgeteld. Vandaar dat --pmt er raar uitziet: -18
+     levert -3 op, en na de 7px overstek zie je precies de -10 die de helm nodig heeft.
+     De helm heeft nauwelijks eigen witruimte en mag daarom in de laatste regel hangen; de
+     breekplanken hebben die lucht wel en houden hun 20px. */
+  .hb-prop{display:block;text-align:right;margin:var(--pmt,27px) -10px 44px 0;
     pointer-events:none}
   .hb-prop img{display:inline-block;width:var(--pw,190px);height:auto;
     transform:rotate(var(--prot,0deg));
@@ -6070,13 +6104,13 @@
     }
     return h+'</div>';
   }
-  /* Wat een puntje over zijn woordgroep verklapt: moeilijke woorden wegen zwaarder dan
-     "al gekend", want dat is waar je naartoe wilt. */
+  /* Wat een puntje over zijn woordgroep verklapt. Een vinkje betekent: hier ben je klaar. Een
+     stip betekent dus dat er nog iets te doen is, en dat is precies wat je wilt zien als je
+     zoekt waar je heen moet. */
   function catDotState(name){
     var g=catByName(name); if(!g) return null;
-    // Aandacht vragen doet een woordgroep met moeilijke woorden, of eentje die je zelf
-    // onder "ken ik" hebt gezet. Een groep die je nog nooit hebt beoordeeld laten we met
-    // rust: dan zou bij de eerste start de hele balk staan te ademen, en dat zegt niets.
+    // Een groep met bladwijzers vraagt aandacht, ook als je hem op "ken ik" hebt gezet: die
+    // woorden heb je zelf apart gelegd. Zo'n groep houdt dus zijn stip.
     if(catHard(g).length) return {cls:'st-todo', hint:'moeilijke woorden'};
     if(catRated(name) && catStage(name)<2) return {cls:'st-todo', hint:'nog oefenen'};
     if(catStage(name)>=2) return {cls:'st-done', hint:'ken je al'};
@@ -6566,7 +6600,7 @@
   // Rekwisiet dat onder de tekst meeloopt — alleen voor de onderdelen die er een hebben.
   var HB_PROP={
     gyepa:    {src:'Gyeokpa',  w:196, rot:-4},
-    gyeorugi: {src:'Gyeorugi', w:142, rot:6}
+    gyeorugi: {src:'Gyeorugi', w:142, rot:6, mt:-18}
   };
   function illusHtml(slug, tall, delay, pair){
     var base='<img src="assets/mascot/'+slug+'.png" alt="" aria-hidden="true">';
@@ -6592,7 +6626,8 @@
     if(cat.eis)       h+='<div class="hb-eis"><span class="hb-eis-l">Wat je laat zien</span>'+esc(cat.eis)+'</div>';
     if(od&&od.tips&&od.tips.length) h+='<div class="hb-sec"><h4>Let op</h4><ul class="hb-check">'+od.tips.map(function(t){ return '<li>'+esc(t)+'</li>'; }).join('')+'</ul></div>';
     var prop=HB_PROP[cat.odid];
-    if(prop) h+='<div class="hb-prop" style="--pw:'+prop.w+'px;--prot:'+prop.rot+'deg">'+
+    if(prop) h+='<div class="hb-prop" style="--pw:'+prop.w+'px;--prot:'+prop.rot+'deg'+
+        (prop.mt==null?'':';--pmt:'+prop.mt+'px')+'">'+
       '<img src="assets/icons/'+prop.src+'.png" alt="" aria-hidden="true"></div>';
     return h;
   }
@@ -7513,7 +7548,7 @@
     el.setAttribute('data-el', TMR_ORB[_tg]);  // colour + orb layout follow the grade's colour group
     setTopBar(TMR_PAL[_tg].el);        // match the iOS top bar to the timer's gradient
     var tOpts = OT_TEMPOS.map(function(t){
-      return '<button class="ot-topt'+(t.v===otState.speed?' on':'')+'" data-act="otspeed" data-v="'+t.v+'"><span class="ot-tlab">'+t.s+'<span class="ot-tx">s</span></span></button>';
+      return '<button class="ot-topt'+(t.v===otState.speed?' on':'')+'" data-act="otspeed" data-v="'+t.v+'"><span class="ot-tlab">'+t.s+'<span class="ot-tu">s/tel</span></span></button>';
     }).join('');
     var rOpts = OT_REPS.map(function(r){
       var inf=r.v===Infinity, dv=inf?'inf':String(r.v);
@@ -8232,7 +8267,8 @@
       else if(name==='rate2'){ if(!sfxSample('rate2')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
     }catch(e){}
   }
-  function otTempoLabel(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].s+'<span class="ot-tx">s</span>'; } return '1<span class="ot-tx">s</span>'; }
+  var OT_TU='<span class="ot-tu">s/tel</span>';
+  function otTempoLabel(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].s+OT_TU; } return '1'+OT_TU; }
   function otTempoName(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].name; } return 'Normaal'; }
   function otPop(){ var n=timerScreen&&timerScreen.querySelector('#ot-num'); if(!n) return;
     n.classList.remove('pop'); void n.offsetWidth; n.classList.add('pop'); }
