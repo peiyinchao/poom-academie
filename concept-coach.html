@@ -602,13 +602,13 @@
      in plaats van bij een willekeurige rand. De blokken overlappen hun eigen ondermarge, anders
      valt er bij elke tussenruimte een gaatje. */
   .tl-line{position:relative;padding-left:34px}
-  .tl-item::before,.tl-year::before{content:"";position:absolute;left:-17.5px;width:5px;
+  .tl-item::before,.tl-year::before{content:"";position:absolute;left:-21.5px;width:5px;
     background:var(--tlcol,var(--line))}
-  /* Op de graduatie zelf slaat de kleur om, en wel precies in het hart van de halte (14px top +
-     halve hoogte van 24px = 26px). Boven de halte de nieuwe band, eronder de vorige — de lijst
+  /* Op de graduatie zelf slaat de kleur om, en wel precies in het hart van de halte (28px top +
+     halve hoogte van 24px = 40px). Boven de halte de nieuwe band, eronder de vorige — de lijst
      loopt van nieuw naar oud, dus naar beneden ga je terug in de tijd. */
   .tl-item.tl-omslag::before{
-    background:var(--tlcoln) 0 0/100% 26px no-repeat,var(--tlcolp,var(--line))}
+    background:var(--tlcoln) 0 0/100% 40px no-repeat,var(--tlcolp,var(--line))}
   /* Vierkante naden: met afgeronde uiteinden per blok kneep de lijn bij elke kaart dicht en
      werd het een rij worstjes in plaats van één doorlopende lijn. Alleen de bovenkant van de
      hele lijn is rond; de onderkant dooft toch uit. */
@@ -629,8 +629,10 @@
   /* De halte staat op de lijn, niet ernaast: dezelfde middellijn. Bewust een rustige, dunne
      rand en geen bandkleur — de kleur zit al in de lijn, en negen gekleurde ringen erbij maakte
      het beeld rommelig. Een witte cirkel op een gekleurde lijn is precies hoe een halte op een
-     metrokaart leest. */
-  .tl-dot{position:absolute;left:-27px;top:14px;width:24px;height:24px;border-radius:50%;
+     metrokaart leest. De halte staat op ooghoogte met de titel, niet met de datum: de titel is
+     waar je naar kijkt. 28px = 1px rand + 13px binnenmarge + de datumregel + het hart van de
+     titel, min de halve halte. */
+  .tl-dot{position:absolute;left:-31px;top:28px;width:24px;height:24px;border-radius:50%;
     display:grid;place-items:center;font-size:12px;line-height:1;
     background:var(--surface);border:2px solid var(--line)}
   .tl-card{position:relative;border:1px solid var(--line);border-radius:16px;padding:13px 15px;background:var(--surface)}
@@ -1082,6 +1084,9 @@
   .session{position:absolute;inset:0;z-index:90;background:var(--page);display:flex;flex-direction:column;
     transform:translateY(100%);transition:transform .38s cubic-bezier(.32,.72,0,1)}
   .session.show{transform:translateY(0)}
+  /* Sluit je met een veeg naar rechts, dan hoort het scherm ook naar rechts weg te gaan:
+     de beweging van je duim en die van het beeld moeten dezelfde kant op. */
+  .tlscreen.tl-weg{transform:translateX(100%)}
   /* Category / Handboek detail: cross-fade in (fade + gentle scale), like the oefentimer — no drill-in slide */
   .session.catsheet{transform:scale(1.04);opacity:0;
     transition:opacity .3s ease, transform .44s cubic-bezier(.33,1,.5,1)}
@@ -5507,19 +5512,23 @@
   /* Twee bandkleuren op één lijn: twee sporen naast elkaar, zoals op een metrokaart waar twee
      lijnen een stuk samen lopen. Bij 5px houd je 2,5px per kleur over; op een telefoonscherm is
      dat scherp genoeg om als twee kleuren te lezen en niet als een vuile rand. */
+  /* De witte band is elders een warm gebroken wit; op de crèmekleurige pagina viel die lijn
+     helemaal weg. Op de lijn gebruiken we daarom vol wit, precies zoals de kaarten: wit met een
+     haarlijntje eromheen leest wél als wit. Alleen hier, zodat de bandkleur elders niet wijzigt. */
+  function tlKleur(c){ return c==='#EDEDE7' ? '#FFFFFF' : c; }
   function tlLijnCss(g){
     if(!g) return 'var(--line)';
     return g.col2
-      ? 'linear-gradient(90deg,'+g.col+' 0 50%,'+g.col2+' 50% 100%)'
-      : g.col;
+      ? 'linear-gradient(90deg,'+tlKleur(g.col)+' 0 50%,'+tlKleur(g.col2)+' 50% 100%)'
+      : tlKleur(g.col);
   }
   /* Voor de omslag op een graduatie moet de bovenste laag altijd een verloop zijn: een kale
      kleur kun je in een background-laag niet op hoogte zetten, een verloop wel. */
   function tlLijnLaag(g){
     if(!g) return 'linear-gradient(var(--line) 0 100%)';
     return g.col2
-      ? 'linear-gradient(90deg,'+g.col+' 0 50%,'+g.col2+' 50% 100%)'
-      : 'linear-gradient('+g.col+' 0 100%)';
+      ? 'linear-gradient(90deg,'+tlKleur(g.col)+' 0 50%,'+tlKleur(g.col2)+' 50% 100%)'
+      : 'linear-gradient('+tlKleur(g.col)+' 0 100%)';
   }
   function tlKleurStijl(iso){
     var g=tlBeltAt(iso);
@@ -5688,7 +5697,7 @@
       if(!down || swiped) return;
       var dx=e.clientX-x0, dy=e.clientY-y0;
       if(Math.abs(dx)<=Math.abs(dy)*1.4) return;       // je rolt verticaal — met rust laten
-      if(dx>60){ swiped=true; down=false; closeTimeline(); }
+      if(dx>60){ swiped=true; down=false; closeTimeline(true); }
     });
     el.addEventListener('pointerup', function(){ down=false; });
     el.addEventListener('pointercancel', function(){ down=false; });
@@ -5696,9 +5705,10 @@
       if(swiped){ e.stopPropagation(); e.preventDefault(); swiped=false; }
     }, true);
   }
-  function closeTimeline(){
+  function closeTimeline(naarRechts){
     if(!tlScreen) return;
     tlScreen.classList.remove('show');
+    if(naarRechts) tlScreen.classList.add('tl-weg');
     var s=tlScreen; tlScreen=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 380);
     fnav.classList.remove('hide');
