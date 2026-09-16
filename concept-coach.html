@@ -2765,12 +2765,12 @@
      plaatje: de helm heeft nauwelijks eigen witruimte en mag daarom dicht tegen de opsomming aan.
      Het rekwisiet zakt altijd naar de onderrand van het scherm (zie .cs-body hieronder), zodat de
      planken en de helm op elk toestel op dezelfde lijn eindigen — ook als de pagina niet scrolt.
-     De marge onderaan tilt ze van die rand af: helemaal tegen de onderkant aan leken ze eruit te
-     vallen, nu staan ze op de pagina in plaats van erop te balanceren. */
+     De marge onderaan tilt ze van die rand af: laag bij de rand leken ze eruit te vallen, met deze
+     ruimte staan ze duidelijk óp de pagina in plaats van erop te balanceren. */
   .hbcat .cs-body:has(.hb-prop){display:flex;flex-direction:column}
   .hbcat .cs-body:has(.hb-prop)>*{flex:0 0 auto}
   .hbcat .cs-body:has(.hb-prop) .hb-prop{margin-top:auto}
-  .hb-prop{display:block;text-align:right;margin:0 -10px 44px 0;padding-top:var(--pmt,26px);
+  .hb-prop{display:block;text-align:right;margin:0 -10px var(--pmb,104px) 0;padding-top:var(--pmt,26px);
     pointer-events:none}
   .hb-prop img{display:inline-block;width:var(--pw,190px);height:auto;
     transform:rotate(var(--prot,0deg));
