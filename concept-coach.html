@@ -153,14 +153,16 @@
      op de stok (43,3% / 29%), anders zwaait de hele vlag los van zijn mast. */
   /* De plaatjes hebben een loze rand: de berg beslaat maar 67% van zijn eigen vak. Bij een vak
      van 32px bleef er dus nog geen 22px berg over en verdween het wapperen. Het vak is daarom
-     ruimer dan de knop; de zichtbare berg komt zo op ~30px uit en blijft daarmee een maatje
+     ruimer dan de knop; de zichtbare berg komt zo op ~26px uit en blijft daarmee een maatje
      kleiner dan de avatar ernaast, die de baas van de kop blijft. Alleen het vak steekt buiten
-     de knop, de inkt niet, dus het aanraakvlak blijft de vertrouwde 37px. */
+     de knop, de inkt niet, dus het aanraakvlak blijft de vertrouwde 37px.
+     De inkt is precies die van een tabbalk-icoon: de berg is een navigatieknop en hoort dus
+     dezelfde stem te hebben als de knoppen onderin, niet zwarter. */
   .tlbtn{width:37px;height:37px;flex:none;border:0;padding:0;border-radius:50%;cursor:pointer;
     background:none;box-shadow:none;
     display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
-  .tlbtn::before,.tlbtn::after{content:"";grid-area:1/1;width:41px;height:41px;
-    background:var(--ink);opacity:.74}
+  .tlbtn::before,.tlbtn::after{content:"";grid-area:1/1;width:38px;height:38px;
+    background:rgba(30,22,16,.56)}
   .tlbtn::after{-webkit-mask:url(assets/icons/Journey-berg.png) center/contain no-repeat;
     mask:url(assets/icons/Journey-berg.png) center/contain no-repeat}
   .tlbtn::before{-webkit-mask:url(assets/icons/Journey-vlag.png) center/contain no-repeat;
@@ -1842,6 +1844,12 @@
     color:rgba(255,255,255,.72);white-space:nowrap;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.34);
     opacity:0;transition:opacity .22s ease}
   .ot-ctl.lab-on .ot-lab,.ot-tempo.open .ot-lab{opacity:1}
+  /* Staat er ergens een uitklapper open, dan verdwijnen de labels van alle ándere knoppen. Die
+     uitklapper legt zich over de balk heen, en losse woorden die er half onderuit steken lezen
+     als rommel. Alleen het label van de open kiezer blijft staan — dat hoort erbij. */
+  .timerscreen:has(.ot-tempo.open,.ot-rep.open,.ot-dur.open,.ot-mode.open) .ot-lab{opacity:0}
+  .timerscreen .ot-tempo.open .ot-lab,.timerscreen .ot-rep.open .ot-lab,
+  .timerscreen .ot-dur.open .ot-lab{opacity:1}
   /* Staat een uitklapper open, dan schuift het label naar rechts náást de pil in plaats van
      erboven: daar botst het niet met de knop erboven in de stapel en staat het op ooghoogte
      van de opties. --pw is de breedte die de pil bij het openen krijgt. */
@@ -1898,9 +1906,6 @@
   .ot-tempo-cur .ot-tx,.ot-topt .ot-tx,.ot-ropt .ot-tx{font-size:.94em}
   .ot-topt .ot-tlab{display:inline-flex;align-items:center;gap:2px}
   /* Diagonal fraction (¹ ⁄ ₄) rebuilt from parts so the slash gets real breathing room left & right */
-  .timerscreen .ot-fr{display:inline-block;white-space:nowrap;letter-spacing:0;font-weight:800}
-  .timerscreen .ot-fr sup,.timerscreen .ot-fr sub{font-size:.72em;font-weight:800}
-  .timerscreen .ot-fr .sl{font-weight:500;margin:0 .18em}
   .ot-tempo.open .ot-tempo-fab{opacity:0;pointer-events:none}
   /* Fold-out pill: same height as the button, grows RIGHTWARD from the left edge; ROUND option thumbs */
   .ot-tmenu{position:absolute;left:0;bottom:3px;height:58px;width:64px;z-index:2;overflow:hidden;
@@ -2768,16 +2773,13 @@
      planken en de helm op elk toestel op dezelfde lijn eindigen — ook als de pagina niet scrolt.
      De marge onderaan tilt ze van die rand af: laag bij de rand leken ze eruit te vallen, met deze
      ruimte staan ze duidelijk óp de pagina in plaats van erop te balanceren. */
-  /* Het rekwisiet hangt onder de tekst, maar mag nooit half achter de onderrand verdwijnen: het is
-     het herkenningspunt van de pagina en je moet het zien zonder eerst te scrollen. Daarom plakt
-     het aan de onderkant van het scherm (sticky) en blijft het daar staan terwijl de tekst eronder
-     doorloopt. Overlappen mag — het is doorzichtig rekwisiet zonder klikvlak. Zodra je helemaal
-     naar beneden scrolt, komt het op zijn eigen plek in de tekst tot rust. */
-  .hbcat .cs-body:has(.hb-prop){display:flex;flex-direction:column}
-  .hbcat .cs-body:has(.hb-prop)>*{flex:0 0 auto}
-  .hbcat .cs-body:has(.hb-prop) .hb-prop{margin-top:auto;position:sticky;
-    bottom:calc(40px + env(safe-area-inset-bottom,0px));z-index:3}
-  .hb-prop{display:block;text-align:right;margin:0 -10px 0 0;padding-top:var(--pmt,26px);
+  /* Het rekwisiet hangt onder de tekst. Het plakte eerst aan de onderrand van het scherm, maar dan
+     viel het op een korte pagina óf half buiten beeld óf het legde zich over de opsomming heen,
+     met een leeg gat eronder. Nu loopt het gewoon mee met de tekst: 20px onder de laatste regel,
+     en aan het eind van de pagina nog wat lucht zodat het niet tegen de rand plakt.
+     De marge is 27 en niet 20, omdat het scheefgezette plaatje met zijn bovenhoek zo'n 7px boven
+     zijn eigen vak uitsteekt; die hoek is wat je ziet, dus die moet op 20px uitkomen. */
+  .hb-prop{display:block;text-align:right;margin:27px -10px 44px 0;
     pointer-events:none}
   .hb-prop img{display:inline-block;width:var(--pw,190px);height:auto;
     transform:rotate(var(--prot,0deg));
@@ -6564,7 +6566,7 @@
   // Rekwisiet dat onder de tekst meeloopt — alleen voor de onderdelen die er een hebben.
   var HB_PROP={
     gyepa:    {src:'Gyeokpa',  w:196, rot:-4},
-    gyeorugi: {src:'Gyeorugi', w:142, rot:6, mt:0}
+    gyeorugi: {src:'Gyeorugi', w:142, rot:6}
   };
   function illusHtml(slug, tall, delay, pair){
     var base='<img src="assets/mascot/'+slug+'.png" alt="" aria-hidden="true">';
@@ -6590,8 +6592,7 @@
     if(cat.eis)       h+='<div class="hb-eis"><span class="hb-eis-l">Wat je laat zien</span>'+esc(cat.eis)+'</div>';
     if(od&&od.tips&&od.tips.length) h+='<div class="hb-sec"><h4>Let op</h4><ul class="hb-check">'+od.tips.map(function(t){ return '<li>'+esc(t)+'</li>'; }).join('')+'</ul></div>';
     var prop=HB_PROP[cat.odid];
-    if(prop) h+='<div class="hb-prop" style="--pw:'+prop.w+'px;--prot:'+prop.rot+'deg'+
-      (prop.mt!=null?(';--pmt:'+prop.mt+'px'):'')+'">'+
+    if(prop) h+='<div class="hb-prop" style="--pw:'+prop.w+'px;--prot:'+prop.rot+'deg">'+
       '<img src="assets/icons/'+prop.src+'.png" alt="" aria-hidden="true"></div>';
     return h;
   }
@@ -7512,7 +7513,7 @@
     el.setAttribute('data-el', TMR_ORB[_tg]);  // colour + orb layout follow the grade's colour group
     setTopBar(TMR_PAL[_tg].el);        // match the iOS top bar to the timer's gradient
     var tOpts = OT_TEMPOS.map(function(t){
-      return '<button class="ot-topt'+(t.v===otState.speed?' on':'')+'" data-act="otspeed" data-v="'+t.v+'"><span class="ot-tlab">'+t.s+'<span class="ot-tx">×</span></span></button>';
+      return '<button class="ot-topt'+(t.v===otState.speed?' on':'')+'" data-act="otspeed" data-v="'+t.v+'"><span class="ot-tlab">'+t.s+'<span class="ot-tx">s</span></span></button>';
     }).join('');
     var rOpts = OT_REPS.map(function(r){
       var inf=r.v===Infinity, dv=inf?'inf':String(r.v);
@@ -7578,7 +7579,7 @@
               '<span class="ot-badge empty" id="ot-rep-badge"></span></button>'+
           '</div>'+
           '<div class="ot-tempo">'+
-            '<span class="ot-lab">Tempo</span>'+
+            '<span class="ot-lab">Sec per tel</span>'+
             '<div class="ot-tmenu"><div class="ot-tmenu-inner"><span class="ot-tthumb"></span>'+tOpts+'</div></div>'+
             '<button class="ot-fab ot-tempo-fab" data-act="ottempo" aria-label="Tempo">'+
               '<span class="ot-tempo-cur" id="ot-tempo-cur">'+otTempoLabel()+'</span></button>'+
@@ -8060,9 +8061,11 @@
   function tlStop(){ if(tlState.iv){ clearTimeout(tlState.iv); tlState.iv=null; } tlState.running=false; }
 
   /* ---- Oefentimer: 3-2-1 klaarmaken → Koreaans tellen 1–10 ---- */
-  function otFrac(n,d){ return '<span class="ot-fr"><sup>'+n+'</sup><span class="sl">&#8260;</span><sub>'+d+'</sub></span>'; }
-  var OT_TEMPOS = [ {v:0.25,s:otFrac(1,4),name:'Traag'}, {v:0.5,s:otFrac(1,2),name:'Rustig'},
-                    {v:1,s:'1',name:'Normaal'}, {v:2,s:'2',name:'Snel'} ];
+  /* Het tempo stond als vermenigvuldiging (¼×, ½×, 1×, 2×). Niemand rekent dat in zijn hoofd
+     om naar hoe snel er geteld wordt, dus staat er nu gewoon hoeveel seconden één tel duurt.
+     Dezelfde volgorde, van traag naar snel; alleen de getallen lopen dus omlaag. */
+  var OT_TEMPOS = [ {v:0.25,s:'4',name:'Traag'}, {v:0.5,s:'2',name:'Rustig'},
+                    {v:1,s:'1',name:'Normaal'}, {v:2,s:'0,5',name:'Snel'} ];
   /* Herhaal-opties: 2× / 4× / 10× / oneindig. reps=0 = uit (speelt één keer). */
   var OT_REPS = [ {v:2}, {v:4}, {v:10}, {v:Infinity} ];
   function otRepV(s){ return s==='inf' ? Infinity : parseInt(s,10); }
@@ -8229,7 +8232,7 @@
       else if(name==='rate2'){ if(!sfxSample('rate2')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
     }catch(e){}
   }
-  function otTempoLabel(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].s+'<span class="ot-tx">×</span>'; } return '1<span class="ot-tx">×</span>'; }
+  function otTempoLabel(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].s+'<span class="ot-tx">s</span>'; } return '1<span class="ot-tx">s</span>'; }
   function otTempoName(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].name; } return 'Normaal'; }
   function otPop(){ var n=timerScreen&&timerScreen.querySelector('#ot-num'); if(!n) return;
     n.classList.remove('pop'); void n.offsetWidth; n.classList.add('pop'); }
