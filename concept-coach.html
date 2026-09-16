@@ -619,6 +619,9 @@
   .tl-meta i{font-style:normal;font-weight:700;color:var(--el)}
   .tl-res{display:inline-block;margin-top:7px;margin-right:9px;padding:4px 10px;border-radius:999px;
     background:var(--beltfill,var(--el));color:var(--beltink,#fff);font-size:12px;font-weight:800}
+  /* Deelgenomen is geen prijs, dus geen bandkleur: dezelfde vorm, rustige tinten. Zo zie je in
+     één oogopslag het verschil tussen een podium en een toernooi waar je het geprobeerd hebt. */
+  .tl-res.plain{background:var(--soft);color:var(--gray)}
   .tl-photo{display:block;width:100%;max-height:210px;object-fit:cover;border-radius:12px;margin-top:10px}
   /* "Passend" letterboxt in een vast kader — anders zou object-fit:contain niets doen. */
   .tl-photo.fitc{height:210px;max-height:none;background:var(--soft);border:1px solid var(--line)}
@@ -626,6 +629,11 @@
     color:var(--gray);font-size:12px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .tl-edit:active{opacity:.65}
   .tl-grad{display:block;margin-top:7px;font-size:12px;font-weight:700;color:var(--gray)}
+  /* Het reservekopie-blok staat onderaan de tijdlijn, los van de kaarten: het hoort niet bij
+     je verhaal, het beschermt het. Daarom een scheidslijn en de rustige knopstijl. */
+  .tl-backup{margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
+  .tl-backup-note{margin:0 0 10px;font-size:12px;color:var(--gray);line-height:1.3}
+  .tl-backup-act{display:flex;gap:9px;flex-wrap:wrap}
   /* De examinator is een herinnering, geen prijs; de gekleurde pil blijft voor uitslagen. */
   .tl-exam{display:block;margin-top:6px;font-size:12px;font-weight:600;color:var(--gray)}
   .tl-add{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:6px;
@@ -3019,6 +3027,109 @@
       }
     };
   })();
+  /* ---------- Reservekopie ----------
+     De tijdlijn is het enige deel van de app dat de gebruiker zelf opbouwt en dat nergens
+     anders bestaat. Een nieuwe telefoon, "wis websitegegevens" of opnieuw installeren wist
+     alles in één klap. Twee maatregelen, in volgorde van wat ze opleveren:
+
+     1. De browser vragen deze opslag met rust te laten. Safari ruimt schrijfbare opslag op
+        na zeven dagen zonder bezoek; een toegekende persist() haalt de app uit die regeling.
+        Kost niets en hoeft maar één keer gevraagd te worden.
+     2. Een reservekopie die de gebruiker zelf ergens neerzet. Dat is het enige dat een
+        verloren toestel overleeft — persist() beschermt tegen opruimen, niet tegen verlies.
+
+     De kopie is één JSON-bestand met alles erin, inclusief de foto&#39;s, zodat terugzetten
+     geen puzzel wordt. Het tijdstip van de laatste kopie staat bewust buiten STORE_KEYS: bij
+     terugzetten moet dat de nieuwe waarde houden, niet die uit het bestand. */
+  var BACKUP_AT='poom_backup_at';
+  function persistVragen(){
+    if(!store.ok || !navigator.storage || !navigator.storage.persist) return;
+    if(store.get('poom_persist_gevraagd', false)) return;
+    store.set('poom_persist_gevraagd', true);
+    try{ navigator.storage.persist(); }catch(e){}
+  }
+  function backupPakket(){
+    var d={};
+    STORE_KEYS.forEach(function(k){
+      try{ var r=localStorage.getItem(k); if(r!==null) d[k]=r; }catch(e){}
+    });
+    return { app:'poom-academy', versie:1, gemaakt:new Date().toISOString(), data:d };
+  }
+  function backupNaam(){
+    var d=new Date();
+    return 'poom-academy-'+d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)+'.json';
+  }
+  function backupAtZet(){ try{ localStorage.setItem(BACKUP_AT, new Date().toISOString()); }catch(e){} }
+  function backupAtLees(){ try{ return localStorage.getItem(BACKUP_AT)||''; }catch(e){ return ''; } }
+  function backupRegel(){
+    var t=backupAtLees();
+    if(!t) return 'Nog geen reservekopie gemaakt';
+    var d=new Date(t); if(isNaN(d.getTime())) return 'Nog geen reservekopie gemaakt';
+    return 'Laatste reservekopie: '+fmtDateNL(d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2));
+  }
+  function tlBackupVerversen(){
+    var n=document.getElementById('tl-backup-note');
+    if(n) n.textContent=backupRegel();
+  }
+  /* Op de telefoon gaat de kopie via het deelvenster naar Bestanden of iCloud Drive; op een
+     computer is er geen deelvenster en valt hij terug op een gewone download. */
+  function backupMaken(){
+    var tekst=JSON.stringify(backupPakket());
+    var naam=backupNaam();
+    var blob=new Blob([tekst], {type:'application/json'});
+    /* Terugval naar een gewone download. Niet alleen voor computers zonder deelvenster: het
+       deelvenster kan ook weigeren of stilvallen, en dan mag de gebruiker niet achterblijven
+       met de indruk dat er een kopie is terwijl die er niet is. */
+    var download=function(){
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a'); a.href=url; a.download=naam;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+      backupAtZet(); tlBackupVerversen(); toast('Reservekopie bewaard.');
+    };
+    if(navigator.share && navigator.canShare && window.File){
+      try{
+        var f=new File([blob], naam, {type:'application/json'});
+        if(navigator.canShare({files:[f]})){
+          navigator.share({files:[f], title:'Poom Academy reservekopie'}).then(function(){
+            backupAtZet(); tlBackupVerversen(); toast('Reservekopie bewaard.');
+          }).catch(function(err){
+            // Zelf afgebroken is een keuze, geen storing; al het andere is wél een storing.
+            if(err && err.name==='AbortError') return;
+            download();
+          });
+          return;
+        }
+      }catch(e){}
+    }
+    download();
+  }
+  /* Terugzetten overschrijft alles. Dat is precies wat je wilt na verlies, maar niet iets om
+     per ongeluk te doen, dus er komt eerst een bevestiging. */
+  function backupTerugzetten(file){
+    if(!file) return;
+    var r=new FileReader();
+    r.onload=function(){
+      var p=null;
+      try{ p=JSON.parse(String(r.result||'')); }catch(e){}
+      if(!p || p.app!=='poom-academy' || !p.data || typeof p.data!=='object'){
+        toast('Dit bestand is geen reservekopie.'); return;
+      }
+      var aantal=0, k;
+      for(k in p.data){ if(p.data.hasOwnProperty(k) && STORE_KEYS.indexOf(k)>-1) aantal++; }
+      if(!aantal){ toast('De reservekopie is leeg.'); return; }
+      var wanneer = p.gemaakt ? fmtDateNL(String(p.gemaakt).slice(0,10)) : 'een onbekende datum';
+      if(!window.confirm('Alles in de app wordt vervangen door de reservekopie van '+wanneer+'. Doorgaan?')) return;
+      STORE_KEYS.forEach(function(sk){
+        try{
+          if(p.data.hasOwnProperty(sk)) localStorage.setItem(sk, p.data[sk]);
+          else localStorage.removeItem(sk);
+        }catch(e){}
+      });
+      location.reload();
+    };
+    r.readAsText(file);
+  }
   /* ?reset=1 wist alle opgeslagen voortgang. Nu er niets meer vanzelf terugspringt is dit de enige
      manier om de app vers te tonen. De parameter wordt meteen uit de URL gehaald: zou hij blijven
      staan, dan zou een PWA die met deze start-URL geïnstalleerd is elke keer alles wissen. */
@@ -3129,10 +3240,49 @@
   var AG_PLACES = [
     {v:'1e plaats', ico:'🥇'},
     {v:'2e plaats', ico:'🥈'},
-    {v:'3e plaats', ico:'🥉'}
+    {v:'3e plaats', ico:'🥉'},
+    /* Meedoen zonder podium is ook een uitslag, en vaak de leerzaamste. Hij staat er bewust
+       als "Deelgenomen" en niet als "verloren": het legt hetzelfde vast zonder dat woord op je
+       eigen tijdlijn te zetten. Hij sluit de medailles uit — een gouden pil naast "geen podium"
+       op dezelfde kaart spreekt zichzelf tegen. */
+    {v:'Deelgenomen', ico:'💪', geenPodium:true}
   ];
+  function agPlace(v){ for(var i=0;i<AG_PLACES.length;i++){ if(AG_PLACES[i].v===v) return AG_PLACES[i]; } return null; }
+  /* Op een toernooi met meerdere onderdelen kun je in het ene onderdeel eerste worden en in
+     het andere tweede. De uitslag is daarom een lijst, niet één waarde. Oudere events hebben
+     nog één string staan; die lezen we hier stilzwijgend in als lijst van één, zodat er niets
+     omgezet hoeft te worden en een oude reservekopie gewoon blijft werken. */
+  function agResultLijst(v){
+    var uit=[], i;
+    if(typeof v==='string') v = v ? [v] : [];
+    if(!v || !v.length) return uit;
+    // Altijd in podiumvolgorde, ongeacht in welke volgorde er getikt is.
+    for(i=0;i<AG_PLACES.length;i++){ if(v.indexOf(AG_PLACES[i].v)>-1) uit.push(AG_PLACES[i].v); }
+    return uit;
+  }
   var AGENDA = [];
   function agType(k){ for(var i=0;i<AG_TYPES.length;i++){ if(AG_TYPES[i].k===k) return AG_TYPES[i]; } return AG_TYPES[0]; }
+  /* Plaatsen en namen herhalen zich sterk: je traint jaar in jaar uit in dezelfde zalen en bij
+     dezelfde mensen. Een datalist laat de telefoon die eerdere waarden zelf aanbieden zonder
+     dat het veld een keuzelijst wordt — je kunt nog steeds gewoon iets nieuws typen. */
+  function agEerdere(veld){
+    var zien={}, uit=[], i, j, e;
+    for(i=0;i<AGENDA.length;i++){
+      e=AGENDA[i];
+      if(veld==='where'){ if(e.where) zien[String(e.where).trim()]=1; }
+      else if(veld==='trainer' && e.trainers){
+        for(j=0;j<e.trainers.length;j++){ if(e.trainers[j]) zien[String(e.trainers[j]).trim()]=1; }
+      }
+    }
+    if(veld==='exam'){ for(i in GMETA){ if(GMETA.hasOwnProperty(i) && GMETA[i] && GMETA[i].exam) zien[String(GMETA[i].exam).trim()]=1; } }
+    for(i in zien){ if(zien.hasOwnProperty(i) && i) uit.push(i); }
+    return uit.sort(function(a,b){ return a.localeCompare(b,'nl'); });
+  }
+  function agDatalist(id, veld){
+    var l=agEerdere(veld);
+    if(!l.length) return '';
+    return '<datalist id="'+id+'">'+l.map(function(v){ return '<option value="'+esc(v)+'">'; }).join('')+'</datalist>';
+  }
   function agLoad(){
     try{ var r=JSON.parse(localStorage.getItem('poom_agenda')); if(r&&r.length){ AGENDA=r; return; } }catch(e){}
     AGENDA=[
@@ -3232,6 +3382,9 @@
     return (a[0]===b[0] && a[1]===b[1]) ? (+a[2])+'–'+fmtDateNL(e.end) : fmtDateNL(e.date)+' – '+fmtDateNL(e.end);
   }
   agLoad();
+  /* Eén keer vragen of de browser deze opslag met rust wil laten. Pas hier, na het laden:
+     een toestemmingsvraag op een lege app heeft geen betekenis. */
+  persistVragen();
 
   /* ---- Filmpjes: a clip collection the student curates themselves ---- */
   // Facebook has no public API for saved items and most of those posts live in closed groups, so
@@ -3686,10 +3839,10 @@
   // Two modes in one sheet: the list of what's planned, and a separate form for entering a new
   // event. Keeping them apart stops the sheet turning into one dense block of controls.
   var agSheet=null, agMode='list', agDraft=null, agEditId=null, agAfterSave=null;
-  function agBlankDraft(){ return {type:'wedstrijd', title:'', date:'', end:'', where:'', result:'', trainers:[], photo:'', focus:phClampFoc(null)}; }
+  function agBlankDraft(){ return {type:'wedstrijd', title:'', date:'', end:'', where:'', result:[], trainers:[], photo:'', focus:phClampFoc(null)}; }
   function agEditDraft(e){
     return {type:agType(e.type).k, title:e.title||'', date:e.date||'', end:e.end||'',
-            where:e.where||'', result:e.result||'', trainers:(e.trainers||[]).slice(),
+            where:e.where||'', result:agResultLijst(e.result), trainers:(e.trainers||[]).slice(),
             photo:phGet(e.id), focus:phFoc(e.id)};
   }
   /* Foto-onderdeel van de agenda- en graduatieformulieren. Zonder foto is het één grote knop;
@@ -3814,13 +3967,14 @@
       list.map(function(n,i){
         return '<div class="ag-trrow">'+
           '<input class="ag-title" type="text" autocomplete="off" data-role="trainer"'+
-            ' value="'+esc(n)+'" placeholder="Naam van de trainer">'+
+            ' list="ag-trainer-eerder" value="'+esc(n)+'" placeholder="Naam van de trainer">'+
           (list.length>1
             ? '<button class="ag-trdel" data-act="agtrdel" data-i="'+i+'" aria-label="Deze trainer verwijderen">×</button>'
             : '')+
         '</div>';
       }).join('')+
       '<button class="ag-tradd" data-act="agtradd">+ Nog een trainer</button>'+
+      agDatalist('ag-trainer-eerder','trainer')+
     '</div>';
   }
   function agFormHtml(){
@@ -3831,7 +3985,8 @@
         return '<button class="ag-chip'+(t.k===d.type?' on':'')+'" data-act="agtype" data-k="'+t.k+'">'+t.ico+' '+t.label+'</button>';
       }).join('')+'</div>'+
       '<input class="ag-title" id="ag-title" type="text" autocomplete="off" value="'+esc(d.title)+'" placeholder="Naam (bijv. Ilyo Open Poomsae)">'+
-      '<input class="ag-title" id="ag-where" type="text" autocomplete="off" value="'+esc(d.where||'')+'" placeholder="Plaats (bijv. Aarschot)">'+
+      '<input class="ag-title" id="ag-where" type="text" autocomplete="off" list="ag-where-eerder" value="'+esc(d.where||'')+'" placeholder="Plaats (bijv. Aarschot)">'+
+      agDatalist('ag-where-eerder','where')+
       '<div class="ag-dates">'+
         agDateHtml('start','Datum', d.date, 'Kies…')+
         agDateHtml('end','t/m (optioneel)', d.end, '—')+
@@ -3840,8 +3995,9 @@
       (d.type==='wedstrijd'
         ? '<div class="ag-res"><span class="ag-trlab">Uitslag</span>'+
           '<div class="ag-chips">'+AG_PLACES.map(function(p){
-            return '<button class="ag-chip'+(d.result===p.v?' on':'')+'" data-act="agres" data-v="'+esc(p.v)+'"'+
-              ' aria-pressed="'+(d.result===p.v?'true':'false')+'">'+p.ico+' '+esc(p.v)+'</button>';
+            var aan = agResultLijst(d.result).indexOf(p.v)>-1;
+            return '<button class="ag-chip'+(aan?' on':'')+'" data-act="agres" data-v="'+esc(p.v)+'"'+
+              ' aria-pressed="'+(aan?'true':'false')+'">'+p.ico+' '+esc(p.v)+'</button>';
           }).join('')+'</div></div>'
         : '')+
       // Wie er voor de zaal stond vraag je alleen bij een cursus.
@@ -3860,7 +4016,6 @@
     if(!agSheet || agMode!=='form' || !agDraft) return;
     var t=agSheet.querySelector('#ag-title'); if(t) agDraft.title=t.value;
     var w=agSheet.querySelector('#ag-where'); if(w) agDraft.where=w.value;
-    var r=agSheet.querySelector('#ag-result'); if(r) agDraft.result=r.value;
     var tr=agSheet.querySelectorAll('[data-role="trainer"]');
     if(tr.length) agDraft.trainers=[].map.call(tr, function(el){ return el.value; });
   }
@@ -3969,7 +4124,8 @@
           '<b'+(d.date?'':' class="dim"')+'>'+esc(d.date?fmtDateNL(d.date):'Kies…')+'</b>'+
           '<input type="date" id="gx-date" max="'+todayISO()+'"'+(d.date?' value="'+esc(d.date)+'"':'')+'></label>'+
       '</div>'+
-      '<input class="ag-title" id="gx-exam" type="text" autocomplete="off" value="'+esc(d.exam)+'" placeholder="Examinator (bijv. R.J. Kawarmala)">'+
+      '<input class="ag-title" id="gx-exam" type="text" autocomplete="off" list="gx-exam-eerder" value="'+esc(d.exam)+'" placeholder="Examinator (bijv. R.J. Kawarmala)">'+
+      agDatalist('gx-exam-eerder','exam')+
       phEditHtml(ph, d.focus, 'gx')+
       '<p class="vd-status'+(d.note&&d.noteErr?' err':'')+'" id="gx-status">'+esc(d.note||'')+'</p>'+
       '<div class="ag-formact">'+
@@ -5257,7 +5413,7 @@
       meta.push(esc(it.sub));
     }
     // Bij iets wat nog moet komen valt er nog niks te vertellen; dan is "Aanpassen" eerlijker.
-    var rich = it.kind==='event' ? (ph||it.ev.result) : (ph||it.gm.exam);
+    var rich = it.kind==='event' ? (ph||agResultLijst(it.ev.result).length) : (ph||it.gm.exam);
     var edit = (fut||rich) ? 'Aanpassen' : 'Foto of uitslag toevoegen';
     if(it.kind==='graad' && !rich) edit='Foto of examinator toevoegen';
     return '<div class="tl-item'+(fut?' fut':'')+'">'+
@@ -5266,7 +5422,13 @@
         '<span class="tl-date">'+esc(tlWhen(it))+'</span>'+
         '<b class="tl-ttl">'+esc(it.title)+'</b>'+
         (meta.length?'<span class="tl-meta">'+meta.join(' · ')+'</span>':'')+
-        (it.kind==='event'&&it.ev.result?'<span class="tl-res">🏅 '+esc(it.ev.result)+'</span>':'')+
+        // Elke podiumplaats krijgt zijn eigen medaille en zijn eigen pil. Eén pil met twee
+        // plaatsen erin leest als één uitslag, terwijl het er echt twee zijn — op een toernooi
+        // met meerdere onderdelen kun je in het ene eerste en in het andere tweede worden.
+        (it.kind==='event' ? agResultLijst(it.ev.result).map(function(v){
+          var p=agPlace(v);
+          return '<span class="tl-res'+(p&&p.geenPodium?' plain':'')+'">'+(p?p.ico:'🏅')+' '+esc(v)+'</span>';
+        }).join('') : '')+
         // Wie de cursus gaf staat er net zo bij als de examinator bij een graduatie: dezelfde
         // regel, dezelfde toon. Het is een herinnering, geen prijs.
         (it.kind==='event'&&it.ev.trainers&&it.ev.trainers.length
@@ -5314,6 +5476,16 @@
       '<div class="sbody" id="tl-scroll">'+
         '<p class="tl-lead" id="tl-lead">'+esc(tlCountLine())+'</p>'+
         '<div id="tl-body">'+tlBodyHtml()+'</div>'+
+        /* Onderaan, niet bovenaan: je verhaal komt eerst, het veiligstellen ervan volgt.
+           Wie ver genoeg doorrolt om hier te komen, heeft ook iets om te bewaren. */
+        '<div class="tl-backup">'+
+          '<p class="tl-backup-note" id="tl-backup-note">'+esc(backupRegel())+'</p>'+
+          '<div class="tl-backup-act">'+
+            '<button class="tl-edit" data-act="tlbackup">Reservekopie maken</button>'+
+            '<button class="tl-edit" data-act="tlrestore">Terugzetten</button>'+
+          '</div>'+
+          '<input type="file" id="tl-restore-file" accept="application/json,.json" hidden>'+
+        '</div>'+
       '</div>'+
       // Zwevend, zodat je vanaf elk punt in je verhaal een moment kunt toevoegen
       // zonder eerst helemaal naar beneden te scrollen.
@@ -8843,10 +9015,12 @@
       if(agAfterSave){ agAfterSave=null; closeAgendaSheet(); } else agRender(); }
     else if(a==='agphdel'){ if(agDraft){ agSync(); agDraft.photo=''; agDraft.focus=phClampFoc(null); agRender(); buzz(10); } }
     else if(a==='agphfit'){ phSetFit('ag', act.getAttribute('data-fit')); }
-    else if(a==='agres'){ agSync();
-      if(agDraft){
-        var _rv=act.getAttribute('data-v');
-        agDraft.result = (agDraft.result===_rv ? '' : _rv);
+    else if(a==='agres'){ agSync();      if(agDraft){
+        var _rv=act.getAttribute('data-v'), _rl=agResultLijst(agDraft.result), _ri=_rl.indexOf(_rv);
+        if(_ri>-1) _rl.splice(_ri,1);
+        else if(agPlace(_rv) && agPlace(_rv).geenPodium) _rl=[_rv];   // sluit de medailles uit
+        else _rl=_rl.filter(function(v){ var p=agPlace(v); return !(p&&p.geenPodium); }).concat([_rv]);
+        agDraft.result=agResultLijst(_rl);
         agRender(); buzz(10);
       } }
     else if(a==='agtradd'){ agSync();
@@ -8871,7 +9045,8 @@
         if(agDraft.end && agDraft.end>agDraft.date) _ev.end=agDraft.end; else delete _ev.end;
         if((agDraft.where||'').trim()) _ev.where=agDraft.where.trim(); else delete _ev.where;
         // Een uitslag hoort alleen bij een wedstrijd; wisselt het type, dan verdwijnt hij mee.
-        if(agDraft.type==='wedstrijd' && (agDraft.result||'').trim()) _ev.result=agDraft.result.trim(); else delete _ev.result;
+        var _rs=(agDraft.type==='wedstrijd') ? agResultLijst(agDraft.result) : [];
+        if(_rs.length) _ev.result=_rs; else delete _ev.result;
         // Trainers horen bij een cursus; wisselt het type, dan verdwijnen ze mee. Lege regels
         // vallen weg, zodat een vergeten veld geen naamloze trainer oplevert.
         var _tr=(agDraft.type==='cursus' ? (agDraft.trainers||[]) : [])
@@ -8895,6 +9070,16 @@
     else if(a==='tlexit'){ closeTimeline(); buzz(10); }
     else if(a==='tlnew'){ tlEdit(null); buzz(12); }
     else if(a==='tledit'){ tlEdit(act.getAttribute('data-id')); buzz(12); }
+    else if(a==='tlbackup'){ backupMaken(); buzz(12); }
+    else if(a==='tlrestore'){
+      var _rf=document.getElementById('tl-restore-file');
+      if(_rf){
+        _rf.value='';
+        _rf.onchange=function(){ backupTerugzetten(_rf.files && _rf.files[0]); };
+        _rf.click();
+      }
+      buzz(10);
+    }
     else if(a==='tlgrad'){ openGradeSheet(parseInt(act.getAttribute('data-k'),10), tlRefresh); buzz(12); }
     /* ---- Graduatie bewerken ---- */
     else if(a==='gradedit'){ openGradeSheet(parseInt(act.getAttribute('data-k'),10), function(){ bpRenderGrad(bpCurK()); }); buzz(12); }
