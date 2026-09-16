@@ -601,8 +601,8 @@
      zijn eigen stukje lijn en kleurt dat zelf, zodat de kleur precies bij een graduatie omslaat
      in plaats van bij een willekeurige rand. De blokken overlappen hun eigen ondermarge, anders
      valt er bij elke tussenruimte een gaatje. */
-  .tl-line{position:relative;padding-left:34px}
-  .tl-item::before,.tl-year::before{content:"";position:absolute;left:-21.5px;width:5px;
+  .tl-line{position:relative;padding-left:37px}
+  .tl-item::before,.tl-year::before{content:"";position:absolute;left:-24.5px;width:5px;
     background:var(--tlcol,var(--line))}
   /* Op de graduatie zelf slaat de kleur om, en wel precies in het hart van de halte (28px top +
      halve hoogte van 24px = 40px). Boven de halte de nieuwe band, eronder de vorige — de lijst
@@ -630,10 +630,11 @@
      rand en geen bandkleur — de kleur zit al in de lijn, en negen gekleurde ringen erbij maakte
      het beeld rommelig. Een witte cirkel op een gekleurde lijn is precies hoe een halte op een
      metrokaart leest. De halte staat op ooghoogte met de titel, niet met de datum: de titel is
-     waar je naar kijkt. 28px = 1px rand + 13px binnenmarge + de datumregel + het hart van de
-     titel, min de halve halte. */
-  .tl-dot{position:absolute;left:-31px;top:28px;width:24px;height:24px;border-radius:50%;
-    display:grid;place-items:center;font-size:12px;line-height:1;
+     waar je naar kijkt. 25px = 1px rand + 13px binnenmarge + de datumregel + het hart van de
+     titel, min de halve halte. Bij een grotere halte moet die 25 dus mee omlaag, anders zakt de
+     halte onder de titel weg. */
+  .tl-dot{position:absolute;left:-37px;top:25px;width:30px;height:30px;border-radius:50%;
+    display:grid;place-items:center;font-size:13px;line-height:1;
     background:var(--surface);border:2px solid var(--line)}
   .tl-card{position:relative;border:1px solid var(--line);border-radius:16px;padding:13px 15px;background:var(--surface)}
   /* Het potlood hangt in de hoek en is er alleen als de kaart bovenaan staat. Het blijft in de
@@ -2767,10 +2768,16 @@
      planken en de helm op elk toestel op dezelfde lijn eindigen — ook als de pagina niet scrolt.
      De marge onderaan tilt ze van die rand af: laag bij de rand leken ze eruit te vallen, met deze
      ruimte staan ze duidelijk óp de pagina in plaats van erop te balanceren. */
+  /* Het rekwisiet hangt onder de tekst, maar mag nooit half achter de onderrand verdwijnen: het is
+     het herkenningspunt van de pagina en je moet het zien zonder eerst te scrollen. Daarom plakt
+     het aan de onderkant van het scherm (sticky) en blijft het daar staan terwijl de tekst eronder
+     doorloopt. Overlappen mag — het is doorzichtig rekwisiet zonder klikvlak. Zodra je helemaal
+     naar beneden scrolt, komt het op zijn eigen plek in de tekst tot rust. */
   .hbcat .cs-body:has(.hb-prop){display:flex;flex-direction:column}
   .hbcat .cs-body:has(.hb-prop)>*{flex:0 0 auto}
-  .hbcat .cs-body:has(.hb-prop) .hb-prop{margin-top:auto}
-  .hb-prop{display:block;text-align:right;margin:0 -10px var(--pmb,104px) 0;padding-top:var(--pmt,26px);
+  .hbcat .cs-body:has(.hb-prop) .hb-prop{margin-top:auto;position:sticky;
+    bottom:calc(40px + env(safe-area-inset-bottom,0px));z-index:3}
+  .hb-prop{display:block;text-align:right;margin:0 -10px 0 0;padding-top:var(--pmt,26px);
     pointer-events:none}
   .hb-prop img{display:inline-block;width:var(--pw,190px);height:auto;
     transform:rotate(var(--prot,0deg));
@@ -5500,7 +5507,8 @@
     return best<0 ? null : geupInfo(best);
   }
   /* De band die je vóór deze graduatie droeg: de hoogste graad eronder die je gehaald hebt.
-     Zonder voorganger val je terug op de lijnkleur, dan is er simpelweg niets om te breken. */
+     Zonder voorganger droeg je nog niets, en dat is in de praktijk de witte band: de aanloop naar
+     je 10e geup krijgt dus dezelfde witte lijn, die onderaan uitdooft naar niets. */
   function tlBeltVoor(geup){
     var best=-1, k;
     for(k in GEUP_DATES){
@@ -5516,8 +5524,10 @@
      helemaal weg. Op de lijn gebruiken we daarom vol wit, precies zoals de kaarten: wit met een
      haarlijntje eromheen leest wél als wit. Alleen hier, zodat de bandkleur elders niet wijzigt. */
   function tlKleur(c){ return c==='#EDEDE7' ? '#FFFFFF' : c; }
+  /* Nog geen enkele band gehaald? Dan is de lijn wit: de aanloop naar je 10e geup. Onderaan dooft
+     hij weg naar niets (zie het masker op het laatste blok), zodat de reis uit het niets begint. */
   function tlLijnCss(g){
-    if(!g) return 'var(--line)';
+    if(!g) return '#FFFFFF';
     return g.col2
       ? 'linear-gradient(90deg,'+tlKleur(g.col)+' 0 50%,'+tlKleur(g.col2)+' 50% 100%)'
       : tlKleur(g.col);
@@ -5525,7 +5535,7 @@
   /* Voor de omslag op een graduatie moet de bovenste laag altijd een verloop zijn: een kale
      kleur kun je in een background-laag niet op hoogte zetten, een verloop wel. */
   function tlLijnLaag(g){
-    if(!g) return 'linear-gradient(var(--line) 0 100%)';
+    if(!g) return 'linear-gradient(#FFFFFF 0 100%)';
     return g.col2
       ? 'linear-gradient(90deg,'+tlKleur(g.col)+' 0 50%,'+tlKleur(g.col2)+' 50% 100%)'
       : 'linear-gradient('+tlKleur(g.col)+' 0 100%)';
