@@ -5267,6 +5267,11 @@
         '<b class="tl-ttl">'+esc(it.title)+'</b>'+
         (meta.length?'<span class="tl-meta">'+meta.join(' · ')+'</span>':'')+
         (it.kind==='event'&&it.ev.result?'<span class="tl-res">🏅 '+esc(it.ev.result)+'</span>':'')+
+        // Wie de cursus gaf staat er net zo bij als de examinator bij een graduatie: dezelfde
+        // regel, dezelfde toon. Het is een herinnering, geen prijs.
+        (it.kind==='event'&&it.ev.trainers&&it.ev.trainers.length
+          ? '<span class="tl-exam">👤 '+(it.ev.trainers.length>1?'Trainers ':'Trainer ')+esc(it.ev.trainers.join(', '))+'</span>'
+          : '')+
         (it.kind==='graad'&&it.gm.exam?'<span class="tl-exam">👤 Examinator '+esc(it.gm.exam)+'</span>':'')+
         (ph?'<img class="tl-photo'+(foc.fit==='contain'?' fitc':'')+'" src="'+esc(ph)+'" '+
           'style="'+phFocStyle(foc)+'" alt="Foto bij '+esc(it.title)+'">':'')+
