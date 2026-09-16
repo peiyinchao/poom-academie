@@ -22,6 +22,9 @@
     --ink:#1A1712; --mid:#101828; --page:#F4F1EA; --gray:#6B6459; --line:#E7E1D5;
     --surface:#FFFFFF; --surface0:rgba(255,255,255,0); --page0:rgba(244,241,234,0); --soft:#EFEADF;
     --seal:#C1121F; --seal-deep:#8E0D17;
+    /* De markerveeg achter een bladwijzerwoord: een onregelmatige band met rafelige uiteinden,
+       uitgerekt over de breedte van het woord. Alleen de vorm telt — de kleur komt uit CSS. */
+    --mark-svg:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 36' preserveAspectRatio='none'%3E%3Cpath d='M3 13c18-7 58-9 96-7 42 3 82 1 99 5l-2 15c-37 6-78 4-118 3-32-1-61 1-77-4z'/%3E%3C/svg%3E");
     --text:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
     --cond:'Big Shoulders Display',system-ui,sans-serif;
     --poster:'Saira Stencil One',system-ui,sans-serif;
@@ -156,7 +159,7 @@
   .tlbtn{width:37px;height:37px;flex:none;border:0;padding:0;border-radius:50%;cursor:pointer;
     background:none;box-shadow:none;
     display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
-  .tlbtn::before,.tlbtn::after{content:"";grid-area:1/1;width:45px;height:45px;
+  .tlbtn::before,.tlbtn::after{content:"";grid-area:1/1;width:41px;height:41px;
     background:var(--ink);opacity:.74}
   .tlbtn::after{-webkit-mask:url(assets/icons/Journey-berg.png) center/contain no-repeat;
     mask:url(assets/icons/Journey-berg.png) center/contain no-repeat}
@@ -441,6 +444,21 @@
     padding:10px 12px;font-family:inherit;font-size:14px;color:var(--ink);-webkit-appearance:none}
   .ag-title::placeholder{color:var(--gray)}
   .ag-title:focus{outline:none;border-color:var(--blue)}
+  /* Trainers bij een cursus: één regel per naam. De regels staan onder een eigen kopje, zodat
+     ze niet verward worden met de naam van de cursus zelf — die staat in hetzelfde soort veld. */
+  .ag-trainers{display:flex;flex-direction:column;gap:7px}
+  .ag-trlab{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;
+    font-size:10px;font-weight:700;color:var(--gray)}
+  .ag-trrow{display:flex;align-items:center;gap:7px}
+  .ag-trrow .ag-title{flex:1;min-width:0}
+  .ag-trdel{flex:none;width:32px;height:32px;border:0;background:none;cursor:pointer;
+    color:var(--gray);font-size:19px;line-height:1;padding:0;-webkit-tap-highlight-color:transparent}
+  .ag-trdel:active{transform:scale(.9)}
+  .ag-tradd{align-self:flex-start;border:0;background:none;padding:2px 0;cursor:pointer;
+    font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;font-size:12px;
+    font-weight:800;color:var(--blue);-webkit-tap-highlight-color:transparent}
+  .ag-tradd:active{opacity:.6}
+  .ag-trsub{margin-top:1px}
   /* Two native date fields side by side; the label reads back the pick in 3-letter month form. */
   .ag-dates{display:flex;gap:9px}
   .ag-date{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;
@@ -599,7 +617,7 @@
   .tl-ttl{display:block;margin-top:3px;font-size:15.5px;font-weight:800;line-height:1.25;color:var(--ink)}
   .tl-meta{display:block;margin-top:3px;font-size:12.5px;color:var(--gray)}
   .tl-meta i{font-style:normal;font-weight:700;color:var(--el)}
-  .tl-res{display:inline-block;margin-top:7px;padding:4px 10px;border-radius:999px;
+  .tl-res{display:inline-block;margin-top:7px;margin-right:9px;padding:4px 10px;border-radius:999px;
     background:var(--beltfill,var(--el));color:var(--beltink,#fff);font-size:12px;font-weight:800}
   .tl-photo{display:block;width:100%;max-height:210px;object-fit:cover;border-radius:12px;margin-top:10px}
   /* "Passend" letterboxt in een vast kader — anders zou object-fit:contain niets doen. */
@@ -2259,7 +2277,7 @@
   .cs-dots{position:relative;z-index:60;display:flex;align-items:center;gap:0;margin:11px 0 0 -3.5px;
     padding:7px 0;align-self:flex-start}
   .cs-dot{position:relative;width:6px;height:6px;flex:none;border:0;padding:0;margin:0 3.5px;border-radius:50%;
-    background-color:rgba(30,22,16,.26);cursor:pointer;-webkit-tap-highlight-color:transparent;
+    background-color:rgba(30,22,16,.4);cursor:pointer;-webkit-tap-highlight-color:transparent;
     transition:transform .2s cubic-bezier(.22,.9,.3,1), background-color .22s ease}
   .cs-dot::before{content:"";position:absolute;top:-9px;bottom:-9px;left:-3.5px;right:-3.5px}
   /* De puntjes kenden eerder vier tinten: onaangeraakt, licht voor "ken je al", diep voor
@@ -2390,7 +2408,17 @@
   .wcat .ct-row + .ct-row{border-top:1px solid var(--line)}
   /* Een gemarkeerd woord kleurt de hele regel zacht rood: je ziet in één blik welke woorden
      in deze lijst nog aandacht vragen, ook zonder de bladwijzers af te speuren. */
-  .wcat .ct-row.hard{background:color-mix(in srgb, #C1121F 7%, transparent)}
+  /* Een bladwijzerwoord kleurde eerder zijn hele regel rood. Bij een lijst met veel moeilijke
+     woorden werd dat een lappendeken en verdween juist het woord zelf. Nu krijgt alleen het
+     woord een markerveeg, zoals je in een boek zou doen: onregelmatige vorm, rafelige uiteinden,
+     iets scheef. De vorm zit in een masker in plaats van in een plaatje, zodat de kleur het
+     thema volgt en er niets extra&#39;s geladen hoeft te worden. */
+  .wcat .ct-row.hard .ct-meta b{position:relative;z-index:0}
+  .wcat .ct-row.hard .ct-meta b::before{content:"";position:absolute;z-index:-1;
+    left:-5px;right:-6px;top:4%;bottom:-10%;transform:rotate(-.7deg);
+    background:color-mix(in srgb, var(--seal) 32%, transparent);
+    -webkit-mask:center/100% 100% no-repeat var(--mark-svg);
+    mask:center/100% 100% no-repeat var(--mark-svg)}
   .ct-tx{flex:1;min-width:0}
   .ct-ko{display:flex;align-items:center;gap:8px;font-size:19px;font-weight:700;color:var(--ink);line-height:1.16}
   .ct-meta{font-size:13px;color:var(--gray);margin-top:2px}
@@ -3094,6 +3122,15 @@
     {k:'examen',    ico:'🥋', label:'Examen'},
     {k:'cursus',    ico:'📚', label:'Cursus'}
   ];
+  /* Een uitslag was vrije tekst, maar in de praktijk is het bijna altijd een podiumplaats.
+     Drie knoppen schelen typwerk op een telefoon en houden de tijdlijn consistent — "2e" en
+     "2de plaats" en "tweede" leverden anders drie verschillende badges op. Nog een keer tikken
+     zet hem weer uit, voor als je toch buiten het podium viel. */
+  var AG_PLACES = [
+    {v:'1e plaats', ico:'🥇'},
+    {v:'2e plaats', ico:'🥈'},
+    {v:'3e plaats', ico:'🥉'}
+  ];
   var AGENDA = [];
   function agType(k){ for(var i=0;i<AG_TYPES.length;i++){ if(AG_TYPES[i].k===k) return AG_TYPES[i]; } return AG_TYPES[0]; }
   function agLoad(){
@@ -3649,10 +3686,11 @@
   // Two modes in one sheet: the list of what's planned, and a separate form for entering a new
   // event. Keeping them apart stops the sheet turning into one dense block of controls.
   var agSheet=null, agMode='list', agDraft=null, agEditId=null, agAfterSave=null;
-  function agBlankDraft(){ return {type:'wedstrijd', title:'', date:'', end:'', where:'', result:'', photo:'', focus:phClampFoc(null)}; }
+  function agBlankDraft(){ return {type:'wedstrijd', title:'', date:'', end:'', where:'', result:'', trainers:[], photo:'', focus:phClampFoc(null)}; }
   function agEditDraft(e){
     return {type:agType(e.type).k, title:e.title||'', date:e.date||'', end:e.end||'',
-            where:e.where||'', result:e.result||'', photo:phGet(e.id), focus:phFoc(e.id)};
+            where:e.where||'', result:e.result||'', trainers:(e.trainers||[]).slice(),
+            photo:phGet(e.id), focus:phFoc(e.id)};
   }
   /* Foto-onderdeel van de agenda- en graduatieformulieren. Zonder foto is het één grote knop;
      mét foto wordt het een klein bewerkvlak: sleep de foto om het brandpunt te verzetten en
@@ -3741,10 +3779,14 @@
   }
   function agItemHtml(e){
     var t=agType(e.type);
+    // De trainers komen op een eigen regel: achter plaats en datum geplakt wordt de subregel
+    // bij drie namen te lang en valt juist de datum weg.
+    var tr=(e.trainers&&e.trainers.length) ? e.trainers.join(', ') : '';
     return '<div class="ag-item">'+
       '<span class="ag-ico">'+t.ico+'</span>'+
       '<span class="ag-txt"><b>'+esc(e.title||t.label)+'</b>'+
-        '<span class="ag-sub">'+esc(agWhen(e)+(e.where?' · '+e.where:''))+'</span></span>'+
+        '<span class="ag-sub">'+esc(agWhen(e)+(e.where?' · '+e.where:''))+'</span>'+
+        (tr?'<span class="ag-sub ag-trsub">'+esc(tr)+'</span>':'')+'</span>'+
       '<span class="ag-cnt">'+agCount(e)+'</span>'+
       '<button class="ag-del" data-act="agdel" data-id="'+esc(e.id)+'" aria-label="Verwijderen">×</button>'+
     '</div>';
@@ -3761,6 +3803,26 @@
       '<b'+(val?'':' class="dim"')+'>'+esc(val?fmtDateNL(val):ph)+'</b>'+
       '<input type="date" data-role="'+role+'"'+(val?' value="'+esc(val)+'"':'')+'></label>';
   }
+  /* Bij een cursus staan er soms twee of drie trainers voor de zaal. Eén veld per trainer in
+     plaats van één veld met komma&#39;s: dan hoeft niemand een scheidingsteken te onthouden en
+     kun je een naam weghalen zonder de rest opnieuw te typen. Het eerste veld staat er altijd,
+     ook leeg — een lege regel leest als een uitnodiging, een knop als huiswerk. */
+  function agTrainersHtml(d){
+    var list=(d.trainers && d.trainers.length) ? d.trainers : [''];
+    return '<div class="ag-trainers">'+
+      '<span class="ag-trlab">'+(list.length>1?'Trainers':'Trainer')+'</span>'+
+      list.map(function(n,i){
+        return '<div class="ag-trrow">'+
+          '<input class="ag-title" type="text" autocomplete="off" data-role="trainer"'+
+            ' value="'+esc(n)+'" placeholder="Naam van de trainer">'+
+          (list.length>1
+            ? '<button class="ag-trdel" data-act="agtrdel" data-i="'+i+'" aria-label="Deze trainer verwijderen">×</button>'
+            : '')+
+        '</div>';
+      }).join('')+
+      '<button class="ag-tradd" data-act="agtradd">+ Nog een trainer</button>'+
+    '</div>';
+  }
   function agFormHtml(){
     var d=agDraft||agBlankDraft();
     var ph=d.photo||'';
@@ -3776,8 +3838,14 @@
       '</div>'+
       // Een uitslag hoort alleen bij een wedstrijd; bij een cursus of examen zou het veld verwarren.
       (d.type==='wedstrijd'
-        ? '<input class="ag-title" id="ag-result" type="text" autocomplete="off" value="'+esc(d.result||'')+'" placeholder="Uitslag (bijv. 2e plaats poomsae)">'
+        ? '<div class="ag-res"><span class="ag-trlab">Uitslag</span>'+
+          '<div class="ag-chips">'+AG_PLACES.map(function(p){
+            return '<button class="ag-chip'+(d.result===p.v?' on':'')+'" data-act="agres" data-v="'+esc(p.v)+'"'+
+              ' aria-pressed="'+(d.result===p.v?'true':'false')+'">'+p.ico+' '+esc(p.v)+'</button>';
+          }).join('')+'</div></div>'
         : '')+
+      // Wie er voor de zaal stond vraag je alleen bij een cursus.
+      (d.type==='cursus' ? agTrainersHtml(d) : '')+
       phEditHtml(ph, d.focus, 'ag')+
       '<p class="vd-status'+(d.note&&d.noteErr?' err':'')+'" id="ag-status">'+esc(d.note||'')+'</p>'+
       '<div class="ag-formact">'+
@@ -3793,6 +3861,8 @@
     var t=agSheet.querySelector('#ag-title'); if(t) agDraft.title=t.value;
     var w=agSheet.querySelector('#ag-where'); if(w) agDraft.where=w.value;
     var r=agSheet.querySelector('#ag-result'); if(r) agDraft.result=r.value;
+    var tr=agSheet.querySelectorAll('[data-role="trainer"]');
+    if(tr.length) agDraft.trainers=[].map.call(tr, function(el){ return el.value; });
   }
   function agRender(){
     if(!agSheet) return;
@@ -5554,34 +5624,18 @@
       el.innerHTML=html; if(body) body.scrollTop=0; return;
     }
     if(body) body.scrollTop=0;   // een nieuwe woordgroep begint bovenaan, niet halverwege
-    var h0 = el.offsetHeight;
     var out = dir<0 ? 'cs-out-r' : 'cs-out-l', into = dir<0 ? 'cs-in-l' : 'cs-in-r';
     el.classList.remove('cs-in-l','cs-in-r');
     el.classList.add('cs-fading', out);             // current rows slide out of the way
     setTimeout(function(){
       el.classList.remove(out);
       el.innerHTML = html;                          // swap while faded
-      el.style.height = '';                         // natuurlijke hoogte om het doel te meten
-      void el.offsetHeight;
-      var h1 = el.offsetHeight;                     // de hoogte die de nieuwe inhoud vraagt
-      if(Math.abs(h1 - h0) < 1){                    // same height → the new rows slide in
-        requestAnimationFrame(function(){ el.classList.remove('cs-fading'); el.classList.add(into); });
-        setTimeout(function(){ el.classList.remove(into); }, 400);
-        return;
-      }
-      // Tijdens het uitzetten is de kaart even lager dan zijn inhoud; zonder afknippen zouden
-      // de onderste rijen er alvast uit hangen.
-      el.style.overflow = 'hidden';
-      el.style.height = h0 + 'px';                  // lock the start height
-      void el.offsetHeight;                         // commit before animating
-      requestAnimationFrame(function(){
-        el.style.transition = 'height .3s cubic-bezier(.22,.9,.3,1)';
-        el.style.height = h1 + 'px';                // ease the card to the new height
-        el.classList.remove('cs-fading');           // new rows slide in
-        el.classList.add(into);
-      });
-      setTimeout(function(){                         // restore natural sizing after the ease
-        el.style.transition = ''; el.style.height = ''; el.style.overflow = '';
+      /* De lijst neemt meteen de hoogte van zijn nieuwe inhoud. Eerder werd daar in .3s naartoe
+         geanimeerd, maar sinds het hele blad rolt schuift die ease de rijen onder je vinger
+         vandaan terwijl je al begint te lezen — en bij een groot lengteverschil deint de
+         pagina zichtbaar na. Alleen de rijen kruisen nog; de hoogte volgt in één keer. */
+      requestAnimationFrame(function(){ el.classList.remove('cs-fading'); el.classList.add(into); });
+      setTimeout(function(){
         el.classList.remove(into);
         if(body) csEdgeFade(body);
       }, 400);
@@ -8784,6 +8838,26 @@
       if(agAfterSave){ agAfterSave=null; closeAgendaSheet(); } else agRender(); }
     else if(a==='agphdel'){ if(agDraft){ agSync(); agDraft.photo=''; agDraft.focus=phClampFoc(null); agRender(); buzz(10); } }
     else if(a==='agphfit'){ phSetFit('ag', act.getAttribute('data-fit')); }
+    else if(a==='agres'){ agSync();
+      if(agDraft){
+        var _rv=act.getAttribute('data-v');
+        agDraft.result = (agDraft.result===_rv ? '' : _rv);
+        agRender(); buzz(10);
+      } }
+    else if(a==='agtradd'){ agSync();
+      if(agDraft){
+        var _tl=(agDraft.trainers && agDraft.trainers.length) ? agDraft.trainers.slice() : [''];
+        _tl.push(''); agDraft.trainers=_tl; agRender();
+        // Meteen in het verse veld staan: anders moet je na de knop nóg een keer tikken.
+        var _ti=agSheet.querySelectorAll('[data-role="trainer"]');
+        if(_ti.length) _ti[_ti.length-1].focus();
+        buzz(10);
+      } }
+    else if(a==='agtrdel'){ agSync();
+      if(agDraft){
+        var _tx=+act.getAttribute('data-i'), _td=(agDraft.trainers||[]).slice();
+        _td.splice(_tx,1); agDraft.trainers=_td.length?_td:['']; agRender(); buzz(10);
+      } }
     else if(a==='agsave'){ agSync();
       if(agDraft && agDraft.date){
         var _ev = agEditId ? agById(agEditId) : null;
@@ -8793,6 +8867,11 @@
         if((agDraft.where||'').trim()) _ev.where=agDraft.where.trim(); else delete _ev.where;
         // Een uitslag hoort alleen bij een wedstrijd; wisselt het type, dan verdwijnt hij mee.
         if(agDraft.type==='wedstrijd' && (agDraft.result||'').trim()) _ev.result=agDraft.result.trim(); else delete _ev.result;
+        // Trainers horen bij een cursus; wisselt het type, dan verdwijnen ze mee. Lege regels
+        // vallen weg, zodat een vergeten veld geen naamloze trainer oplevert.
+        var _tr=(agDraft.type==='cursus' ? (agDraft.trainers||[]) : [])
+          .map(function(n){ return String(n||'').trim(); }).filter(Boolean);
+        if(_tr.length) _ev.trainers=_tr; else delete _ev.trainers;
         agSave(); refreshStatusNext();
         var _phok=phSet(_ev.id, agDraft.photo||'');
         phFocSet(_ev.id, agDraft.photo ? agDraft.focus : null);
