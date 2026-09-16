@@ -595,23 +595,60 @@
   /* ---- Tijdlijn ---- */
   .tl-lead{margin:0 0 14px;font-size:12.5px;color:var(--gray);letter-spacing:.01em}
   .tl-empty{font-size:13.5px;color:var(--gray);line-height:1.55;text-align:center;padding:30px 12px 20px}
-  /* Eén doorlopende lijn achter alle stippen: dat is wat het een tijdlijn maakt in plaats van een lijst. */
+  /* De tijdlijn is een metrolijn: één doorlopende streep in de kleur van de band die je op dat
+     moment droeg, met de gebeurtenissen als haltes. 5px: breed genoeg om twee bandkleuren als
+     twee sporen naast elkaar te tonen, en nog steeds rustig naast de kaarten. Elk blok tekent
+     zijn eigen stukje lijn en kleurt dat zelf, zodat de kleur precies bij een graduatie omslaat
+     in plaats van bij een willekeurige rand. De blokken overlappen hun eigen ondermarge, anders
+     valt er bij elke tussenruimte een gaatje. */
   .tl-line{position:relative;padding-left:34px}
-  .tl-line::before{content:"";position:absolute;left:14px;top:6px;bottom:10px;width:2px;border-radius:2px;
-    background:linear-gradient(180deg,var(--line),var(--line) 82%,transparent)}
+  .tl-item::before,.tl-year::before{content:"";position:absolute;left:-17.5px;width:5px;
+    background:var(--tlcol,var(--line))}
+  /* Op de graduatie zelf slaat de kleur om, en wel precies in het hart van de halte (14px top +
+     halve hoogte van 24px = 26px). Boven de halte de nieuwe band, eronder de vorige — de lijst
+     loopt van nieuw naar oud, dus naar beneden ga je terug in de tijd. */
+  .tl-item.tl-omslag::before{
+    background:var(--tlcoln) 0 0/100% 26px no-repeat,var(--tlcolp,var(--line))}
+  /* Vierkante naden: met afgeronde uiteinden per blok kneep de lijn bij elke kaart dicht en
+     werd het een rij worstjes in plaats van één doorlopende lijn. Alleen de bovenkant van de
+     hele lijn is rond; de onderkant dooft toch uit. */
+  .tl-line>:first-child::before{border-radius:2.5px 2.5px 0 0}
+  .tl-item::before{top:0;bottom:-12px}
+  .tl-year::before{top:-2px;bottom:-10px}
+  /* Onderaan houdt je verhaal op; daar dooft de lijn uit in plaats van hard af te breken. Met
+     een masker, want de kleur kan ook een verloop van twee bandkleuren zijn. */
+  .tl-line>.tl-item:last-child::before{-webkit-mask:linear-gradient(180deg,#000 58%,transparent);
+    mask:linear-gradient(180deg,#000 58%,transparent)}
+  /* Zo groot als een gebeurtenistitel en in dezelfde inkt: een jaartal is een kop, geen bijschrift. */
   .tl-year{position:relative;margin:2px 0 10px;padding-top:4px}
-  .tl-year span{display:inline-block;font-family:var(--cond);font-size:12px;font-weight:800;
-    letter-spacing:.09em;text-transform:uppercase;color:var(--gray)}
-  .tl-year::before{content:"";position:absolute;left:-27px;top:8px;width:16px;height:2px;border-radius:2px;
-    background:var(--line)}
+  .tl-year span{display:inline-block;font-family:var(--cond);font-size:15.5px;font-weight:800;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
   .tl-item{position:relative;margin-bottom:12px}
-  .tl-item.fut{opacity:.82}
+  /* Een geplande gebeurtenis mag zichtbaar zijn: de stippellijn was zo licht dat je hem niet zag. */
+  .tl-item.fut{opacity:.94}
+  /* De halte staat op de lijn, niet ernaast: dezelfde middellijn. Bewust een rustige, dunne
+     rand en geen bandkleur — de kleur zit al in de lijn, en negen gekleurde ringen erbij maakte
+     het beeld rommelig. Een witte cirkel op een gekleurde lijn is precies hoe een halte op een
+     metrokaart leest. */
   .tl-dot{position:absolute;left:-27px;top:14px;width:24px;height:24px;border-radius:50%;
     display:grid;place-items:center;font-size:12px;line-height:1;
-    background:var(--surface);border:2px solid var(--line);box-shadow:0 0 0 4px var(--bg)}
-  .tl-dot.belt{border-color:rgba(20,17,13,.16)}
-  .tl-card{border:1px solid var(--line);border-radius:16px;padding:13px 15px;background:var(--surface)}
-  .tl-item.fut .tl-card{border-style:dashed;background:transparent}
+    background:var(--surface);border:2px solid var(--line)}
+  .tl-card{position:relative;border:1px solid var(--line);border-radius:16px;padding:13px 15px;background:var(--surface)}
+  /* Het potlood hangt in de hoek en is er alleen als de kaart bovenaan staat. Het blijft in de
+     opmaak staan (alleen onzichtbaar), zodat de tekst niet verspringt als het verschijnt. */
+  .tl-pen{position:absolute;top:9px;right:9px;z-index:2;width:34px;height:34px;padding:0;border:0;
+    border-radius:50%;background:var(--soft);color:var(--gray);display:grid;place-items:center;
+    opacity:0;pointer-events:none;transform:scale(.86);
+    transition:opacity .22s ease,transform .22s cubic-bezier(.22,1,.36,1)}
+  .tl-pen svg{width:16px;height:16px}
+  .tl-item.tl-atop .tl-pen{opacity:1;pointer-events:auto;transform:none}
+  .tl-pen:active{transform:scale(.9)}
+  .tl-ttl[role="button"]{cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .tl-ttl[role="button"]:active{opacity:.6}
+  .tl-photo[role="button"]{cursor:zoom-in}
+  /* De titel mag niet onder het potlood doorlopen zodra dat er is. */
+  .tl-item.tl-atop .tl-date,.tl-item.tl-atop .tl-ttl{padding-right:38px}
+  .tl-item.fut .tl-card{border-style:dashed;border-color:rgba(30,22,16,.3);background:transparent}
   .tl-date{display:block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
     color:var(--gray);font-family:var(--cond)}
   .tl-ttl{display:block;margin-top:3px;font-size:15.5px;font-weight:800;line-height:1.25;color:var(--ink)}
@@ -635,6 +672,17 @@
   .tl-backup-note{margin:0 0 10px;font-size:12px;color:var(--gray);line-height:1.3}
   .tl-backup-act{display:flex;gap:9px;flex-wrap:wrap}
   /* De examinator is een herinnering, geen prijs; de gekleurde pil blijft voor uitslagen. */
+  /* De vergrote foto: zwart eromheen zodat er niets anders om je aandacht vraagt, en de hele
+     foto in beeld in plaats van bijgesneden. Overal tikken sluit hem weer. */
+  .tl-lb{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:22px;
+    background:rgba(12,10,8,.92);opacity:0;transition:opacity .24s ease;-webkit-tap-highlight-color:transparent}
+  .tl-lb.show{opacity:1}
+  .tl-lb img{max-width:100%;max-height:100%;border-radius:12px;object-fit:contain;
+    transform:scale(.96);transition:transform .28s cubic-bezier(.22,1,.36,1)}
+  .tl-lb.show img{transform:none}
+  .tl-lb-x{position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:14px;width:44px;height:44px;
+    border:0;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;display:grid;place-items:center}
+  .tl-lb-x svg{width:22px;height:22px}
   .tl-exam{display:block;margin-top:6px;font-size:12px;font-weight:600;color:var(--gray)}
   .tl-add{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:6px;
     border-radius:16px;padding:15px;
@@ -2816,7 +2864,7 @@
   .ic-woorden{-webkit-mask-image:url('assets/icons/Woorden.png');mask-image:url('assets/icons/Woorden.png')}
   /* No drawn asset for this one yet — an inline SVG mask keeps it in step with the others, which
      are all painted with currentColor through a mask. */
-  .ic-filmpjes{-webkit-mask-image:url('assets/icons/Video.png');mask-image:url('assets/icons/Video.png')}
+  .ic-filmpjes{-webkit-mask-image:url('assets/icons/Videos.png');mask-image:url('assets/icons/Videos.png')}
 
   @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -2923,6 +2971,7 @@
     plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
     speak:'<svg class="wv" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect class="wv-b" x="3.1" y="10.2" width="1.8" height="3.6" rx=".9"/><rect class="wv-b" x="6.3" y="7.2" width="1.8" height="9.6" rx=".9"/><rect class="wv-b" x="9.5" y="5.2" width="1.8" height="13.6" rx=".9"/><rect class="wv-b" x="12.5" y="9.5" width="1.8" height="5" rx=".9"/><rect class="wv-b" x="15.7" y="6.6" width="1.8" height="10.8" rx=".9"/><rect class="wv-b" x="18.9" y="10.4" width="1.8" height="3.2" rx=".9"/></svg>',
     spk:'<svg class="wf-spk" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.4v5.2h3.4L12 18.9V5.1L7.4 9.4H4z" fill="currentColor"/><path d="M15.3 9.1a4 4 0 0 1 0 5.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M17.7 6.6a7.3 7.3 0 0 1 0 10.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    potlood:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M14.5 6.5l3 3"/></svg>',
     x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
     idea:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18h5M10 21.5h4M12 2.5a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1V18h6v-1.8c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 2.5z"/></svg>',
@@ -3228,10 +3277,12 @@
   /* ---------- Agenda ---------- */
   // Wedstrijden, examens en cursussen that the student enters themselves. Unlike GEUP_DATES
   // (in-memory demo data) these are real user input, so they persist in localStorage.
+  /* Volgorde op hoe vaak het voorkomt: wedstrijden het vaakst, examens het minst. Zo staat de
+     knop die je meestal nodig hebt vooraan en is hij ook de standaardkeuze. */
   var AG_TYPES = [
     {k:'wedstrijd', ico:'🏆', label:'Wedstrijd'},
-    {k:'examen',    ico:'🥋', label:'Examen'},
-    {k:'cursus',    ico:'📚', label:'Cursus'}
+    {k:'cursus',    ico:'📚', label:'Cursus'},
+    {k:'examen',    ico:'🥋', label:'Examen'}
   ];
   /* Een uitslag was vrije tekst, maar in de praktijk is het bijna altijd een podiumplaats.
      Drie knoppen schelen typwerk op een telefoon en houden de tijdlijn consistent — "2e" en
@@ -3273,6 +3324,8 @@
       else if(veld==='trainer' && e.trainers){
         for(j=0;j<e.trainers.length;j++){ if(e.trainers[j]) zien[String(e.trainers[j]).trim()]=1; }
       }
+      // Een examinator kan ook bij een gepland examen staan, nog voor de graad binnen is.
+      else if(veld==='exam' && e.exam){ zien[String(e.exam).trim()]=1; }
     }
     if(veld==='exam'){ for(i in GMETA){ if(GMETA.hasOwnProperty(i) && GMETA[i] && GMETA[i].exam) zien[String(GMETA[i].exam).trim()]=1; } }
     for(i in zien){ if(zien.hasOwnProperty(i) && i) uit.push(i); }
@@ -3839,10 +3892,12 @@
   // Two modes in one sheet: the list of what's planned, and a separate form for entering a new
   // event. Keeping them apart stops the sheet turning into one dense block of controls.
   var agSheet=null, agMode='list', agDraft=null, agEditId=null, agAfterSave=null;
-  function agBlankDraft(){ return {type:'wedstrijd', title:'', date:'', end:'', where:'', result:[], trainers:[], photo:'', focus:phClampFoc(null)}; }
+  function agBlankDraft(){ return {type:'wedstrijd', title:'', date:'', end:'', where:'', result:[], trainers:[], geup:agVolgendeGraad(), exam:agVorigeExaminator(), photo:'', focus:phClampFoc(null)}; }
   function agEditDraft(e){
     return {type:agType(e.type).k, title:e.title||'', date:e.date||'', end:e.end||'',
             where:e.where||'', result:agResultLijst(e.result), trainers:(e.trainers||[]).slice(),
+            geup:(typeof e.geup==='number'?e.geup:agVolgendeGraad()),
+            exam:(e.exam||agVorigeExaminator()),
             photo:phGet(e.id), focus:phFoc(e.id)};
   }
   /* Foto-onderdeel van de agenda- en graduatieformulieren. Zonder foto is het één grote knop;
@@ -3977,19 +4032,53 @@
       agDatalist('ag-trainer-eerder','trainer')+
     '</div>';
   }
+  /* Welke graden heb je nog niet? Dat is de keuzelijst bij een examen. Standaard staat de
+     eerstvolgende aan, maar hogere mogen ook: je kunt een graad overslaan. */
+  function agOpenGraden(){
+    var high=geupHighest(), uit=[], i;
+    for(i=0;i<GEUPS.length;i++){ if(!GEUP_DATES[i] && i>high) uit.push(i); }
+    return uit;
+  }
+  function agVolgendeGraad(){ var l=agOpenGraden(); return l.length?l[0]:null; }
+  // De examinator van de vorige keer is verreweg de waarschijnlijkste; die staat alvast ingevuld.
+  function agVorigeExaminator(){
+    var best=-1, k;
+    for(k in GEUP_DATES){
+      if(!GEUP_DATES.hasOwnProperty(k) || !GEUP_DATES[k]) continue;
+      if((+k)>best && gmGet(+k).exam) best=+k;
+    }
+    return best<0 ? '' : (gmGet(best).exam||'');
+  }
+  function agExamenHtml(d){
+    var open=agOpenGraden();
+    if(!open.length) return '<p class="ag-trlab">Je hebt alle graden al gehaald.</p>';
+    return '<div class="ag-res"><span class="ag-trlab">Voor welke graad</span>'+
+      '<div class="ag-chips">'+open.map(function(i){
+        var g=geupInfo(i);
+        return '<button class="ag-chip'+(d.geup===i?' on':'')+'" data-act="aggeup" data-k="'+i+'"'+
+          ' aria-pressed="'+(d.geup===i?'true':'false')+'">'+esc(g.grade)+'</button>';
+      }).join('')+'</div></div>'+
+      '<input class="ag-title" id="ag-exam" type="text" autocomplete="off" list="ag-exam-eerder"'+
+        ' value="'+esc(d.exam||'')+'" placeholder="Examinator (bijv. R.J. Kawarmala)">'+
+      agDatalist('ag-exam-eerder','exam');
+  }
   function agFormHtml(){
     var d=agDraft||agBlankDraft();
     var ph=d.photo||'';
+    var examen = d.type==='examen';
     return '<div class="ag-form">'+
       '<div class="ag-chips">'+AG_TYPES.map(function(t){
         return '<button class="ag-chip'+(t.k===d.type?' on':'')+'" data-act="agtype" data-k="'+t.k+'">'+t.ico+' '+t.label+'</button>';
       }).join('')+'</div>'+
-      '<input class="ag-title" id="ag-title" type="text" autocomplete="off" value="'+esc(d.title)+'" placeholder="Naam (bijv. Ilyo Open Poomsae)">'+
+      // Bij een examen is de naam geen vrije tekst maar de graad waar je voor opgaat.
+      (examen ? agExamenHtml(d)
+              : '<input class="ag-title" id="ag-title" type="text" autocomplete="off" value="'+esc(d.title)+'" placeholder="Naam (bijv. Ilyo Open Poomsae)">')+
       '<input class="ag-title" id="ag-where" type="text" autocomplete="off" list="ag-where-eerder" value="'+esc(d.where||'')+'" placeholder="Plaats (bijv. Aarschot)">'+
       agDatalist('ag-where-eerder','where')+
       '<div class="ag-dates">'+
         agDateHtml('start','Datum', d.date, 'Kies…')+
-        agDateHtml('end','t/m (optioneel)', d.end, '—')+
+        // Een examen is één dag; een periode aanbieden zou suggereren dat het er meer zijn.
+        (examen ? '' : agDateHtml('end','t/m (optioneel)', d.end, '—'))+
       '</div>'+
       // Een uitslag hoort alleen bij een wedstrijd; bij een cursus of examen zou het veld verwarren.
       (d.type==='wedstrijd'
@@ -4015,6 +4104,7 @@
   function agSync(){
     if(!agSheet || agMode!=='form' || !agDraft) return;
     var t=agSheet.querySelector('#ag-title'); if(t) agDraft.title=t.value;
+    var x=agSheet.querySelector('#ag-exam'); if(x) agDraft.exam=x.value;
     var w=agSheet.querySelector('#ag-where'); if(w) agDraft.where=w.value;
     var tr=agSheet.querySelectorAll('[data-role="trainer"]');
     if(tr.length) agDraft.trainers=[].map.call(tr, function(el){ return el.value; });
@@ -5394,12 +5484,60 @@
     }
     return s;
   }
-  function tlDotHtml(it){
-    if(it.kind==='graad'){
-      var g=geupInfo(it.geup), st=' style="background:'+esc(g.col)+
-        (g.col2?';background:linear-gradient(160deg,'+esc(g.col)+' 0 50%,'+esc(g.col2)+' 50% 100%)':'')+'"';
-      return '<span class="tl-dot belt"'+st+'></span>';
+  /* Welke band droeg je op deze datum? De hoogste graad die je toen al gehaald had. Een
+     graduatie kleurt dus vanaf zijn eigen datum, want die dag ging de nieuwe band om. */
+  function tlBeltAt(iso){
+    var best=-1, k;
+    for(k in GEUP_DATES){
+      if(!GEUP_DATES.hasOwnProperty(k) || !GEUP_DATES[k]) continue;
+      if(GEUP_DATES[k]<=iso && (+k)>best) best=+k;
     }
+    return best<0 ? null : geupInfo(best);
+  }
+  /* De band die je vóór deze graduatie droeg: de hoogste graad eronder die je gehaald hebt.
+     Zonder voorganger val je terug op de lijnkleur, dan is er simpelweg niets om te breken. */
+  function tlBeltVoor(geup){
+    var best=-1, k;
+    for(k in GEUP_DATES){
+      if(!GEUP_DATES.hasOwnProperty(k) || !GEUP_DATES[k]) continue;
+      if((+k)<(+geup) && (+k)>best) best=+k;
+    }
+    return best<0 ? null : geupInfo(best);
+  }
+  /* Twee bandkleuren op één lijn: twee sporen naast elkaar, zoals op een metrokaart waar twee
+     lijnen een stuk samen lopen. Bij 5px houd je 2,5px per kleur over; op een telefoonscherm is
+     dat scherp genoeg om als twee kleuren te lezen en niet als een vuile rand. */
+  function tlLijnCss(g){
+    if(!g) return 'var(--line)';
+    return g.col2
+      ? 'linear-gradient(90deg,'+g.col+' 0 50%,'+g.col2+' 50% 100%)'
+      : g.col;
+  }
+  /* Voor de omslag op een graduatie moet de bovenste laag altijd een verloop zijn: een kale
+     kleur kun je in een background-laag niet op hoogte zetten, een verloop wel. */
+  function tlLijnLaag(g){
+    if(!g) return 'linear-gradient(var(--line) 0 100%)';
+    return g.col2
+      ? 'linear-gradient(90deg,'+g.col+' 0 50%,'+g.col2+' 50% 100%)'
+      : 'linear-gradient('+g.col+' 0 100%)';
+  }
+  function tlKleurStijl(iso){
+    var g=tlBeltAt(iso);
+    if(!g) return '';
+    return ' style="--tlcol:'+esc(tlLijnCss(g))+';--tldot:'+esc(g.col)+'"';
+  }
+  /* Op een graduatieblok slaat de lijn halverwege om: boven de halte de band die je vanaf dat
+     moment droeg, eronder de vorige. Zo zit de kleurbreuk precies op de halte in plaats van op
+     een kaartrand — geen trapje meer in de lijn. */
+  function tlOmslagStijl(it){
+    var g=geupInfo(it.geup), pre=tlBeltVoor(it.geup);
+    return ' style="--tlcol:'+esc(tlLijnCss(g))+';--tldot:'+esc(g.col)+
+      ';--tlcoln:'+esc(tlLijnLaag(g))+';--tlcolp:'+esc(tlLijnCss(pre))+'"';
+  }
+  function tlDotHtml(it){
+    /* Een graduatie krijgt hetzelfde diplomateken als bij het invoeren van een gebeurtenis; de
+       bandkleur zit nu in de lijn en in de ring, dus de halte hoeft hem niet nog eens te dragen. */
+    if(it.kind==='graad') return '<span class="tl-dot belt">🎓</span>';
     return '<span class="tl-dot">'+it.ico+'</span>';
   }
   function tlItemHtml(it, today){
@@ -5416,11 +5554,20 @@
     var rich = it.kind==='event' ? (ph||agResultLijst(it.ev.result).length) : (ph||it.gm.exam);
     var edit = (fut||rich) ? 'Aanpassen' : 'Foto of uitslag toevoegen';
     if(it.kind==='graad' && !rich) edit='Foto of examinator toevoegen';
-    return '<div class="tl-item'+(fut?' fut':'')+'">'+
+    /* De aanpassen-knop stond onder elke kaart en haalde de rust uit het beeld. Nu is de titel
+       zelf aan te tikken en verschijnt er een potlood in de hoek zodra de kaart bovenaan komt:
+       binnen bereik op het moment dat je ernaar kijkt, en verder onzichtbaar. */
+    var ed = it.kind==='event'
+      ? 'data-act="tledit" data-id="'+esc(it.id)+'"'
+      : 'data-act="tlgrad" data-k="'+it.geup+'"';
+    var gr = it.kind==='graad';
+    return '<div class="tl-item'+(fut?' fut':'')+(gr?' tl-omslag':'')+'"'+
+      (gr?tlOmslagStijl(it):tlKleurStijl(it.date))+'>'+
       tlDotHtml(it)+
       '<div class="tl-card">'+
+        '<button class="tl-pen" '+ed+' aria-label="'+esc(edit)+'" title="'+esc(edit)+'">'+IC.potlood+'</button>'+
         '<span class="tl-date">'+esc(tlWhen(it))+'</span>'+
-        '<b class="tl-ttl">'+esc(it.title)+'</b>'+
+        '<b class="tl-ttl" role="button" tabindex="0" '+ed+'>'+esc(it.title)+'</b>'+
         (meta.length?'<span class="tl-meta">'+meta.join(' · ')+'</span>':'')+
         // Elke podiumplaats krijgt zijn eigen medaille en zijn eigen pil. Eén pil met twee
         // plaatsen erin leest als één uitslag, terwijl het er echt twee zijn — op een toernooi
@@ -5434,13 +5581,13 @@
         (it.kind==='event'&&it.ev.trainers&&it.ev.trainers.length
           ? '<span class="tl-exam">👤 '+(it.ev.trainers.length>1?'Trainers ':'Trainer ')+esc(it.ev.trainers.join(', '))+'</span>'
           : '')+
+        (it.kind==='event'&&it.ev.exam
+          ? '<span class="tl-exam">👤 Examinator '+esc(it.ev.exam)+'</span>' : '')+
         (it.kind==='graad'&&it.gm.exam?'<span class="tl-exam">👤 Examinator '+esc(it.gm.exam)+'</span>':'')+
         (ph?'<img class="tl-photo'+(foc.fit==='contain'?' fitc':'')+'" src="'+esc(ph)+'" '+
-          'style="'+phFocStyle(foc)+'" alt="Foto bij '+esc(it.title)+'">':'')+
+          'style="'+phFocStyle(foc)+'" alt="Foto bij '+esc(it.title)+'" '+
+          'role="button" data-act="tlfoto" data-id="'+esc(it.id)+'">':'')+
         (it.kind==='graad'?'<span class="tl-grad">🎓 '+esc(it.note)+'</span>':'')+
-        (it.kind==='event'
-          ? '<button class="tl-edit" data-act="tledit" data-id="'+esc(it.id)+'">'+edit+'</button>'
-          : '<button class="tl-edit" data-act="tlgrad" data-k="'+it.geup+'">'+edit+'</button>')+
       '</div>'+
     '</div>';
   }
@@ -5454,7 +5601,9 @@
     var h='<div class="tl-line">', yr=null;
     for(var i=0;i<all.length;i++){
       var y=tlYear(all[i].date);
-      if(y!==yr){ yr=y; h+='<div class="tl-year"><span>'+esc(yr)+'</span></div>'; }
+      // Het jaartal draagt de kleur van de gebeurtenis die eronder komt, zodat de lijn er
+      // zonder kleurbreuk doorheen loopt.
+      if(y!==yr){ yr=y; h+='<div class="tl-year"'+tlKleurStijl(all[i].date)+'><span>'+esc(yr)+'</span></div>'; }
       h+=tlItemHtml(all[i], today);
     }
     return h+'</div>';
@@ -5494,8 +5643,58 @@
     stage.appendChild(el);
     tlScreen=el;
     fnav.classList.add('hide');
-    requestAnimationFrame(function(){ el.classList.add('show'); });
+    tlWire(el);
+    requestAnimationFrame(function(){ el.classList.add('show'); tlNaTekenen(); });
     return el;
+  }
+  /* Eén plek waar al het gedrag van het tijdlijnscherm aan elkaar hangt: het potlood dat
+     meeloopt met de scroll, de verloopranden en het veeggebaar om te sluiten. */
+  function tlWire(el){
+    var sc=el.querySelector('#tl-scroll');
+    if(!sc) return;
+    csFades(sc);
+    sc.addEventListener('scroll', function(){ csEdgeFade(sc); tlAtop(sc); }, {passive:true});
+    tlVeegTerug(el, sc);
+  }
+  function tlNaTekenen(){
+    if(!tlScreen) return;
+    var sc=tlScreen.querySelector('#tl-scroll');
+    if(!sc) return;
+    csFades(sc); csEdgeFade(sc); tlAtop(sc);
+  }
+  /* Welke kaart staat bovenaan? De laatste waarvan de bovenkant nog boven de leeslijn ligt.
+     Zo hoort het potlood altijd bij de kaart waar je naar kijkt, ook als er eentje half buiten
+     beeld hangt. Alleen de klas wisselen als hij echt verandert, anders flikkert de overgang. */
+  function tlAtop(sc){
+    var items=sc.querySelectorAll('.tl-item');
+    if(!items.length) return;
+    var lijn=sc.getBoundingClientRect().top + 72, kies=null, i, r;
+    for(i=0;i<items.length;i++){
+      r=items[i].getBoundingClientRect();
+      if(r.top<=lijn && r.bottom>lijn+20){ kies=items[i]; break; }
+    }
+    if(!kies && sc.scrollTop<=2) kies=items[0];
+    for(i=0;i<items.length;i++) items[i].classList.toggle('tl-atop', items[i]===kies);
+  }
+  /* Naar rechts vegen sluit de tijdlijn, net als bij het handboek. Met één hand is de X
+     linksboven nauwelijks te halen; een veeg vanaf het midden wel. */
+  function tlVeegTerug(el, sc){
+    var x0=0,y0=0,down=false,swiped=false;
+    el.addEventListener('pointerdown', function(e){
+      if(e.pointerType==='mouse' && e.button!==0) return;
+      x0=e.clientX; y0=e.clientY; down=true; swiped=false;
+    });
+    el.addEventListener('pointermove', function(e){
+      if(!down || swiped) return;
+      var dx=e.clientX-x0, dy=e.clientY-y0;
+      if(Math.abs(dx)<=Math.abs(dy)*1.4) return;       // je rolt verticaal — met rust laten
+      if(dx>60){ swiped=true; down=false; closeTimeline(); }
+    });
+    el.addEventListener('pointerup', function(){ down=false; });
+    el.addEventListener('pointercancel', function(){ down=false; });
+    el.addEventListener('click', function(e){
+      if(swiped){ e.stopPropagation(); e.preventDefault(); swiped=false; }
+    }, true);
   }
   function closeTimeline(){
     if(!tlScreen) return;
@@ -5508,6 +5707,23 @@
     if(!tlScreen) return;
     var b=tlScreen.querySelector('#tl-body'); if(b) b.innerHTML=tlBodyHtml();
     var l=tlScreen.querySelector('#tl-lead'); if(l) l.textContent=tlCountLine();
+    tlNaTekenen();
+  }
+  /* Een foto op een kaart is klein en bijgesneden. Aantikken laat hem in zijn geheel zien,
+     zonder bijsnijden, met een tik naast de foto om weer terug te gaan. */
+  function tlFotoGroot(id){
+    var src=phGet(id); if(!src) return;
+    var ov=document.createElement('div');
+    ov.className='tl-lb'; ov.setAttribute('role','dialog');
+    ov.innerHTML='<button class="tl-lb-x" aria-label="Sluiten">'+IC.x+'</button>'+
+                 '<img src="'+esc(src)+'" alt="Foto, vergroot">';
+    var weg=function(){
+      ov.classList.remove('show');
+      setTimeout(function(){ if(ov.parentNode) ov.parentNode.removeChild(ov); }, 240);
+    };
+    ov.addEventListener('click', weg);
+    document.body.appendChild(ov);
+    requestAnimationFrame(function(){ ov.classList.add('show'); });
   }
   // Vanuit de tijdlijn open je hetzelfde agendaformulier; na bewaren keert hij hier terug.
   function tlEdit(id){ openAgendaForm(id||null, tlRefresh); }
@@ -9010,6 +9226,10 @@
     else if(a==='agendaclose'){ closeAgendaSheet(); }
     else if(a==='agtype'){ if(!agDraft||!agSheet) return; agSync(); agDraft.type=act.getAttribute('data-k');
       agRender(); }
+    // Bij een examen kies je een graad die je nog niet hebt; hoger dan de eerstvolgende mag,
+    // want een graad overslaan komt voor.
+    else if(a==='aggeup'){ if(!agDraft||!agSheet) return; agSync();
+      agDraft.geup=+act.getAttribute('data-k'); agRender(); buzz(10); }
     else if(a==='agnew'){ agDraft=agBlankDraft(); agEditId=null; agMode='form'; agRender(); }
     else if(a==='agcancel'){ agMode='list'; agDraft=null; agEditId=null;
       if(agAfterSave){ agAfterSave=null; closeAgendaSheet(); } else agRender(); }
@@ -9042,7 +9262,19 @@
         var _ev = agEditId ? agById(agEditId) : null;
         if(!_ev){ _ev={id:'a'+Date.now()}; AGENDA.push(_ev); }
         _ev.type=agDraft.type; _ev.title=(agDraft.title||'').trim(); _ev.date=agDraft.date;
-        if(agDraft.end && agDraft.end>agDraft.date) _ev.end=agDraft.end; else delete _ev.end;
+        /* Bij een examen komt de naam uit de gekozen graad, zodat de kaart altijd leesbaar is
+           en er geen twee schrijfwijzen van dezelfde graad naast elkaar ontstaan. Wisselt het
+           type, dan verdwijnen graad en examinator mee — net als bij de uitslag. */
+        if(agDraft.type==='examen'){
+          var _gi=agDraft.geup;
+          if(typeof _gi==='number'){ _ev.geup=_gi; _ev.title='Examen '+geupInfo(_gi).grade; }
+          else delete _ev.geup;
+          if((agDraft.exam||'').trim()) _ev.exam=agDraft.exam.trim(); else delete _ev.exam;
+          delete _ev.end;
+        } else { delete _ev.geup; delete _ev.exam; }
+        if(agDraft.type!=='examen'){
+          if(agDraft.end && agDraft.end>agDraft.date) _ev.end=agDraft.end; else delete _ev.end;
+        }
         if((agDraft.where||'').trim()) _ev.where=agDraft.where.trim(); else delete _ev.where;
         // Een uitslag hoort alleen bij een wedstrijd; wisselt het type, dan verdwijnt hij mee.
         var _rs=(agDraft.type==='wedstrijd') ? agResultLijst(agDraft.result) : [];
@@ -9071,6 +9303,7 @@
     else if(a==='tlnew'){ tlEdit(null); buzz(12); }
     else if(a==='tledit'){ tlEdit(act.getAttribute('data-id')); buzz(12); }
     else if(a==='tlbackup'){ backupMaken(); buzz(12); }
+    else if(a==='tlfoto'){ tlFotoGroot(act.getAttribute('data-id')); buzz(10); }
     else if(a==='tlrestore'){
       var _rf=document.getElementById('tl-restore-file');
       if(_rf){
