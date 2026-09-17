@@ -615,6 +615,19 @@
      loopt van nieuw naar oud, dus naar beneden ga je terug in de tijd. */
   .tl-item.tl-omslag::before{
     background:var(--tlcoln) 0 0/100% 40px no-repeat,var(--tlcolp,var(--line))}
+  /* 1e en 2e poom dragen allebei dezelfde zwarte band, dus op de lijn zijn ze niet uit elkaar
+     te houden. De band zelf lost dat op met witte strepen aan het uiteinde; de lijn doet hier
+     hetzelfde. Ze staan bóven de halte, want de lijst loopt van nieuw naar oud: boven de halte
+     is ná die gebeurtenis, en dat is precies de band die je vanaf dat moment droeg.
+     Even breed als de lijn, dus ze lezen als strepen ín de band en niet als iets ernaast.
+     Maatvoering: een streep van 3px, 6px boven de halte, en bij 2e poom 2px tussen de twee.
+     De halte is 32px en zijn hart ligt op 40px, dus zijn bovenrand op 24px: de onderste streep
+     loopt daarom tot 18px. */
+  .tl-item.tl-str1::after,.tl-item.tl-str2::after{content:"";position:absolute;left:-25px;width:6px;
+    background:#FFFFFF}
+  .tl-item.tl-str1::after{top:15px;height:3px}
+  .tl-item.tl-str2::after{top:10px;height:8px;
+    background:linear-gradient(#FFFFFF 0 3px,transparent 3px 5px,#FFFFFF 5px 8px)}
   /* Vierkante naden: met afgeronde uiteinden per blok kneep de lijn bij elke kaart dicht en
      werd het een rij worstjes in plaats van één doorlopende lijn. Alleen de bovenkant van de
      hele lijn is rond; de onderkant dooft toch uit. */
@@ -649,12 +662,13 @@
      symmetrisch naar buiten en blijft hij vanzelf op de lijn liggen.
      4px is tweederde van de 6px lijn: dik genoeg dat de lijn zichtbaar doorloopt in de ring in
      plaats van er los bovenop te liggen, en dun genoeg dat de halte de aandacht niet van de
-     kaarten wegtrekt.
+     kaarten wegtrekt. Samen met 24px witruimte komt de halte op 32px uit: dat blijkt bij een
+     lijn van 6px de prettigste verhouding — ruim vijf keer de lijndikte.
      De halte staat op ooghoogte met de titel, niet met de datum: de titel is
      waar je naar kijkt. 25px = 1px rand + 13px binnenmarge + de datumregel + het hart van de
      titel, min de halve halte. Bij een grotere halte moet die 25 dus mee omlaag, anders zakt de
      halte onder de titel weg. */
-  .tl-dot{--tlring:4px;--tlin:22px;--tlsz:calc(var(--tlin) + 2 * var(--tlring));
+  .tl-dot{--tlring:4px;--tlin:24px;--tlsz:calc(var(--tlin) + 2 * var(--tlring));
     position:absolute;left:calc(-22px - var(--tlsz) / 2);top:calc(40px - var(--tlsz) / 2);
     width:var(--tlsz);height:var(--tlsz);border-radius:50%;
     display:grid;place-items:center;font-size:13px;line-height:1;padding:var(--tlring);
@@ -5655,6 +5669,14 @@
     return ' style="--tlcol:'+esc(tlLijnCss(g))+';--tldot:'+esc(tlDotRand(g))+
       ';--tlcoln:'+esc(tlLijnLaag(g))+';--tlcolp:'+esc(pre?tlLijnCss(pre):'var(--line)')+'"';
   }
+  /* Hoeveel witte strepen hoort de lijn boven deze halte te dragen? Dat is het aantal strepen
+     van de band die je ná deze gebeurtenis droeg: bij een graduatie de nieuwe band, anders
+     gewoon de band van die dag. Alleen de poom-banden hebben er (1e poom één, 2e poom twee). */
+  function tlStreepKlas(it){
+    var g = it.kind==='graad' ? geupInfo(it.geup) : tlBeltAt(it.date);
+    var n = (g && g.lines) || 0;
+    return n ? ' tl-str'+Math.min(2, n) : '';
+  }
   function tlDotHtml(it){
     /* Een graduatie krijgt hetzelfde diplomateken als bij het invoeren van een gebeurtenis; de
        bandkleur zit nu in de lijn en in de ring, dus de halte hoeft hem niet nog eens te dragen. */
@@ -5682,7 +5704,7 @@
       ? 'data-act="tledit" data-id="'+esc(it.id)+'"'
       : 'data-act="tlgrad" data-k="'+it.geup+'"';
     var gr = it.kind==='graad';
-    return '<div class="tl-item'+(fut?' fut':'')+(gr?' tl-omslag':'')+'"'+
+    return '<div class="tl-item'+(fut?' fut':'')+(gr?' tl-omslag':'')+tlStreepKlas(it)+'"'+
       (gr?tlOmslagStijl(it):tlKleurStijl(it.date))+'>'+
       tlDotHtml(it)+
       '<div class="tl-card">'+
