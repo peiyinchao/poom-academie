@@ -3700,6 +3700,10 @@
     });
   }
   function phGet(id){ return (id && PHOTOS[id]) || ''; }
+  /* Bij één gebeurtenis horen vaak twee foto's: de actie en het podium, of de band en de groep.
+     De tweede staat onder dezelfde sleutel met '#2' erachter en is verder precies zo'n foto —
+     eigen brandpunt, dezelfde opslag. Zo blijft alles wat al bewaard is ongemoeid. */
+  function phId2(id){ return id ? id+'#2' : ''; }
   /* Hoe een foto in zijn kader staat, los van de foto zelf: een groepsfoto of een portret
      wordt door object-fit:cover standaard in het midden afgesneden, en dan valt er net een
      hoofd buiten. Daarom bewaren we per foto een brandpunt (x/y in procenten) en of hij het
@@ -3746,8 +3750,25 @@
       if(gereed) gereed(!!ok);
     });
   }
-  // Een telefoonfoto is zo 4 MB; localStorage heeft er een paar. Verkleinen tot maximaal 1000px
+  // Een telefoonfoto is zo 4 MB; verkleinen tot maximaal 1000px
   // en als jpeg wegschrijven houdt hem rond de 100 kB zonder dat je het op dit scherm ziet.
+  /* Beide sleuven in één keer wegschrijven, met hun brandpunt. Zonder eerste foto is er ook
+     geen tweede: valt de eerste weg, dan schuift de tweede niet stiekem door maar verdwijnt hij
+     mee — anders zou je na het weghalen van "de foto" nog steeds een foto zien staan. */
+  function phBewaarPaar(id, d, gereed){
+    var f1=d.photo||'', f2=f1?(d.photo2||''):'';
+    phFocSet(id, f1?d.focus:null);
+    phFocSet(phId2(id), f2?d.focus2:null);
+    var open=2, alles=true;
+    var af=function(ok){ if(!ok) alles=false; if(!--open && gereed) gereed(alles); };
+    phSet(id, f1, af);
+    phSet(phId2(id), f2, af);
+  }
+  // Gebeurtenis weg: beide foto's en hun brandpunten gaan mee.
+  function phWeg(id){
+    phSet(id,''); phSet(phId2(id),'');
+    phFocSet(id,null); phFocSet(phId2(id),null);
+  }
   function phShrink(file){
     return new Promise(function(res, rej){
       if(!file || !/^image\//.test(file.type||'')) { rej(new Error('geen afbeelding')); return; }
@@ -4257,7 +4278,7 @@
   // gebeurd is. Dat bepaalt alleen nog wat er te zien is zolang er geen datum staat; zodra die
   // er is beslist de datum zelf (zie agFotoAan en agUitslagVeldAan).
   var agVerledenCtx=false;
-  function agBlankDraft(){ return {type:'wedstrijd', title:'', date:'', end:'', where:'', result:[], trainers:[], geup:agVolgendeGraad(), exam:agVorigeExaminator(), photo:'', focus:phClampFoc(null)}; }
+  function agBlankDraft(){ return {type:'wedstrijd', title:'', date:'', end:'', where:'', result:[], trainers:[], geup:agVolgendeGraad(), exam:agVorigeExaminator(), photo:'', focus:phClampFoc(null), photo2:'', focus2:phClampFoc(null)}; }
   function agEditDraft(e){
     return {type:agType(e.type).k, title:e.title||'', date:e.date||'', end:e.end||'',
             // De hele uitslag mee, inclusief de onderdelen: met alleen de plaatsen raakte je
@@ -4265,7 +4286,25 @@
             where:e.where||'', result:agUitslagRijen(e.result), trainers:(e.trainers||[]).slice(),
             geup:(typeof e.geup==='number'?e.geup:agVolgendeGraad()),
             exam:(e.exam||agVorigeExaminator()),
-            photo:phGet(e.id), focus:phFoc(e.id)};
+            photo:phGet(e.id), focus:phFoc(e.id),
+            photo2:phGet(phId2(e.id)), focus2:phFoc(phId2(e.id))};
+  }
+  /* Welke sleuf een knop of bewerkvlak bedient. Het voorvoegsel 'ag' of 'gx' zegt uit welk
+     formulier hij komt, de 2 erachter of het om de tweede foto gaat. */
+  function phSleuf(pfx){
+    var twee = /2$/.test(pfx);
+    return {d: (/^gx/.test(pfx) ? gxDraft : agDraft),
+            basis: twee ? pfx.slice(0,-1) : pfx,
+            foto: twee ? 'photo2' : 'photo',
+            foc:  twee ? 'focus2' : 'focus'};
+  }
+  function phSleufRender(basis){ if(basis==='gx') gxRender(); else agRender(); }
+  function phSleufSync(basis){ if(basis==='gx') gxSync(); else agSync(); }
+  // Een tweede sleuf bieden we pas aan als de eerste gevuld is; anders staan er twee lege
+  // knoppen onder elkaar en lijkt een foto verplicht in tweevoud.
+  function phEditPaar(d, pfx){
+    return phEditHtml(d.photo||'', d.focus, pfx)+
+      (d.photo ? phEditHtml(d.photo2||'', d.focus2, pfx+'2') : '');
   }
   /* Foto-onderdeel van de agenda- en graduatieformulieren. Zonder foto is het één grote knop;
      mét foto wordt het een klein bewerkvlak: sleep de foto om het brandpunt te verzetten en
@@ -4273,7 +4312,7 @@
   function phEditHtml(ph, foc, pfx){
     if(!ph){
       return '<div class="ag-photo">'+
-        '<label class="ag-phbtn">📷 Foto toevoegen'+
+        '<label class="ag-phbtn">📷 '+(/2$/.test(pfx)?'Tweede foto':'Foto')+' toevoegen'+
           '<input type="file" id="'+pfx+'-photo" accept="image/*">'+
         '</label>'+
       '</div>';
@@ -4303,19 +4342,18 @@
      procentstap zou bij een bijna-passende foto veel te gevoelig aanvoelen. */
   (function phPan(){
     var st=null;
-    function draft(pfx){ return pfx==='gx' ? gxDraft : agDraft; }
     function redraw(pfx, img, f){
       img.style.cssText=phFocStyle(f);
-      var d=draft(pfx); if(d) d.focus=f;
+      var s=phSleuf(pfx); if(s.d) s.d[s.foc]=f;
     }
     document.addEventListener('pointerdown', function(ev){
       var stage=ev.target && ev.target.closest && ev.target.closest('.ag-phstage.pan');
       if(!stage) return;
       var img=stage.querySelector('img'); if(!img || !img.naturalWidth) return;
-      var pfx=stage.getAttribute('data-pfx'), d=draft(pfx); if(!d) return;
+      var pfx=stage.getAttribute('data-pfx'), sl=phSleuf(pfx), d=sl.d; if(!d) return;
       var box=stage.getBoundingClientRect();
       var sc=Math.max(box.width/img.naturalWidth, box.height/img.naturalHeight);
-      st={pfx:pfx, img:img, x0:ev.clientX, y0:ev.clientY, f:phClampFoc(d.focus), moved:false,
+      st={pfx:pfx, img:img, x0:ev.clientX, y0:ev.clientY, f:phClampFoc(d[sl.foc]), moved:false,
           ovX:Math.max(0, img.naturalWidth*sc - box.width),
           ovY:Math.max(0, img.naturalHeight*sc - box.height)};
       if(!st.ovX && !st.ovY){ st=null; return; }      // niets om te verschuiven
@@ -4345,12 +4383,22 @@
     document.addEventListener('pointercancel', end);
   })();
   function phSetFit(pfx, fit){
-    var d = pfx==='gx' ? gxDraft : agDraft;
-    if(!d || !d.photo) return;
-    if(pfx==='gx') gxSync(); else agSync();
-    d.focus=phClampFoc({x:d.focus&&d.focus.x, y:d.focus&&d.focus.y, fit:fit});
-    if(pfx==='gx') gxRender(); else agRender();
+    var s=phSleuf(pfx), d=s.d;
+    if(!d || !d[s.foto]) return;
+    phSleufSync(s.basis);
+    var f=d[s.foc];
+    d[s.foc]=phClampFoc({x:f&&f.x, y:f&&f.y, fit:fit});
+    phSleufRender(s.basis);
     buzz(8);
+  }
+  // Een foto weghalen uit één sleuf. De tweede foto schuift niet door naar de eerste: hij hoort
+  // bij zijn eigen plek en verdwijnt vanzelf mee als de eerste weggaat (zie phBewaarPaar).
+  function phDelSleuf(pfx){
+    var s=phSleuf(pfx), d=s.d; if(!d) return;
+    phSleufSync(s.basis);
+    d[s.foto]=''; d[s.foc]=phClampFoc(null);
+    phSleufRender(s.basis);
+    buzz(10);
   }
   function agItemHtml(e){
     var t=agType(e.type);
@@ -4476,7 +4524,6 @@
   }
   function agFormHtml(){
     var d=agDraft||agBlankDraft();
-    var ph=d.photo||'';
     var examen = d.type==='examen';
     return '<div class="ag-form">'+
       '<div class="ag-chips">'+AG_TYPES.map(function(t){
@@ -4496,7 +4543,7 @@
       (d.type==='wedstrijd' && agUitslagVeldAan(d) ? agUitslagHtml(d) : '')+
       // Wie er voor de zaal stond vraag je alleen bij een cursus.
       (d.type==='cursus' ? agTrainersHtml(d) : '')+
-      (agFotoAan(d) ? phEditHtml(ph, d.focus, 'ag') : '')+
+      (agFotoAan(d) ? phEditPaar(d, 'ag') : '')+
       '<p class="vd-status'+(d.note&&d.noteErr?' err':'')+'" id="ag-status">'+esc(d.note||'')+'</p>'+
       '<div class="ag-formact">'+
         '<button class="ag-cancel" data-act="agcancel">Annuleer</button>'+
@@ -4563,7 +4610,7 @@
     fnav.classList.add('hide');
     agSheet.addEventListener('change', function(ev){
       var tg=ev.target;
-      if(tg && tg.id==='ag-photo'){ agPickPhoto(tg.files && tg.files[0]); return; }
+      if(tg && (tg.id==='ag-photo' || tg.id==='ag2-photo')){ agPickPhoto(tg.files && tg.files[0], tg.id==='ag2-photo'); return; }
       var inp=tg.closest && tg.closest('.ag-date input'); if(!inp || !agDraft) return;
       agSync();
       if(inp.getAttribute('data-role')==='start'){
@@ -4588,13 +4635,14 @@
     agVerledenCtx = true;
     agMode='form'; agRender();
   }
-  function agPickPhoto(file){
+  function agPickPhoto(file, tweede){
     if(!file || !agDraft) return;
+    var veld = tweede ? 'photo2' : 'photo';
     agSync();                                  // anders gaat getypte tekst verloren bij het opnieuw tekenen
     agDraft.note='Foto verkleinen…'; agDraft.noteErr=false; agRender();
     phShrink(file).then(function(url){
       if(!agDraft) return;
-      agDraft.photo=url; agDraft.note=''; agDraft.noteErr=false; agRender();
+      agDraft[veld]=url; agDraft.note=''; agDraft.noteErr=false; agRender();
     }).catch(function(){
       if(!agDraft) return;
       agDraft.note='Deze foto lukte niet. Probeer een andere.'; agDraft.noteErr=true; agRender();
@@ -4618,10 +4666,11 @@
   function gxBlank(k){
     var m=gmGet(k);
     return {k:k, date:GEUP_DATES[k]||'', exam:m.exam||'',
-            photo:phGet('g'+k), focus:phFoc('g'+k), note:'', noteErr:false};
+            photo:phGet('g'+k), focus:phFoc('g'+k),
+            photo2:phGet(phId2('g'+k)), focus2:phFoc(phId2('g'+k)), note:'', noteErr:false};
   }
   function gxFormHtml(){
-    var d=gxDraft||gxBlank(GEUP_I), g=geupInfo(d.k), ph=d.photo||'';
+    var d=gxDraft||gxBlank(GEUP_I), g=geupInfo(d.k);
     var had=!!GEUP_DATES[d.k];
     return '<div class="ag-form">'+
       '<p class="gx-lead"><b>'+esc(g.grade)+'</b> · '+esc(g.band)+'</p>'+
@@ -4632,7 +4681,7 @@
       '</div>'+
       '<input class="ag-title" id="gx-exam" type="text" autocomplete="off" list="gx-exam-eerder" value="'+esc(d.exam)+'" placeholder="Examinator (bijv. R.J. Kawarmala)">'+
       agDatalist('gx-exam-eerder','exam')+
-      phEditHtml(ph, d.focus, 'gx')+
+      phEditPaar(d, 'gx')+
       '<p class="vd-status'+(d.note&&d.noteErr?' err':'')+'" id="gx-status">'+esc(d.note||'')+'</p>'+
       '<div class="ag-formact">'+
         '<button class="ag-cancel" data-act="gxcancel">Annuleer</button>'+
@@ -4650,13 +4699,14 @@
     if(!gxSheet) return;
     var b=gxSheet.querySelector('#gx-body'); if(b) b.innerHTML=gxFormHtml();
   }
-  function gxPickPhoto(file){
+  function gxPickPhoto(file, tweede){
     if(!file || !gxDraft) return;
+    var veld = tweede ? 'photo2' : 'photo';
     gxSync();
     gxDraft.note='Foto verkleinen…'; gxDraft.noteErr=false; gxRender();
     phShrink(file).then(function(url){
       if(!gxDraft) return;
-      gxDraft.photo=url; gxDraft.note=''; gxDraft.noteErr=false; gxRender();
+      gxDraft[veld]=url; gxDraft.note=''; gxDraft.noteErr=false; gxRender();
     }).catch(function(){
       if(!gxDraft) return;
       gxDraft.note='Deze foto lukte niet. Probeer een andere.'; gxDraft.noteErr=true; gxRender();
@@ -4679,7 +4729,7 @@
     fnav.classList.add('hide');
     gxSheet.addEventListener('change', function(ev){
       var tg=ev.target;
-      if(tg && tg.id==='gx-photo'){ gxPickPhoto(tg.files && tg.files[0]); return; }
+      if(tg && (tg.id==='gx-photo' || tg.id==='gx2-photo')){ gxPickPhoto(tg.files && tg.files[0], tg.id==='gx2-photo'); return; }
       if(tg && tg.id==='gx-date' && gxDraft){ gxSync(); gxDraft.date=tg.value; gxRender(); }
     });
     requestAnimationFrame(function(){ gxSheet.classList.add('show'); syncTopDim(); });
@@ -5979,6 +6029,7 @@
   }
   function tlItemHtml(it, today){
     var ph = phGet(it.id), foc = phFoc(it.id);
+    var ph2 = ph ? phGet(phId2(it.id)) : '', foc2 = phFoc(phId2(it.id));
     var fut = it.date>today;
     var meta=[];
     if(it.kind==='event'){
@@ -6025,6 +6076,10 @@
         (ph?'<img class="tl-photo'+(foc.fit==='contain'?' fitc':'')+'" src="'+esc(ph)+'" '+
           'style="'+phFocStyle(foc)+'" alt="Foto bij '+esc(it.title)+'" '+
           'role="button" data-act="tlfoto" data-id="'+esc(it.id)+'">':'')+
+        // De tweede foto krijgt zijn eigen sleutel mee, zodat vergroten hem vanzelf vindt.
+        (ph2?'<img class="tl-photo'+(foc2.fit==='contain'?' fitc':'')+'" src="'+esc(ph2)+'" '+
+          'style="'+phFocStyle(foc2)+'" alt="Tweede foto bij '+esc(it.title)+'" '+
+          'role="button" data-act="tlfoto" data-id="'+esc(phId2(it.id))+'">':'')+
         (it.kind==='graad'?'<span class="tl-grad">🎓 '+esc(it.note)+'</span>':'')+
       '</div>'+
     '</div>';
@@ -9775,8 +9830,8 @@
     else if(a==='agnew'){ agDraft=agBlankDraft(); agEditId=null; agVerledenCtx=false; agMode='form'; agRender(); }
     else if(a==='agcancel'){ agMode='list'; agDraft=null; agEditId=null;
       if(agAfterSave){ agAfterSave=null; closeAgendaSheet(); } else agRender(); }
-    else if(a==='agphdel'){ if(agDraft){ agSync(); agDraft.photo=''; agDraft.focus=phClampFoc(null); agRender(); buzz(10); } }
-    else if(a==='agphfit'){ phSetFit('ag', act.getAttribute('data-fit')); }
+    else if(a==='agphdel' || a==='ag2phdel'){ phDelSleuf(a.replace('phdel','')); }
+    else if(a==='agphfit' || a==='ag2phfit'){ phSetFit(a.replace('phfit',''), act.getAttribute('data-fit')); }
     // Binnen één onderdeel is de plaats een keuze: nog eens tikken zet hem weer uit, een andere
     // tik vervangt hem. "Deelgenomen" hoeft niet meer apart uitgesloten te worden — dat volgt nu
     // vanzelf uit het feit dat een regel er maar één draagt.
@@ -9844,10 +9899,9 @@
           .map(function(n){ return String(n||'').trim(); }).filter(Boolean);
         if(_tr.length) _ev.trainers=_tr; else delete _ev.trainers;
         agSave(); refreshStatusNext();
-        phSet(_ev.id, agDraft.photo||'', function(ok){
+        phBewaarPaar(_ev.id, agDraft, function(ok){
           if(!ok) toast('De foto paste er niet meer bij. De rest is wel bewaard.');
         });
-        phFocSet(_ev.id, agDraft.photo ? agDraft.focus : null);
         var _after=agAfterSave; agAfterSave=null;
         agMode='list'; agDraft=null; agEditId=null;
         buzz(20); try{ sfx('complete'); }catch(_e){}
@@ -9855,7 +9909,7 @@
       } }
     else if(a==='agdel'){ var _aid=act.getAttribute('data-id');
       AGENDA=AGENDA.filter(function(e){ return e.id!==_aid; });
-      agSave(); phSet(_aid,''); agRender(); refreshStatusNext(); buzz(12); }
+      agSave(); phWeg(_aid); agRender(); refreshStatusNext(); buzz(12); }
     else if(a==='vdnew'){ openVideoSheet(); buzz(12); }
     /* ---- Tijdlijn ---- */
     else if(a==='timeline'){ openTimeline(); buzz(12); }
@@ -9885,17 +9939,16 @@
         buzz(20); try{ sfx('complete'); }catch(_e){}
       } }
     else if(a==='gxcancel'){ closeGradeSheet(); buzz(10); }
-    else if(a==='gxphdel'){ if(gxDraft){ gxSync(); gxDraft.photo=''; gxDraft.focus=phClampFoc(null); gxRender(); } buzz(10); }
-    else if(a==='gxphfit'){ phSetFit('gx', act.getAttribute('data-fit')); }
+    else if(a==='gxphdel' || a==='gx2phdel'){ phDelSleuf(a.replace('phdel','')); }
+    else if(a==='gxphfit' || a==='gx2phfit'){ phSetFit(a.replace('phfit',''), act.getAttribute('data-fit')); }
     else if(a==='gxsave'){ gxSync();
       if(gxDraft && gxDraft.date){
         var _gk=gxDraft.k;
         GEUP_DATES[_gk]=gxDraft.date; gdSave();
         gmSet(_gk, {exam:gxDraft.exam});
-        phSet('g'+_gk, gxDraft.photo||'', function(ok){
+        phBewaarPaar('g'+_gk, gxDraft, function(ok){
           if(!ok) toast('De foto paste er niet meer bij. De rest is wel bewaard.');
         });
-        phFocSet('g'+_gk, gxDraft.photo ? gxDraft.focus : null);
         // Sta je lager ingesteld dan wat je net invulde, dan klopt je graad niet meer.
         if(_gk>GEUP_I) setBelt(_gk, true);
         bpRenderGrad(bpCurK());
@@ -9905,7 +9958,7 @@
     else if(a==='gxdel'){
       if(gxDraft){
         var _dk=gxDraft.k;
-        delete GEUP_DATES[_dk]; gdSave(); gmSet(_dk, null); phSet('g'+_dk,'');
+        delete GEUP_DATES[_dk]; gdSave(); gmSet(_dk, null); phWeg('g'+_dk);
         // Je graad hangt aan de hoogste graduatie; valt die weg, dan zak je terug naar de vorige.
         var _h=geupHighest();
         if(GEUP_I>_h) setBelt(Math.max(0,_h), true);
