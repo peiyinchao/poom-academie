@@ -648,43 +648,33 @@
   .tl-item{position:relative;margin-bottom:12px}
   /* Een geplande gebeurtenis mag zichtbaar zijn: de stippellijn was zo licht dat je hem niet zag. */
   .tl-item.fut{opacity:.94}
-  /* De halte staat op de lijn, niet ernaast: dezelfde middellijn. De rand neemt de kleur van de
-     band over, zodat de halte bij de lijn hoort waar hij op ligt in plaats van er als los wit
-     rondje bovenop te liggen. Bij de witte band valt die ring weg tegen het rondje zelf; daar
-     houdt hij de gewone lijnkleur (zie tlDotRand).
-     De ring is geen border maar twee achtergrondlagen, want een border kan maar één kleur dragen
-     en een tweekleurige band moet er allebei in kwijt. De onderste laag vult de hele cirkel met
-     de bandkleur (of met dezelfde links/rechts-verdeling als de lijn), de bovenste legt daar het
-     paginavlak overheen tot aan de binnenrand. Wat overblijft is de ring; de padding doet dus het
-     werk dat de border deed.
-     Twee knoppen, en ze staan los van elkaar: --tlin is de witruimte binnenin, --tlring de dikte
-     eromheen. Een border groeide naar BINNEN — de halte bleef 30px, maar het tekentje raakte klem
-     omdat het wit van 30 naar 18px kromp. Daarom wordt de halte hier vanuit zijn HART geplaatst:
-     -22px en 40px zijn de coördinaten van dat hart, precies het hart van de lijn (37 - 25 + 3) en
-     het hart van de titelregel. Verander je de ring of de witruimte, dan groeit de halte
-     symmetrisch naar buiten en blijft hij vanzelf op de lijn liggen.
-     De ring is 2px: een dunne, strakke omlijning waar de halte zelf het witte vlak is en de
-     kleur alleen de rand markeert. Samen met 28px witruimte komt de halte op 32px uit: dat
-     blijkt bij een lijn van 6px de prettigste verhouding — ruim vijf keer de lijndikte. Een
-     dikkere ring at de witruimte op die het tekentje nodig heeft.
+  /* De halte staat op de lijn, niet ernaast: dezelfde middellijn. Hij is gemaakt als de kaarten
+     ernaast — een wit vlak met een haarlijn eromheen — zodat lijn en halte niet om aandacht
+     vechten. De bandkleur zit al in de lijn zelf en in de witte strepen erboven; die nog eens
+     in een dikke gekleurde ring herhalen maakte van elke halte een tweede accent naast de kaart.
+     De halte wordt vanuit zijn HART geplaatst: -22px en 40px zijn de coördinaten van dat hart,
+     precies het hart van de lijn (37 - 25 + 3) en het hart van de titelregel. Verander je de
+     maat, dan groeit hij symmetrisch naar buiten en blijft hij vanzelf op de lijn liggen.
+     32px bij een lijn van 6px blijkt de prettigste verhouding — ruim vijf keer de lijndikte.
      De halte staat op ooghoogte met de titel, niet met de datum: de titel is
      waar je naar kijkt. 25px = 1px rand + 13px binnenmarge + de datumregel + het hart van de
      titel, min de halve halte. Bij een grotere halte moet die 25 dus mee omlaag, anders zakt de
      halte onder de titel weg. */
-  .tl-dot{--tlring:2px;--tlin:28px;--tlsz:calc(var(--tlin) + 2 * var(--tlring));
+  .tl-dot{--tlsz:32px;box-sizing:border-box;
     position:absolute;left:calc(-22px - var(--tlsz) / 2);top:calc(40px - var(--tlsz) / 2);
-    width:var(--tlsz);height:var(--tlsz);border-radius:50%;
-    display:grid;place-items:center;font-size:13px;line-height:1;padding:var(--tlring);
-    background:linear-gradient(var(--surface),var(--surface)) content-box no-repeat,
-      var(--tldot,var(--line)) border-box no-repeat}
+    width:var(--tlsz);height:var(--tlsz);border-radius:50%;font-size:13px;line-height:var(--tlsz);
+    text-align:center;background:var(--surface);border:1px solid var(--line)}
   /* Het tekentje in de halte is een getekend icoon en geen emoji: emoji dragen hun eigen kleur
      en hun eigen witruimte mee, en op zo'n klein vlak werd dat een vlekje. Als masker neemt het
      de inkt van de pagina over, net als de iconen in de navigatiebalk.
      De tekeningen zijn getekend op de volle halte van 32px (op een doek van 64px, dus dubbele
      dichtheid) en dragen hun eigen witruimte al mee. Ze gaan daarom op ware grootte over de hele
-     halte heen en niet op de 28px binnenruimte: schalen zou de maatvoering van de tekenaar
-     overdoen. Ze steken dus 2px onder de ring door, precies zoals ze bedoeld zijn. */
-  .tl-ico{width:var(--tlsz);height:var(--tlsz);background:var(--ink);
+     halte heen; schalen zou de maatvoering van de tekenaar overdoen.
+     Vanuit het hart geplaatst en niet als rooster-kind: een kind dat groter is dan het vlak
+     waarin het gecentreerd wordt, valt in een grid terug op de linkerbovenhoek. Het tekentje
+     stond daardoor 1px naar rechtsonder — precies de haarlijn eromheen. */
+  .tl-ico{position:absolute;left:50%;top:50%;width:var(--tlsz);height:var(--tlsz);
+    margin:calc(var(--tlsz) / -2) 0 0 calc(var(--tlsz) / -2);background:var(--ink);
     -webkit-mask:center/contain no-repeat;mask:center/contain no-repeat}
   .ic-tl-wedstrijd{-webkit-mask-image:url('assets/icons/Wedstrijd.png');mask-image:url('assets/icons/Wedstrijd.png')}
   .ic-tl-examen{-webkit-mask-image:url('assets/icons/Examen.png');mask-image:url('assets/icons/Examen.png')}
@@ -2418,21 +2408,21 @@
   .wcat .cs-x:active,.hbcat .cs-x:active{transform:scale(.9)}
   /* Bottom dot navigation — small traditional page dots. Tap a dot to jump to that screen.
      Auto-fades like the scrollbar. */
-  /* De puntjes staan op dezelfde regel als het kopje "WOORDGROEP", rechts uitgelijnd op de
-     paginarand. Onder de titel namen ze een hele regel in beslag voor iets wat maar een paar
-     pixels hoog is; naast het kopje kost het niets extra en zie je meteen waar je in de reeks
-     zit. Het kopje mag wijken als de rij puntjes lang wordt, de puntjes zelf krimpen niet. */
-  .cs-eyerow{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .cs-eyerow .cs-eye{min-width:0}
-  .cs-eyerow .cs-dots{flex:none;margin:0 -1px 0 0;align-self:center}
-  /* Rechts uitgelijnd hoort de LAATSTE stip met zijn rand op de paginarand te staan, niet met
-     zijn hart: net als links, maar dan gespiegeld. */
-  .cs-eyerow .cs-dot:first-child::after{left:50%;margin-left:-3px}
-  .cs-eyerow .cs-dot:first-child.st-done::after{margin-left:-5.5px}
-  .cs-eyerow .cs-dot:first-child.on::after{margin-left:-7.5px}
-  .cs-eyerow .cs-dot:last-child::after{left:auto;right:0;margin-left:0}
-  .cs-dots{position:relative;z-index:60;display:flex;align-items:center;gap:0;margin:11px 0 0 -1px;
-    padding:7px 0;align-self:flex-start}
+  /* De puntjes hangen onderin op een eigen dienblad in plaats van in de kop. In de kop deelden
+     ze de aandacht met het kopje en de titel, terwijl je ze pas opzoekt als je al aan het lezen
+     bent. Onderin liggen ze binnen duimbereik, en omdat het dienblad zweeft rolt de lijst er
+     gewoon onderdoor: je verliest geen regel aan iets wat maar een paar pixels hoog is. */
+  .cs-dotstray{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 14px);
+    z-index:60;display:flex;justify-content:center;pointer-events:none}
+  /* Doorschijnend en vervaagd, net als de zwevende navigatiebalk: zo zie je dat er inhoud
+     onderdoor loopt in plaats van dat de lijst daar ophoudt. */
+  .cs-dotstray .cs-dots{pointer-events:auto;margin:0;padding:7px 13px;border-radius:999px;
+    background:rgba(252,250,246,.5);
+    -webkit-backdrop-filter:blur(30px) saturate(1.9);backdrop-filter:blur(30px) saturate(1.9);
+    border:1px solid rgba(255,255,255,.55);
+    box-shadow:0 10px 26px -16px rgba(40,24,12,.35), 0 1px 0 rgba(255,255,255,.7) inset}
+  .cs-dots{position:relative;z-index:60;display:flex;align-items:center;gap:0;
+    margin:11px 0 0 -1px;padding:7px 0;align-self:flex-start}
   /* De knop is een vast vakje van 15px; alleen de inkt erin verandert. Eerder groeide de knop
      zelf mee met zijn toestand, waardoor de hele rij verschoof zodra je een pagina met een
      vinkje koos — en dat gebeurde bij elke veeg opnieuw. Nu staat de rij stil en beweegt
@@ -2456,12 +2446,14 @@
     background-color:rgba(30,22,16,.32);
     -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
     mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
-  /* "Hier ben je" mag ook in formaat verschillen, niet alleen in kleur: op een creme scherm
-     leest een maatverschil sneller dan een kleurverschil. De blauwe schijf is altijd even
-     groot, met of zonder vinkje erin — anders springt hij van maat zodra je een pagina
-     afvinkt terwijl je erop staat. */
-  .cs-dot.on::after{width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border-radius:50%;
-    background-color:var(--el,#3E5BD6);-webkit-mask:none;mask:none}
+  /* Waar je bent staat in de kleur, niet in de maat: een blauwe stip tussen grijze stippen
+     springt er al uit. Liet je hem ook nog opzwellen, dan werd van de twee dingen die de rij
+     vertelt — waar je bent en wat je af hebt — alleen het opzwellen nog gezien. */
+  .cs-dot.on::after{background-color:var(--el,#3E5BD6)}
+  /* Met een vinkje erin moet de stip wél groeien: het teken heeft ruimte nodig om leesbaar te
+     blijven, en het blauw eromheen zegt dat je hier nu staat. */
+  .cs-dot.on.st-done::after{width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border-radius:50%;
+    -webkit-mask:none;mask:none}
   /* Sta je op een pagina die je al kent, dan moeten beide dingen waar blijven: het blauw zegt
      waar je bent, het vinkje dat je hier klaar bent. Het vinkje kruipt daarom in de blauwe
      schijf, in wit, en is daar iets groter dan los. Het vinkvak is 12px in een schijf van
@@ -2469,10 +2461,6 @@
      aan las het als een volle knop in plaats van als een teken. */
   .cs-dot.on.st-done::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat:no-repeat;background-position:center;background-size:12px 12px}
-  /* De balk staat links uitgelijnd op de titel. Groeide de eerste stip vanuit zijn hart, dan
-     stak hij een paar pixels buiten die lijn; vanaf de linkerrand groeien houdt de kolom recht
-     zonder dat de vakjes hoeven te verschuiven. */
-  .cs-dot:first-child::after{left:0;margin-left:0}
   @media (hover:hover){ .cs-dot:not(.on):hover::after{background-color:rgba(30,22,16,.44)} }
   /* Paging between categories: the TITLE and the confidence icons cross-slide (belt-picker style).
      Shared by Woorden woordgroepen and Handboek onderdelen. */
@@ -2540,7 +2528,7 @@
   .wcat .cs-chip.hot svg{color:var(--seal-deep)}
   .wcat .cs-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
     scrollbar-width:none;margin-top:0;border-radius:0;box-shadow:none;background:var(--page);
-    padding:14px 22px calc(env(safe-area-inset-bottom) + 22px)}
+    padding:14px 22px calc(env(safe-area-inset-bottom) + 58px)}
   .wcat .cs-body::-webkit-scrollbar{display:none}
   /* De woordenlijst werkt nu hetzelfde als die in het Handboek: de kaart is zo hoog als zijn
      inhoud en het hele lichaam rolt eronderdoor. Vroeger stond de kaart vast en rolden de
@@ -2771,12 +2759,12 @@
   /* Evenveel lucht als tussen de puntjes en de vraag erboven, zodat de beoordeling een eigen
      blok blijft en niet aan de woordenlijst vastplakt. */
   .cs-rate{margin:0 0 22px;padding:0;background:none;border:0;border-radius:0}
-  /* De vraag is een kopje, net als "Let op" in het Handboek: zelfde maat, zelfde accentinkt.
-     Als klein grijs regeltje las hij als bijschrift bij de knoppen eronder, terwijl hij juist
-     de vraag stelt die je moet beantwoorden. De ruimte eronder is ruimer dan die van een
-     bijschrift, zodat kopje en knoppen niet aan elkaar plakken. */
+  /* De vraag is wegwijzer, geen kop: hij vertelt wat de knoppen eronder doen en hoeft daarna
+     niet meer op te vallen. In accentinkt trok hij de aandacht weg van de keuze zelf, en die
+     keuze is het enige waar het hier om gaat. Grijs dus, maar met de ruimte eronder van een
+     kopje, zodat vraag en knoppen niet aan elkaar plakken. */
   .cs-rate-q{font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;font-weight:700;
-    font-size:14px;color:var(--deep);margin-bottom:16px}
+    font-size:14px;color:var(--gray);margin-bottom:16px}
   .cs-rate-opts{display:flex;gap:9px;position:relative}
   /* Single sliding highlight (tweens position + colour between options, like the tab bar) */
   .cs-rate-hl{position:absolute;top:0;bottom:0;left:0;width:0;z-index:0;pointer-events:none;border-radius:13px;
@@ -2789,7 +2777,9 @@
     border:0;border-radius:13px;cursor:pointer;transition:background-color .2s ease}
   .cs-ropt .cs-ric{width:42px;height:42px;display:grid;place-items:center}
   .cs-ric .gicon{width:42px;height:42px;transition:background-color .2s ease}
-  .cs-rl{font-family:var(--cond);text-transform:uppercase;letter-spacing:.02em;font-weight:700;font-size:10.5px;color:var(--gray);line-height:1;text-align:center;transition:color .2s ease}
+  /* Even groot als de romanisering in de woordenlijst eronder: de knoppen zijn de plek waar je
+     iets kiest, dus ze mogen niet kleiner lezen dan de regels waar je alleen langs scrolt. */
+  .cs-rl{font-family:var(--cond);text-transform:uppercase;letter-spacing:.02em;font-weight:700;font-size:13px;color:var(--gray);line-height:1;text-align:center;transition:color .2s ease}
   /* Wat elke keuze betekent staat in de knop zelf, zodat je het ziet vóór je kiest in plaats
      van op een losse regel eronder die alleen de gemaakte keuze uitlegt. */
   .cs-rs{font-size:10.5px;line-height:1.25;color:var(--gray);text-align:center;opacity:.78;
@@ -5674,16 +5664,6 @@
      helemaal weg. Op de lijn gebruiken we daarom vol wit, precies zoals de kaarten: wit met een
      haarlijntje eromheen leest wél als wit. Alleen hier, zodat de bandkleur elders niet wijzigt. */
   function tlKleur(c){ return c==='#EDEDE7' ? '#FFFFFF' : c; }
-  /* De ring om de halte draagt de bandkleur, en bij een tweekleurige band draagt hij ze allebei:
-     exact dezelfde links/rechts-verdeling als de lijn, zodat de twee sporen zonder kleurbreuk de
-     ring in lopen en de lijn zich echt om de halte heen lijkt te vouwen. Ook de witte band krijgt
-     zijn eigen kleur: via tlKleur wordt dat vol wit, net als de lijn. Een gedempte grijze ring zou
-     de 10e geup juist zijn band afpakken, terwijl wit op de crèmekleurige pagina prima leest.
-     Alleen wie nog helemaal geen band heeft, houdt de gewone lijnkleur. */
-  function tlDotRand(g){
-    if(!g) return 'var(--line)';
-    return g.col2 ? tlLijnCss(g) : tlKleur(g.col);
-  }
   /* Nog geen enkele band gehaald? Dan is de lijn wit: de aanloop naar je 10e geup. Onderaan dooft
      hij weg naar niets (zie het masker op het laatste blok), zodat de reis uit het niets begint. */
   function tlLijnCss(g){
@@ -5703,14 +5683,14 @@
   function tlKleurStijl(iso){
     var g=tlBeltAt(iso);
     if(!g) return '';
-    return ' style="--tlcol:'+esc(tlLijnCss(g))+';--tldot:'+esc(tlDotRand(g))+'"';
+    return ' style="--tlcol:'+esc(tlLijnCss(g))+'"';
   }
   /* Op een graduatieblok slaat de lijn halverwege om: boven de halte de band die je vanaf dat
      moment droeg, eronder de vorige. Zo zit de kleurbreuk precies op de halte in plaats van op
      een kaartrand — geen trapje meer in de lijn. */
   function tlOmslagStijl(it){
     var g=geupInfo(it.geup), pre=tlBeltVoor(it.geup);
-    return ' style="--tlcol:'+esc(tlLijnCss(g))+';--tldot:'+esc(tlDotRand(g))+
+    return ' style="--tlcol:'+esc(tlLijnCss(g))+
       ';--tlcoln:'+esc(tlLijnLaag(g))+';--tlcolp:'+esc(pre?tlLijnCss(pre):'var(--line)')+'"';
   }
   /* Hoeveel witte strepen hoort de lijn boven deze halte te dragen? Dat is het aantal strepen
@@ -6109,11 +6089,12 @@
       '<div class="cs-hero">'+
         '<button class="cs-x" data-act="catclose" aria-label="Sluiten">'+IC.x+'</button>'+
         '<div class="cs-head">'+
-          '<div class="cs-eyerow"><div class="cs-eye">'+parts.eyebrow+'</div>'+dots+'</div>'+
+          '<div class="cs-eye">'+parts.eyebrow+'</div>'+
           '<div class="cs-titlerow">'+parts.titlerow+'</div>'+
         '</div>'+
       '</div>'+
-      '<div class="cs-body">'+parts.body+'</div>';
+      '<div class="cs-body">'+parts.body+'</div>'+
+      (dots ? '<div class="cs-dotstray">'+dots+'</div>' : '');
     stage.appendChild(catSheet);
     moveRateHL(catSheet.querySelector('.cs-rate'), true);
     if(multi){ attachCatSwipe(catSheet); attachDotScrub(catSheet); showDots(); }
