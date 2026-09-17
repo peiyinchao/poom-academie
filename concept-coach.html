@@ -2381,42 +2381,48 @@
   .wcat .cs-x:active,.hbcat .cs-x:active{transform:scale(.9)}
   /* Bottom dot navigation — small traditional page dots. Tap a dot to jump to that screen.
      Auto-fades like the scrollbar. */
-  .cs-dots{position:relative;z-index:60;display:flex;align-items:center;gap:0;margin:11px 0 0 -3.5px;
+  .cs-dots{position:relative;z-index:60;display:flex;align-items:center;gap:0;margin:11px 0 0 0;
     padding:7px 0;align-self:flex-start}
-  .cs-dot{position:relative;width:6px;height:6px;flex:none;border:0;padding:0;margin:0 3.5px;border-radius:50%;
-    background-color:rgba(30,22,16,.4);cursor:pointer;-webkit-tap-highlight-color:transparent;
-    transition:transform .2s cubic-bezier(.22,.9,.3,1), background-color .22s ease,
-      width .24s cubic-bezier(.22,.9,.3,1), height .24s cubic-bezier(.22,.9,.3,1)}
-  .cs-dot::before{content:"";position:absolute;top:-9px;bottom:-9px;left:-3.5px;right:-3.5px}
+  /* De knop is een vast vakje van 15px; alleen de inkt erin verandert. Eerder groeide de knop
+     zelf mee met zijn toestand, waardoor de hele rij verschoof zodra je een pagina met een
+     vinkje koos — en dat gebeurde bij elke veeg opnieuw. Nu staat de rij stil en beweegt
+     alleen wat erin getekend wordt. */
+  .cs-dot{position:relative;width:15px;height:15px;flex:none;border:0;padding:0;margin:0;
+    background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .cs-dot::before{content:"";position:absolute;top:-5px;bottom:-5px;left:0;right:0}
+  /* De inkt zit op ::after en wordt vanuit het hart geplaatst, zodat elke maatwissel
+     symmetrisch is en het vakje nooit verlaat. */
+  .cs-dot::after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;
+    margin:-3px 0 0 -3px;border-radius:50%;background-color:rgba(30,22,16,.4);
+    transition:width .24s cubic-bezier(.22,.9,.3,1), height .24s cubic-bezier(.22,.9,.3,1),
+      margin .24s cubic-bezier(.22,.9,.3,1), background-color .22s ease}
   /* De puntjes probeerden het verschil eerder met tinten te vertellen: licht voor "beoordeeld",
      donker voor "vraagt aandacht". Dat werkte niet — een tintverschil van een paar procent op
      een stip van 6px zie je simpelweg niet, en je moest raden welke kant de donkere tint op wees.
      Nu staat er een vinkje waar je klaar bent. Een stip betekent dus: hier moet je nog heen.
-     Dat lees je in één oogopslag, en het overleeft kleurenblindheid.
-     Eerder ademden deze puntjes zachtjes, maar meerdere animaties gelijk laten lopen bleef
-     zichtbaar uit de pas; een stille vulling doet hetzelfde werk zonder die onrust. */
-  .cs-dot.st-done{width:11px;height:11px;border-radius:0;background-color:rgba(30,22,16,.46);
+     Dat lees je in een oogopslag, en het overleeft kleurenblindheid. */
+  .cs-dot.st-done::after{width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:0;
+    background-color:rgba(30,22,16,.46);
     -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
     mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
-  /* "Hier ben je" mag ook in formaat verschillen, niet alleen in kleur: op een crème scherm
-     leest een maatverschil sneller dan een kleurverschil, en het overleeft kleurenblindheid. */
-  .cs-dot.on{background-color:var(--el,#3E5BD6);transform:scale(1.34)}
-  /* Sta je op een pagina die je al kent, dan moeten beide dingen waar blijven: het blauw zegt
-     waar je bent, het vinkje dat je hier klaar bent. Het vinkje kruipt daarom in de blauwe stip,
-     in wit. Die stip wordt daarvoor wat groter in plaats van geschaald — geschaald zou het
-     vinkje mee uitrekken en wollig worden.
-     Het vinkje meet zich aan de stip (inset + contain) in plaats van aan een vast getal, dus
-     het groeit mee terwijl de stip breder wordt. Samen met de overgang op width en height
-     schuift het blauw als een vergrootglas onder de vinkjes door terwijl je bladert. */
-  .cs-dot.on.st-done{width:15px;height:15px;border-radius:50%;transform:none;
+  /* "Hier ben je" mag ook in formaat verschillen, niet alleen in kleur: op een creme scherm
+     leest een maatverschil sneller dan een kleurverschil. De blauwe schijf is altijd even
+     groot, met of zonder vinkje erin — anders springt hij van maat zodra je een pagina
+     afvinkt terwijl je erop staat. */
+  .cs-dot.on::after{width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border-radius:50%;
     background-color:var(--el,#3E5BD6);-webkit-mask:none;mask:none}
-  .cs-dot.on.st-done::after{content:"";position:absolute;inset:1px;background-color:#fff;
-    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
-    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
-  /* De balk staat links uitgelijnd op de titel. Groeit de eerste stip vanuit zijn midden, dan
-     steekt hij een pixel buiten die lijn; vanaf de linkerrand groeien houdt de kolom recht. */
-  .cs-dot:first-child.on{transform-origin:left center}
-  @media (hover:hover){ .cs-dot:not(.on):hover{background-color:rgba(30,22,16,.42)} }
+  /* Sta je op een pagina die je al kent, dan moeten beide dingen waar blijven: het blauw zegt
+     waar je bent, het vinkje dat je hier klaar bent. Het vinkje kruipt daarom in de blauwe
+     schijf, in wit, en is daar iets groter dan los. Het vinkvak is 12px in een schijf van
+     15px: dat houdt de punt van het vinkje anderhalve pixel van de rand, want tegen de rand
+     aan las het als een volle knop in plaats van als een teken. */
+  .cs-dot.on.st-done::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:center;background-size:12px 12px}
+  /* De balk staat links uitgelijnd op de titel. Groeide de eerste stip vanuit zijn hart, dan
+     stak hij een paar pixels buiten die lijn; vanaf de linkerrand groeien houdt de kolom recht
+     zonder dat de vakjes hoeven te verschuiven. */
+  .cs-dot:first-child::after{left:0;margin-left:0}
+  @media (hover:hover){ .cs-dot:not(.on):hover::after{background-color:rgba(30,22,16,.42)} }
   /* Paging between categories: the TITLE and the confidence icons cross-slide (belt-picker style).
      Shared by Woorden woordgroepen and Handboek onderdelen. */
   .wcat .cs-titlewrap,.hbcat .cs-titlewrap{position:relative;overflow:hidden;flex:1 1 auto;min-width:0}
