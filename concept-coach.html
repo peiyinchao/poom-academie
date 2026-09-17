@@ -3272,6 +3272,9 @@
         STORE_KEYS.concat(['poom_schema']).forEach(function(k){
           try{ localStorage.removeItem(k); }catch(e){}
         });
+        // De foto's staan in hun eigen kast en zouden anders een wisbeurt overleven. fotoDB
+        // wordt hieronder pas gemaakt; bij het wissen vlak na het opstarten bestaat hij al.
+        try{ if(typeof fotoDB!=='undefined') fotoDB.leeg(); }catch(e){}
       }
     };
   })();
@@ -3301,6 +3304,9 @@
     STORE_KEYS.forEach(function(k){
       try{ var r=localStorage.getItem(k); if(r!==null) d[k]=r; }catch(e){}
     });
+    // De foto's staan in hun eigen kast; in de kopie horen ze wel, en in dezelfde vorm als
+    // vroeger, zodat een oudere reservekopie gewoon terug te zetten blijft.
+    for(var f in PHOTOS){ if(PHOTOS.hasOwnProperty(f)){ d['poom_photos']=JSON.stringify(PHOTOS); break; } }
     return { app:'poom-academy', versie:1, gemaakt:new Date().toISOString(), data:d };
   }
   function backupNaam(){
@@ -3369,12 +3375,18 @@
       var wanneer = p.gemaakt ? fmtDateNL(String(p.gemaakt).slice(0,10)) : 'een onbekende datum';
       if(!window.confirm('Alles in de app wordt vervangen door de reservekopie van '+wanneer+'. Doorgaan?')) return;
       STORE_KEYS.forEach(function(sk){
+        if(sk==='poom_photos') return;           // die gaat naar zijn eigen kast, zie hieronder
         try{
           if(p.data.hasOwnProperty(sk)) localStorage.setItem(sk, p.data[sk]);
           else localStorage.removeItem(sk);
         }catch(e){}
       });
-      location.reload();
+      // Foto's langs localStorage terugzetten zou precies tegen de grens aanlopen waar we net
+      // vandaan komen: een kopie van dertig foto's past daar niet in.
+      var fotos={};
+      try{ if(p.data.poom_photos) fotos=JSON.parse(p.data.poom_photos)||{}; }catch(e){ fotos={}; }
+      try{ localStorage.removeItem('poom_photos'); }catch(e){}
+      fotoDB.zetAlles(fotos).then(function(){ location.reload(); });
     };
     r.readAsText(file);
   }
@@ -3572,9 +3584,121 @@
   function agById(id){ for(var i=0;i<AGENDA.length;i++) if(AGENDA[i].id===id) return AGENDA[i]; return null; }
   /* Foto's staan apart van de agenda: ze zijn vele malen groter dan de rest en zo blijft de
      agenda klein genoeg om altijd te kunnen bewaren, ook als het fotoquotum vol zit. */
+  /* ---------- De fotokast ----------
+     localStorage is een tekstkast. Een foto moet er als base64 in — dat maakt hem een derde
+     groter — en de browser rekent elk teken voor twee bytes. Een verkleinde foto van 150 kB
+     kostte daar dus ruim 300 kB, en na een stuk of vijftien viel een nieuwe foto er stilletjes
+     buiten. IndexedDB kent die grens niet en telt niet dubbel.
+
+     De foto's blijven in PHOTOS in het geheugen staan, zodat alles wat tekent synchroon kan
+     blijven; de kast eronder is enkel de bewaarplaats. Lukt IndexedDB niet (privémodus, oude
+     browser), dan valt alles terug op de oude tekstkast — dan is er weinig ruimte, maar werkt
+     de app wel. */
+  var fotoDB = (function(){
+    var NAAM='poom-fotos', WINKEL='fotos', klaar=null;
+    function open(){
+      if(klaar) return klaar;
+      klaar = new Promise(function(res){
+        var rq;
+        try{ rq = indexedDB.open(NAAM, 1); }catch(e){ res(null); return; }
+        rq.onupgradeneeded = function(){ try{ rq.result.createObjectStore(WINKEL); }catch(e){} };
+        rq.onsuccess = function(){ res(rq.result); };
+        rq.onerror = function(){ res(null); };
+        rq.onblocked = function(){ res(null); };
+      });
+      return klaar;
+    }
+    // Eén plek voor het openen van een transactie, zodat een geweigerde kast overal hetzelfde
+    // oplevert: null, en nooit een uitzondering die de app onderuit haalt.
+    function winkel(modus){
+      return open().then(function(db){
+        if(!db) return null;
+        try{ return db.transaction(WINKEL, modus).objectStore(WINKEL); }catch(e){ return null; }
+      });
+    }
+    // Wachten tot de transactie zelf klaar is, niet tot het verzoek gelukt is: pas dan staat
+    // het echt op schijf en weten we of het quotum het aankon.
+    function afronden(w, doeHet){
+      return new Promise(function(res){
+        try{ doeHet(w); }catch(e){ res(false); return; }
+        var t=w.transaction;
+        t.oncomplete=function(){ res(true); };
+        t.onerror=function(){ res(false); };
+        t.onabort=function(){ res(false); };
+      });
+    }
+    return {
+      // null betekent: deze kast doet het niet. Een lege kast geeft gewoon {}.
+      alles: function(){
+        return winkel('readonly').then(function(w){
+          if(!w) return null;
+          return new Promise(function(res){
+            var uit={};
+            try{
+              var c=w.openCursor();
+              c.onsuccess=function(){
+                var cur=c.result;
+                if(!cur){ res(uit); return; }
+                uit[cur.key]=cur.value; cur.continue();
+              };
+              c.onerror=function(){ res(null); };
+            }catch(e){ res(null); }
+          });
+        });
+      },
+      zet: function(id, waarde){
+        return winkel('readwrite').then(function(w){
+          return w ? afronden(w, function(w){ w.put(waarde, id); }) : false;
+        });
+      },
+      weg: function(id){
+        return winkel('readwrite').then(function(w){
+          return w ? afronden(w, function(w){ w.delete(id); }) : false;
+        });
+      },
+      leeg: function(){
+        return winkel('readwrite').then(function(w){
+          return w ? afronden(w, function(w){ w.clear(); }) : false;
+        });
+      },
+      // Alles in één transactie: half geslaagd terugzetten is erger dan helemaal niet.
+      zetAlles: function(obj){
+        return winkel('readwrite').then(function(w){
+          return w ? afronden(w, function(w){
+            w.clear();
+            for(var k in obj) if(obj.hasOwnProperty(k) && obj[k]) w.put(obj[k], k);
+          }) : false;
+        });
+      }
+    };
+  })();
   var PHOTOS = {};
-  function phLoad(){ var r=store.get('poom_photos', null); PHOTOS=(r&&typeof r==='object')?r:{}; }
-  function phSave(){ return store.set('poom_photos', PHOTOS); }
+  var fotoKastOk = true;              // tot het tegendeel blijkt bij het inlezen
+  function phSaveLS(){ return store.set('poom_photos', PHOTOS); }
+  /* Inlezen gaat nu asynchroon, dus wie op de foto's wacht geeft een callback mee. Een oude
+     voorraad uit localStorage verhuist één keer mee en wordt daarna daar weggehaald — dat geeft
+     de tekstkast in één klap zijn ruimte terug. */
+  function phLoad(gereed){
+    var oud = store.get('poom_photos', null);
+    var af = function(){ if(gereed) gereed(); };
+    fotoDB.alles().then(function(uit){
+      if(uit===null){                 // geen kast: verder op de oude voet
+        fotoKastOk=false;
+        PHOTOS=(oud&&typeof oud==='object')?oud:{};
+        af(); return;
+      }
+      PHOTOS=uit;
+      if(!oud || typeof oud!=='object'){ af(); return; }
+      var mee=false;
+      for(var k in oud){ if(oud.hasOwnProperty(k) && !PHOTOS.hasOwnProperty(k)){ PHOTOS[k]=oud[k]; mee=true; } }
+      if(!mee){ try{ localStorage.removeItem('poom_photos'); }catch(e){} af(); return; }
+      fotoDB.zetAlles(PHOTOS).then(function(ok){
+        // Alleen weghalen als het er echt in staat, anders ben je ze kwijt.
+        if(ok){ try{ localStorage.removeItem('poom_photos'); }catch(e){} }
+        af();
+      });
+    });
+  }
   function phGet(id){ return (id && PHOTOS[id]) || ''; }
   /* Hoe een foto in zijn kader staat, los van de foto zelf: een groepsfoto of een portret
      wordt door object-fit:cover standaard in het midden afgesneden, en dan valt er net een
@@ -3603,12 +3727,24 @@
     f=phClampFoc(f);
     return f.fit==='contain' ? 'object-fit:contain' : 'object-fit:cover;object-position:'+f.x+'% '+f.y+'%';
   }
-  function phSet(id, dataUrl){
-    if(!id) return true;
+  /* Het geheugen gaat meteen om, zodat het scherm niet op de schijf hoeft te wachten. Lukt het
+     wegschrijven toch niet, dan draaien we die ene foto terug en laat de callback dat weten —
+     de rest van de gebeurtenis is dan allang bewaard. */
+  function phSet(id, dataUrl, gereed){
+    if(!id){ if(gereed) gereed(true); return; }
+    var vorige = PHOTOS.hasOwnProperty(id) ? PHOTOS[id] : null;
     if(dataUrl) PHOTOS[id]=dataUrl; else delete PHOTOS[id];
-    if(phSave()) return true;
-    delete PHOTOS[id]; phSave();      // quotum vol → de foto valt weg, de rest blijft heel
-    return false;
+    var terug = function(){ if(vorige===null) delete PHOTOS[id]; else PHOTOS[id]=vorige; };
+    if(!fotoKastOk){
+      if(phSaveLS()){ if(gereed) gereed(true); return; }
+      terug(); phSaveLS();            // quotum vol → de foto valt weg, de rest blijft heel
+      if(gereed) gereed(false);
+      return;
+    }
+    (dataUrl ? fotoDB.zet(id, dataUrl) : fotoDB.weg(id)).then(function(ok){
+      if(!ok) terug();
+      if(gereed) gereed(!!ok);
+    });
   }
   // Een telefoonfoto is zo 4 MB; localStorage heeft er een paar. Verkleinen tot maximaal 1000px
   // en als jpeg wegschrijven houdt hem rond de 100 kB zonder dat je het op dit scherm ziet.
@@ -3629,7 +3765,9 @@
       im.src=url;
     });
   }
-  phLoad();
+  // De foto's komen een tel later binnen dan de rest. Bij het opstarten staat de tijdlijn nog
+  // dicht, maar wie hem in die tel opent zou lege kaders zien; daarom tekenen we hem dan opnieuw.
+  phLoad(function(){ try{ if(typeof tlScreen!=='undefined' && tlScreen) tlRender(); }catch(e){} });
   phFocLoad();
   // Whole days from today, compared as calendar dates (UTC maths, so DST can't shift the count).
   function agDays(iso){
@@ -9706,13 +9844,14 @@
           .map(function(n){ return String(n||'').trim(); }).filter(Boolean);
         if(_tr.length) _ev.trainers=_tr; else delete _ev.trainers;
         agSave(); refreshStatusNext();
-        var _phok=phSet(_ev.id, agDraft.photo||'');
+        phSet(_ev.id, agDraft.photo||'', function(ok){
+          if(!ok) toast('De foto paste er niet meer bij. De rest is wel bewaard.');
+        });
         phFocSet(_ev.id, agDraft.photo ? agDraft.focus : null);
         var _after=agAfterSave; agAfterSave=null;
         agMode='list'; agDraft=null; agEditId=null;
         buzz(20); try{ sfx('complete'); }catch(_e){}
         if(_after){ closeAgendaSheet(); _after(); } else agRender();
-        if(!_phok) toast('De foto paste er niet meer bij. De rest is wel bewaard.');
       } }
     else if(a==='agdel'){ var _aid=act.getAttribute('data-id');
       AGENDA=AGENDA.filter(function(e){ return e.id!==_aid; });
@@ -9753,14 +9892,15 @@
         var _gk=gxDraft.k;
         GEUP_DATES[_gk]=gxDraft.date; gdSave();
         gmSet(_gk, {exam:gxDraft.exam});
-        var _gphok=phSet('g'+_gk, gxDraft.photo||'');
+        phSet('g'+_gk, gxDraft.photo||'', function(ok){
+          if(!ok) toast('De foto paste er niet meer bij. De rest is wel bewaard.');
+        });
         phFocSet('g'+_gk, gxDraft.photo ? gxDraft.focus : null);
         // Sta je lager ingesteld dan wat je net invulde, dan klopt je graad niet meer.
         if(_gk>GEUP_I) setBelt(_gk, true);
         bpRenderGrad(bpCurK());
         buzz(20); try{ sfx('complete'); }catch(_e){}
         closeGradeSheet();
-        if(!_gphok) toast('De foto paste er niet meer bij. De rest is wel bewaard.');
       } }
     else if(a==='gxdel'){
       if(gxDraft){
