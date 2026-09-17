@@ -22,31 +22,43 @@
   h2{font-family:var(--cond);font-weight:800;font-size:20px;margin:36px 0 2px;letter-spacing:-.01em}
   .lead{opacity:.72;margin:0 0 6px;max-width:62ch}
   p.note{opacity:.72;margin:4px 0 14px;max-width:62ch;font-size:14px}
-  .rij{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px;margin:14px 0 4px}
+  /* ---- de nagebouwde tabbalk ----
+     Zo staat hij in de app: een melkglazen balk die over de pagina zweeft, met de actieve pil
+     eronder. De balk is bewust lichtgrijs-transparant, want dat bepaalt of een witte pil nog
+     opvalt. */
+  .navrij{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin:14px 0 4px}
+  .navwrap>span{display:block;font-family:var(--cond);font-weight:800;font-size:12px;
+    letter-spacing:.07em;text-transform:uppercase;opacity:.6;margin:0 0 7px 2px}
+  .navvlak{background:linear-gradient(140deg,#EFE9DC,#E3DCCB);border-radius:22px;padding:14px 12px}
+  .tabs{position:relative;display:flex;gap:4px;background:rgba(252,250,246,.5);
+    -webkit-backdrop-filter:blur(30px) saturate(1.9);backdrop-filter:blur(30px) saturate(1.9);
+    border-radius:999px;padding:3px;border:1px solid rgba(255,255,255,.55);
+    box-shadow:0 14px 32px -16px rgba(40,24,12,.4), 0 1px 0 rgba(255,255,255,.75) inset}
+  .tab{flex:1 1 0;border-radius:999px;padding:7px 4px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:5px;font-family:var(--cond);
+    text-transform:uppercase;font-weight:700;letter-spacing:.03em;font-size:8.5px;line-height:1;
+    color:rgba(30,22,16,.56);position:relative}
+  .tab svg{width:22px;height:22px;display:block}
+  /* De actieve pil: één effen vlak in de bandkleur, geen streepje. De inkt draait mee. */
+  .tab.on{color:#fff}
+  .tab.on.donker{color:#241d12}
+  .tab.leeg{background:transparent !important;box-shadow:none !important}
 
-  /* ---- de nagebouwde dagkaart ---- */
-  .kaart{position:relative;border-radius:18px;overflow:hidden;padding:13px 14px 15px;
-    min-height:126px;display:flex;flex-direction:column;justify-content:space-between;
-    color:#fff;isolation:isolate}
-  .kaart.licht{color:#241d12}
-  .kaart .graad{font-family:var(--cond);font-weight:800;font-size:12px;letter-spacing:.07em;
-    text-transform:uppercase;opacity:.78}
-  .kaart .vorm{font-family:var(--cond);font-weight:800;font-size:23px;line-height:1.05;margin-top:2px}
-  .kaart .band{font-size:11.5px;opacity:.82;margin-top:3px}
-  .kaart .chip{align-self:flex-start;margin-top:10px;font-size:11px;font-weight:700;
-    padding:4px 9px;border-radius:99px;background:rgba(255,255,255,.22);
-    border:1px solid rgba(255,255,255,.34)}
-  .kaart.licht .chip{background:rgba(36,29,18,.12);border-color:rgba(36,29,18,.2)}
-
-
-  /* ---- het nagebouwde tabbalkje ---- */
-  .tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);
-    border-radius:99px;padding:5px;max-width:330px;margin:10px 0 2px}
-  .tab{flex:1;text-align:center;font-size:12.5px;font-weight:700;padding:8px 4px;border-radius:99px;
-    opacity:.55;position:relative}
-  .tab.on{opacity:1;color:#fff}
-  .tab.on.licht{color:#241d12}
-  .tab.on .rand{position:absolute;left:18%;right:18%;bottom:3px;height:2.5px;border-radius:99px}
+  /* ---- de nagebouwde timer ---- */
+  .tmrrij{display:grid;grid-template-columns:repeat(auto-fill,minmax(186px,1fr));gap:14px;margin:14px 0 4px}
+  .tmrwrap>span{display:block;font-family:var(--cond);font-weight:800;font-size:12px;
+    letter-spacing:.07em;text-transform:uppercase;opacity:.6;margin:0 0 7px 2px}
+  .tmr{position:relative;border-radius:24px;overflow:hidden;height:250px;color:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    box-shadow:0 20px 40px -26px rgba(16,24,40,.5)}
+  .tmr.donker{color:#241d12}
+  .tmr .ring{position:relative;width:132px;height:132px;display:grid;place-items:center}
+  .tmr .ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+  .tmr .num{font-family:var(--cond);font-weight:800;font-size:54px;line-height:1;
+    font-variant-numeric:tabular-nums}
+  .tmr .ko{font-size:15px;opacity:.9}
+  .tmr .ro{font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;
+    font-size:10px;font-weight:700;opacity:.62}
 
   .keuze{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 2px}
   .keuze button{font:inherit;font-size:13px;font-weight:700;padding:7px 13px;border-radius:99px;
@@ -110,64 +122,79 @@
   .dag.licht .ck.aan{background:#241d12;border-color:#241d12}
   .dag.licht .brush{filter:invert(1) opacity(.72)}
   .dag.licht .wm{opacity:.1;filter:invert(1)}
-  /* De witte poomstrepen op de zwarte band, in het groot */
-  .dag .streep{position:absolute;top:0;width:4px;height:34px;border-radius:0 0 4px 4px;z-index:-1}
 </style>
 </head>
 <body>
 
-<h1>Kleur per geup</h1>
-<p class="lead">De richting is gekozen: <strong>de veeg</strong>. Je eigen kleur houdt bijna de
-hele kaart, en de volgende kleur veegt alleen de onderste hoek mee — als een penseelstreek.
-Hieronder staan vijf manieren om die veeg te zetten, uitgetekend over de volledige ladder van
-12 graden. Kies er één en ik bouw hem.</p>
+<h1>Kleur per geup — definitief</h1>
+<p class="lead">De brede veeg, uitgewerkt over de hele ladder van 12 graden. Eén regel bepaalt
+alles wat je hieronder ziet.</p>
 
-<h2>Het probleem</h2>
-<p class="note">Nu pakt de app bij een dubbele band alleen de <em>gevorderde</em> kleur
-(<code>col2 || col</code>). 4e geup is blauw, 3e geup (blauw-rood) wordt rood, 2e geup is óók rood.
-Je promoveert twee keer en ziet één keer verschil. Met de tussenstappen erbij wordt dat nog erger:
-9e, 8e en 7e zouden alle drie geel worden.</p>
+<h2>De regel</h2>
+<p class="note"><strong>De band houdt zijn eigen kleur; de inkt past zich aan.</strong> Geel blijft
+dus geel en wit blijft wit — er wordt niets donkerder gemaakt om witte tekst te laten werken.
+In plaats daarvan draait de tekst (en het icoon) om naar donker zodra de band te licht is voor wit.
+Dat is dezelfde afweging die de app nu al maakt voor de tabbalk, alleen consequent doorgetrokken
+naar de dagkaart en de timer.</p>
+<p class="note">Daarbovenop komt de veeg: je eigen kleur draagt het vlak, en bij een tussenstap
+veegt de volgende kleur de onderste hoek mee. De veeg zit op de <em>vlakken</em> — dagkaart en
+timer — niet op de pil.</p>
 
-<h2>Het idee erachter</h2>
-<p class="note">De band zelf is het antwoord. Een tussenstap is letterlijk <em>jouw kleur, plus een
-punt van wat komt</em>. Dus: de kleur die je vólledig hebt gehaald blijft de hoofdkleur van de app,
-en de tussenstap voegt daar zichtbaar de volgende kleur aan toe. Dan klopt ook jouw instinct —
-je stapt pas echt over als de band helemaal van jou is — maar er verandert wél iets leuks bij
-élke promotie.</p>
+<h2>De tabbalk</h2>
+<p class="note">De pil is één effen vlak in de kleur die je <em>volledig</em> hebt gehaald, zonder
+streepje eronder. De balk eromheen is melkglas over de pagina, precies zoals in de app.</p>
+<div id="navs"></div>
+<p class="weeg"><strong>Eén ding om te weten.</strong> Met een homogene pil zonder streepje kan de
+tabbalk een tussenstap niet laten zien: 4e geup (blauw) en 3e geup (blauw-rood) krijgen dezelfde
+pil. Dat is bewust — de balk blijft rustig, en de promotie zie je op de dagkaart en de timer.
+Wil je het tóch in de balk zien, dan is het streepje de enige plek waar dat kan.</p>
 
-<div class="keuze" id="keuzeA"></div>
+<h2>En de witte band?</h2>
+<p class="note">Je vroeg je af of de pil dan transparant moet worden met een zwart icoon. Dat hoeft
+niet: de balk zelf is melkglas over een gekleurde pagina, dus een lichte pil valt wél op door zijn
+rand en slagschaduw — dat is precies hoe de app de standaardpil nu ook tekent. Hieronder staan de
+twee naast elkaar.</p>
+<div id="wit"></div>
+<p class="weeg">Links de gevulde pil, rechts een transparante. De transparante variant laat de
+actieve tab verdwijnen zodra de pagina eronder licht is; je ziet dan alleen nog dat het icoon
+donkerder is. De gevulde pil houdt de vorm, en dat is wat een tabbalk moet doen.</p>
 
-<div id="uit"></div>
-
-<h2>En hoe ziet de dagkaart er dan uit?</h2>
-<p class="note">De kaartjes hierboven zijn miniaturen. Dit is de échte kaart van het
-Vandaag-scherm, op ware grootte en met dezelfde opbouw. Let op: vandaag draagt die kaart
-helemaal geen bandkleur — hij draagt de kleur van de <em>poomsae</em> waar je mee bezig bent.
+<h2>De dagkaarten</h2>
+<p class="note">De échte kaart van het Vandaag-scherm, op ware grootte. Let op: vandaag draagt die
+kaart helemaal geen bandkleur — hij draagt de kleur van de <em>poomsae</em> waar je mee bezig bent.
 Daarom staat de huidige kaart er als eerste bij, ter vergelijking.</p>
-
 <div id="dagkaarten"></div>
 
-<h2>Waar het bij de veeg op aankomt</h2>
-<p class="weeg">Twee dingen bepalen of een veeg werkt. <strong>Hoe ver hij komt</strong> — hoe
-groter het aandeel van de volgende kleur, hoe duidelijker de promotie, maar hoe minder de kaart
-nog "van jou" voelt. En <strong>hoe hard de rand is</strong> — een zachte overgang is mooier,
-maar twee verzadigde kleuren die in elkaar lopen worden in het midden altijd vuil: blauw→rood
-wordt paars, geel→groen wordt olijf. Een harde rand heeft dat probleem niet, maar leest strakker
-dan een penseelstreek. De varianten hieronder verschillen precies op die twee knoppen. Let vooral
-op 3e geup (blauw-rood) en 7e geup (geel-groen): dat zijn de twee die het snelst modderig worden.</p>
+<h2>De timer</h2>
+<p class="note">De timerachtergrond is nu ook poomsae-gekleurd, met een verloop van 158° en twee
+zachte gloedbollen. Dat verloop staat al bijna in dezelfde hoek als de veeg, dus de band past er
+zonder verbouwing in: dezelfde veeg, alleen over het volle scherm. De ring en de cijfers volgen
+dezelfde inktregel.</p>
+<div id="timers"></div>
 
-<h2>En de tabbalk?</h2>
-<p class="weeg">Daar zou ik het rustig houden: de actieve pil krijgt de kleur die je
-<em>volledig</em> hebt gehaald, en een tussenstap voegt alleen een dun randje van de volgende
-kleur toe onder de pil. Zo blijft de app herkenbaar "blauw" zolang blauw van jou is, blijft
-witte tekst gegarandeerd leesbaar, en zie je tóch dat er iets nieuws is bijgekomen.</p>
+<h2>Wat de meting zegt</h2>
+<p class="weeg">Ik heb dit niet op gevoel beoordeeld maar de pixels uitgelezen: per kaart en per
+timer een raster van 625 punten over de achtergrond, met de tekst even verborgen, en telkens het
+slechtste contrast met de inkt genoteerd. Alle twaalf pillen halen minimaal 5,1. De dagkaarten en
+timers komen uit tussen 4,4 en 10,8, met groen-blauw als zwakste. Ter vergelijking: de kaart zoals
+hij <em>nu</em> in de app staat meet 2,9. Die laatste punten gaan trouwens niet op de veeg zitten
+maar op het watermerk — de lichte trap-illustratie rechts — en dat is een bestaand dingetje, geen
+nieuw.</p>
 
-<h2>Die ene vraag is beantwoord</h2>
-<p class="weeg">1e en 2e poom stonden allebei als effen zwart op de lijn en waren dus niet uit
-elkaar te houden. De band blijft nu gewoon zwart — dat is wat de school uitreikt — maar boven
-elke halte draagt de lijn voortaan witte dwarsstrepen: één voor 1e poom, twee voor 2e poom.
-Precies zoals de strepen op het uiteinde van de band zelf. Een streep is 3px hoog en staat 6px
-boven de halte; bij 2e poom zit er 2px tussen de twee.</p>
+<h2>Drie dingen die opvallen als je dit doorvoert</h2>
+<p class="weeg"><strong>Groen krijgt donkere inkt.</strong> Dat verwacht je niet, maar het is
+gemeten: wit op deze groentint haalt maar 3,0 — te weinig om comfortabel te lezen — en donkere
+inkt haalt 5,1. Wit, geel en groen draaien dus om; blauw, rood en zwart houden witte inkt. De
+alternatieve route is groen net zo lang verdiepen tot wit wél werkt, maar dan is het niet meer de
+kleur van de band, en dat is precies wat je bij geel niet wilde.</p>
+<p class="weeg"><strong>De timer wordt bij een lichte band een licht scherm.</strong> Nu is die
+altijd donker. Bij wit en geel wordt het een helder vlak met donkere cijfers. Het is eerlijk — de
+band ís wit — en het maakt de sprong naar blauw voelbaar. Vind je het te fel in een donkere zaal,
+dan is de kleinste ingreep om alléén de timer bij wit en geel een tint te dempen; de rest blijft
+dan zoals hier.</p>
+<p class="weeg"><strong>De tabbalk kan een tussenstap niet tonen.</strong> Met een homogene pil
+zonder streepje delen 4e en 3e geup dezelfde pil, net als 8e en 7e. De promotie leeft dan volledig
+op de dagkaart en de timer. Dat is een bewuste ruil voor rust in de balk.</p>
 
 <script>
 /* De volledige ladder, inclusief de tussenstappen die veel scholen overslaan.
@@ -197,109 +224,135 @@ function shade(h,p){ var c=hx(h), t=p<0?0:255, f=Math.abs(p)/100;
 function lum(h){ return hx(h).map(function(v){ v/=255;
   return v<=.03928 ? v/12.92 : Math.pow((v+.055)/1.055,2.4); })
   .reduce(function(a,v,i){ return a+v*[.2126,.7152,.0722][i]; },0); }
-function licht(h){ return lum(h) > .42; }   // vraagt om donkere tekst
 /* `transparent` is in WebKit rgba(0,0,0,0) en trekt een verloop dus naar grijs. Wil je een kleur
    laten wegvallen, dan moet je diezelfde kleur met alfa 0 gebruiken. */
 function weg(h){ return 'rgba('+hx(h).join(',')+',0)'; }
 
 /* De kaart mag niet naar de kleur van de band luisteren maar naar de leesbaarheid ervan:
    op wit en geel moet de tekst donker worden, anders valt er niets te lezen. */
-function kaartHtml(g, binnen, extra){
-  var l = licht(g.basis);
-  return '<div class="kaart'+(l?' licht':'')+'" style="'+(extra||'')+'">'+
-    (binnen||'')+
-    '<div><div class="graad">'+g.grade+'</div>'+
-    '<div class="vorm">'+g.vorm+'</div>'+
-    '<div class="band">'+g.band+(g.strepen?' · '+g.strepen+' streep'+(g.strepen>1?'jes':'je'):'')+'</div></div>'+
-    '<span class="chip">Training van vandaag</span></div>';
+/* De brede veeg. Je eigen kleur draagt het vlak tot ver over de helft; daarna komt de volgende
+   kleur binnen en loopt hij uit naar de onderhoek.
+
+   Een vlak verdraagt maar één inktkleur, en een verloop loopt van licht naar donker. Dat botst:
+   donkere inkt leest prima op de lichte kop van het verloop, maar valt weg in de donkere staart.
+   Daarom splitst de veeg in twee families.
+
+   - Lichte banden (wit, geel) houden het hele vlak licht en dragen donkere inkt. De veeg gaat
+     niet diep de schaduw in, en de volgende kleur blijft in de onderhoek waar geen tekst staat.
+   - Alle andere banden dragen witte inkt, en dan moet het vlak diep genoeg zijn. Groen is de
+     enige die daarvoor verdiept moet worden — wit haalt op de zuivere bandgroen maar 3,0. Op de
+     pil blijft groen wél zijn eigen kleur, want daar is het vlak effen en klein. */
+function isLicht(h){ return lum(h) > .5; }
+/* Verdiep tot witte tekst er comfortabel op staat. Dit is dezelfde lus die de app al gebruikt. */
+function witVeilig(h, doel){ var c = h, w = 0, d = doel || 5.2;
+  while(contrast('#FFFFFF',c) < d && w++ < 30) c = shade(c,-8);
+  return c; }
+/* De kop van de kaart staat linksboven, precies waar het verloop het lichtst is. Licht dus niet
+   verder op dan de inkt kan hebben. We mikken op 5,2 in plaats van op 4,5: het watermerk en de
+   gloedbollen leggen er nog wat licht bovenop, en dat is in de gemeten pixels terug te zien. */
+function kop(c, wit){ var p = wit ? 12 : 20;
+  while(wit && p > 0 && contrast('#FFFFFF', shade(c,p)) < 5.2) p -= 2;
+  return shade(c,p); }
+
+function veeg(g, hoek){
+  var h = (hoek||160)+'deg';
+  if(isLicht(g.basis)){
+    return g.volgend
+      ? 'linear-gradient('+h+','+kop(g.basis,false)+' 0%,'+shade(g.basis,-10)+' 62%,'+
+        shade(g.volgend,8)+' 88%,'+shade(g.volgend,-16)+' 100%)'
+      : 'linear-gradient('+h+','+kop(g.basis,false)+' 0%,'+shade(g.basis,-8)+' 58%,'+
+        shade(g.basis,-22)+' 100%)';
+  }
+  var b = witVeilig(g.basis);
+  var v = g.volgend ? witVeilig(g.volgend) : null;
+  return v
+    ? 'linear-gradient('+h+','+kop(b,true)+' 0%,'+shade(b,-16)+' 44%,'+v+' 72%,'+
+      shade(v,-26)+' 100%)'
+    : 'linear-gradient('+h+','+kop(b,true)+' 0%,'+shade(b,-14)+' 44%,'+shade(b,-38)+' 100%)';
 }
+/* Welke inkt hoort bij het vlak? Bij een vlak telt de hele reeks, niet alleen de bandkleur. */
+function vlakInkt(g){ return isLicht(g.basis) ? DONKER : '#FFFFFF'; }
 
-/* De veeg. Je eigen kleur draagt de kaart; de volgende kleur komt alleen in de onderste hoek
-   binnen. Twee knoppen bepalen het karakter: hoe ver de veeg komt, en hoe hard de rand is.
-   Elke variant moet ook een effen band diepte geven — anders wordt wit of zwart een dood vlak. */
-var A_VARIANTEN = [
-  {id:'V1', naam:'V1 · De veeg', uitleg:
-   'Het origineel. De volgende kleur begint op 84% en loopt zacht uit tot de hoek; daarboven '+
-   'verdiept je eigen kleur rustig. Rustig en warm, maar bij blauw-rood zie je in die laatste '+
-   'strook nog een korte menging.',
-   fn:function(g){ return g.volgend
-     ? 'linear-gradient(158deg,'+shade(g.basis,20)+' 0%,'+shade(g.basis,-18)+' 58%,'+
-       shade(g.volgend,-2)+' 84%,'+shade(g.volgend,-22)+' 100%)'
-     : 'linear-gradient(158deg,'+shade(g.basis,22)+' 0%,'+shade(g.basis,-12)+' 58%,'+
-       shade(g.basis,-32)+' 100%)'; }},
+/* Contrast volgens WCAG, zodat de inkt niet op gevoel gekozen wordt maar op meting.
+   Dit is dezelfde regel die de app al gebruikt voor de actieve tab. */
+function contrast(a,b){ var la=lum(a), lb=lum(b);
+  return (Math.max(la,lb)+.05)/(Math.min(la,lb)+.05); }
+/* Wit of donker? We meten beide tegen de bandkleur en nemen de winnaar. De donkere inkt is
+   dezelfde warme zwarttint die de app overal gebruikt, niet een neutraal zwart. */
+var DONKER = '#241D12';
+function inkt(bg){ return contrast('#FFFFFF',bg) >= contrast(DONKER,bg) ? '#FFFFFF' : DONKER; }
 
-  {id:'V2', naam:'V2 · Korte veeg', uitleg:
-   'Dezelfde streek, maar korter en steiler: de volgende kleur raakt alleen de punt van de hoek. '+
-   'Het meest ingetogen van allemaal — je ziet je eigen band bijna volledig, met net een teken '+
-   'dat er iets aankomt.',
-   fn:function(g){ return g.volgend
-     ? 'linear-gradient(146deg,'+shade(g.basis,22)+' 0%,'+shade(g.basis,-16)+' 70%,'+
-       shade(g.volgend,-4)+' 92%,'+shade(g.volgend,-24)+' 100%)'
-     : 'linear-gradient(146deg,'+shade(g.basis,24)+' 0%,'+shade(g.basis,-14)+' 70%,'+
-       shade(g.basis,-34)+' 100%)'; }},
+var IC = {
+  vandaag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/></svg>',
+  handboek:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5h6a2.5 2.5 0 0 1 2.5 2.5V20a2 2 0 0 0-2-2H4z"/><path d="M20 4.5h-6A2.5 2.5 0 0 0 11.5 7V20a2 2 0 0 1 2-2H20z"/></svg>',
+  woorden:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12.5a7 7 0 0 1-7 7H8l-4 2.5.9-3.6A7 7 0 0 1 11 5h2a7 7 0 0 1 7 7z"/></svg>',
+  video:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="3"/><path d="M10.5 9.8 15 12l-4.5 2.2z"/></svg>'
+};
+var TABS = [['Vandaag','vandaag'],['Handboek','handboek'],['Woorden','woorden'],['Video','video']];
 
-  {id:'V3', naam:'V3 · Penseelstreek', uitleg:
-   'De veeg krijgt een harde rand, precies zoals een kwast die in één haal van de kaart af gaat. '+
-   'Geen menging, dus ook blauw-rood en geel-groen blijven schoon. Binnen de streek zelf zit wel '+
-   'verloop, zodat het geen platte driehoek wordt.',
-   fn:function(g){ return g.volgend
-     ? 'linear-gradient(152deg,'+shade(g.basis,22)+' 0%,'+shade(g.basis,-20)+' 78%,'+
-       shade(g.volgend,10)+' 78%,'+shade(g.volgend,-26)+' 100%)'
-     : 'linear-gradient(152deg,'+shade(g.basis,24)+' 0%,'+shade(g.basis,-16)+' 78%,'+
-       shade(g.basis,-36)+' 78%,'+shade(g.basis,-44)+' 100%)'; }},
-
-  {id:'V4', naam:'V4 · Dubbele haal', uitleg:
-   'Twee strepen in plaats van één: een smalle lichte haal van je eigen kleur over het midden, en '+
-   'daaronder de veeg van de volgende kleur. Dat geeft de kaart beweging — het lijkt meer op een '+
-   'penseel dan op een verloop.',
-   fn:function(g){ var op = shade(g.basis,34);
-     var haal = 'linear-gradient(152deg,'+weg(op)+' 0 34%,'+op+' 44%,'+weg(op)+' 56%)';
-     var basis = g.volgend
-       ? 'linear-gradient(152deg,'+shade(g.basis,14)+' 0%,'+shade(g.basis,-22)+' 72%,'+
-         shade(g.volgend,2)+' 88%,'+shade(g.volgend,-24)+' 100%)'
-       : 'linear-gradient(152deg,'+shade(g.basis,16)+' 0%,'+shade(g.basis,-22)+' 72%,'+
-         shade(g.basis,-38)+' 100%)';
-     return haal+','+basis; }},
-
-  {id:'V5', naam:'V5 · Brede veeg', uitleg:
-   'De veeg komt verder de kaart op en pakt bijna een derde. De promotie is hierdoor het best '+
-   'zichtbaar — vooral handig als de tussenstap juist gevierd mag worden — maar de kaart voelt '+
-   'wel duidelijk minder "van jou alleen".',
-   fn:function(g){ return g.volgend
-     ? 'linear-gradient(160deg,'+shade(g.basis,20)+' 0%,'+shade(g.basis,-16)+' 44%,'+
-       shade(g.volgend,4)+' 72%,'+shade(g.volgend,-26)+' 100%)'
-     : 'linear-gradient(160deg,'+shade(g.basis,22)+' 0%,'+shade(g.basis,-14)+' 44%,'+
-       shade(g.basis,-38)+' 100%)'; }}
-];
-
-function vulA(g){
-  return A_VARIANTEN.filter(function(v){ return v.id===actiefA; })[0].fn(g);
-}
-function voorstelA(g){ return kaartHtml(g,'','background:'+vulA(g)); }
-
-/* De tabbalk: de pil draagt de kleur die je volledig hebt, een tussenstap voegt er een
-   dun randje van de volgende kleur onder toe. */
-function tabsHtml(g){
-  var vul = g.basis, l = licht(vul);
-  if(l){ vul = shade(g.basis,-34); l = licht(vul); }   // wit en geel eerst leesbaar maken
-  var rand = g.volgend ? '<span class="rand" style="background:'+g.volgend+'"></span>' : '';
+/* De tabbalk. De pil is één effen vlak in de kleur die je volledig hebt gehaald — dus bij een
+   tussenstap de básiskleur, niet de volgende. Geen streepje: de tussenstap laat zich hier niet
+   zien, en dat is een bewuste keuze. `leeg` toont hoe een transparante pil eruit zou zien. */
+function tabsHtml(g, leeg){
+  var vul = g.basis, i = inkt(vul), donker = i !== '#FFFFFF';
+  var stijl = leeg
+    ? 'background:transparent'
+    : 'background:'+vul+';box-shadow:0 5px 14px -5px rgba(120,52,20,.4), 0 0 0 1px '+
+      (donker ? 'rgba(40,28,18,.24)' : 'rgba(255,255,255,.82)');
   return '<div class="tabs">'+
-    ['Vandaag','Handboek','Woorden','Video'].map(function(t,i){
-      return i===1
-        ? '<div class="tab on'+(l?' licht':'')+'" style="background:'+vul+'">'+t+rand+'</div>'
-        : '<div class="tab">'+t+'</div>';
+    TABS.map(function(t, n){
+      return n===1
+        ? '<div class="tab on'+(donker?' donker':'')+(leeg?' leeg':'')+'" style="'+stijl+
+          (leeg?';color:'+DONKER:'')+'">'+IC[t[1]]+'<span>'+t[0]+'</span></div>'
+        : '<div class="tab">'+IC[t[1]]+'<span>'+t[0]+'</span></div>';
     }).join('')+'</div>';
 }
 
-/* De dagkaart op ware grootte. De inhoud is steeds dezelfde training, zodat alleen de kleur
-   verschilt. De achtergrond komt uit dezelfde veeg als de miniaturen hierboven. Bij de zwarte
-   band komen de witte poomstrepen erbij; die horen bij de band en niet bij de veeg. */
-function dagVulling(g){
-  var streep = '';
-  for(var i=0;i<(g.strepen||0);i++){
-    streep += '<span class="streep" style="right:'+(16+i*9)+'px;background:#EDEDE7"></span>';
-  }
-  return { bg: vulA(g), binnen: streep };
+function navs(){
+  document.getElementById('navs').innerHTML = '<div class="navrij">'+
+    LADDER.map(function(g){
+      return '<div class="navwrap"><span>'+g.grade+' · '+g.band+'</span>'+
+        '<div class="navvlak">'+tabsHtml(g)+'</div></div>';
+    }).join('')+'</div>';
+  var w = LADDER[0];
+  document.getElementById('wit').innerHTML = '<div class="navrij">'+
+    '<div class="navwrap"><span>Wit · gevulde pil</span><div class="navvlak">'+tabsHtml(w)+'</div></div>'+
+    '<div class="navwrap"><span>Wit · transparante pil</span><div class="navvlak">'+tabsHtml(w,true)+'</div></div>'+
+    '</div>';
+}
+
+/* De timer, in het klein. De achtergrond is dezelfde veeg, alleen over het volle scherm; de ring
+   en de cijfers volgen de inktregel. De twee gloedbollen houden we erin, want die geven het
+   scherm zijn diepte — ze pakken alleen de kleur van de band in plaats van die van de poomsae. */
+function timerHtml(g, bg, i){
+  var donker = i === DONKER;
+  var rgba = function(h,a){ return 'rgba('+hx(h).join(',')+','+a+')'; };
+  /* De gloedbollen volgen dezelfde verdieping als het vlak; anders lichten ze de achtergrond
+     net zo ver op dat de witte cijfers er alsnog op wegvallen. */
+  var basis = isLicht(g.basis) ? g.basis : witVeilig(g.basis);
+  var bol1 = 'radial-gradient(circle at 18% 14%,'+rgba(shade(basis,isLicht(g.basis)?18:20),.38)+', transparent 62%)';
+  var bol2 = 'radial-gradient(circle at 88% 92%,'+
+    rgba(g.volgend ? (isLicht(g.basis)?shade(g.volgend,10):witVeilig(g.volgend)) : shade(basis,-14),.4)+', transparent 60%)';
+  var ring = donker ? 'rgba(36,29,18,.22)' : 'rgba(255,255,255,.26)';
+  return '<div class="tmr'+(donker?' donker':'')+'" style="background:'+bol1+','+bol2+','+bg+'">'+
+    '<div class="ring">'+
+      '<svg viewBox="0 0 100 100">'+
+        '<circle cx="50" cy="50" r="44" fill="none" stroke="'+ring+'" stroke-width="7"/>'+
+        '<circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="7" '+
+          'stroke-linecap="round" stroke-dasharray="276" stroke-dashoffset="96"/>'+
+      '</svg>'+
+      '<span class="num">7</span>'+
+    '</div>'+
+    '<span class="ko">일곱</span><span class="ro">Ilgop</span></div>';
+}
+
+function timers(){
+  document.getElementById('timers').innerHTML = '<div class="tmrrij">'+
+    LADDER.map(function(g){
+      var bg = veeg(g, 158);
+      return '<div class="tmrwrap"><span>'+g.grade+' · '+g.band+'</span>'+
+        timerHtml(g, bg, vlakInkt(g))+'</div>';
+    }).join('')+'</div>';
 }
 
 /* De drie regels van de training: hetzelfde rijtje als op het Vandaag-scherm. */
@@ -342,41 +395,19 @@ function dagNu(g){
 }
 
 function dagkaarten(){
-  var deel = ['10','8','7','4','3','2','1','P2'];
   var uit = '<div class="dagrij">'+
     '<div class="dagwrap"><span>Nu · kleur van de poomsae</span>'+
       dagNu(LADDER.filter(function(g){ return g.stop==='4'; })[0])+'</div>'+
-    deel.map(function(s){
-      var g = LADDER.filter(function(x){ return x.stop===s; })[0];
-      var v = dagVulling(g);
+    LADDER.map(function(g){
       return '<div class="dagwrap"><span>'+g.grade+' · '+g.band+'</span>'+
-        dagHtml(g, v.bg, v.binnen, v.extra, licht(g.basis))+'</div>';
+        dagHtml(g, veeg(g), '', '', vlakInkt(g) === DONKER)+'</div>';
     }).join('')+'</div>';
   document.getElementById('dagkaarten').innerHTML = uit;
 }
 
-var actiefA = 'V1';
-function teken(){
-  var v = A_VARIANTEN.filter(function(x){ return x.id===actiefA; })[0];
-  document.getElementById('keuzeA').innerHTML = A_VARIANTEN.map(function(x){
-    return '<button data-va="'+x.id+'" aria-pressed="'+(x.id===actiefA)+'">'+x.naam+'</button>';
-  }).join('');
-  document.getElementById('uit').innerHTML =
-    '<h2>'+v.naam+'</h2><p class="note">'+v.uitleg+'</p>'+
-    '<div class="rij">'+LADDER.map(voorstelA).join('')+'</div>'+
-    '<h2>De tabbalk bij deze graden</h2>'+
-    '<p class="note">De pil houdt de kleur die je volledig hebt gehaald; een tussenstap zet er '+
-    'een dun randje van de volgende kleur onder.</p>'+
-    LADDER.filter(function(g){ return ['8','7','4','3','2'].indexOf(g.stop)>=0; })
-      .map(function(g){ return '<p class="note" style="margin:14px 0 0">'+g.grade+' · '+g.band+'</p>'+tabsHtml(g); })
-      .join('');
-  dagkaarten();
-}
-document.getElementById('keuzeA').addEventListener('click', function(e){
-  var b = e.target.closest('button'); if(!b) return;
-  actiefA = b.dataset.va; teken();
-});
-teken();
+navs();
+dagkaarten();
+timers();
 </script>
 </body>
 </html>
