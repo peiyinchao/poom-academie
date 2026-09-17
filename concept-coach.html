@@ -442,8 +442,11 @@
     font-family:var(--cond);text-transform:uppercase;letter-spacing:.03em;font-weight:700;
     font-size:12px;color:var(--gray);cursor:pointer;-webkit-tap-highlight-color:transparent}
   .ag-chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  /* 16px is hier geen smaakkeuze: tikt je vinger in een veld dat kleiner is, dan zoomt Safari
+     op de iPhone vanzelf in — en terugzoomen doet hij niet. Je kwam dus ingezoomd terug op de
+     tijdlijn. De datumvelden hierboven staan om precies dezelfde reden op 16px. */
   .ag-title{width:100%;border:1px solid var(--line);border-radius:13px;background:var(--surface);
-    padding:10px 12px;font-family:inherit;font-size:14px;color:var(--ink);-webkit-appearance:none}
+    padding:10px 12px;font-family:inherit;font-size:16px;color:var(--ink);-webkit-appearance:none}
   .ag-title::placeholder{color:var(--gray)}
   .ag-title:focus{outline:none;border-color:var(--blue)}
   /* Trainers bij een cursus: één regel per naam. De regels staan onder een eigen kopje, zodat
@@ -9869,6 +9872,7 @@
     else if(a==='agsave'){ agSync();
       if(agDraft && agDraft.date){
         var _ev = agEditId ? agById(agEditId) : null;
+        var _nieuw = !_ev;
         if(!_ev){ _ev={id:'a'+Date.now()}; AGENDA.push(_ev); }
         _ev.type=agDraft.type; _ev.title=(agDraft.title||'').trim(); _ev.date=agDraft.date;
         /* Bij een examen komt de naam uit de gekozen graad, zodat de kaart altijd leesbaar is
@@ -9904,7 +9908,9 @@
         });
         var _after=agAfterSave; agAfterSave=null;
         agMode='list'; agDraft=null; agEditId=null;
-        buzz(20); try{ sfx('complete'); }catch(_e){}
+        // Het tuneje viert dat er iets bij je verhaal komt. Naderhand nog een foto of een
+        // uitslag aanvullen is bijwerken, geen mijlpaal, dus dan blijft het stil.
+        buzz(20); if(_nieuw){ try{ sfx('complete'); }catch(_e){} }
         if(_after){ closeAgendaSheet(); _after(); } else agRender();
       } }
     else if(a==='agdel'){ var _aid=act.getAttribute('data-id');
@@ -9943,7 +9949,7 @@
     else if(a==='gxphfit' || a==='gx2phfit'){ phSetFit(a.replace('phfit',''), act.getAttribute('data-fit')); }
     else if(a==='gxsave'){ gxSync();
       if(gxDraft && gxDraft.date){
-        var _gk=gxDraft.k;
+        var _gk=gxDraft.k, _had=!!GEUP_DATES[_gk];
         GEUP_DATES[_gk]=gxDraft.date; gdSave();
         gmSet(_gk, {exam:gxDraft.exam});
         phBewaarPaar('g'+_gk, gxDraft, function(ok){
@@ -9952,7 +9958,8 @@
         // Sta je lager ingesteld dan wat je net invulde, dan klopt je graad niet meer.
         if(_gk>GEUP_I) setBelt(_gk, true);
         bpRenderGrad(bpCurK());
-        buzz(20); try{ sfx('complete'); }catch(_e){}
+        // Zelfde afspraak als bij de agenda: alleen een nieuwe graduatie is een mijlpaal.
+        buzz(20); if(!_had){ try{ sfx('complete'); }catch(_e){} }
         closeGradeSheet();
       } }
     else if(a==='gxdel'){
