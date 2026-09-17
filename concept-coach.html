@@ -660,20 +660,32 @@
      -22px en 40px zijn de coördinaten van dat hart, precies het hart van de lijn (37 - 25 + 3) en
      het hart van de titelregel. Verander je de ring of de witruimte, dan groeit de halte
      symmetrisch naar buiten en blijft hij vanzelf op de lijn liggen.
-     4px is tweederde van de 6px lijn: dik genoeg dat de lijn zichtbaar doorloopt in de ring in
-     plaats van er los bovenop te liggen, en dun genoeg dat de halte de aandacht niet van de
-     kaarten wegtrekt. Samen met 24px witruimte komt de halte op 32px uit: dat blijkt bij een
-     lijn van 6px de prettigste verhouding — ruim vijf keer de lijndikte.
+     De ring is 2px: een dunne, strakke omlijning waar de halte zelf het witte vlak is en de
+     kleur alleen de rand markeert. Samen met 28px witruimte komt de halte op 32px uit: dat
+     blijkt bij een lijn van 6px de prettigste verhouding — ruim vijf keer de lijndikte. Een
+     dikkere ring at de witruimte op die het tekentje nodig heeft.
      De halte staat op ooghoogte met de titel, niet met de datum: de titel is
      waar je naar kijkt. 25px = 1px rand + 13px binnenmarge + de datumregel + het hart van de
      titel, min de halve halte. Bij een grotere halte moet die 25 dus mee omlaag, anders zakt de
      halte onder de titel weg. */
-  .tl-dot{--tlring:4px;--tlin:24px;--tlsz:calc(var(--tlin) + 2 * var(--tlring));
+  .tl-dot{--tlring:2px;--tlin:28px;--tlsz:calc(var(--tlin) + 2 * var(--tlring));
     position:absolute;left:calc(-22px - var(--tlsz) / 2);top:calc(40px - var(--tlsz) / 2);
     width:var(--tlsz);height:var(--tlsz);border-radius:50%;
     display:grid;place-items:center;font-size:13px;line-height:1;padding:var(--tlring);
     background:linear-gradient(var(--surface),var(--surface)) content-box no-repeat,
       var(--tldot,var(--line)) border-box no-repeat}
+  /* Het tekentje in de halte is een getekend icoon en geen emoji: emoji dragen hun eigen kleur
+     en hun eigen witruimte mee, en op zo'n klein vlak werd dat een vlekje. Als masker neemt het
+     de inkt van de pagina over, net als de iconen in de navigatiebalk.
+     De tekeningen zijn getekend op de volle halte van 32px (op een doek van 64px, dus dubbele
+     dichtheid) en dragen hun eigen witruimte al mee. Ze gaan daarom op ware grootte over de hele
+     halte heen en niet op de 28px binnenruimte: schalen zou de maatvoering van de tekenaar
+     overdoen. Ze steken dus 2px onder de ring door, precies zoals ze bedoeld zijn. */
+  .tl-ico{width:var(--tlsz);height:var(--tlsz);background:var(--ink);
+    -webkit-mask:center/contain no-repeat;mask:center/contain no-repeat}
+  .ic-tl-wedstrijd{-webkit-mask-image:url('assets/icons/Wedstrijd.png');mask-image:url('assets/icons/Wedstrijd.png')}
+  .ic-tl-examen{-webkit-mask-image:url('assets/icons/Examen.png');mask-image:url('assets/icons/Examen.png')}
+  .ic-tl-cursus{-webkit-mask-image:url('assets/icons/Cursus.png');mask-image:url('assets/icons/Cursus.png')}
   .tl-card{position:relative;border:1px solid var(--line);border-radius:16px;padding:13px 15px;background:var(--surface)}
   /* Het potlood hangt in de hoek en is er alleen als de kaart bovenaan staat. Het blijft in de
      opmaak staan (alleen onzichtbaar), zodat de tekst niet verspringt als het verschijnt. */
@@ -2833,12 +2845,14 @@
   .st-info{flex:1;min-width:0}
   .st-info .st-wt{margin-top:0}
   .st-info .hb-body{margin-top:8px}
-  /* Weight distribution pill. Neutral by default; only asymmetric (non-50/50) is highlighted */
+  /* Het gewichtslabel. Eerst was alleen een scheve verdeling geaccentueerd en bleef 50/50 grijs,
+     maar dan lees je de rij als "deze standen zijn belangrijk en die andere niet". De verdeling
+     is bij elke stand even bepalend, dus dragen ze allemaal dezelfde accentkleur. */
   .st-wt{display:inline-block;margin-top:7px;font-family:var(--cond);font-weight:700;font-size:14px;
-    letter-spacing:.01em;color:var(--ink);background:var(--soft);
-    border:1px solid var(--line);border-radius:8px;padding:3px 10px 2px;line-height:1.25}
+    letter-spacing:.01em;color:var(--deep);background:color-mix(in srgb, var(--el) 9%, #fff);
+    border:1px solid color-mix(in srgb, var(--el) 22%, transparent);border-radius:8px;
+    padding:3px 10px 2px;line-height:1.25}
   .st-wt b{color:var(--gray);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;margin-right:6px}
-  .st-wt.key{color:var(--deep);background:color-mix(in srgb, var(--el) 9%, #fff);border-color:color-mix(in srgb, var(--el) 22%, transparent)}
   .hb-figure{float:right;width:150px;height:auto;margin:4px 0 0 15px;shape-outside:margin-box;pointer-events:none;user-select:none}
   .hbcat .ct-row.hbfig{padding-bottom:0}
   .hbfig .hb-body{display:flow-root}
@@ -5593,7 +5607,7 @@
     for(var i=0;i<AGENDA.length;i++){
       var e=AGENDA[i], t=agType(e.type);
       out.push({kind:'event', id:e.id, date:e.date, end:e.end,
-                title:e.title||t.label, ico:t.ico, typ:t.label, ev:e});
+                title:e.title||t.label, ico:t.ico, tk:t.k, typ:t.label, ev:e});
     }
     out.sort(function(a,b){ return a.date<b.date?1:(a.date>b.date?-1:0); });
     return out;
@@ -5683,11 +5697,15 @@
     var n = (g && g.lines) || 0;
     return n ? ' tl-str'+Math.min(2, n) : '';
   }
+  /* Welk tekentje hoort in de halte? Een graduatie deelt de baret met een examen: allebei zijn
+     ze het moment waarop je je band verdiende. De andere twee soorten hebben hun eigen tekening.
+     Kent een soort er geen, dan valt hij terug op het teken uit de agenda zelf. */
+  var TL_ICOS = {wedstrijd:'ic-tl-wedstrijd', examen:'ic-tl-examen', cursus:'ic-tl-cursus'};
   function tlDotHtml(it){
-    /* Een graduatie krijgt hetzelfde diplomateken als bij het invoeren van een gebeurtenis; de
-       bandkleur zit nu in de lijn en in de ring, dus de halte hoeft hem niet nog eens te dragen. */
-    if(it.kind==='graad') return '<span class="tl-dot belt">🎓</span>';
-    return '<span class="tl-dot">'+it.ico+'</span>';
+    /* De bandkleur zit in de lijn en in de ring, dus de halte hoeft hem niet nog eens te dragen. */
+    var k = it.kind==='graad' ? 'examen' : it.tk;
+    if(TL_ICOS[k]) return '<span class="tl-dot"><i class="tl-ico '+TL_ICOS[k]+'"></i></span>';
+    return '<span class="tl-dot">'+(it.ico||'🎓')+'</span>';
   }
   function tlItemHtml(it, today){
     var ph = phGet(it.id), foc = phFoc(it.id);
@@ -6642,7 +6660,7 @@
   function stanceRow(s){
     var img=stanceImg(s.roman);
     var fig=img?'<span class="st-fig"><img src="'+img+'" alt="Voetdiagram '+esc(s.roman)+'" loading="lazy"></span>':'';
-    var wt='<div class="st-wt'+(/^\s*50\s*\/\s*50\s*$/.test(s.gewicht||'')?'':' key')+'"><b>Gewicht</b>'+esc(s.gewicht)+'</div>';
+    var wt='<div class="st-wt"><b>Gewicht</b>'+esc(s.gewicht)+'</div>';
     var uit=s.uitleg?'<div class="hb-body">'+esc(s.uitleg)+'</div>':'';
     // Tekst en plaatje staan naast elkaar en beginnen op dezelfde hoogte; het luidsprekertje
     // zakt naar de onderkant van de tekstkolom. Zo vult de tekst de hoogte van het diagram op
