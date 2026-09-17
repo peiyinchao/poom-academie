@@ -4902,7 +4902,9 @@
   /* Handboek punch-bag: slide it left↔right along the ceiling rail (a tap still lands a hit).
      The bag (hook + shaft + bag) translates as one; the rail line stays put, so it reads as the
      bag sliding along the rail. The title block shrinks to hug the bag's left edge as it nears. */
-  var PBAG={x:0, dragged:false};
+  /* x is null zolang de zak nog nooit geplaatst is; hij krijgt dan zijn ruststand onder de
+     profielfoto. Zodra je hem versleept blijft jouw plek staan. */
+  var PBAG={x:null, dragged:false};
   // Hook-arch outer edges at the rail line, as fractions of the mount box width (image-x 255/424
   // of 695 across the rail's image-y 121–162 band). Drive the two rails' inner edges so the gap
   // between the left/right rail segments always clears the hook, wherever the bag is dragged.
@@ -4923,6 +4925,25 @@
     var l=av.getBoundingClientRect().right-hl-RAIL_W;
     var r=(end||av).getBoundingClientRect().right-hl;
     return {l:l, r:r};
+  }
+  /* Ruststand: de haak hangt recht onder het midden van de profielfoto. Daar begint de rail ook,
+     en de zak ligt dan niet meer over de tijdlijnknop ernaast. */
+  function bagRust(hdr){
+    var root=hdr.closest('.surface'); if(!root) return 0;
+    var av=root.querySelector('.avatar'), span=hdr.querySelector('.whead-bag');
+    if(!av||!span) return 0;
+    var hr=hdr.getBoundingClientRect(), sr=span.getBoundingClientRect(), ar=av.getBoundingClientRect();
+    if(!sr.width||!ar.width) return 0;
+    var U=(sr.left-hr.left)-(PBAG.x||0);                  // linkerkant zonder verschuiving
+    var haak=U+((ARCH_L+ARCH_R)/2)*sr.width;              // midden van de haak
+    var x=(ar.left+ar.width/2-hr.left)-haak;
+    var ends=railEnds(hdr);
+    if(ends){                                             // binnen de rail blijven
+      var min=ends.l-U-ARCH_L*sr.width, max=ends.r-U-ARCH_R*sr.width;
+      if(min>max){ var m=(min+max)/2; min=max=m; }
+      x=Math.max(min, Math.min(max, x));
+    }
+    return x;
   }
   function updateRail(hdr){
     if(!hdr||!hdr.style) return;
@@ -4949,10 +4970,10 @@
       var b=(e.target&&e.target.closest)?e.target.closest('.pbag'):null; if(!b) return;
       btn=b; span=b.closest('.whead-bag'); hdr=b.closest('.whead-hb'); if(!span||!hdr) return;
       jh=hdr.querySelector('.jhead'); swing=b.querySelector('.pbag-swing');
-      startX=e.clientX; startTx=PBAG.x; drag=false; PBAG.dragged=false; pid=e.pointerId;
+      startX=e.clientX; startTx=(PBAG.x||0); drag=false; PBAG.dragged=false; pid=e.pointerId;
       lastX=e.clientX; lastT=now();
       var hr=hdr.getBoundingClientRect(), sr=span.getBoundingClientRect();
-      var w=sr.width, U=(sr.left-hr.left)-PBAG.x;              // untranslated hook-span left (header coords)
+      var w=sr.width, U=(sr.left-hr.left)-(PBAG.x||0);              // untranslated hook-span left (header coords)
       var ends=railEnds(hdr) || {l:hr.width-24-RAIL_W, r:hr.width-24};
       minTx=ends.l-U-ARCH_L*w;                                 // hook's left edge reaches the rail's left end
       maxTx=ends.r-U-ARCH_R*w;                                 // hook's right edge reaches the rail's right end
@@ -6950,10 +6971,16 @@
     if(!root) return;
     var span=root.querySelector('.whead-bag'); if(!span) return;
     var jh=root.querySelector('.whead-hb .jhead');
-    span.style.transform = PBAG.x ? 'translateX('+PBAG.x+'px)' : '';
-    if(jh) jh.style.marginRight = PBAG.x<0 ? (-PBAG.x)+'px' : '';
     var hdr=root.querySelector('.whead-hb');
-    if(hdr){ updateRail(hdr); requestAnimationFrame(function(){ updateRail(hdr); }); }
+    function zet(){
+      if(PBAG.x==null && hdr) PBAG.x=bagRust(hdr);        // eerste keer: onder de profielfoto
+      var x=PBAG.x||0;
+      span.style.transform = x ? 'translateX('+x+'px)' : '';
+      if(jh) jh.style.marginRight = x<0 ? (-x)+'px' : '';
+      if(hdr) updateRail(hdr);
+    }
+    zet();
+    requestAnimationFrame(zet);
   }
   function renderHandbook(){
     function hbHubRow(cat){
