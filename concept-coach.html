@@ -4115,9 +4115,10 @@
   // Two modes in one sheet: the list of what's planned, and a separate form for entering a new
   // event. Keeping them apart stops the sheet turning into one dense block of controls.
   var agSheet=null, agMode='list', agDraft=null, agEditId=null, agAfterSave=null;
-  // De agenda gaat over wat er nog komt, dus daar valt niets in te vullen bij "uitslag". Alleen
-  // de tijdlijn, die over gebeurde dingen gaat, laat dat blok zien.
-  var agUitslagAan=false;
+  // Waar het formulier vandaan komt: de agenda gaat over wat nog komt, de tijdlijn over wat
+  // gebeurd is. Dat bepaalt alleen nog wat er te zien is zolang er geen datum staat; zodra die
+  // er is beslist de datum zelf (zie agFotoAan en agUitslagVeldAan).
+  var agVerledenCtx=false;
   function agBlankDraft(){ return {type:'wedstrijd', title:'', date:'', end:'', where:'', result:[], trainers:[], geup:agVolgendeGraad(), exam:agVorigeExaminator(), photo:'', focus:phClampFoc(null)}; }
   function agEditDraft(e){
     return {type:agType(e.type).k, title:e.title||'', date:e.date||'', end:e.end||'',
@@ -4324,7 +4325,15 @@
   // blijft altijd staan, anders kun je hem niet meer weghalen.
   function agFotoAan(d){
     if(d.photo) return true;
-    if(!d.date) return agUitslagAan;
+    if(!d.date) return agVerledenCtx;
+    return agDays(d.end||d.date) <= 0;
+  }
+  // Een uitslag heb je pas als het achter de rug is; hetzelfde verhaal als de foto. Ook in de
+  // tijdlijn staan toekomstige dingen, dus de datum beslist, niet de plek waar je vandaan komt.
+  // Een al ingevulde uitslag blijft staan, anders kun je hem niet meer weghalen.
+  function agUitslagVeldAan(d){
+    if(agUitslagRijen(d.result).length) return true;
+    if(!d.date) return agVerledenCtx;
     return agDays(d.end||d.date) <= 0;
   }
   function agFormHtml(){
@@ -4346,7 +4355,7 @@
         (examen ? '' : agDateHtml('end','t/m (optioneel)', d.end, '—'))+
       '</div>'+
       // Een uitslag hoort alleen bij een wedstrijd; bij een cursus of examen zou het veld verwarren.
-      (d.type==='wedstrijd' && agUitslagAan ? agUitslagHtml(d) : '')+
+      (d.type==='wedstrijd' && agUitslagVeldAan(d) ? agUitslagHtml(d) : '')+
       // Wie er voor de zaal stond vraag je alleen bij een cursus.
       (d.type==='cursus' ? agTrainersHtml(d) : '')+
       (agFotoAan(d) ? phEditHtml(ph, d.focus, 'ag') : '')+
@@ -4438,7 +4447,7 @@
     agEditId = e?e.id:null;
     agDraft = e?agEditDraft(e):agBlankDraft();
     agAfterSave = after||null;
-    agUitslagAan = true;
+    agVerledenCtx = true;
     agMode='form'; agRender();
   }
   function agPickPhoto(file){
@@ -4457,7 +4466,7 @@
     if(!agSheet) return;
     agSheet.classList.remove('show'); syncTopDim();
     var s=agSheet; agSheet=null; agMode='list'; agDraft=null; agEditId=null; agAfterSave=null;
-    agUitslagAan=false;
+    agVerledenCtx=false;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
     if(!tlScreen) fnav.classList.remove('hide');
   }
@@ -6949,7 +6958,21 @@
     if(hbSheet){
       var body=hbSheet.querySelector('.cs-body');
       if(body){
+        // De balk heeft een transitie, maar de kaart wordt in zijn geheel opnieuw opgebouwd en
+        // een vers element heeft geen vorige breedte om vanaf te lopen. Dus zetten we hem eerst
+        // terug op de oude stand en pas in het volgende beeldje op de nieuwe; dan groeit hij mee
+        // met het vinkje in plaats van er meteen te staan.
+        var vorigeBreedte=(function(){ var i=body.querySelector('.hb-prog-bar i'); return i?i.style.width:''; })();
         body.innerHTML=hbBody('examen');
+        var balk=body.querySelector('.hb-prog-bar i');
+        if(balk && vorigeBreedte){
+          var doel=balk.style.width;
+          balk.style.transition='none';
+          balk.style.width=vorigeBreedte;
+          requestAnimationFrame(function(){
+            requestAnimationFrame(function(){ balk.style.transition=''; balk.style.width=doel; });
+          });
+        }
         if(nowOn){                                      // draw the scribble on the row you just ticked
           var row=body.querySelector('.hb-exrow[data-k="'+id+'"]');
           if(row) row.classList.add('just');
@@ -9611,7 +9634,7 @@
     // want een graad overslaan komt voor.
     else if(a==='aggeup'){ if(!agDraft||!agSheet) return; agSync();
       agDraft.geup=+act.getAttribute('data-k'); agRender(); buzz(10); }
-    else if(a==='agnew'){ agDraft=agBlankDraft(); agEditId=null; agUitslagAan=false; agMode='form'; agRender(); }
+    else if(a==='agnew'){ agDraft=agBlankDraft(); agEditId=null; agVerledenCtx=false; agMode='form'; agRender(); }
     else if(a==='agcancel'){ agMode='list'; agDraft=null; agEditId=null;
       if(agAfterSave){ agAfterSave=null; closeAgendaSheet(); } else agRender(); }
     else if(a==='agphdel'){ if(agDraft){ agSync(); agDraft.photo=''; agDraft.focus=phClampFoc(null); agRender(); buzz(10); } }
