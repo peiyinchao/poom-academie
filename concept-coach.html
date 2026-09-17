@@ -1071,8 +1071,12 @@
     padding:0 24px calc(env(safe-area-inset-bottom) + 150px);display:flex;flex-direction:column;justify-content:center}
   /* Bigger dial for emphasis */
   .timerscreen .pt-svg{width:300px;height:300px}
-  /* Counter uses the lexicon Korean display face (Black Han Sans) */
-  .timerscreen .pt-num{font-family:var(--kor);font-size:120px;line-height:.9;font-weight:400;display:flex;align-items:center;justify-content:center;height:108px}
+  /* De teller draagt dezelfde letter als de rest van de timer (Big Shoulders). Op 100px is het
+     cijfer even hoog als de klok in Tijd-modus, dus beide standen vullen de ring gelijk. Het vak
+     houdt zijn vaste hoogte, want tijdens de Junbi-aanloop staan hier drie stippen in plaats van
+     een cijfer — zonder die hoogte zou de ring op dat moment inzakken. */
+  .timerscreen .pt-num{font-family:var(--cond);font-size:100px;font-weight:800;letter-spacing:.01em;
+    font-variant-numeric:tabular-nums;line-height:.9;display:flex;align-items:center;justify-content:center;height:108px}
   .timerscreen .pt-word{margin-top:4px;gap:10px}
   .timerscreen .pt-word .w-ko{font-family:'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;font-size:32px;font-weight:400}
   .timerscreen .pt-word .w-ro{font-size:15px}
@@ -2240,10 +2244,8 @@
     box-shadow:0 5px 14px -5px rgba(0,0,0,.5)}
 
   /* Tijd mode: the dial always shows MM:SS (even while setting) — no Korean word / in-ring prompt */
-  /* 100px in Big Shoulders gives an 81.7px digit — matching Tellen's 82.1px at 120px Black Han Sans.
-     Matching the px value instead would render 16px taller and crowd the ring. */
-  .timerscreen .pt-num.ot-tnum{font-family:var(--cond);font-weight:800;font-size:100px;line-height:1;height:auto;
-    letter-spacing:.01em;font-variant-numeric:tabular-nums}
+  /* De klok mag zijn eigen hoogte pakken: daar staat tekst van vier tekens, geen los cijfer. */
+  .timerscreen .pt-num.ot-tnum{line-height:1;height:auto}
   .timerscreen[data-mode="time"] .ptimer.idle .pt-num{display:flex}
   /* De uitleg staat nu ook bij Tijd ín de ring, onder de tijd — zelfde plek als bij Tellen. */
   .timerscreen[data-mode="time"] .ptimer.idle .pt-word{display:flex}
