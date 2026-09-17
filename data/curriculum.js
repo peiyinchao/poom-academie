@@ -401,6 +401,35 @@ window.CURRICULUM = {
           missie: "Markeer in je set welke vijf aanvallen géén gewone stoot zijn."
         }
       },
+      /* De naam telt gewoon het aantal stappen. Wie dat eenmaal doorheeft, hoeft de drie vormen
+         nooit meer uit elkaar te puzzelen: il=1, i=2, sam=3. */
+      vormen: {
+        lead: "De naam telt het aantal stappen: <b>bo</b> (보) is stap, <b>taeryon</b> (대련) is sparren. Het telwoord ervoor zegt hoe vaak je partner aanvalt.",
+        rijen: [
+          { ko: "일보 대련", ro: "Ilbo Taeryon", nl: "Eén stap",
+            b: "<b>Il</b> is één. Je partner valt één keer aan. Jij verdedigt en werkt meteen af." },
+          { ko: "이보 대련", ro: "Ibo Taeryon", nl: "Twee stappen",
+            b: "<b>I</b> is twee. Twee aanvallen achter elkaar. Je wijkt twee keer terug, blokkeert allebei en countert na de tweede." },
+          { ko: "삼보 대련", ro: "Sambo Taeryon", nl: "Drie stappen",
+            b: "<b>Sam</b> is drie. Drie aanvallen achter elkaar. Je wijkt drie keer terug en werkt pas op de laatste af." }
+        ]
+      },
+      /* LET OP: deze regels worden als HTML geplaatst, niet ge-escaped — de vetgedrukte Koreaanse
+         commando's zijn juist de kapstok waar je de volgorde aan onthoudt. Alleen vaste tekst
+         uit dit bestand, nooit iets wat een gebruiker intypt. */
+      start: [
+        "<b>Joonbi</b> (klaarstaan) — je staat tegenover elkaar in de gereedstaande houding, <b>Naranhi Seogi</b>.",
+        "<b>Charyeot</b> — de voeten sluiten: <b>Moa Seogi</b>.",
+        "<b>Gyeongrye</b> — groeten, met een buiging naar je partner.",
+        "De afstand meten en terugkeren naar de gereedstaande houding, <b>Pyeonhi Seogi</b>.",
+        "<b>Si-jak</b> (start) — nu mag het sparren beginnen."
+      ],
+      aanval: [
+        "De aanvaller staat links voor in een lange stand (<b>Oen Apkoobi Seogi</b>) met het rechterbeen naar achteren, en maakt gelijktijdig een lage vuistverdediging met links op de ellepijpzijde van de pols: <b>Oen Bakat-palmok Area Makki</b>.",
+        "De aanvaller geeft een <b>KIAP</b>.",
+        "De verdediger geeft een <b>KIAP</b> terug — het teken dat hij klaar is voor de aanval.",
+        "De aanvaller verplaatst het rechterbeen naar voren in een rechter lange stand (<b>Oreun Apkoobi Seogi</b>) en stoot gelijktijdig midden met rechts: <b>Bandae-Momtong-Jireugi</b>."
+      ],
       veilig: "Wacht tot de aanval echt is gestart. Houd tegenaanvallen op veilige afstand of met gecontroleerd contact, en spreek vooraf een duidelijk stopteken af.",
       video: { url: "https://www.facebook.com/reel/347532419750423", poster: "./img/video/ilbo.jpg", titel: "5 Ilbo Taeryon", bron: "Taekwondo Kawarmala Holland" }
     },

@@ -2889,13 +2889,13 @@
   .hb-illus.hb-illus-tall .hb-illusb{max-width:143px}
   .hb-illus.hb-illus-tall{margin-left:0;margin-right:0}
   .hb-illusb img{display:block;width:100%;height:auto}
-  .hb-illusb .hb-blink{position:absolute;left:0;top:0;opacity:0}
+  .hb-illusb .hb-blink,.pm-mascb .hb-blink{position:absolute;left:0;top:0;opacity:0}
   @keyframes hbBlink{0%,92.5%,100%{opacity:0}94.5%,97.5%{opacity:1}}
-  @media (prefers-reduced-motion:no-preference){.hb-illusb .hb-blink{animation:hbBlink 5.6s infinite}}
+  @media (prefers-reduced-motion:no-preference){.hb-illusb .hb-blink,.pm-mascb .hb-blink{animation:hbBlink 5.6s infinite}}
   /* Two-mascot scenes: blink each half on its own clock so their eyes don't close together */
-  .hb-illusb .hb-blink-l{clip-path:inset(0 50% 0 0)}
-  .hb-illusb .hb-blink-r{clip-path:inset(0 0 0 50%)}
-  @media (prefers-reduced-motion:no-preference){.hb-illusb .hb-blink-r{animation-duration:6.7s}}
+  .hb-illusb .hb-blink-l,.pm-mascb .hb-blink-l{clip-path:inset(0 50% 0 0)}
+  .hb-illusb .hb-blink-r,.pm-mascb .hb-blink-r{clip-path:inset(0 0 0 50%)}
+  @media (prefers-reduced-motion:no-preference){.hb-illusb .hb-blink-r,.pm-mascb .hb-blink-r{animation-duration:6.7s}}
   /* Rekwisiet onderaan het onderdeel: de breekplanken en de helm vullen de lege staart van de
      pagina en geven elk onderdeel een eigen herkenningspunt. Puur decoratief. */
   /* Het rekwisiet hangt onder de tekst. Hoeveel lucht daartussen minimaal hoort, verschilt per
@@ -2922,10 +2922,13 @@
     filter:drop-shadow(0 12px 20px rgba(26,22,18,.14))}
   @keyframes hbPropIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion:no-preference){.hb-prop{animation:hbPropIn .52s cubic-bezier(.2,.7,.3,1) both .14s}}
-  /* Poomsae Handboek: the stance mascotte shrinks on scroll from a big hero illustration into a
-     small companion docked beside the title, while the list scrolls beneath it. Geometry (rest/dock
-     position + scale) is measured in pmSetup and interpolated by --pmc (0 rest -> 1 docked). */
-  .hbcat[data-hb="poomsae"] .cs-hero{position:relative;z-index:6}
+  /* Handboek-mascotte die meekrimpt: hij begint als grote plaat boven de pagina en schuift al
+     rollend samen tot een klein maatje naast de titel, terwijl de lijst eronderdoor rolt. Zo
+     krijgt de tekst het scherm zodra je gaat lezen, zonder dat de mascotte helemaal verdwijnt.
+     Geometrie (rust/dok-positie + schaal) wordt in mascSetup gemeten en door --pmc (0 rust ->
+     1 gedokt) geïnterpoleerd. Elke sectie met een tekening doet ditzelfde, dus de beweging
+     hoort bij het Handboek en niet bij één pagina. */
+  .hbcat.has-masc .cs-hero{position:relative;z-index:6}
   .pm-masc{position:absolute;left:0;top:0;width:var(--pm-w,150px);z-index:4;transform-origin:0 0;
     pointer-events:none;will-change:transform;filter:drop-shadow(0 7px 12px rgba(20,23,18,.16));
     transform:translate(calc(var(--pm-x0,0px) + var(--pm-dx,0px) * var(--pmc,0)),
@@ -2933,7 +2936,12 @@
               scale(calc(1 + (var(--pm-s,.3) - 1) * var(--pmc,0)))}
   .pm-mascb{position:relative;width:100%}
   .pm-mascb > img{display:block;width:100%;height:auto}
-  .pm-mascb .hb-blink{position:absolute;left:0;top:0;width:100%;opacity:0}
+  /* Dezelfde zachte gloed als onder een vaste plaat, maar hij dooft weg zodra de mascotte
+     samenkrimpt: als klein maatje naast de titel zou een lichtvlek achter hem alleen maar
+     opvallen als een vlek. */
+  .pm-mascb::before{content:"";position:absolute;left:-6px;right:-6px;top:-10px;bottom:0;z-index:-1;
+    border-radius:20px;opacity:calc(1 - var(--pmc,0));
+    background:radial-gradient(126% 94% at 50% 100%, rgba(36,104,214,.13), rgba(36,104,214,0) 72%)}
   .pm-spacer{width:100%}
   /* "Wat je laat zien" — bare vertical accent bar (same language as the daily quote .gday),
      no card / border / fill, so important info reads consistently across the whole app. */
@@ -2949,6 +2957,17 @@
   .hb-sec p{font-size:13.5px;line-height:1.55;color:var(--ink);margin:0}
   .hb-check{margin:6px 0 0;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--ink)}
   .hb-check li{margin-bottom:3px}
+  /* Een reeks commando's die je in díe volgorde uitvoert, dus genummerd in plaats van bolletjes:
+     het nummer is hier de informatie. De regels staan verder uit elkaar dan in een gewone lijst,
+     want elke stap is een zin met een Koreaanse term erin die je los wilt kunnen oppikken. */
+  .hb-steps{list-style:decimal;padding-left:21px}
+  .hb-steps li{margin-bottom:7px;padding-left:2px}
+  .hb-steps li::marker{font-family:var(--cond);font-weight:800;color:var(--deep)}
+  .hb-steps b{color:var(--deep);font-weight:700}
+  .hb-secp{font-size:13.5px;line-height:1.55;color:var(--ink);margin:0}
+  .hb-secp b{color:var(--deep)}
+  .hb-vormen{margin-bottom:15px}
+  .hb-vormen .hb-body{margin-top:5px}
   .hb-check b{color:var(--deep)}
   /* Video link — a simple inline hyperlink to the school's Facebook clip (opens in a new tab) */
   .hb-link{color:var(--el);font-weight:600;text-decoration:underline;text-underline-offset:2px;
@@ -6699,11 +6718,30 @@
     // Simplified reference page (ilbo + hosinsul share this builder): concept intro + illustration
     // + a link to the school's video. Grade-specific quantities (how many afwerkingen/verdedigingen)
     // live in the contextual Examenkaart, not here.
-    var n=C.naslag[key], h='';
-    if(key==='ilbo') h+=illusHtml('ilbo-taeryon', false, -0.4, true);
+    var n=C.naslag[key], h=mascSpacer(key);
     if(n.intro) h+='<p class="hb-lead">'+esc(n.intro)+'</p>';
+    // Il, I of Sam: de drie vormen verschillen alleen in het aantal stappen, maar dat staat
+    // nergens uitgelegd — je moest maar weten dat het telwoord vooraan de naam dat vertelt.
+    if(n.vormen){
+      h+='<div class="hb-sec"><h4>(Il)-(I)-(Sam)bo Taeryon</h4>'+
+         '<p class="hb-secp">'+n.vormen.lead+'</p></div>'+
+         '<div class="ct-list hb-vormen">'+
+         n.vormen.rijen.map(function(r){
+           return hbRow({ko:r.ko, ro:r.ro, nl:r.nl, body:'<div class="hb-body">'+r.b+'</div>'});
+         }).join('')+'</div>';
+    }
+    // De startvolgorde is een reeks commando's die je in die volgorde moet kennen; als lopende
+    // tekst las je hem niet terug tijdens het oefenen, genummerd wel.
+    if(n.start) h+=stapLijst('Zo begin je', n.start);
+    if(n.aanval) h+=stapLijst('De aanval', n.aanval);
     if(n.video) h+=reelHtml(n.video);
     return h;
+  }
+  // De regels dragen bewust eigen opmaak (vette Koreaanse commando's) en komen uit curriculum.js,
+  // nooit van de gebruiker — vandaar geen esc() op de regel zelf.
+  function stapLijst(kop, regels){
+    return '<div class="hb-sec"><h4>'+esc(kop)+'</h4><ol class="hb-check hb-steps">'+
+      regels.map(function(r){ return '<li>'+r+'</li>'; }).join('')+'</ol></div>';
   }
   function reelHtml(v){
     return '<p class="hb-lead">Voorbeeldvideo: '+
@@ -6716,26 +6754,40 @@
     gyepa:    {src:'Gyeokpa',  w:196, rot:-4},
     gyeorugi: {src:'Gyeorugi', w:142, rot:6, mt:-38}
   };
-  function illusHtml(slug, tall, delay, pair){
+  function mascImgs(slug, delay, pair){
     var base='<img src="assets/mascot/'+slug+'.png" alt="" aria-hidden="true">';
-    var blink;
     if(pair){
       // Two mascots share one scene PNG: blink each half independently (different delay + drift) so
       // their eyes don't close in lockstep. The blink frame only differs at the eyes, so the midline
       // clip is invisible on the rest of the scene.
-      blink='<img class="hb-blink hb-blink-l" src="assets/mascot/'+slug+'-blink.png" alt="" aria-hidden="true" style="animation-delay:'+delay+'s">'+
+      return base+
+        '<img class="hb-blink hb-blink-l" src="assets/mascot/'+slug+'-blink.png" alt="" aria-hidden="true" style="animation-delay:'+delay+'s">'+
         '<img class="hb-blink hb-blink-r" src="assets/mascot/'+slug+'-blink.png" alt="" aria-hidden="true" style="animation-delay:'+(delay-2.8)+'s">';
-    } else {
-      blink='<img class="hb-blink" src="assets/mascot/'+slug+'-blink.png" alt="" aria-hidden="true" style="animation-delay:'+delay+'s">';
     }
-    return '<div class="hb-illus'+(tall?' hb-illus-tall':'')+'"><div class="hb-illusb">'+base+blink+'</div></div>';
+    return base+'<img class="hb-blink" src="assets/mascot/'+slug+'-blink.png" alt="" aria-hidden="true" style="animation-delay:'+delay+'s">';
+  }
+  function illusHtml(slug, tall, delay, pair){
+    return '<div class="hb-illus'+(tall?' hb-illus-tall':'')+'"><div class="hb-illusb">'+
+      mascImgs(slug, delay, pair)+'</div></div>';
+  }
+  /* Onderdelen met een tekening die meekrimpt naar een maatje naast de titel. De plaat staat op
+     al deze pagina's bovenaan, dus in plaats van hem in de lijst te zetten reserveren we daar
+     alleen de ruimte (#pm-spacer) en hangt de tekening in de kop.
+     rest = hoeveel van de paginabreedte hij in rust vult. Een staande mascotte mag smal blijven,
+     een liggende scène heeft de volle breedte nodig om leesbaar te zijn. */
+  var HB_MASC={
+    poomsae:  {slug:'poomsae-stance', wh:520/793, delay:-1.7, rest:0.42, restMax:154},
+    ilbo:     {slug:'ilbo-taeryon',   wh:1.515,   delay:-0.4, rest:0.92, restMax:330, pair:true},
+    gyeorugi: {slug:'gyeorugi-pair',  wh:1.445,   delay:-0.4, rest:0.92, restMax:330, pair:true},
+    gyeokpa:  {slug:'gyeokpa-scene',  wh:1.593,   delay:-2.9, rest:0.92, restMax:330, pair:true}
+  };
+  function mascSpacer(key){
+    return HB_MASC[key] ? '<div class="pm-spacer" id="pm-spacer" aria-hidden="true"></div>' : '';
   }
   function hbOnderdeelBody(cat){
     var list=C.onderdelen||[], od=null, i;
     for(i=0;i<list.length;i++){ if(list[i].id===cat.odid){ od=list[i]; break; } }
-    var h='';
-    var ILLUS={ gyepa:'gyeokpa-scene', gyeorugi:'gyeorugi-pair' };
-    if(cat && ILLUS[cat.odid]) h+=illusHtml(ILLUS[cat.odid], false, cat.odid==='gyepa'?-2.9:-0.4, true);
+    var h=mascSpacer(cat&&cat.key);
     if(od&&od.uitleg) h+='<p class="hb-lead">'+esc(od.uitleg)+'</p>';
     if(cat.eis)       h+='<div class="hb-eis"><span class="hb-eis-l">Wat je laat zien</span>'+esc(cat.eis)+'</div>';
     if(od&&od.tips&&od.tips.length) h+='<div class="hb-sec"><h4>Let op</h4><ul class="hb-check">'+od.tips.map(function(t){ return '<li>'+esc(t)+'</li>'; }).join('')+'</ul></div>';
@@ -6815,7 +6867,7 @@
         rows+=hbRow({ro:t.titel, body:'<div class="hb-body">'+t.body+'</div>'});
       }
     });
-    var pre = (key==='poomsae') ? '<div class="pm-spacer" id="pm-spacer" aria-hidden="true"></div>' : '';
+    var pre = mascSpacer(key);
     // Standen heeft zijn uitleg in de kop staan en daaronder één lijst; die kan dus als vast
     // kader mee-ademen met het scherm, net als een woordgroep. De andere onderdelen hebben
     // tussenkopjes of meerdere lijsten en blijven in hun geheel rollen.
@@ -6863,7 +6915,7 @@
     fnav.classList.add('hide');
     void hbSheet.offsetWidth; // capture the off-screen start so the drill-in transition runs
     requestAnimationFrame(function(){ hbSheet.classList.add('show'); csEdgeFadeAll(hbSheet); });
-    if(key==='poomsae') pmSetup(hbSheet);
+    mascSetup(hbSheet);
   }
   // Page between Handboek onderdelen in place (dir -1 prev / +1 next), cycling; body crossfades, title cross-slides.
   function swapToHb(key, dir){
@@ -6874,6 +6926,7 @@
     var chips=hbSheet.querySelector('.cs-titlerow .cs-chips'); if(chips) chips.innerHTML=hbChips(cat);
     csTitleSwap(hbSheet, catTitleHtml(cat), dir);
     fadeSwap(hbSheet.querySelector('.cs-body'), hbBody(cat.key));
+    mascSetup(hbSheet);   // anders bleef de mascotte van de vorige sectie in de kop hangen
     setTimeout(function(){ csEdgeFadeAll(hbSheet); }, 220);
     updateDots(key);
   }
@@ -6901,32 +6954,46 @@
     fnav.classList.remove('hide');
     csBack();   // het scherm eronder wisselt terwijl de pagina wegschuift
   }
-  /* Poomsae Handboek scroll animation: the stance mascotte starts as a big hero illustration and,
-     as the list scrolls, shrinks + glides into a small companion docked beside the title. The list
-     starts below the big mascotte (spacer) and scrolls beneath it. --pmc (0 rest -> 1 docked) is
-     driven from the body scroll; rest/dock geometry is measured so it adapts to the title width and
-     safe-area insets. */
-  function pmSetup(sheet){
-    var hero=sheet.querySelector('.cs-hero'), body=sheet.querySelector('.cs-body'),
-        title=sheet.querySelector('.cs-title'), spacer=sheet.querySelector('#pm-spacer');
+  /* Zet de meekrimpende mascotte op voor de sectie die nu in het blad staat. Draait bij het
+     openen én bij elke wissel, want anders bleef de tekening van de vorige sectie in de kop
+     hangen terwijl de lijst eronder al iets anders was. Secties zonder tekening ruimen alles
+     netjes op en zetten --pmc terug op 0. */
+  function mascSetup(sheet){
+    var body=sheet.querySelector('.cs-body');
+    var oud=sheet.querySelector('.pm-masc'); if(oud&&oud.parentNode) oud.parentNode.removeChild(oud);
+    if(body&&body._pmScroll){ body.removeEventListener('scroll', body._pmScroll); body._pmScroll=null; }
+    if(sheet._pmResize){ window.removeEventListener('resize', sheet._pmResize); sheet._pmResize=null; }
+    sheet.style.setProperty('--pmc','0');
+    var m=HB_MASC[sheet.getAttribute('data-hb')];
+    sheet.classList.toggle('has-masc', !!m);
+    if(!m) return;
+    var hero=sheet.querySelector('.cs-hero'), title=sheet.querySelector('.cs-title'),
+        spacer=sheet.querySelector('#pm-spacer');
     if(!hero||!body||!title||!spacer) return;
-    var RATIO=793/520;                                  // poomsae-stance.png aspect (h/w)
     var masc=document.createElement('div');
     masc.className='pm-masc'; masc.id='pm-masc'; masc.setAttribute('aria-hidden','true');
-    masc.innerHTML='<div class="pm-mascb">'+
-        '<img src="assets/mascot/poomsae-stance.png" alt="">'+
-        '<img class="hb-blink" src="assets/mascot/poomsae-stance-blink.png" alt="" style="animation-delay:-1.7s">'+
-      '</div>';
+    masc.innerHTML='<div class="pm-mascb">'+mascImgs(m.slug, m.delay, m.pair)+'</div>';
     hero.appendChild(masc);
+    var beeld=masc.querySelector('img'), wh=m.wh;   // breedte gedeeld door hoogte
     function geom(){
-      var hr=hero.getBoundingClientRect(), tr=title.getBoundingClientRect(), br=body.getBoundingClientRect();
+      // Zodra de tekening geladen is weten we de echte verhouding; tot die tijd staat er een
+      // opgegeven waarde, zodat de ruimte meteen klopt en de lijst niet naspringt.
+      if(beeld&&beeld.naturalWidth) wh=beeld.naturalWidth/beeld.naturalHeight;
+      var hr=hero.getBoundingClientRect(), tr=title.getBoundingClientRect(),
+          br=body.getBoundingClientRect();
       if(!hr.width) return;
-      var restW=Math.max(120, Math.min(154, hr.width*0.42));
-      var restH=restW*RATIO;
-      var x0=Math.round((hr.width-restW)/2);            // rest: centred under the title
+      var restW=Math.max(120, Math.min(m.restMax, hr.width*m.rest));
+      var restH=restW/wh;
+      var x0=Math.round((hr.width-restW)/2);          // rust: gecentreerd onder de titel
       var y0=Math.round((tr.bottom-hr.top)+12);
-      var dockH=74, dockW=dockH/RATIO, s=dockW/restW;   // dock: small, beside the title
-      // Dock beside the actual title TEXT (the .cs-title box is full-width), clamped inside the hero.
+      // Gedokt past de tekening in een vast doosje. Een staande mascotte loopt tegen de hoogte
+      // aan, een liggende scène tegen de breedte; op één maat sturen maakte de scènes zo breed
+      // dat ze de titel uit beeld drukten.
+      var dockH=74, dockW=Math.min(88, dockH*wh);
+      dockH=dockW/wh;
+      var s=dockW/restW;
+      // Dok naast de TEKST van de titel (het .cs-title-vak is zo breed als de pagina), en houd
+      // hem binnen de kop.
       var textRight=tr.right;
       try{ var rg=document.createRange(); rg.selectNodeContents(title); var rr=rg.getBoundingClientRect(); if(rr.width) textRight=rr.right; }catch(e){}
       var dockX=Math.round((textRight-hr.left)+16);
@@ -6939,21 +7006,49 @@
       masc.style.setProperty('--pm-dx', (dockX-x0)+'px');
       masc.style.setProperty('--pm-dy', (dockTop-y0)+'px');
       masc.style.setProperty('--pm-s', s.toFixed(4));
-      // Reserve the rest-mascotte height so the list starts just below it; the same distance is the
-      // scroll range over which the dock completes (so the spacer clears exactly as it finishes).
+      // Reserveer de rusthoogte zodat de lijst er net onder begint; diezelfde afstand is het
+      // rolbereik waarover het dokken afrondt, zodat het reserveblok precies leeg is als hij
+      // op zijn plek staat.
       var Hs=Math.max(40, Math.round((hr.top+y0+restH) - br.top + 14));
       spacer.style.height=Hs+'px';
       body._pmHs=Hs;
     }
     function upd(){ var Hs=body._pmHs||1, c=body.scrollTop/Hs; c=c<0?0:c>1?1:c; sheet.style.setProperty('--pmc', c.toFixed(3)); }
-    geom(); upd();
-    if(body._pmScroll) body.removeEventListener('scroll', body._pmScroll);
-    body._pmScroll=upd; body.addEventListener('scroll', upd, {passive:true});
-    if(sheet._pmResize) window.removeEventListener('resize', sheet._pmResize);
-    sheet._pmResize=function(){ geom(); upd(); }; window.addEventListener('resize', sheet._pmResize);
-    // Re-measure once the drill-in scale transition settles (rect is scaled mid-open).
-    setTimeout(function(){ geom(); upd(); }, 70);
-    setTimeout(function(){ geom(); upd(); }, 460);
+    // Meekrimpen kan alleen als de pagina genoeg te rollen heeft om het reserveblok helemaal
+    // weg te rollen. Is de pagina daar te kort voor, dan zou de mascotte halverwege blijven
+    // hangen boven een gat waar de plaat stond — dan is een gewone vaste plaat eerlijker.
+    // Op een kleiner scherm rolt diezelfde pagina wél genoeg, en dan klapt hij vanzelf om.
+    // Het reserveblok is precies zo hoog als het rolbereik van het dokken, dus het valt tegen
+    // zichzelf weg: wat overblijft is de vraag of de rest van de pagina het scherm zélf al vult.
+    // Zo hangt de uitkomst niet af van wat er op dít moment in het blok staat.
+    function past(){
+      var blok=spacer.getBoundingClientRect().height;
+      return (body.scrollHeight - blok - body.clientHeight) >= 24;
+    }
+    function beslis(){
+      geom();
+      if(past()){
+        if(spacer.firstChild){ spacer.innerHTML=''; spacer.style.height=(body._pmHs||0)+'px'; geom(); }
+        masc.style.display=''; sheet.classList.add('has-masc');
+      } else {
+        // Terug naar de vaste plaat: de mascotte uit de kop, de tekening in het reserveblok.
+        if(!spacer.firstChild) spacer.innerHTML=illusHtml(m.slug, false, m.delay, m.pair);
+        spacer.style.height='';
+        masc.style.display='none'; sheet.classList.remove('has-masc');
+        sheet.style.setProperty('--pmc','0');
+        return;
+      }
+      upd();
+    }
+    beslis();
+    body._pmScroll=function(){ if(sheet.classList.contains('has-masc')) upd(); };
+    body.addEventListener('scroll', body._pmScroll, {passive:true});
+    sheet._pmResize=beslis; window.addEventListener('resize', sheet._pmResize);
+    // Nog een keer meten als de tekening binnen is en als de inschuif-animatie is uitgewerkt:
+    // midden in die schaalstap levert een meting de verkeerde maten op.
+    if(beeld&&!beeld.complete) beeld.addEventListener('load', beslis, {once:true});
+    setTimeout(beslis, 70);
+    setTimeout(beslis, 460);
   }
   /* ---- Poomsae drill-in detail ---- */
   var poomSheet=null, poomPagerSaved=null;
