@@ -1893,6 +1893,11 @@
      de overgang zie je ze allebei half, en dan leest het als twee woorden die elkaar aflossen.
      Daarom staat er geen vertraging op: alles deelt dezelfde .28s uit de regel hierboven. */
   .ot-rep.collapsing .ot-lab,.ot-tempo.collapsing .ot-lab,.ot-dur.collapsing .ot-lab{opacity:0}
+  /* Kies je een waarde, dan begint de pil pas een kwart seconde later op te vouwen: eerst schuift
+     de schijf onder je keuze. Het label hoort niet op die tweede tel te wachten — het woord gaat
+     over de kiezer die je zojuist hebt afgerond, dus het dooft meteen mee met je keuze. */
+  .timerscreen .ot-rep.lab-uit .ot-lab,.timerscreen .ot-tempo.lab-uit .ot-lab,
+  .timerscreen .ot-dur.lab-uit .ot-lab{opacity:0}
   /* Staat een uitklapper open, dan schuift het label naar rechts náást de pil in plaats van
      erboven: daar botst het niet met de knop erboven in de stapel en staat het op ooghoogte
      van de opties. --pw is de breedte die de pil bij het openen krijgt. */
@@ -2395,15 +2400,16 @@
   .wcat .cs-x:active,.hbcat .cs-x:active{transform:scale(.9)}
   /* Bottom dot navigation — small traditional page dots. Tap a dot to jump to that screen.
      Auto-fades like the scrollbar. */
-  .cs-dots{position:relative;z-index:60;display:flex;align-items:center;gap:0;margin:11px 0 0 0;
+  .cs-dots{position:relative;z-index:60;display:flex;align-items:center;gap:0;margin:11px 0 0 -1px;
     padding:7px 0;align-self:flex-start}
   /* De knop is een vast vakje van 15px; alleen de inkt erin verandert. Eerder groeide de knop
      zelf mee met zijn toestand, waardoor de hele rij verschoof zodra je een pagina met een
      vinkje koos — en dat gebeurde bij elke veeg opnieuw. Nu staat de rij stil en beweegt
      alleen wat erin getekend wordt. */
-  .cs-dot{position:relative;width:15px;height:15px;flex:none;border:0;padding:0;margin:0;
+  .cs-dot{position:relative;width:15px;height:15px;flex:none;border:0;padding:0;margin:0 1px;
     background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
-  .cs-dot::before{content:"";position:absolute;top:-5px;bottom:-5px;left:0;right:0}
+  /* Het raakvlak sluit de tussenruimte weer dicht: de lucht is er voor het oog, niet voor je duim. */
+  .cs-dot::before{content:"";position:absolute;top:-5px;bottom:-5px;left:-1px;right:-1px}
   /* De inkt zit op ::after en wordt vanuit het hart geplaatst, zodat elke maatwissel
      symmetrisch is en het vakje nooit verlaat. */
   .cs-dot::after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;
@@ -8183,6 +8189,10 @@
   /* 1× is one count per second, matching the 준비 lead-in beat. OT_LEADIN holds that same beat
      across the hand-off into the count, so the cadence never jumps. */
   var OT_BASE = 1000, OT_READY = 3, OT_LEADIN = 1000;
+  /* De ring loopt terug naar nul bij een moduswissel. Die terugloop hoort bij het wisselen zelf
+     en niet bij het tempo waarin je telt: op "4 sec / tel" bleef hij anders seconden nadraaien.
+     OT_WIS is het tempo van de snelste stand, 0,5 seconde per tel. */
+  var OT_WIS = OT_BASE / 2;
   var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, reps:0, left:0, _lastFrac:0, _wrapT:null,
                   mode:'time', dur:60, total:0, endAt:0, raf:null, _lastSec:0, _dragged:false, _windT:null, dragC:null, _pd:null };
   var otTmT=null; // tempo fold-out collapse/close timer
@@ -8388,7 +8398,7 @@
     host.classList.toggle('running', !!otState.running);
     /* Fill + knob move together over one tick; SNAP (no reverse sweep) whenever the ring shrinks
        (reset / restart / repeat-wrap) so it clears at once instead of unwinding counter-clockwise. */
-    var dur=Math.max(140, OT_BASE/otState.speed);
+    var dur = (frac===0 && otState.phase==='idle') ? OT_WIS : Math.max(140, OT_BASE/otState.speed);
     var dec = frac < (otState._lastFrac||0) - 0.001;
     if(prog){
       prog.style.transition = dec ? 'none' : ('stroke-dashoffset '+dur+'ms linear');
@@ -8585,7 +8595,7 @@
     var w=host.querySelector('.ot-rep'); if(!w) return;
     var collapsing=w.classList.contains('collapsing');
     if(!w.classList.contains('open') && !collapsing) return;
-    w.classList.remove('open','collapsing');
+    w.classList.remove('open','collapsing','lab-uit');
     var menu=w.querySelector('.ot-rmenu'); if(menu){ menu.style.transition=''; menu.style.width=''; }
     if(collapsing){                                  // aborted mid-glide → clear the inline travel styles
       var inner=w.querySelector('.ot-rmenu-inner'), thumb=w.querySelector('.ot-rthumb');
@@ -8615,7 +8625,7 @@
     otRepT=setTimeout(function(){                     // disc arrived home → menu fades out, revealing the FAB
       if(!timerScreen) return;
       var w2=timerScreen.querySelector('.ot-rep'); if(!w2) return;
-      w2.classList.remove('open','collapsing');
+      w2.classList.remove('open','collapsing','lab-uit');
       var m=w2.querySelector('.ot-rmenu'), inn=w2.querySelector('.ot-rmenu-inner'), th=w2.querySelector('.ot-rthumb');
       if(m){ m.style.transition=''; m.style.width=''; }
       if(inn){ inn.style.transition=''; inn.style.transform=''; }
@@ -8630,6 +8640,7 @@
     otSyncControls();
     var thumb=timerScreen&&timerScreen.querySelector('.ot-rthumb');
     if(thumb) thumb.style.transition='transform .24s cubic-bezier(.34,1.28,.4,1), width .24s cubic-bezier(.34,1.28,.4,1), opacity .2s ease';
+    var wR=timerScreen&&timerScreen.querySelector('.ot-rep'); if(wR) wR.classList.add('lab-uit');
     moveRepThumb(true);                               // beat 1: schijf onder de nieuwe keuze — bij afzetten is
                                                       // dat "niet herhalen", dus hij glijdt netjes naar rechts
     clearTimeout(otRepT);
@@ -8642,6 +8653,7 @@
     otSyncControls(); buzz(10);
     var thumb=timerScreen&&timerScreen.querySelector('.ot-rthumb');
     if(thumb) thumb.style.transition='transform .24s cubic-bezier(.34,1.28,.4,1), width .24s cubic-bezier(.34,1.28,.4,1), opacity .2s ease';
+    var wRo=timerScreen&&timerScreen.querySelector('.ot-rep'); if(wRo) wRo.classList.add('lab-uit');
     moveRepThumb(true);
     clearTimeout(otRepT);
     otRepT=setTimeout(otCollapseReps, 250);
@@ -8662,7 +8674,7 @@
     var collapsing=w.classList.contains('collapsing');
     if(!w.classList.contains('open') && !collapsing) return;
     clearTimeout(otTmT);
-    w.classList.remove('open','collapsing','settling','handoff');
+    w.classList.remove('open','collapsing','settling','handoff','lab-uit');
     var menu=w.querySelector('.ot-tmenu');
     if(menu){ menu.style.transition=''; menu.style.width=''; }
     if(collapsing){ // aborted mid-glide: also clear the inline travel transforms
@@ -8701,7 +8713,7 @@
         otTmT=setTimeout(function(){ // grown → wipe the inline travel styles + collapse classes invisibly
           if(!timerScreen) return;
           var w4=timerScreen.querySelector('.ot-tempo'); if(!w4) return;
-          w4.classList.remove('collapsing','settling','handoff');
+          w4.classList.remove('collapsing','settling','handoff','lab-uit');
           var m=w4.querySelector('.ot-tmenu'), inn=w4.querySelector('.ot-tmenu-inner'), th=w4.querySelector('.ot-tthumb');
           if(m){ m.style.transition=''; m.style.width=''; }
           if(inn){ inn.style.transition=''; inn.style.transform=''; }
@@ -8752,6 +8764,7 @@
     otState.speed=parseFloat(v); otSyncControls();
     var thumb=timerScreen&&timerScreen.querySelector('.ot-tthumb');
     if(thumb) thumb.style.transition='transform .24s cubic-bezier(.34,1.28,.4,1), width .24s cubic-bezier(.34,1.28,.4,1)';
+    var wT=timerScreen&&timerScreen.querySelector('.ot-tempo'); if(wT) wT.classList.add('lab-uit');
     moveTempoThumb(true); // beat 1: snap the circle under the picked value
     if(otState.running) otSchedule();
     clearTimeout(otTmT);
