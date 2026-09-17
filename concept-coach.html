@@ -2430,12 +2430,15 @@
   .cs-dotstray{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 14px);
     z-index:60;display:flex;justify-content:center;pointer-events:none}
   /* Doorschijnend en vervaagd, net als de zwevende navigatiebalk: zo zie je dat er inhoud
-     onderdoor loopt in plaats van dat de lijst daar ophoudt. */
+     onderdoor loopt in plaats van dat de lijst daar ophoudt. De navigatiebalk kan met bijna-wit
+     toe omdat daar de zandkleurige pagina onderdoor loopt; hier liggen witte kaarten onder het
+     dienblad, en daarop viel het helemaal weg. Vandaar een zandtint die iets dieper zit dan de
+     kaarten, met een hairline eromheen. */
   .cs-dotstray .cs-dots{pointer-events:auto;margin:0;padding:7px 13px;border-radius:999px;
-    background:rgba(252,250,246,.5);
+    background:rgba(233,226,213,.82);
     -webkit-backdrop-filter:blur(30px) saturate(1.9);backdrop-filter:blur(30px) saturate(1.9);
-    border:1px solid rgba(255,255,255,.55);
-    box-shadow:0 10px 26px -16px rgba(40,24,12,.35), 0 1px 0 rgba(255,255,255,.7) inset}
+    border:1px solid rgba(26,23,18,.10);
+    box-shadow:0 10px 26px -16px rgba(40,24,12,.4), 0 1px 0 rgba(255,255,255,.5) inset}
   .cs-dots{position:relative;z-index:60;display:flex;align-items:center;gap:0;
     margin:11px 0 0 -1px;padding:7px 0;align-self:flex-start}
   /* De knop is een vast vakje van 15px; alleen de inkt erin verandert. Eerder groeide de knop
@@ -4100,6 +4103,9 @@
   // Two modes in one sheet: the list of what's planned, and a separate form for entering a new
   // event. Keeping them apart stops the sheet turning into one dense block of controls.
   var agSheet=null, agMode='list', agDraft=null, agEditId=null, agAfterSave=null;
+  // De agenda gaat over wat er nog komt, dus daar valt niets in te vullen bij "uitslag". Alleen
+  // de tijdlijn, die over gebeurde dingen gaat, laat dat blok zien.
+  var agUitslagAan=false;
   function agBlankDraft(){ return {type:'wedstrijd', title:'', date:'', end:'', where:'', result:[], trainers:[], geup:agVolgendeGraad(), exam:agVorigeExaminator(), photo:'', focus:phClampFoc(null)}; }
   function agEditDraft(e){
     return {type:agType(e.type).k, title:e.title||'', date:e.date||'', end:e.end||'',
@@ -4319,7 +4325,7 @@
         (examen ? '' : agDateHtml('end','t/m (optioneel)', d.end, '—'))+
       '</div>'+
       // Een uitslag hoort alleen bij een wedstrijd; bij een cursus of examen zou het veld verwarren.
-      (d.type==='wedstrijd' ? agUitslagHtml(d) : '')+
+      (d.type==='wedstrijd' && agUitslagAan ? agUitslagHtml(d) : '')+
       // Wie er voor de zaal stond vraag je alleen bij een cursus.
       (d.type==='cursus' ? agTrainersHtml(d) : '')+
       phEditHtml(ph, d.focus, 'ag')+
@@ -4411,6 +4417,7 @@
     agEditId = e?e.id:null;
     agDraft = e?agEditDraft(e):agBlankDraft();
     agAfterSave = after||null;
+    agUitslagAan = true;
     agMode='form'; agRender();
   }
   function agPickPhoto(file){
@@ -4429,6 +4436,7 @@
     if(!agSheet) return;
     agSheet.classList.remove('show'); syncTopDim();
     var s=agSheet; agSheet=null; agMode='list'; agDraft=null; agEditId=null; agAfterSave=null;
+    agUitslagAan=false;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
     if(!tlScreen) fnav.classList.remove('hide');
   }
@@ -7096,13 +7104,17 @@
       // op zijn plek staat.
       var Hs=Math.max(40, Math.round((hr.top+y0+restH) - br.top + 14));
       spacer.style.height=Hs+'px';
-      // Het rolbereik waarover het dokken afrondt is normaal die hele hoogte. Korte pagina's als
-      // Gyeorugi en Gyeokpa kunnen zo ver niet rollen; daar rondt het gebaar af binnen wat er
-      // wél te rollen valt, zodat de mascotte netjes aankomt in plaats van halverwege te blijven
-      // hangen. Lucht bijplussen kon niet: die pagina's sluiten af met een rekwisiet dat op de
-      // onderrand hoort te staan.
-      var ruim=body.scrollHeight - body.clientHeight;
-      body._pmHs=Math.max(40, Math.min(Hs, ruim));
+      // Het gebaar rondt af over die hele hoogte, zodat het reserveblok precies leeg is als de
+      // mascotte op zijn plek staat. Daar is wel voor nodig dat de pagina zo ver kán rollen.
+      // Gyeorugi en Gyeokpa hebben te weinig tekst en kwamen zo'n 150px tekort: het reserveblok
+      // bleef half in beeld staan als een gat tussen de gedokte mascotte en de eerste regel, en
+      // het dokken haastte zich door die paar pixels heen. Dat tekort leggen we er onderaan bij.
+      // Eerst onze eigen lucht weghalen, anders meten we de vorige meting mee.
+      if(body._pmPad0==null) body._pmPad0=getComputedStyle(body).paddingBottom;
+      body.style.paddingBottom=body._pmPad0;
+      var tekort=Math.max(0, body.clientHeight - (body.scrollHeight - Hs));
+      if(tekort) body.style.paddingBottom=(parseFloat(body._pmPad0)||0)+tekort+'px';
+      body._pmHs=Hs;
     }
     function upd(){ var Hs=body._pmHs||1, c=body.scrollTop/Hs; c=c<0?0:c>1?1:c; sheet.style.setProperty('--pmc', c.toFixed(3)); }
     function beslis(){ geom(); upd(); }
@@ -9571,7 +9583,7 @@
     // want een graad overslaan komt voor.
     else if(a==='aggeup'){ if(!agDraft||!agSheet) return; agSync();
       agDraft.geup=+act.getAttribute('data-k'); agRender(); buzz(10); }
-    else if(a==='agnew'){ agDraft=agBlankDraft(); agEditId=null; agMode='form'; agRender(); }
+    else if(a==='agnew'){ agDraft=agBlankDraft(); agEditId=null; agUitslagAan=false; agMode='form'; agRender(); }
     else if(a==='agcancel'){ agMode='list'; agDraft=null; agEditId=null;
       if(agAfterSave){ agAfterSave=null; closeAgendaSheet(); } else agRender(); }
     else if(a==='agphdel'){ if(agDraft){ agSync(); agDraft.photo=''; agDraft.focus=phClampFoc(null); agRender(); buzz(10); } }
