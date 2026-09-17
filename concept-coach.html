@@ -2966,10 +2966,9 @@
     border-radius:3px;background:var(--accent,var(--el));opacity:.9}
   .hb-eis-l{display:block;font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-size:11px;
     font-weight:800;color:var(--accent,var(--el));margin-bottom:4px}
-  /* Bronvermelding onder een lijst: kleiner en grijs, met een haarlijn erboven zodat hij bij de
-     lijst hoort maar er duidelijk geen regel meer van is. */
-  .hb-bron{font-size:12px;line-height:1.5;color:var(--gray);margin:16px 2px 0;padding-top:12px;
-    border-top:1px solid var(--line)}
+  /* Bronvermelding vlak onder de titel: kleiner en grijs, zodat hij als onderschrift van de kop
+     leest en niet als eerste regel van de lijst. Je ziet meteen waar de eisen vandaan komen. */
+  .hb-bron{font-size:12px;line-height:1.5;color:var(--gray);margin:-2px 2px 14px}
   .hb-sec{margin-bottom:15px}
   .hb-sec h4{font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;font-size:14px;
     color:var(--deep);margin:0 0 12px}
@@ -6905,6 +6904,9 @@
     var pr = examProgress(), done = pr.done;
     var pct = ond.length ? Math.round(done/ond.length*100) : 0;
     var head = '';
+    // Waar de eisen vandaan komen hoort bovenaan te staan: het is niet onze lijst, en onderaan
+    // wordt zo'n verwijzing makkelijk gemist. Als onderschrift van de kop lees je het meteen.
+    head += '<p class="hb-bron">Gebaseerd op de exameneisen van TKD-vereniging Kawarmala.</p>';
     head += '<div class="hb-prog"><div class="hb-prog-bar"><i style="width:'+pct+'%"></i></div>'+
             '<span class="hb-prog-n">'+done+'/'+ond.length+'</span></div>';
     var rows = ond.map(function(o){
@@ -6919,11 +6921,8 @@
         '</span>'+
       '</button>';
     }).join('');
-    // Waar de eisen vandaan komen hoort er gewoon bij te staan: het is niet onze lijst, en bij
-    // een verschil weet je meteen welk reglement voorgaat. Onderaan, want het is een verwijzing
-    // en geen onderdeel van de lijst.
-    return head+'<div class="hb-exlist">'+rows+'</div>'+
-      '<p class="hb-bron">Gebaseerd op de exameneisen van TKD-vereniging Kawarmala.</p>';
+    // Waar de eisen vandaan komen staat in de kop, zie hierboven.
+    return head+'<div class="hb-exlist">'+rows+'</div>';
   }
   function toggleExamChk(id){
     if(!id) return;
