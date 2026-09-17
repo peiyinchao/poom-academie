@@ -182,10 +182,10 @@ dezelfde inktregel.</p>
 <div id="timers"></div>
 
 <h2>Wat de meting zegt</h2>
-<p class="weeg">Ik heb dit niet op gevoel beoordeeld maar de pixels uitgelezen: per kaart en per
-timer een raster van 625 punten over de achtergrond, met de tekst even verborgen, en telkens het
-slechtste contrast met de inkt genoteerd. Alle twaalf pillen halen minimaal 5,1. De dagkaarten en
-timers komen uit tussen 4,6 en 11,1, met groen-blauw als zwakste. Ter vergelijking: de kaart zoals
+<p class="weeg">Ik heb dit niet op gevoel beoordeeld maar de pixels uitgelezen: ik leg de
+plekken vast waar écht tekst staat — titel, ondertitel, vinkjes, ring, cijfers — verberg die tekst,
+en meet dan op precies die plekken het slechtste contrast met de inkt. Alle twaalf pillen halen
+minimaal 5,0. De dagkaarten en timers komen uit tussen 4,6 en 11,8, met blauw als krapste. Ter vergelijking: de kaart zoals
 hij <em>nu</em> in de app staat meet 2,9. De zwakste punten gaan trouwens niet op de veeg zitten
 maar op het watermerk — de lichte trap-illustratie rechts — en dat is een bestaand dingetje, geen
 nieuw.</p>
@@ -266,7 +266,9 @@ function witVeilig(h, doel){ var c = h, w = 0, d = doel || 5.2;
    verder op dan de inkt kan hebben. We mikken op 5,2 in plaats van op 4,5: het watermerk en de
    gloedbollen leggen er nog wat licht bovenop, en dat is in de gemeten pixels terug te zien. */
 function kop(c, wit){ var p = wit ? 12 : 10;
-  while(wit && p > 0 && contrast('#FFFFFF', shade(c,p)) < 5.2) p -= 2;
+  /* Mag ook ónder nul zakken: bij blauw ligt het watermerk precies over de kop, en dan is een
+     iets diepere start de enige manier om de titel leesbaar te houden. */
+  while(wit && p > -14 && contrast('#FFFFFF', shade(c,p)) < 5.5) p -= 2;
   return shade(c,p); }
 
 function veeg(g, hoek){
@@ -274,8 +276,10 @@ function veeg(g, hoek){
   if(isLicht(g.basis)){
     return g.volgend
       ? (function(){ var nx = donkerVeilig(g.volgend);
-          return 'linear-gradient('+h+','+kop(g.basis,false)+' 0%,'+shade(g.basis,-10)+' 62%,'+
-            shade(nx,6)+' 88%,'+shade(nx,-10)+' 100%)'; })()
+          /* De volgende kleur mag in de uiterste hoek dieper zijn dan de inkt normaal toelaat:
+             daar staat geen tekst. De opgelichte tint pakt de overgang, de echte bandkleur de punt. */
+          return 'linear-gradient('+h+','+kop(g.basis,false)+' 0%,'+shade(g.basis,-10)+' 58%,'+
+            shade(nx,6)+' 84%,'+g.volgend+' 96%,'+shade(g.volgend,-18)+' 100%)'; })()
       : 'linear-gradient('+h+','+kop(g.basis,false)+' 0%,'+g.basis+' 46%,'+
         shade(g.basis,-6)+' 74%,'+shade(g.basis,-16)+' 100%)';
   }
