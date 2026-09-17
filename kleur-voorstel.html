@@ -38,10 +38,6 @@
     border:1px solid rgba(255,255,255,.34)}
   .kaart.licht .chip{background:rgba(36,29,18,.12);border-color:rgba(36,29,18,.2)}
 
-  /* C: de bandpunt die over de hoek valt */
-  .punt{position:absolute;inset:0;z-index:-1}
-  .strook{position:absolute;left:0;right:0;bottom:0;height:13px;z-index:-1}
-  .strook i{position:absolute;inset:0;display:block}
 
   /* ---- het nagebouwde tabbalkje ---- */
   .tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);
@@ -56,12 +52,6 @@
   .keuze button{font:inherit;font-size:13px;font-weight:700;padding:7px 13px;border-radius:99px;
     border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
   .keuze button[aria-pressed="true"]{background:var(--ink);color:var(--page);border-color:var(--ink)}
-  /* De variantkiezer staat een niveau lager dan de hoofdkeuze en mag die dus niet overstemmen. */
-  .keuze.zacht{gap:6px;margin:8px 0 2px}
-  .keuze.zacht:empty{margin:0}
-  .keuze.zacht button{font-size:12px;font-weight:600;padding:5px 11px;opacity:.85}
-  .keuze.zacht button[aria-pressed="true"]{background:transparent;color:var(--ink);
-    border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);opacity:1}
   code{background:rgba(30,22,16,.07);padding:1px 5px;border-radius:5px;font-size:13px}
   ul{margin:6px 0 0;padding-left:20px;max-width:62ch}
   li{margin:3px 0}
@@ -120,18 +110,17 @@
   .dag.licht .ck.aan{background:#241d12;border-color:#241d12}
   .dag.licht .brush{filter:invert(1) opacity(.72)}
   .dag.licht .wm{opacity:.1;filter:invert(1)}
-  /* De bandpunt en de bandrand, in het groot */
-  .dag .punt{position:absolute;inset:0;z-index:-1}
-  .dag .rand{position:absolute;left:0;right:0;bottom:0;height:18px;z-index:-1}
+  /* De witte poomstrepen op de zwarte band, in het groot */
   .dag .streep{position:absolute;top:0;width:4px;height:34px;border-radius:0 0 4px 4px;z-index:-1}
 </style>
 </head>
 <body>
 
 <h1>Kleur per geup</h1>
-<p class="lead">Drie voorstellen, uitgetekend over de volledige ladder van 12 graden — dus
-inclusief de tussenstappen die Jaydens school overslaat, maar die andere scholen wél geven.
-Kies onderaan welke je wilt dat ik bouw.</p>
+<p class="lead">De richting is gekozen: <strong>de veeg</strong>. Je eigen kleur houdt bijna de
+hele kaart, en de volgende kleur veegt alleen de onderste hoek mee — als een penseelstreek.
+Hieronder staan vijf manieren om die veeg te zetten, uitgetekend over de volledige ladder van
+12 graden. Kies er één en ik bouw hem.</p>
 
 <h2>Het probleem</h2>
 <p class="note">Nu pakt de app bij een dubbele band alleen de <em>gevorderde</em> kleur
@@ -146,8 +135,7 @@ en de tussenstap voegt daar zichtbaar de volgende kleur aan toe. Dan klopt ook j
 je stapt pas echt over als de band helemaal van jou is — maar er verandert wél iets leuks bij
 élke promotie.</p>
 
-<div class="keuze" id="keuze"></div>
-<div class="keuze zacht" id="keuzeA"></div>
+<div class="keuze" id="keuzeA"></div>
 
 <div id="uit"></div>
 
@@ -159,14 +147,14 @@ Daarom staat de huidige kaart er als eerste bij, ter vergelijking.</p>
 
 <div id="dagkaarten"></div>
 
-<h2>Wat ik zou kiezen</h2>
-<p class="weeg"><strong>Voorstel C (Bandpunt).</strong> A loopt bij blauw→rood door paars en bij
-geel→groen door een vuil olijf; hoe strak je de naad ook zet, twee verzadigde kleuren die in
-elkaar overlopen worden altijd modderig in het midden. C laat ze elkaar juist ráken langs een
-scherpe diagonaal — precies zoals een omgeslagen bandpunt — dus er is geen mengzone. Bovendien
-heeft C ook voor de effen banden diepte, zodat wit en zwart niet als dode vlakken overblijven.
-B is het veiligst en het meest "correct", maar het is ook het saaist: de kaart zelf blijft dan
-elke graad even vlak.</p>
+<h2>Waar het bij de veeg op aankomt</h2>
+<p class="weeg">Twee dingen bepalen of een veeg werkt. <strong>Hoe ver hij komt</strong> — hoe
+groter het aandeel van de volgende kleur, hoe duidelijker de promotie, maar hoe minder de kaart
+nog "van jou" voelt. En <strong>hoe hard de rand is</strong> — een zachte overgang is mooier,
+maar twee verzadigde kleuren die in elkaar lopen worden in het midden altijd vuil: blauw→rood
+wordt paars, geel→groen wordt olijf. Een harde rand heeft dat probleem niet, maar leest strakker
+dan een penseelstreek. De varianten hieronder verschillen precies op die twee knoppen. Let vooral
+op 3e geup (blauw-rood) en 7e geup (geel-groen): dat zijn de twee die het snelst modderig worden.</p>
 
 <h2>En de tabbalk?</h2>
 <p class="weeg">Daar zou ik het rustig houden: de actieve pil krijgt de kleur die je
@@ -210,6 +198,9 @@ function lum(h){ return hx(h).map(function(v){ v/=255;
   return v<=.03928 ? v/12.92 : Math.pow((v+.055)/1.055,2.4); })
   .reduce(function(a,v,i){ return a+v*[.2126,.7152,.0722][i]; },0); }
 function licht(h){ return lum(h) > .42; }   // vraagt om donkere tekst
+/* `transparent` is in WebKit rgba(0,0,0,0) en trekt een verloop dus naar grijs. Wil je een kleur
+   laten wegvallen, dan moet je diezelfde kleur met alfa 0 gebruiken. */
+function weg(h){ return 'rgba('+hx(h).join(',')+',0)'; }
 
 /* De kaart mag niet naar de kleur van de band luisteren maar naar de leesbaarheid ervan:
    op wit en geel moet de tekst donker worden, anders valt er niets te lezen. */
@@ -223,85 +214,68 @@ function kaartHtml(g, binnen, extra){
     '<span class="chip">Training van vandaag</span></div>';
 }
 
-/* A — Zonsopgang: de kleur zit in het verloop zelf, niet in een los element. Vijf manieren om
-   datzelfde verloop in te zetten; kies er onderaan één. Elke variant moet twee dingen kunnen:
-   een effen band diepte geven, én bij een tussenstap de volgende kleur binnenlaten zonder dat
-   er een brede mengzone ontstaat. */
+/* De veeg. Je eigen kleur draagt de kaart; de volgende kleur komt alleen in de onderste hoek
+   binnen. Twee knoppen bepalen het karakter: hoe ver de veeg komt, en hoe hard de rand is.
+   Elke variant moet ook een effen band diepte geven — anders wordt wit of zwart een dood vlak. */
 var A_VARIANTEN = [
-  {id:'A1', naam:'A1 · Diagonaal', uitleg:
-   'Eén schuine lijn van linksboven naar rechtsonder. De volgende kleur neemt de laatste 30% over.',
-   fn:function(g){ return g.volgend
-     ? 'linear-gradient(135deg,'+shade(g.basis,12)+' 0 46%,'+shade(g.volgend,-6)+' 70% 100%)'
-     : 'linear-gradient(135deg,'+shade(g.basis,16)+' 0%,'+shade(g.basis,-26)+' 100%)'; }},
-
-  {id:'A2', naam:'A2 · Zonsopgang', uitleg:
-   'Licht bovenaan, donker onderaan, met de gloed in de rechterbovenhoek die de kaart nu ook al '+
-   'heeft. Bij een tussenstap komt de volgende kleur van onderen opzetten, als grond onder de lucht.',
-   fn:function(g){ return 'radial-gradient(130% 100% at 88% 4%, rgba(255,255,255,.18), transparent 55%),'+
-     (g.volgend
-       ? 'linear-gradient(180deg,'+shade(g.basis,18)+' 0 44%,'+shade(g.volgend,-10)+' 72% 100%)'
-       : 'linear-gradient(180deg,'+shade(g.basis,20)+' 0%,'+shade(g.basis,-30)+' 100%)'); }},
-
-  {id:'A3', naam:'A3 · Gloed uit de hoek', uitleg:
-   'Geen lijn maar licht: de kaart is effen diep, met een ronde gloed van je eigen kleur in de '+
-   'rechterbovenhoek. Een tussenstap zet er een tweede gloed van de volgende kleur tegenover, '+
-   'linksonder. Twee lichtbronnen, geen naad.',
-   fn:function(g){ var g1 = 'radial-gradient(120% 95% at 84% 2%,'+shade(g.basis,26)+' 0%, transparent 62%)';
-     var g2 = g.volgend
-       ? 'radial-gradient(115% 90% at 8% 104%,'+shade(g.volgend,4)+' 0%, transparent 58%),'
-       : '';
-     return g1+','+g2+shade(g.basis,-30); }},
-
-  {id:'A4', naam:'A4 · Horizon', uitleg:
-   'Een duidelijke horizon over de kaart: erboven licht, eronder diep. Bij een tussenstap ligt de '+
-   'volgende kleur onder die horizon, dus je ziet twee volle kleuren met een smalle overgang.',
-   fn:function(g){ return g.volgend
-     ? 'linear-gradient(176deg,'+shade(g.basis,22)+' 0 40%,'+shade(g.basis,-4)+' 52%,'+
-       shade(g.volgend,2)+' 60%,'+shade(g.volgend,-24)+' 100%)'
-     : 'linear-gradient(176deg,'+shade(g.basis,24)+' 0 40%,'+shade(g.basis,-6)+' 56%,'+
-       shade(g.basis,-34)+' 100%)'; }},
-
-  {id:'A5', naam:'A5 · Veeg', uitleg:
-   'Je eigen kleur houdt bijna de hele kaart; de volgende kleur veegt alleen de onderste hoek mee, '+
-   'als een penseelstreek. Het meest ingetogen: je ziet vooral nog je eigen band.',
+  {id:'V1', naam:'V1 · De veeg', uitleg:
+   'Het origineel. De volgende kleur begint op 84% en loopt zacht uit tot de hoek; daarboven '+
+   'verdiept je eigen kleur rustig. Rustig en warm, maar bij blauw-rood zie je in die laatste '+
+   'strook nog een korte menging.',
    fn:function(g){ return g.volgend
      ? 'linear-gradient(158deg,'+shade(g.basis,20)+' 0%,'+shade(g.basis,-18)+' 58%,'+
        shade(g.volgend,-2)+' 84%,'+shade(g.volgend,-22)+' 100%)'
      : 'linear-gradient(158deg,'+shade(g.basis,22)+' 0%,'+shade(g.basis,-12)+' 58%,'+
-       shade(g.basis,-32)+' 100%)'; }}
+       shade(g.basis,-32)+' 100%)'; }},
+
+  {id:'V2', naam:'V2 · Korte veeg', uitleg:
+   'Dezelfde streek, maar korter en steiler: de volgende kleur raakt alleen de punt van de hoek. '+
+   'Het meest ingetogen van allemaal — je ziet je eigen band bijna volledig, met net een teken '+
+   'dat er iets aankomt.',
+   fn:function(g){ return g.volgend
+     ? 'linear-gradient(146deg,'+shade(g.basis,22)+' 0%,'+shade(g.basis,-16)+' 70%,'+
+       shade(g.volgend,-4)+' 92%,'+shade(g.volgend,-24)+' 100%)'
+     : 'linear-gradient(146deg,'+shade(g.basis,24)+' 0%,'+shade(g.basis,-14)+' 70%,'+
+       shade(g.basis,-34)+' 100%)'; }},
+
+  {id:'V3', naam:'V3 · Penseelstreek', uitleg:
+   'De veeg krijgt een harde rand, precies zoals een kwast die in één haal van de kaart af gaat. '+
+   'Geen menging, dus ook blauw-rood en geel-groen blijven schoon. Binnen de streek zelf zit wel '+
+   'verloop, zodat het geen platte driehoek wordt.',
+   fn:function(g){ return g.volgend
+     ? 'linear-gradient(152deg,'+shade(g.basis,22)+' 0%,'+shade(g.basis,-20)+' 78%,'+
+       shade(g.volgend,10)+' 78%,'+shade(g.volgend,-26)+' 100%)'
+     : 'linear-gradient(152deg,'+shade(g.basis,24)+' 0%,'+shade(g.basis,-16)+' 78%,'+
+       shade(g.basis,-36)+' 78%,'+shade(g.basis,-44)+' 100%)'; }},
+
+  {id:'V4', naam:'V4 · Dubbele haal', uitleg:
+   'Twee strepen in plaats van één: een smalle lichte haal van je eigen kleur over het midden, en '+
+   'daaronder de veeg van de volgende kleur. Dat geeft de kaart beweging — het lijkt meer op een '+
+   'penseel dan op een verloop.',
+   fn:function(g){ var op = shade(g.basis,34);
+     var haal = 'linear-gradient(152deg,'+weg(op)+' 0 34%,'+op+' 44%,'+weg(op)+' 56%)';
+     var basis = g.volgend
+       ? 'linear-gradient(152deg,'+shade(g.basis,14)+' 0%,'+shade(g.basis,-22)+' 72%,'+
+         shade(g.volgend,2)+' 88%,'+shade(g.volgend,-24)+' 100%)'
+       : 'linear-gradient(152deg,'+shade(g.basis,16)+' 0%,'+shade(g.basis,-22)+' 72%,'+
+         shade(g.basis,-38)+' 100%)';
+     return haal+','+basis; }},
+
+  {id:'V5', naam:'V5 · Brede veeg', uitleg:
+   'De veeg komt verder de kaart op en pakt bijna een derde. De promotie is hierdoor het best '+
+   'zichtbaar — vooral handig als de tussenstap juist gevierd mag worden — maar de kaart voelt '+
+   'wel duidelijk minder "van jou alleen".',
+   fn:function(g){ return g.volgend
+     ? 'linear-gradient(160deg,'+shade(g.basis,20)+' 0%,'+shade(g.basis,-16)+' 44%,'+
+       shade(g.volgend,4)+' 72%,'+shade(g.volgend,-26)+' 100%)'
+     : 'linear-gradient(160deg,'+shade(g.basis,22)+' 0%,'+shade(g.basis,-14)+' 44%,'+
+       shade(g.basis,-38)+' 100%)'; }}
 ];
 
-var actiefA = 'A2';
 function vulA(g){
   return A_VARIANTEN.filter(function(v){ return v.id===actiefA; })[0].fn(g);
 }
 function voorstelA(g){ return kaartHtml(g,'','background:'+vulA(g)); }
-
-/* B — Bandrand: de kaart blijft een effen vlak, maar draagt onderaan een echte band.
-   Bij een tussenstap is die band in de lengte gedeeld, net als het echte ding. */
-function voorstelB(g){
-  var strook = g.volgend
-    ? '<span class="strook"><i style="background:linear-gradient(90deg,'+g.basis+' 0 50%,'+g.volgend+' 50% 100%)"></i></span>'
-    : '<span class="strook"><i style="background:'+shade(g.basis,-22)+'"></i></span>';
-  return kaartHtml(g, strook, 'background:'+shade(g.basis,-4)+';padding-bottom:24px');
-}
-
-/* C — Bandpunt: diepte via een verloop in de eigen kleur, en bij een tussenstap valt de
-   volgende kleur als een omgeslagen bandpunt over de rechterbovenhoek. Twee verzadigde
-   kleuren raken elkaar hier langs een scherpe rand, dus er ontstaat nooit een mengzone. */
-function voorstelC(g){
-  var basis = 'linear-gradient(150deg,'+shade(g.basis,15)+' 0%,'+shade(g.basis,-28)+' 100%)';
-  var punt = g.volgend
-    ? '<span class="punt" style="background:linear-gradient(210deg,'+shade(g.volgend,8)+' 0 30%,transparent 30%)"></span>'
-    : '';
-  var streep = '';
-  if(g.strepen){
-    var s = [];
-    for(var i=0;i<g.strepen;i++) s.push('<i style="left:auto;right:'+(11+i*7)+'px;top:0;bottom:auto;width:3px;height:26px;border-radius:0 0 3px 3px;background:#D8A32B"></i>');
-    streep = '<span class="strook" style="inset:0;height:auto">'+s.join('')+'</span>';
-  }
-  return kaartHtml(g, punt+streep, 'background:'+basis);
-}
 
 /* De tabbalk: de pil draagt de kleur die je volledig hebt, een tussenstap voegt er een
    dun randje van de volgende kleur onder toe. */
@@ -318,26 +292,14 @@ function tabsHtml(g){
 }
 
 /* De dagkaart op ware grootte. De inhoud is steeds dezelfde training, zodat alleen de kleur
-   verschilt. De achtergrond komt uit dezelfde drie recepten als de miniaturen hierboven. */
-function dagVulling(g, id){
-  if(id==='A'){
-    return { bg: vulA(g), binnen:'' };
-  }
-  if(id==='B'){
-    var rand = g.volgend
-      ? '<span class="rand" style="background:linear-gradient(90deg,'+g.basis+' 0 50%,'+g.volgend+' 50% 100%)"></span>'
-      : '<span class="rand" style="background:'+shade(g.basis,-22)+'"></span>';
-    return { bg: shade(g.basis,-4), binnen: rand, extra:'padding-bottom:30px' };
-  }
-  var punt = g.volgend
-    ? '<span class="punt" style="background:linear-gradient(210deg,'+shade(g.volgend,8)+' 0 26%,transparent 26%)"></span>'
-    : '';
+   verschilt. De achtergrond komt uit dezelfde veeg als de miniaturen hierboven. Bij de zwarte
+   band komen de witte poomstrepen erbij; die horen bij de band en niet bij de veeg. */
+function dagVulling(g){
   var streep = '';
   for(var i=0;i<(g.strepen||0);i++){
-    streep += '<span class="streep" style="right:'+(16+i*9)+'px;background:#D8A32B"></span>';
+    streep += '<span class="streep" style="right:'+(16+i*9)+'px;background:#EDEDE7"></span>';
   }
-  return { bg:'linear-gradient(150deg,'+shade(g.basis,15)+' 0%,'+shade(g.basis,-28)+' 100%)',
-           binnen: punt+streep };
+  return { bg: vulA(g), binnen: streep };
 }
 
 /* De drie regels van de training: hetzelfde rijtje als op het Vandaag-scherm. */
@@ -386,37 +348,22 @@ function dagkaarten(){
       dagNu(LADDER.filter(function(g){ return g.stop==='4'; })[0])+'</div>'+
     deel.map(function(s){
       var g = LADDER.filter(function(x){ return x.stop===s; })[0];
-      var v = dagVulling(g, actief);
+      var v = dagVulling(g);
       return '<div class="dagwrap"><span>'+g.grade+' · '+g.band+'</span>'+
         dagHtml(g, v.bg, v.binnen, v.extra, licht(g.basis))+'</div>';
     }).join('')+'</div>';
   document.getElementById('dagkaarten').innerHTML = uit;
 }
 
-var VOORSTELLEN = [  {id:'A', naam:'A · Zonsopgang', fn:voorstelA,
-   uitleg:'De kleur zit in het verloop zelf. Hieronder staan vijf manieren om datzelfde verloop in te zetten — kies er één en alles op deze pagina verandert mee.'},
-  {id:'C', naam:'C · Bandpunt', fn:voorstelC,
-   uitleg:'Diepte in je eigen kleur, en de volgende kleur valt als een omgeslagen bandpunt over de hoek. Geen mengzone, dus ook blauw-rood blijft schoon.'},
-  {id:'B', naam:'B · Bandrand', fn:voorstelB,
-   uitleg:'De kaart blijft een effen vlak met onderaan een echte band, in de lengte gedeeld bij een tussenstap. Het veiligst en het meest herkenbaar, maar ook het vlakst.'}
-];
-
-var actief = 'A';
+var actiefA = 'V1';
 function teken(){
-  var v = VOORSTELLEN.filter(function(x){ return x.id===actief; })[0];
-  document.getElementById('keuze').innerHTML = VOORSTELLEN.map(function(x){
-    return '<button data-id="'+x.id+'" aria-pressed="'+(x.id===actief)+'">'+x.naam+'</button>';
+  var v = A_VARIANTEN.filter(function(x){ return x.id===actiefA; })[0];
+  document.getElementById('keuzeA').innerHTML = A_VARIANTEN.map(function(x){
+    return '<button data-va="'+x.id+'" aria-pressed="'+(x.id===actiefA)+'">'+x.naam+'</button>';
   }).join('');
-  /* De variantkiezer hoort alleen bij A; bij B en C valt hij weg. */
-  var va = A_VARIANTEN.filter(function(x){ return x.id===actiefA; })[0];
-  document.getElementById('keuzeA').innerHTML = actief!=='A' ? '' :
-    A_VARIANTEN.map(function(x){
-      return '<button data-va="'+x.id+'" aria-pressed="'+(x.id===actiefA)+'">'+x.naam+'</button>';
-    }).join('');
   document.getElementById('uit').innerHTML =
-    '<h2>'+(actief==='A' ? va.naam : v.naam)+'</h2>'+
-    '<p class="note">'+(actief==='A' ? va.uitleg : v.uitleg)+'</p>'+
-    '<div class="rij">'+LADDER.map(v.fn).join('')+'</div>'+
+    '<h2>'+v.naam+'</h2><p class="note">'+v.uitleg+'</p>'+
+    '<div class="rij">'+LADDER.map(voorstelA).join('')+'</div>'+
     '<h2>De tabbalk bij deze graden</h2>'+
     '<p class="note">De pil houdt de kleur die je volledig hebt gehaald; een tussenstap zet er '+
     'een dun randje van de volgende kleur onder.</p>'+
@@ -425,10 +372,6 @@ function teken(){
       .join('');
   dagkaarten();
 }
-document.getElementById('keuze').addEventListener('click', function(e){
-  var b = e.target.closest('button'); if(!b) return;
-  actief = b.dataset.id; teken();
-});
 document.getElementById('keuzeA').addEventListener('click', function(e){
   var b = e.target.closest('button'); if(!b) return;
   actiefA = b.dataset.va; teken();
