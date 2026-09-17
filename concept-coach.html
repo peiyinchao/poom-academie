@@ -2816,6 +2816,18 @@
   .hb-prog-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--el),var(--deep));
     transition:width .4s cubic-bezier(.4,1.2,.4,1)}
   .hb-prog-n{font-family:var(--cond);font-weight:800;font-size:15px;color:var(--deep);min-width:34px;text-align:right}
+  /* Examenkaart: de bron en de teller horen bij de kop, dus die blijven staan en de eisen rollen
+     eronderdoor. Net als de kiezer bij Woorden trekt het blok zijn achtergrond tot in de randmarge,
+     anders schemeren de kaartjes langs de zijkanten mee. Het staartje eronder laat zien dat er iets
+     onder doorloopt; het randje erboven dekt de bovenmarge van de scroller af, waar sticky zelf
+     niet bij kan. */
+  .hbcat .hb-exhead{position:sticky;top:0;z-index:4;background:var(--page);
+    margin:0 -22px 2px;padding:2px 22px 10px}
+  .hbcat .hb-exhead .hb-prog{margin-bottom:0}
+  .hbcat .hb-exhead::after{content:"";position:absolute;left:0;right:0;top:100%;height:14px;
+    background:linear-gradient(var(--page),var(--page0));pointer-events:none}
+  .hbcat .hb-exhead::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:18px;
+    background:var(--page);pointer-events:none}
   .hb-exlist{display:flex;flex-direction:column;gap:9px}
   .hb-exrow{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;cursor:pointer;
     background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:13px 14px;
@@ -6906,9 +6918,12 @@
     var head = '';
     // Waar de eisen vandaan komen hoort bovenaan te staan: het is niet onze lijst, en onderaan
     // wordt zo'n verwijzing makkelijk gemist. Als onderschrift van de kop lees je het meteen.
-    head += '<p class="hb-bron">Gebaseerd op de exameneisen van TKD-vereniging Kawarmala.</p>';
-    head += '<div class="hb-prog"><div class="hb-prog-bar"><i style="width:'+pct+'%"></i></div>'+
-            '<span class="hb-prog-n">'+done+'/'+ond.length+'</span></div>';
+    // Samen met de teller blijft het staan terwijl je door de eisen rolt.
+    head += '<div class="hb-exhead">'+
+            '<p class="hb-bron">Gebaseerd op de exameneisen van TKD-vereniging Kawarmala.</p>'+
+            '<div class="hb-prog"><div class="hb-prog-bar"><i style="width:'+pct+'%"></i></div>'+
+            '<span class="hb-prog-n">'+done+'/'+ond.length+'</span></div>'+
+            '</div>';
     var rows = ond.map(function(o){
       var dn = !!EXAM_CHK[o.id];
       return '<button class="hb-exrow'+(dn?' done':'')+'" '+(dn?'style="--sk:'+strikeVar()+'" ':'')+
