@@ -451,6 +451,11 @@
   .ag-trainers{display:flex;flex-direction:column;gap:7px}
   .ag-trlab{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;
     font-size:10px;font-weight:700;color:var(--gray)}
+  /* Elke uitslagregel is een blokje op zich: eerst het onderdeel, daaronder de plaats. Naast
+     elkaar werd het te smal voor vier chips op een telefoon. De scheiding maakt zichtbaar waar
+     de ene regel ophoudt en de volgende begint. */
+  .ag-resrow{display:flex;flex-direction:column;gap:7px}
+  .ag-resrow+.ag-resrow{margin-top:11px;padding-top:11px;border-top:1px solid var(--line)}
   .ag-trrow{display:flex;align-items:center;gap:7px}
   .ag-trrow .ag-title{flex:1;min-width:0}
   .ag-trdel{flex:none;width:32px;height:32px;border:0;background:none;cursor:pointer;
@@ -598,7 +603,14 @@
   /* De telregel hoort bij de kaarten eronder, dus begint hij op dezelfde lijn: 37px is de
      ruimte die de lijn met zijn haltes links van de kaarten inneemt. Tegen de schermrand
      hing hij los boven het verhaal in plaats van erboven. */
-  .tl-lead{margin:0 0 14px;padding-left:37px;font-size:12.5px;color:var(--gray);letter-spacing:.01em}
+  .tl-lead{position:relative;margin:0 0 14px;padding-left:37px;font-size:12.5px;color:var(--gray);letter-spacing:.01em}
+  /* De lijn begon onder de telregel, waardoor die regel er los boven zweefde. Nu tekent de
+     telregel zelf het bovenste stukje: de lijn loopt door tot de bovenrand van die tekst, dus
+     het aantal momenten hangt aan je verhaal in plaats van ernaast. 12px onder de tekst sluit
+     hij aan op het jaartal (14px ondermarge, waarvan het jaartal er 2px overheen komt).
+     Het 37px-inspringen is padding, dus 12px vanaf de rand is hetzelfde hart als de haltes. */
+  .tl-lead.heeft-lijn::before{content:"";position:absolute;left:12px;width:6px;top:0;bottom:-12px;
+    border-radius:3px 3px 0 0;background:var(--tlcol,var(--line))}
   .tl-empty{font-size:13.5px;color:var(--gray);line-height:1.55;text-align:center;padding:30px 12px 20px}
   /* De tijdlijn is een metrolijn: één doorlopende streep in de kleur van de band die je op dat
      moment droeg, met de gebeurtenissen als haltes. 5px: breed genoeg om twee bandkleuren als
@@ -635,6 +647,9 @@
      werd het een rij worstjes in plaats van één doorlopende lijn. Alleen de bovenkant van de
      hele lijn is rond; de onderkant dooft toch uit. */
   .tl-line>:first-child::before{border-radius:3px 3px 0 0}
+  /* Loopt de lijn al door vanaf de telregel, dan is die kop daar al rond en zou een tweede
+     ronding hier een knik in de doorlopende lijn knippen. */
+  .tl-lead.heeft-lijn+#tl-body .tl-line>:first-child::before{border-radius:0}
   .tl-item::before{top:0;bottom:-12px}
   .tl-year::before{top:-2px;bottom:-10px}
   /* Onderaan houdt je verhaal op; daar dooft de lijn uit in plaats van hard af te breken. Met
@@ -3469,17 +3484,34 @@
   ];
   function agPlace(v){ for(var i=0;i<AG_PLACES.length;i++){ if(AG_PLACES[i].v===v) return AG_PLACES[i]; } return null; }
   /* Op een toernooi met meerdere onderdelen kun je in het ene onderdeel eerste worden en in
-     het andere tweede. De uitslag is daarom een lijst, niet één waarde. Oudere events hebben
-     nog één string staan; die lezen we hier stilzwijgend in als lijst van één, zodat er niets
-     omgezet hoeft te worden en een oude reservekopie gewoon blijft werken. */
-  function agResultLijst(v){
-    var uit=[], i;
+     het andere tweede. De uitslag is daarom een lijst, en elke regel draagt naast de plaats ook
+     het onderdeel waarin je hem haalde — "Poomsae · 1e plaats" zegt meer dan "1e plaats".
+     Er zijn drie schrijfwijzen in omloop en ze moeten alle drie blijven werken: één losse
+     string (het allereerste model), een lijst met strings (toen de uitslag een lijst werd) en
+     nu een lijst met {deel,v}. Ze worden hier stilzwijgend ingelezen, zodat een oude
+     reservekopie gewoon opengaat en er niets omgezet hoeft te worden. */
+  /* leegOok: in het formulier blijft een regel bestaan zolang jij hem open hebt staan, ook als
+     er nog niets in staat — je typt vaak eerst het onderdeel en kiest daarna pas de plaats, en
+     een verse regel begint per definitie leeg. Overal daarbuiten telt alleen wat af is. */
+  function agUitslagRijen(v, leegOok){
+    var uit=[], i, r;
     if(typeof v==='string') v = v ? [v] : [];
     if(!v || !v.length) return uit;
-    // Altijd in podiumvolgorde, ongeacht in welke volgorde er getikt is.
-    for(i=0;i<AG_PLACES.length;i++){ if(v.indexOf(AG_PLACES[i].v)>-1) uit.push(AG_PLACES[i].v); }
+    for(i=0;i<v.length;i++){
+      r=v[i];
+      if(typeof r==='string'){ if(r) uit.push({deel:'', v:r}); }
+      else if(r && (r.v || r.deel || leegOok)) uit.push({deel:String(r.deel||''), v:String(r.v||'')});
+    }
     return uit;
   }
+  /* Alleen de plaatsen, zonder de onderdelen. Handig waar het puur om "is er al een uitslag"
+     gaat en de regels zelf niet uitgepakt hoeven te worden. */
+  function agResultLijst(v){
+    return agUitslagRijen(v).filter(function(r){ return !!r.v; }).map(function(r){ return r.v; });
+  }
+  /* Eén regel zoals hij op de kaart hoort te lezen. Zonder onderdeel blijft het gewoon de
+     plaats; dat is precies hoe het er vóór deze uitbreiding al stond. */
+  function agUitslagTekst(r){ return r.deel ? r.deel+' · '+r.v : r.v; }
   var AGENDA = [];
   function agType(k){ for(var i=0;i<AG_TYPES.length;i++){ if(AG_TYPES[i].k===k) return AG_TYPES[i]; } return AG_TYPES[0]; }
   /* Plaatsen en namen herhalen zich sterk: je traint jaar in jaar uit in dezelfde zalen en bij
@@ -3495,8 +3527,15 @@
       }
       // Een examinator kan ook bij een gepland examen staan, nog voor de graad binnen is.
       else if(veld==='exam' && e.exam){ zien[String(e.exam).trim()]=1; }
+      // Onderdelen herhalen zich het sterkst van allemaal: het is vrijwel altijd Poomsae of
+      // Gyeorugi. Die twee staan er daarom ook in als je nog nooit een uitslag hebt genoteerd.
+      else if(veld==='uitdeel' && e.result){
+        var rr=agUitslagRijen(e.result);
+        for(j=0;j<rr.length;j++){ if(rr[j].deel) zien[rr[j].deel.trim()]=1; }
+      }
     }
     if(veld==='exam'){ for(i in GMETA){ if(GMETA.hasOwnProperty(i) && GMETA[i] && GMETA[i].exam) zien[String(GMETA[i].exam).trim()]=1; } }
+    if(veld==='uitdeel'){ zien['Poomsae']=1; zien['Gyeorugi']=1; }
     for(i in zien){ if(zien.hasOwnProperty(i) && i) uit.push(i); }
     return uit.sort(function(a,b){ return a.localeCompare(b,'nl'); });
   }
@@ -4064,7 +4103,9 @@
   function agBlankDraft(){ return {type:'wedstrijd', title:'', date:'', end:'', where:'', result:[], trainers:[], geup:agVolgendeGraad(), exam:agVorigeExaminator(), photo:'', focus:phClampFoc(null)}; }
   function agEditDraft(e){
     return {type:agType(e.type).k, title:e.title||'', date:e.date||'', end:e.end||'',
-            where:e.where||'', result:agResultLijst(e.result), trainers:(e.trainers||[]).slice(),
+            // De hele uitslag mee, inclusief de onderdelen: met alleen de plaatsen raakte je
+            // "Poomsae" kwijt zodra je een bestaande wedstrijd openklapte.
+            where:e.where||'', result:agUitslagRijen(e.result), trainers:(e.trainers||[]).slice(),
             geup:(typeof e.geup==='number'?e.geup:agVolgendeGraad()),
             exam:(e.exam||agVorigeExaminator()),
             photo:phGet(e.id), focus:phFoc(e.id)};
@@ -4184,6 +4225,34 @@
      plaats van één veld met komma&#39;s: dan hoeft niemand een scheidingsteken te onthouden en
      kun je een naam weghalen zonder de rest opnieuw te typen. Het eerste veld staat er altijd,
      ook leeg — een lege regel leest als een uitnodiging, een knop als huiswerk. */
+  /* De uitslag is een stapel regels: per onderdeel één. Het onderdeel mag leeg blijven — op een
+     toernooi met maar één onderdeel valt er niets te onderscheiden en is "1e plaats" genoeg.
+     Binnen één regel is de plaats een keuze en geen aanvinklijst: je wordt in hetzelfde
+     onderdeel niet tegelijk eerste en tweede. */
+  function agUitslagHtml(d){
+    var rijen=agUitslagRijen(d.result, true);
+    if(!rijen.length) rijen=[{deel:'', v:''}];
+    return '<div class="ag-res"><span class="ag-trlab">Uitslag</span>'+
+      rijen.map(function(r,i){
+        return '<div class="ag-resrow">'+
+          '<div class="ag-trrow">'+
+            '<input class="ag-title" type="text" autocomplete="off" data-role="uitdeel"'+
+              ' list="ag-deel-eerder" value="'+esc(r.deel)+'" placeholder="Onderdeel (bijv. Poomsae)">'+
+            (rijen.length>1
+              ? '<button class="ag-trdel" data-act="aguitdel" data-i="'+i+'" aria-label="Dit onderdeel verwijderen">×</button>'
+              : '')+
+          '</div>'+
+          '<div class="ag-chips">'+AG_PLACES.map(function(p){
+            var aan = r.v===p.v;
+            return '<button class="ag-chip'+(aan?' on':'')+'" data-act="agres" data-i="'+i+'" data-v="'+esc(p.v)+'"'+
+              ' aria-pressed="'+(aan?'true':'false')+'">'+p.ico+' '+esc(p.v)+'</button>';
+          }).join('')+'</div>'+
+        '</div>';
+      }).join('')+
+      '<button class="ag-tradd" data-act="aguitadd">+ Nog een onderdeel</button>'+
+      agDatalist('ag-deel-eerder','uitdeel')+
+    '</div>';
+  }
   function agTrainersHtml(d){
     var list=(d.trainers && d.trainers.length) ? d.trainers : [''];
     return '<div class="ag-trainers">'+
@@ -4250,14 +4319,7 @@
         (examen ? '' : agDateHtml('end','t/m (optioneel)', d.end, '—'))+
       '</div>'+
       // Een uitslag hoort alleen bij een wedstrijd; bij een cursus of examen zou het veld verwarren.
-      (d.type==='wedstrijd'
-        ? '<div class="ag-res"><span class="ag-trlab">Uitslag</span>'+
-          '<div class="ag-chips">'+AG_PLACES.map(function(p){
-            var aan = agResultLijst(d.result).indexOf(p.v)>-1;
-            return '<button class="ag-chip'+(aan?' on':'')+'" data-act="agres" data-v="'+esc(p.v)+'"'+
-              ' aria-pressed="'+(aan?'true':'false')+'">'+p.ico+' '+esc(p.v)+'</button>';
-          }).join('')+'</div></div>'
-        : '')+
+      (d.type==='wedstrijd' ? agUitslagHtml(d) : '')+
       // Wie er voor de zaal stond vraag je alleen bij een cursus.
       (d.type==='cursus' ? agTrainersHtml(d) : '')+
       phEditHtml(ph, d.focus, 'ag')+
@@ -4277,6 +4339,15 @@
     var w=agSheet.querySelector('#ag-where'); if(w) agDraft.where=w.value;
     var tr=agSheet.querySelectorAll('[data-role="trainer"]');
     if(tr.length) agDraft.trainers=[].map.call(tr, function(el){ return el.value; });
+    // De onderdeel-velden staan naast de plaats-chips, dus ze moeten mee terug voordat een tik
+    // op een chip het formulier opnieuw tekent — anders typ je een onderdeel en ben je het kwijt.
+    var ud=agSheet.querySelectorAll('[data-role="uitdeel"]');
+    if(ud.length){
+      var oud=agUitslagRijen(agDraft.result, true);
+      agDraft.result=[].map.call(ud, function(el,i){
+        return {deel:el.value, v:(oud[i]&&oud[i].v)||''};
+      });
+    }
   }
   function agRender(){
     if(!agSheet) return;
@@ -5762,9 +5833,10 @@
         // Elke podiumplaats krijgt zijn eigen medaille en zijn eigen pil. Eén pil met twee
         // plaatsen erin leest als één uitslag, terwijl het er echt twee zijn — op een toernooi
         // met meerdere onderdelen kun je in het ene eerste en in het andere tweede worden.
-        (it.kind==='event' ? agResultLijst(it.ev.result).map(function(v){
-          var p=agPlace(v);
-          return '<span class="tl-res'+(p&&p.geenPodium?' plain':'')+'">'+(p?p.ico:'🏅')+' '+esc(v)+'</span>';
+        (it.kind==='event' ? agUitslagRijen(it.ev.result).filter(function(r){ return !!r.v; }).map(function(r){
+          var p=agPlace(r.v);
+          return '<span class="tl-res'+(p&&p.geenPodium?' plain':'')+'">'+(p?p.ico:'🏅')+' '+
+            esc(agUitslagTekst(r))+'</span>';
         }).join('') : '')+
         // Wie de cursus gaf staat er net zo bij als de examinator bij een graduatie: dezelfde
         // regel, dezelfde toon. Het is een herinnering, geen prijs.
@@ -5802,6 +5874,16 @@
     var n=tlItems().length;
     return n+' '+(n===1?'moment':'momenten')+' · jouw taekwondo-verhaal';
   }
+  /* De telregel tekent het bovenste stukje lijn, dus hij moet dezelfde band dragen als het
+     jaartal eronder: die van de bovenste gebeurtenis. Zonder verhaal is er niets om aan te
+     hangen en blijft de regel kaal. */
+  function tlLeadLijn(el){
+    if(!el) return;
+    var all=tlItems();
+    el.classList.toggle('heeft-lijn', all.length>0);
+    var g=all.length?tlBeltAt(all[0].date):null;
+    if(g) el.style.setProperty('--tlcol', tlLijnCss(g)); else el.style.removeProperty('--tlcol');
+  }
   function openTimeline(){
     if(tlScreen) return tlScreen;
     var el=document.createElement('div');
@@ -5833,6 +5915,7 @@
     stage.appendChild(el);
     tlScreen=el;
     fnav.classList.add('hide');
+    tlLeadLijn(el.querySelector('#tl-lead'));
     tlWire(el);
     requestAnimationFrame(function(){ el.classList.add('show'); tlNaTekenen(); });
     return el;
@@ -5897,7 +5980,7 @@
   function tlRefresh(){
     if(!tlScreen) return;
     var b=tlScreen.querySelector('#tl-body'); if(b) b.innerHTML=tlBodyHtml();
-    var l=tlScreen.querySelector('#tl-lead'); if(l) l.textContent=tlCountLine();
+    var l=tlScreen.querySelector('#tl-lead'); if(l){ l.textContent=tlCountLine(); tlLeadLijn(l); }
     tlNaTekenen();
   }
   /* Een foto op een kaart is klein en bijgesneden. Aantikken laat hem in zijn geheel zien,
@@ -6517,7 +6600,9 @@
     {key:'standen',    title:'Standen',         han:'서', el:UI_BLUE,   sub:'Voetposities',       unit:'standen',     grp:1},
     {key:'technieken', title:'Technieken',      han:'술', el:UI_BLUE,   sub:'Blok · stoot · slag · trap',unit:'technieken',  grp:1},
     {key:'poomsae',    title:'Poomsae',         han:'품', el:UI_BLUE,   sub:'De vormen',          unit:'vormen',      grp:2, wide:true},
-    {key:'ilbo',       title:'Ilbo Taeryon',    han:'일', el:UI_BLUE,   sub:'Stapsparren',        unit:'afwerkingen', grp:2},
+    // Op deze hoogte heet het Taeryon, niet Ilbo Taeryon: Ilbo, Ibo en Sambo zijn er alle drie
+    // vormen van, en de pagina zelf legt dat verschil uit.
+    {key:'ilbo',       title:'Taeryon',         han:'대', el:UI_BLUE,   sub:'Stapsparren',        unit:'afwerkingen', grp:2},
     {key:'hosinsul',   title:'Hosinsul',        han:'호', el:UI_BLUE,   sub:'Zelfverdediging',    unit:'technieken',  grp:2},
     {key:'gyeorugi',   title:'Gyeorugi',        han:'겨', el:UI_BLUE,   sub:'Sparren',            unit:'sparren',     grp:2,
       kind:'onderdeel', odid:'gyeorugi', ko:'겨루기', roman:'Gyeorugi', show:hasGyeorugi,
@@ -7011,38 +7096,19 @@
       // op zijn plek staat.
       var Hs=Math.max(40, Math.round((hr.top+y0+restH) - br.top + 14));
       spacer.style.height=Hs+'px';
-      body._pmHs=Hs;
+      // Het rolbereik waarover het dokken afrondt is normaal die hele hoogte. Korte pagina's als
+      // Gyeorugi en Gyeokpa kunnen zo ver niet rollen; daar rondt het gebaar af binnen wat er
+      // wél te rollen valt, zodat de mascotte netjes aankomt in plaats van halverwege te blijven
+      // hangen. Lucht bijplussen kon niet: die pagina's sluiten af met een rekwisiet dat op de
+      // onderrand hoort te staan.
+      var ruim=body.scrollHeight - body.clientHeight;
+      body._pmHs=Math.max(40, Math.min(Hs, ruim));
     }
     function upd(){ var Hs=body._pmHs||1, c=body.scrollTop/Hs; c=c<0?0:c>1?1:c; sheet.style.setProperty('--pmc', c.toFixed(3)); }
-    // Meekrimpen kan alleen als de pagina genoeg te rollen heeft om het reserveblok helemaal
-    // weg te rollen. Is de pagina daar te kort voor, dan zou de mascotte halverwege blijven
-    // hangen boven een gat waar de plaat stond — dan is een gewone vaste plaat eerlijker.
-    // Op een kleiner scherm rolt diezelfde pagina wél genoeg, en dan klapt hij vanzelf om.
-    // Het reserveblok is precies zo hoog als het rolbereik van het dokken, dus het valt tegen
-    // zichzelf weg: wat overblijft is de vraag of de rest van de pagina het scherm zélf al vult.
-    // Zo hangt de uitkomst niet af van wat er op dít moment in het blok staat.
-    function past(){
-      var blok=spacer.getBoundingClientRect().height;
-      return (body.scrollHeight - blok - body.clientHeight) >= 24;
-    }
-    function beslis(){
-      geom();
-      if(past()){
-        if(spacer.firstChild){ spacer.innerHTML=''; spacer.style.height=(body._pmHs||0)+'px'; geom(); }
-        masc.style.display=''; sheet.classList.add('has-masc');
-      } else {
-        // Terug naar de vaste plaat: de mascotte uit de kop, de tekening in het reserveblok.
-        if(!spacer.firstChild) spacer.innerHTML=illusHtml(m.slug, false, m.delay, m.pair);
-        spacer.style.height='';
-        masc.style.display='none'; sheet.classList.remove('has-masc');
-        sheet.style.setProperty('--pmc','0');
-        return;
-      }
-      upd();
-    }
+    function beslis(){ geom(); upd(); }
     beslis();
-    body._pmScroll=function(){ if(sheet.classList.contains('has-masc')) upd(); };
-    body.addEventListener('scroll', body._pmScroll, {passive:true});
+    body._pmScroll=upd;
+    body.addEventListener('scroll', upd, {passive:true});
     sheet._pmResize=beslis; window.addEventListener('resize', sheet._pmResize);
     // Nog een keer meten als de tekening binnen is en als de inschuif-animatie is uitgewerkt:
     // midden in die schaalstap levert een meting de verkeerde maten op.
@@ -7814,7 +7880,7 @@
               '<span class="ot-badge empty" id="ot-rep-badge"></span></button>'+
           '</div>'+
           '<div class="ot-tempo">'+
-            '<span class="ot-lab">Seconde(s) per tel</span>'+
+            '<span class="ot-lab" id="ot-tempo-lab">'+otTempoWoord()+'</span>'+
             '<div class="ot-tmenu"><div class="ot-tmenu-inner"><span class="ot-tthumb"></span>'+tOpts+'</div></div>'+
             '<button class="ot-fab ot-tempo-fab" data-act="ottempo" aria-label="Tempo">'+
               '<span class="ot-tempo-cur" id="ot-tempo-cur">'+otTempoLabel()+'</span></button>'+
@@ -8473,6 +8539,13 @@
   // Lucht om de schuine streep: op 8px plakken "sec" en "tel" anders aan elkaar tot één woord.
   var OT_TU='<span class="ot-tu">sec / tel</span>';
   function otTempoLabel(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].s+OT_TU; } return '1'+OT_TU; }
+  /* "Seconde(s)" met haakjes las als een formuliertje. Het label weet welk tempo eronder staat,
+     dus het kan het gewoon goed zeggen: bij 0,5 en 1 enkelvoud, bij 2 en 4 meervoud. */
+  function otTempoWoord(){
+    var s='1';
+    for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed){ s=OT_TEMPOS[k].s; break; } }
+    return (parseFloat(s.replace(',','.'))>1 ? 'Secondes' : 'Seconde')+' per tel';
+  }
   function otTempoName(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].name; } return 'Normaal'; }
   function otPop(){ var n=timerScreen&&timerScreen.querySelector('#ot-num'); if(!n) return;
     n.classList.remove('pop'); void n.offsetWidth; n.classList.add('pop'); }
@@ -8549,6 +8622,7 @@
     var rs=host.querySelector('#ot-reset'); if(rs) rs.classList.toggle('is-off', !canReset);
     var rsc=host.querySelector('#ot-reset-ctl'); if(rsc) rsc.classList.toggle('lab-on', canReset);
     var cur=host.querySelector('#ot-tempo-cur'); if(cur) cur.innerHTML=otTempoLabel();
+    var tlab=host.querySelector('#ot-tempo-lab'); if(tlab) tlab.textContent=otTempoWoord();
     [].forEach.call(host.querySelectorAll('.ot-topt'),function(o){ o.classList.toggle('on', parseFloat(o.getAttribute('data-v'))===otState.speed); });
   }
   function moveTempoThumb(animate){
@@ -9502,14 +9576,26 @@
       if(agAfterSave){ agAfterSave=null; closeAgendaSheet(); } else agRender(); }
     else if(a==='agphdel'){ if(agDraft){ agSync(); agDraft.photo=''; agDraft.focus=phClampFoc(null); agRender(); buzz(10); } }
     else if(a==='agphfit'){ phSetFit('ag', act.getAttribute('data-fit')); }
+    // Binnen één onderdeel is de plaats een keuze: nog eens tikken zet hem weer uit, een andere
+    // tik vervangt hem. "Deelgenomen" hoeft niet meer apart uitgesloten te worden — dat volgt nu
+    // vanzelf uit het feit dat een regel er maar één draagt.
     else if(a==='agres'){ agSync();      if(agDraft){
-        var _rv=act.getAttribute('data-v'), _rl=agResultLijst(agDraft.result), _ri=_rl.indexOf(_rv);
-        if(_ri>-1) _rl.splice(_ri,1);
-        else if(agPlace(_rv) && agPlace(_rv).geenPodium) _rl=[_rv];   // sluit de medailles uit
-        else _rl=_rl.filter(function(v){ var p=agPlace(v); return !(p&&p.geenPodium); }).concat([_rv]);
-        agDraft.result=agResultLijst(_rl);
+        var _rv=act.getAttribute('data-v'), _i=+(act.getAttribute('data-i')||0);
+        var _rl=agUitslagRijen(agDraft.result, true);
+        while(_rl.length<=_i) _rl.push({deel:'', v:''});
+        _rl[_i].v = (_rl[_i].v===_rv) ? '' : _rv;
+        agDraft.result=_rl;
         agRender(); buzz(10);
       } }
+    else if(a==='aguitadd'){ agSync();
+      if(agDraft){ var _ul=agUitslagRijen(agDraft.result, true); _ul.push({deel:'', v:''});
+        agDraft.result=_ul; agRender(); buzz(10);
+        var _nw=agSheet&&agSheet.querySelectorAll('[data-role="uitdeel"]');
+        if(_nw&&_nw.length) _nw[_nw.length-1].focus();
+      } }
+    else if(a==='aguitdel'){ agSync();
+      if(agDraft){ var _dl=agUitslagRijen(agDraft.result, true); _dl.splice(+act.getAttribute('data-i'),1);
+        agDraft.result=_dl; agRender(); buzz(10); } }
     else if(a==='agtradd'){ agSync();
       if(agDraft){
         var _tl=(agDraft.trainers && agDraft.trainers.length) ? agDraft.trainers.slice() : [''];
@@ -9544,7 +9630,12 @@
         }
         if((agDraft.where||'').trim()) _ev.where=agDraft.where.trim(); else delete _ev.where;
         // Een uitslag hoort alleen bij een wedstrijd; wisselt het type, dan verdwijnt hij mee.
-        var _rs=(agDraft.type==='wedstrijd') ? agResultLijst(agDraft.result) : [];
+        // Een regel zonder plaats is niets: een onderdeel waarin je geen uitslag noteert hoeft
+        // niet op je tijdlijn te staan.
+        var _rs=(agDraft.type==='wedstrijd')
+          ? agUitslagRijen(agDraft.result).filter(function(r){ return !!r.v; })
+              .map(function(r){ var d=(r.deel||'').trim(); return d ? {deel:d, v:r.v} : r.v; })
+          : [];
         if(_rs.length) _ev.result=_rs; else delete _ev.result;
         // Trainers horen bij een cursus; wisselt het type, dan verdwijnen ze mee. Lege regels
         // vallen weg, zodat een vergeten veld geen naamloze trainer oplevert.
