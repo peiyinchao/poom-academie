@@ -2935,9 +2935,10 @@
      breekplanken hebben die lucht wel en houden hun 20px. */
   .hb-prop{display:block;text-align:right;margin:var(--pmt,27px) -10px 44px 0;
     pointer-events:none}
+  /* Zonder slagschaduw: onder een gesloten vorm als de helm las die zachte donkere vlek als
+     een verloopje achter het plaatje, net als de blauwe waas die we net weghaalden. */
   .hb-prop img{display:inline-block;width:var(--pw,190px);height:auto;
-    transform:rotate(var(--prot,0deg));
-    filter:drop-shadow(0 12px 20px rgba(26,22,18,.14))}
+    transform:rotate(var(--prot,0deg))}
   @keyframes hbPropIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion:no-preference){.hb-prop{animation:hbPropIn .52s cubic-bezier(.2,.7,.3,1) both .14s}}
   /* Handboek-mascotte die meekrimpt: hij begint als grote plaat boven de pagina en schuift al
@@ -2947,8 +2948,10 @@
      1 gedokt) geïnterpoleerd. Elke sectie met een tekening doet ditzelfde, dus de beweging
      hoort bij het Handboek en niet bij één pagina. */
   .hbcat.has-masc .cs-hero{position:relative;z-index:6}
+  /* Ook hier geen slagschaduw: de vaste plaat heeft er nooit een gehad, dus met schaduw week de
+     meekrimpende mascotte juist af van de tekening die hij vervangt. */
   .pm-masc{position:absolute;left:0;top:0;width:var(--pm-w,150px);z-index:4;transform-origin:0 0;
-    pointer-events:none;will-change:transform;filter:drop-shadow(0 7px 12px rgba(20,23,18,.16));
+    pointer-events:none;will-change:transform;
     transform:translate(calc(var(--pm-x0,0px) + var(--pm-dx,0px) * var(--pmc,0)),
                         calc(var(--pm-y0,0px) + var(--pm-dy,0px) * var(--pmc,0)))
               scale(calc(1 + (var(--pm-s,.3) - 1) * var(--pmc,0)))}
@@ -2963,6 +2966,10 @@
     border-radius:3px;background:var(--accent,var(--el));opacity:.9}
   .hb-eis-l{display:block;font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-size:11px;
     font-weight:800;color:var(--accent,var(--el));margin-bottom:4px}
+  /* Bronvermelding onder een lijst: kleiner en grijs, met een haarlijn erboven zodat hij bij de
+     lijst hoort maar er duidelijk geen regel meer van is. */
+  .hb-bron{font-size:12px;line-height:1.5;color:var(--gray);margin:16px 2px 0;padding-top:12px;
+    border-top:1px solid var(--line)}
   .hb-sec{margin-bottom:15px}
   .hb-sec h4{font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;font-size:14px;
     color:var(--deep);margin:0 0 12px}
@@ -6912,7 +6919,11 @@
         '</span>'+
       '</button>';
     }).join('');
-    return head+'<div class="hb-exlist">'+rows+'</div>';
+    // Waar de eisen vandaan komen hoort er gewoon bij te staan: het is niet onze lijst, en bij
+    // een verschil weet je meteen welk reglement voorgaat. Onderaan, want het is een verwijzing
+    // en geen onderdeel van de lijst.
+    return head+'<div class="hb-exlist">'+rows+'</div>'+
+      '<p class="hb-bron">Gebaseerd op het examenreglement van TKD-vereniging Kawarmala.</p>';
   }
   function toggleExamChk(id){
     if(!id) return;
