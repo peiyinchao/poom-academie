@@ -636,22 +636,28 @@
      band over, zodat de halte bij de lijn hoort waar hij op ligt in plaats van er als los wit
      rondje bovenop te liggen. Bij de witte band valt die ring weg tegen het rondje zelf; daar
      houdt hij de gewone lijnkleur (zie tlDotRand).
-     De ring is even dik als de lijn: 6px. Bij 2px las de halte als een los rondje dat toevallig
-     op de lijn lag, omdat de ring dunner was dan de lijn die erin uitkwam. Op dezelfde dikte
-     loopt de lijn zonder verspringen door in de ring en leest de halte als de lijn die zich om
-     het punt heen vouwt. Dankzij border-box blijft de halte 30px, dus het hart blijft op
-     dezelfde 15px liggen; alleen het tekentje binnenin krijgt minder ruimte.
-     De ring is geen border maar twee achtergrondlagen, want een border kan maar één kleur
-     dragen en een tweekleurige band moet er allebei in kwijt. De onderste laag vult de hele
-     cirkel met de bandkleur (of met dezelfde links/rechts-verdeling als de lijn), de bovenste
-     legt daar het paginavlak overheen tot aan de binnenrand. Wat overblijft is de ring. De
-     padding van 6px doet hier het werk dat de border deed, dus de binnenruimte blijft 18px.
+     De ring is geen border maar twee achtergrondlagen, want een border kan maar één kleur dragen
+     en een tweekleurige band moet er allebei in kwijt. De onderste laag vult de hele cirkel met
+     de bandkleur (of met dezelfde links/rechts-verdeling als de lijn), de bovenste legt daar het
+     paginavlak overheen tot aan de binnenrand. Wat overblijft is de ring; de padding doet dus het
+     werk dat de border deed.
+     Twee knoppen, en ze staan los van elkaar: --tlin is de witruimte binnenin, --tlring de dikte
+     eromheen. Een border groeide naar BINNEN — de halte bleef 30px, maar het tekentje raakte klem
+     omdat het wit van 30 naar 18px kromp. Daarom wordt de halte hier vanuit zijn HART geplaatst:
+     -22px en 40px zijn de coördinaten van dat hart, precies het hart van de lijn (37 - 25 + 3) en
+     het hart van de titelregel. Verander je de ring of de witruimte, dan groeit de halte
+     symmetrisch naar buiten en blijft hij vanzelf op de lijn liggen.
+     4px is tweederde van de 6px lijn: dik genoeg dat de lijn zichtbaar doorloopt in de ring in
+     plaats van er los bovenop te liggen, en dun genoeg dat de halte de aandacht niet van de
+     kaarten wegtrekt.
      De halte staat op ooghoogte met de titel, niet met de datum: de titel is
      waar je naar kijkt. 25px = 1px rand + 13px binnenmarge + de datumregel + het hart van de
      titel, min de halve halte. Bij een grotere halte moet die 25 dus mee omlaag, anders zakt de
      halte onder de titel weg. */
-  .tl-dot{position:absolute;left:-37px;top:25px;width:30px;height:30px;border-radius:50%;
-    display:grid;place-items:center;font-size:13px;line-height:1;padding:6px;
+  .tl-dot{--tlring:4px;--tlin:22px;--tlsz:calc(var(--tlin) + 2 * var(--tlring));
+    position:absolute;left:calc(-22px - var(--tlsz) / 2);top:calc(40px - var(--tlsz) / 2);
+    width:var(--tlsz);height:var(--tlsz);border-radius:50%;
+    display:grid;place-items:center;font-size:13px;line-height:1;padding:var(--tlring);
     background:linear-gradient(var(--surface),var(--surface)) content-box no-repeat,
       var(--tldot,var(--line)) border-box no-repeat}
   .tl-card{position:relative;border:1px solid var(--line);border-radius:16px;padding:13px 15px;background:var(--surface)}
@@ -1925,9 +1931,12 @@
   /* Een kale "s" achter het getal las als seconden, terwijl het seconden per tel zijn — en dat
      verschil is nu juist waar de knop over gaat. Daarom staat de eenheid voluit onder het getal.
      Klein en gedempt: het is een onderschrift, geen tweede waarde, dus het getal blijft de
-     aflezing die je van een afstand ziet. */
+     aflezing die je van een afstand ziet.
+     Alleen op de gesloten knop, want daar is het de enige aflezing. In het open menu staat de
+     eenheid al voluit náást de pil, en dan is hem onder elke optie herhalen puur ruis: de opties
+     verschillen in het getal, niet in de eenheid. */
   .ot-tempo-cur,.ot-topt .ot-tlab{flex-direction:column;gap:0;line-height:1}
-  .ot-tu{font-size:8px;font-weight:700;letter-spacing:.03em;opacity:.74;margin-top:2px}
+  .ot-tu{font-size:8px;font-weight:700;letter-spacing:.03em;opacity:.74;margin-top:2px;white-space:nowrap}
   /* Diagonal fraction (¹ ⁄ ₄) rebuilt from parts so the slash gets real breathing room left & right */
   .ot-tempo.open .ot-tempo-fab{opacity:0;pointer-events:none}
   /* Fold-out pill: same height as the button, grows RIGHTWARD from the left edge; ROUND option thumbs */
@@ -2046,9 +2055,12 @@
   .ot-mode-fab .ot-mdig{font-size:19px}
   /* Dichtgevouwen draagt de knop zelf een bijschrift in plaats van een zwevend label ernaast:
      dat scheelt een woord dat over het scherm loopt en zegt meteen wat de stand oplevert.
-     Het icoon schuift daarvoor een paar pixels omhoog zodat het paar samen gecentreerd blijft. */
+     Het icoon schuift daarvoor een paar pixels omhoog zodat het paar samen gecentreerd blijft.
+     Alleen de herhalingen hebben dat nodig: een teller van 1 tot 10 moet je uitleggen, een
+     zandloper niet. Die staat dus zonder bijschrift, en dan ook zonder de opschuif. */
   .ot-mico{display:flex;flex-direction:column;align-items:center;justify-content:center;
     line-height:1;margin-top:-3px}
+  .ot-mico.time{margin-top:0}
   .ot-mcap{font-size:8px;font-weight:700;letter-spacing:.03em;opacity:.74;margin-top:3px}
   .ot-mico.time,.timerscreen[data-mode="time"] .ot-mico.count{display:none}
   .timerscreen[data-mode="time"] .ot-mico.time{display:flex}
@@ -5600,14 +5612,13 @@
   function tlKleur(c){ return c==='#EDEDE7' ? '#FFFFFF' : c; }
   /* De ring om de halte draagt de bandkleur, en bij een tweekleurige band draagt hij ze allebei:
      exact dezelfde links/rechts-verdeling als de lijn, zodat de twee sporen zonder kleurbreuk de
-     ring in lopen en de lijn zich echt om de halte heen lijkt te vouwen. Alleen een effen witte
-     band kan dat niet: een witte ring om een wit rondje is geen ring meer, dus die houdt de
-     gewone lijnkleur. Heeft zo'n band wél een tweede kleur, dan is er genoeg om te zien en
-     volgt de ring gewoon de lijn. */
+     ring in lopen en de lijn zich echt om de halte heen lijkt te vouwen. Ook de witte band krijgt
+     zijn eigen kleur: via tlKleur wordt dat vol wit, net als de lijn. Een gedempte grijze ring zou
+     de 10e geup juist zijn band afpakken, terwijl wit op de crèmekleurige pagina prima leest.
+     Alleen wie nog helemaal geen band heeft, houdt de gewone lijnkleur. */
   function tlDotRand(g){
     if(!g) return 'var(--line)';
-    if(g.col2) return tlLijnCss(g);
-    return g.col==='#EDEDE7' ? 'var(--line)' : g.col;
+    return g.col2 ? tlLijnCss(g) : tlKleur(g.col);
   }
   /* Nog geen enkele band gehaald? Dan is de lijn wit: de aanloop naar je 10e geup. Onderaan dooft
      hij weg naar niets (zie het masker op het laatste blok), zodat de reis uit het niets begint. */
@@ -7586,7 +7597,7 @@
     el.setAttribute('data-el', TMR_ORB[_tg]);  // colour + orb layout follow the grade's colour group
     setTopBar(TMR_PAL[_tg].el);        // match the iOS top bar to the timer's gradient
     var tOpts = OT_TEMPOS.map(function(t){
-      return '<button class="ot-topt'+(t.v===otState.speed?' on':'')+'" data-act="otspeed" data-v="'+t.v+'"><span class="ot-tlab">'+t.s+'<span class="ot-tu">sec/tel</span></span></button>';
+      return '<button class="ot-topt'+(t.v===otState.speed?' on':'')+'" data-act="otspeed" data-v="'+t.v+'"><span class="ot-tlab">'+t.s+'</span></button>';
     }).join('');
     var rOpts = OT_REPS.map(function(r){
       var inf=r.v===Infinity, dv=inf?'inf':String(r.v);
@@ -7652,7 +7663,7 @@
               '<span class="ot-badge empty" id="ot-rep-badge"></span></button>'+
           '</div>'+
           '<div class="ot-tempo">'+
-            '<span class="ot-lab">Sec per tel</span>'+
+            '<span class="ot-lab">Seconde(s) per tel</span>'+
             '<div class="ot-tmenu"><div class="ot-tmenu-inner"><span class="ot-tthumb"></span>'+tOpts+'</div></div>'+
             '<button class="ot-fab ot-tempo-fab" data-act="ottempo" aria-label="Tempo">'+
               '<span class="ot-tempo-cur" id="ot-tempo-cur">'+otTempoLabel()+'</span></button>'+
@@ -7674,7 +7685,7 @@
             '<div class="ot-mmenu"><div class="ot-mmenu-inner"><span class="ot-mthumb"></span>'+mOpts+'</div></div>'+
             '<button class="ot-fab ot-mode-fab" id="ot-mode" data-act="otmodemenu" aria-label="'+otModeAria()+'">'+
               '<span class="ot-mico count">'+otModeIcon('count')+'<span class="ot-mcap">1-10</span></span>'+
-              '<span class="ot-mico time">'+otModeIcon('time')+'<span class="ot-mcap">3,2,1</span></span></button>'+
+              '<span class="ot-mico time">'+otModeIcon('time')+'</span></button>'+
           '</div>'+
         '</div>'+
         '<div class="ot-ctl" id="ot-reset-ctl"><span class="ot-lab">Opnieuw</span>'+
@@ -8304,7 +8315,8 @@
       else if(name==='rate2'){ if(!sfxSample('rate2')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
     }catch(e){}
   }
-  var OT_TU='<span class="ot-tu">sec/tel</span>';
+  // Lucht om de schuine streep: op 8px plakken "sec" en "tel" anders aan elkaar tot één woord.
+  var OT_TU='<span class="ot-tu">sec / tel</span>';
   function otTempoLabel(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].s+OT_TU; } return '1'+OT_TU; }
   function otTempoName(){ for(var k=0;k<OT_TEMPOS.length;k++){ if(OT_TEMPOS[k].v===otState.speed) return OT_TEMPOS[k].name; } return 'Normaal'; }
   function otPop(){ var n=timerScreen&&timerScreen.querySelector('#ot-num'); if(!n) return;

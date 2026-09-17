@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Poom Academy — haltes op de tijdlijn</title>
+<style>
+  :root{
+    --page:#F4F1EA; --surface:#FFFFFF; --ink:#1A1712; --gray:#6B6459;
+    --line:#E7E1D5; --soft:#EFEADF;
+    /* Dezelfde twee stapels als de app, zodat de preview klopt met je telefoon. */
+    --cond:'Big Shoulders Display','Oswald',system-ui,sans-serif;
+    --text:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--ink);font:15px/1.55 var(--text);
+    padding:22px 18px calc(56px + env(safe-area-inset-bottom));-webkit-text-size-adjust:100%}
+  h1{font-family:var(--cond);font-weight:800;font-size:27px;letter-spacing:-.01em;margin:0 0 4px}
+  h2{font-family:var(--cond);font-weight:800;font-size:20px;margin:34px 0 2px;letter-spacing:-.01em}
+  .lead{opacity:.72;margin:0 0 10px;max-width:62ch}
+  p.note{opacity:.72;margin:4px 0 14px;max-width:62ch;font-size:14px}
+
+  /* ---------- de nagebouwde tijdlijn ---------- */
+  /* Exact de maten uit de app: lijst met 37px inspringing, lijn 6px op left:-25px, halte
+     gecentreerd op datzelfde hart. Alleen de halte zelf is hier instelbaar. */
+  .tl{position:relative;padding-left:37px}
+  .it{position:relative;margin-bottom:11px}
+  .it::before{content:"";position:absolute;left:-25px;width:6px;top:0;bottom:-11px;
+    background:var(--c,var(--line))}
+  .tl>.it:first-child::before{border-radius:3px 3px 0 0}
+  .tl>.it:last-child::before{-webkit-mask:linear-gradient(180deg,#000 58%,transparent);
+    mask:linear-gradient(180deg,#000 58%,transparent)}
+  .kaart{position:relative;border:1px solid var(--line);border-radius:16px;
+    padding:13px 15px;background:var(--surface)}
+  .kaart .d{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;
+    font-size:10.5px;font-weight:700;color:var(--gray);margin-bottom:3px}
+  .kaart .t{font-size:15px;font-weight:700;line-height:1.25}
+
+  /* De halte. --in is de witruimte binnenin, --ring de dikte van de rand. De rand groeit naar
+     BUITEN: left/top schuiven met de ring mee, zodat het hart precies op de lijn blijft liggen
+     hoeveel rand je er ook omheen legt. De rand is geschilderd in plaats van een border, want
+     een tweekleurige band moet twee kleuren in die ring kwijt. */
+  .dot{position:absolute;
+    left:calc(-37px - var(--ring));
+    top:calc(25px - var(--ring) + (18px - var(--in)) / 2);
+    width:calc(var(--in) + 2 * var(--ring));height:calc(var(--in) + 2 * var(--ring));
+    border-radius:50%;display:grid;place-items:center;line-height:1;
+    font-size:calc(var(--in) * .72);padding:var(--ring);
+    background:linear-gradient(var(--surface),var(--surface)) content-box no-repeat,
+      var(--r,var(--line)) border-box no-repeat}
+  /* Gevuld: geen ring maar een dichte schijf in de bandkleur, met het teken er wit bovenop.
+     Emoji zijn niet wit te krijgen, dus ze worden tot silhouet gerekend: eerst helemaal zwart,
+     dan omgekeerd naar wit. Dat werkt voor elk teken dat er ooit bij komt. */
+  .gevuld .dot{padding:0;width:var(--in);height:var(--in);
+    left:calc(-37px + (18px - var(--in)) / 2 - 6px);
+    top:calc(25px + (18px - var(--in)) / 2);
+    background:var(--r,var(--line))}
+  .gevuld .dot span{filter:brightness(0) invert(1)}
+  /* Het oude gedrag, puur als ijkpunt: de rand groeide naar binnen, dus de halte bleef 30px
+     maar de witruimte kromp van 30 naar 18. */
+  .oud .dot{left:-37px;top:25px;width:30px;height:30px;padding:6px;font-size:13px}
+
+  /* ---------- bediening ---------- */
+  .paneel{position:sticky;top:0;z-index:5;background:var(--page);
+    padding:10px 0 12px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+  .rij{display:flex;align-items:center;gap:12px;margin:7px 0}
+  .rij label{font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;
+    font-size:11.5px;font-weight:700;color:var(--gray);width:104px;flex:none}
+  .rij input[type=range]{flex:1;accent-color:#3E5BD6}
+  .rij .v{font-family:var(--cond);font-weight:800;font-size:17px;width:46px;text-align:right}
+  .uitkomst{font-size:13px;opacity:.75;margin:8px 0 0}
+  .uitkomst b{font-variant-numeric:tabular-nums}
+  .knoppen{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .knoppen button{font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;
+    font-size:12px;font-weight:700;padding:7px 12px;border-radius:999px;cursor:pointer;
+    border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+  .knoppen button.on{background:#3E5BD6;border-color:#3E5BD6;color:#fff}
+
+  /* ---------- de vaste rij ter vergelijking ---------- */
+  .strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:16px;margin-top:12px}
+  .vak{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 12px 4px}
+  .vak h3{font-family:var(--cond);text-transform:uppercase;letter-spacing:.07em;font-size:11.5px;
+    font-weight:700;color:var(--gray);margin:0 0 10px}
+  .vak .tl{padding-left:30px;transform:translateX(7px)}
+  .vak .kaart{padding:9px 10px}
+  .vak .kaart .t{font-size:12.5px}
+  .vak .kaart .d{font-size:9px}
+</style>
+</head>
+<body>
+
+<h1>Haltes op de tijdlijn</h1>
+<p class="lead">De rand groeit hier naar <b>buiten</b>: het hart van de halte blijft op de lijn
+liggen, en de witruimte binnenin blijft wat hij is — hoe dik je de rand ook maakt. Schuif tot het
+klopt en geef me de twee getallen door.</p>
+
+<div class="paneel">
+  <div class="rij">
+    <label for="s-in">Witruimte</label>
+    <input id="s-in" type="range" min="14" max="34" step="1" value="24">
+    <span class="v" id="v-in">24px</span>
+  </div>
+  <div class="rij">
+    <label for="s-ring">Randdikte</label>
+    <input id="s-ring" type="range" min="0" max="8" step="1" value="3">
+    <span class="v" id="v-ring">3px</span>
+  </div>
+  <div class="rij">
+    <label for="s-rust">Rust</label>
+    <input id="s-rust" type="range" min="0" max="60" step="5" value="0">
+    <span class="v" id="v-rust">0%</span>
+  </div>
+  <p class="uitkomst" id="uitkomst"></p>
+  <div class="knoppen">
+    <button data-stijl="ring" class="on">Met rand</button>
+    <button data-stijl="gevuld">Gevuld, wit teken</button>
+  </div>
+</div>
+
+<div id="live"></div>
+
+<h2>Randdikte naast elkaar</h2>
+<p class="note">Dezelfde witruimte, alleen de rand verschilt. Zo zie je in één oogopslag waar het
+omslaat van "los rondje op de lijn" naar "de lijn vouwt zich om de halte".</p>
+<div class="strip" id="strip-ring"></div>
+
+<h2>Gevuld, met een wit teken</h2>
+<p class="note">Geen rand maar een dichte schijf in de bandkleur. De halte wordt dan zelf een
+stukje lijn in plaats van een onderbreking erin. Bij een tweekleurige band draagt de schijf
+allebei de kleuren, net als de lijn. Gevuld mag kleiner: een dichte schijf trekt bij gelijke maat
+meer aandacht dan een ring, en die aandacht hoort bij de kaart te liggen.</p>
+<div class="strip" id="strip-vul"></div>
+
+<h2>Hoe rustig mag de lijn zijn?</h2>
+<p class="note">Dezelfde halte, alleen de bandkleur wordt stap voor stap met de paginakleur
+verdund. Hoe verder naar rechts, hoe meer de lijn achtergrond wordt en de kaarten vooraan komen.</p>
+<div class="strip" id="strip-rust"></div>
+
+<h2>Zoals het nu live staat</h2>
+<p class="note">Ter vergelijking: de rand groeide naar binnen, dus de halte bleef 30px maar de
+witruimte kromp tot 18px en het teken kwam klem te zitten.</p>
+<div class="strip" id="strip-oud"></div>
+
+<script>
+  // Drie haltes die samen alle gevallen laten zien: een tweekleurige band, een effen band en
+  // de witte band. Die laatste krijgt vol wit, net als de lijn: op de crèmekleurige pagina leest
+  // wit wél als wit, en een gedempte grijze ring zou de 10e geup juist zijn kleur afpakken.
+  var BLAUW = '#2463E0', ROOD = '#C50116', GEEL = '#FFD000', WIT = '#FFFFFF';
+  var BASIS = [
+    { ico:'🎓', kleuren:[BLAUW, ROOD], d:'12 juni 2025',    t:'3e geup gehaald' },
+    { ico:'🏆', kleuren:[GEEL],        d:'4 maart 2025',    t:'Clubtoernooi' },
+    { ico:'📚', kleuren:[WIT],         d:'9 januari 2025',  t:'Eerste les · 10e geup' }
+  ];
+  // Minder verzadigd betekent: dezelfde kleur, minder kleur erin. Dus naar grijs toe en niet naar
+  // de paginakleur — anders verschuift de tint ook en wordt rood ineens roze-beige. Daarom via
+  // HSL, waar verzadiging een eigen knop is. Wit heeft geen verzadiging en blijft dus wit.
+  function ontzadig(hex, pct){
+    if (!pct) return hex;
+    var r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
+    var mx = Math.max(r,g,b), mn = Math.min(r,g,b), l = (mx+mn)/2, h = 0, sat = 0;
+    if (mx !== mn) {
+      var d = mx - mn;
+      sat = l > .5 ? d/(2-mx-mn) : d/(mx+mn);
+      h = mx === r ? (g-b)/d + (g<b?6:0) : mx === g ? (b-r)/d + 2 : (r-g)/d + 4;
+      h /= 6;
+    }
+    sat *= (1 - pct/100);
+    function kan(p,q,t){ if(t<0)t+=1; if(t>1)t-=1;
+      if(t<1/6) return p+(q-p)*6*t; if(t<1/2) return q; if(t<2/3) return p+(q-p)*(2/3-t)*6; return p; }
+    var q = l < .5 ? l*(1+sat) : l+sat-l*sat, p2 = 2*l-q;
+    var uit = [kan(p2,q,h+1/3), kan(p2,q,h), kan(p2,q,h-1/3)];
+    return '#' + uit.map(function(v){ return ('0'+Math.round(v*255).toString(16)).slice(-2); }).join('').toUpperCase();
+  }
+  function verf(kleuren, rust){
+    var k = kleuren.map(function(c){ return ontzadig(c, rust); });
+    return k.length === 2 ? 'linear-gradient(90deg,' + k[0] + ' 0 50%,' + k[1] + ' 50% 100%)' : k[0];
+  }
+  function tlHtml(rust){
+    return '<div class="tl">' + BASIS.map(function(h){
+      var v = verf(h.kleuren, rust);
+      return '<div class="it" style="--c:' + v + ';--r:' + v + '">' +
+        '<span class="dot"><span>' + h.ico + '</span></span>' +
+        '<div class="kaart"><div class="d">' + h.d + '</div><div class="t">' + h.t + '</div></div>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+  function vak(titel, stijl, inn, ring, rust){
+    return '<div class="vak ' + stijl + '" style="--in:' + inn + 'px;--ring:' + ring + 'px">' +
+      '<h3>' + titel + '</h3>' + tlHtml(rust || 0) + '</div>';
+  }
+
+  var live = document.getElementById('live'),
+      sIn = document.getElementById('s-in'), sRing = document.getElementById('s-ring'),
+      sRust = document.getElementById('s-rust'),
+      vIn = document.getElementById('v-in'), vRing = document.getElementById('v-ring'),
+      vRust = document.getElementById('v-rust'),
+      uit = document.getElementById('uitkomst'), stijl = 'ring';
+  // Een gevulde schijf trekt bij gelijke maat meer aandacht dan een ring, dus die stijl heeft
+  // zijn eigen, kleinere uitgangsmaat. Wissel je van stijl, dan gaat de schuif daarheen mee.
+  var maat = { ring:24, gevuld:18 };
+
+  function teken(){
+    var inn = +sIn.value, ring = +sRing.value, rust = +sRust.value;
+    maat[stijl] = inn;
+    vIn.textContent = inn + 'px';
+    vRing.textContent = ring + 'px';
+    vRust.textContent = rust + '%';
+    uit.innerHTML = (stijl === 'gevuld'
+      ? 'Schijf van <b>' + inn + 'px</b>, teken <b>' + Math.round(inn * .72) + 'px</b>.'
+      : 'Halte <b>' + (inn + 2 * ring) + 'px</b> in totaal: ' + inn + 'px wit met ' + ring +
+        'px rand eromheen. De lijn is 6px, dus de rand is ' +
+        (ring === 0 ? 'er niet' : (ring / 6).toFixed(2).replace(/0+$/, '').replace(/\.$/, '') +
+        '\u00d7 de lijndikte') + '.')
+      + (rust ? ' Kleur <b>' + rust + '%</b> ontzadigd — geel wordt ' + ontzadig('#FFD000', rust) + '.' : '');
+    live.className = stijl === 'gevuld' ? 'gevuld' : '';
+    live.setAttribute('style', '--in:' + inn + 'px;--ring:' + ring + 'px');
+    live.innerHTML = tlHtml(rust);
+  }
+  sIn.addEventListener('input', teken);
+  sRing.addEventListener('input', teken);
+  sRust.addEventListener('input', teken);
+  [].forEach.call(document.querySelectorAll('.knoppen button'), function(b){
+    b.addEventListener('click', function(){
+      stijl = b.getAttribute('data-stijl');
+      sIn.value = maat[stijl];
+      [].forEach.call(document.querySelectorAll('.knoppen button'), function(o){
+        o.classList.toggle('on', o === b);
+      });
+      teken();
+    });
+  });
+
+  document.getElementById('strip-ring').innerHTML =
+    [0,1,2,3,4,5,6].map(function(w){ return vak(w === 0 ? 'Geen rand' : w + 'px rand', '', 24, w); }).join('');
+  document.getElementById('strip-vul').innerHTML =
+    [12,14,16,18,20,22].map(function(d){ return vak(d + 'px schijf', 'gevuld', d, 0); }).join('');
+  document.getElementById('strip-rust').innerHTML =
+    [0,15,30,45,60].map(function(r){ return vak(r === 0 ? 'Vol' : r + '% rustiger', 'gevuld', 16, 0, r); }).join('');
+  document.getElementById('strip-oud').innerHTML = vak('Nu live', 'oud', 18, 6);
+
+  teken();
+</script>
+</body>
+</html>
