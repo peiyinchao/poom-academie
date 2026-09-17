@@ -636,13 +636,24 @@
      band over, zodat de halte bij de lijn hoort waar hij op ligt in plaats van er als los wit
      rondje bovenop te liggen. Bij de witte band valt die ring weg tegen het rondje zelf; daar
      houdt hij de gewone lijnkleur (zie tlDotRand).
+     De ring is even dik als de lijn: 6px. Bij 2px las de halte als een los rondje dat toevallig
+     op de lijn lag, omdat de ring dunner was dan de lijn die erin uitkwam. Op dezelfde dikte
+     loopt de lijn zonder verspringen door in de ring en leest de halte als de lijn die zich om
+     het punt heen vouwt. Dankzij border-box blijft de halte 30px, dus het hart blijft op
+     dezelfde 15px liggen; alleen het tekentje binnenin krijgt minder ruimte.
+     De ring is geen border maar twee achtergrondlagen, want een border kan maar één kleur
+     dragen en een tweekleurige band moet er allebei in kwijt. De onderste laag vult de hele
+     cirkel met de bandkleur (of met dezelfde links/rechts-verdeling als de lijn), de bovenste
+     legt daar het paginavlak overheen tot aan de binnenrand. Wat overblijft is de ring. De
+     padding van 6px doet hier het werk dat de border deed, dus de binnenruimte blijft 18px.
      De halte staat op ooghoogte met de titel, niet met de datum: de titel is
      waar je naar kijkt. 25px = 1px rand + 13px binnenmarge + de datumregel + het hart van de
      titel, min de halve halte. Bij een grotere halte moet die 25 dus mee omlaag, anders zakt de
      halte onder de titel weg. */
   .tl-dot{position:absolute;left:-37px;top:25px;width:30px;height:30px;border-radius:50%;
-    display:grid;place-items:center;font-size:13px;line-height:1;
-    background:var(--surface);border:2px solid var(--tldot,var(--line))}
+    display:grid;place-items:center;font-size:13px;line-height:1;padding:6px;
+    background:linear-gradient(var(--surface),var(--surface)) content-box no-repeat,
+      var(--tldot,var(--line)) border-box no-repeat}
   .tl-card{position:relative;border:1px solid var(--line);border-radius:16px;padding:13px 15px;background:var(--surface)}
   /* Het potlood hangt in de hoek en is er alleen als de kaart bovenaan staat. Het blijft in de
      opmaak staan (alleen onzichtbaar), zodat de tekst niet verspringt als het verschijnt. */
@@ -1868,12 +1879,6 @@
   .ot-rep .ot-lab,.ot-tempo .ot-lab,.ot-dur .ot-lab{
     left:calc(var(--pw, 64px) + 14px);bottom:3px;height:58px;margin-bottom:0;transform:none;
     display:flex;align-items:center}
-  /* De moduskiezer vouwt na het kiezen dicht tot alleen de cijfers; het label ernaast blijft
-     staan en zegt welke stand aan is. Tijdens het uitklappen wijkt het, want dan staan de
-     woorden in de opties zelf. */
-  .ot-mode .ot-lab{left:78px;bottom:0;height:64px;margin-bottom:0;transform:none;
-    display:flex;align-items:center;opacity:1}
-  .ot-mode.open .ot-lab,.ot-mode.collapsing .ot-lab{opacity:0}
   .ot-fab.is-off{opacity:.32;pointer-events:none}
   /* Loopt de timer? Dan zijn de instellingen linksonder buiten bedrijf. */
   .timerscreen.ot-locked .ot-left .ot-fab{opacity:.32;pointer-events:none}
@@ -2039,9 +2044,14 @@
   .ot-mode.open{z-index:6}
   .ot-mode.open .ot-fab{opacity:0;pointer-events:none;transition:opacity .2s ease}
   .ot-mode-fab .ot-mdig{font-size:19px}
-  .ot-mico{display:grid;place-items:center}
+  /* Dichtgevouwen draagt de knop zelf een bijschrift in plaats van een zwevend label ernaast:
+     dat scheelt een woord dat over het scherm loopt en zegt meteen wat de stand oplevert.
+     Het icoon schuift daarvoor een paar pixels omhoog zodat het paar samen gecentreerd blijft. */
+  .ot-mico{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    line-height:1;margin-top:-3px}
+  .ot-mcap{font-size:8px;font-weight:700;letter-spacing:.03em;opacity:.74;margin-top:3px}
   .ot-mico.time,.timerscreen[data-mode="time"] .ot-mico.count{display:none}
-  .timerscreen[data-mode="time"] .ot-mico.time{display:grid}
+  .timerscreen[data-mode="time"] .ot-mico.time{display:flex}
   .ot-mmenu{position:absolute;left:0;bottom:3px;height:58px;width:64px;z-index:2;overflow:hidden;
     display:flex;align-items:center;justify-content:flex-start;padding:6px;box-sizing:border-box;
     border-radius:29px;background:rgba(16,8,4,.52);border:1px solid rgba(255,255,255,.24);
@@ -2363,7 +2373,8 @@
     padding:7px 0;align-self:flex-start}
   .cs-dot{position:relative;width:6px;height:6px;flex:none;border:0;padding:0;margin:0 3.5px;border-radius:50%;
     background-color:rgba(30,22,16,.4);cursor:pointer;-webkit-tap-highlight-color:transparent;
-    transition:transform .2s cubic-bezier(.22,.9,.3,1), background-color .22s ease}
+    transition:transform .2s cubic-bezier(.22,.9,.3,1), background-color .22s ease,
+      width .24s cubic-bezier(.22,.9,.3,1), height .24s cubic-bezier(.22,.9,.3,1)}
   .cs-dot::before{content:"";position:absolute;top:-9px;bottom:-9px;left:-3.5px;right:-3.5px}
   /* De puntjes probeerden het verschil eerder met tinten te vertellen: licht voor "beoordeeld",
      donker voor "vraagt aandacht". Dat werkte niet — een tintverschil van een paar procent op
@@ -2372,7 +2383,7 @@
      Dat lees je in één oogopslag, en het overleeft kleurenblindheid.
      Eerder ademden deze puntjes zachtjes, maar meerdere animaties gelijk laten lopen bleef
      zichtbaar uit de pas; een stille vulling doet hetzelfde werk zonder die onrust. */
-  .cs-dot.st-done{width:12px;height:12px;border-radius:0;background-color:rgba(30,22,16,.46);
+  .cs-dot.st-done{width:11px;height:11px;border-radius:0;background-color:rgba(30,22,16,.46);
     -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
     mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
   /* "Hier ben je" mag ook in formaat verschillen, niet alleen in kleur: op een crème scherm
@@ -2381,12 +2392,15 @@
   /* Sta je op een pagina die je al kent, dan moeten beide dingen waar blijven: het blauw zegt
      waar je bent, het vinkje dat je hier klaar bent. Het vinkje kruipt daarom in de blauwe stip,
      in wit. Die stip wordt daarvoor wat groter in plaats van geschaald — geschaald zou het
-     vinkje mee uitrekken en wollig worden. */
+     vinkje mee uitrekken en wollig worden.
+     Het vinkje meet zich aan de stip (inset + contain) in plaats van aan een vast getal, dus
+     het groeit mee terwijl de stip breder wordt. Samen met de overgang op width en height
+     schuift het blauw als een vergrootglas onder de vinkjes door terwijl je bladert. */
   .cs-dot.on.st-done{width:15px;height:15px;border-radius:50%;transform:none;
     background-color:var(--el,#3E5BD6);-webkit-mask:none;mask:none}
-  .cs-dot.on.st-done::after{content:"";position:absolute;inset:0;background-color:#fff;
-    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/9px no-repeat;
-    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/9px no-repeat}
+  .cs-dot.on.st-done::after{content:"";position:absolute;inset:1px;background-color:#fff;
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.9 6.3 4.6 9 10.1 3.1' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
   /* De balk staat links uitgelijnd op de titel. Groeit de eerste stip vanuit zijn midden, dan
      steekt hij een pixel buiten die lijn; vanaf de linkerrand groeien houdt de kolom recht. */
   .cs-dot:first-child.on{transform-origin:left center}
@@ -2473,6 +2487,12 @@
     margin:0 -22px 22px;padding:2px 22px 10px}
   .wcat .cs-rate::after{content:"";position:absolute;left:0;right:0;top:100%;height:14px;
     background:linear-gradient(var(--page),var(--page0));pointer-events:none}
+  /* Een plakkende kiezer blijft hangen op de rand van het tekstvlak, niet op de rand van het
+     kijkvenster: de bovenmarge van de scroller bleef daardoor onbedekt en daar schemerde de
+     regel die eronder doorschoof doorheen. Dit blokje dekt precies die strook af. Het loopt
+     bewust een paar pixels door boven het venster; dat wordt toch afgesneden. */
+  .wcat .cs-rate::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:18px;
+    background:var(--page);pointer-events:none}
   /* De vervaging boven- en onderaan zegt dat er nog meer staat. Hij hoort bij de rand van het
      kijkvenster, niet bij de inhoud, dus hij hangt aan twee plakkertjes zonder eigen hoogte:
      die verschuiven niets in de opmaak maar blijven wel aan de boven- en onderkant plakken
@@ -2758,7 +2778,11 @@
      duwde de naam opzij; het staat nu linksonder, waar toch ruimte over is. De hele regel
      spreekt het woord uit, dus het teken hoeft nergens specifiek te staan. */
   .hbcat .st-row{display:flex;align-items:flex-start;gap:14px;cursor:pointer}
-  .st-col{flex:1;min-width:0;display:flex;flex-direction:column;align-self:stretch}
+  /* De tekst begint niet kaarsrecht op de bovenkant van het diagram: uitgelijnd is niet hetzelfde
+     als prettig. Een plaatje heeft lucht rondom, een kop niet, dus zonder deze marge leest de
+     naam als tegen de bovenrand geduwd. Het luidsprekertje hangt aan de onderkant en blijft
+     hierdoor staan waar het stond. */
+  .st-col{flex:1;min-width:0;display:flex;flex-direction:column;align-self:stretch;padding-top:20px}
   .st-head .ct-tx{min-width:0}
   /* margin-top:auto duwt het teken naar de onderrand van de rij zodra het diagram hoger is dan
      de tekst — precies de ruimte die anders leeg bleef. */
@@ -5555,8 +5579,10 @@
     return best<0 ? null : geupInfo(best);
   }
   /* De band die je vóór deze graduatie droeg: de hoogste graad eronder die je gehaald hebt.
-     Zonder voorganger droeg je nog niets, en dat is in de praktijk de witte band: de aanloop naar
-     je 10e geup krijgt dus dezelfde witte lijn, die onderaan uitdooft naar niets. */
+     Zonder voorganger droeg je nog geen band. Die aanloop krijgt dus niet alvast het wit van je
+     10e geup — dan zou de kleur al onder de halte beginnen, terwijl je hem daar nog niet had.
+     Hij houdt de gewone lijnkleur, net als de gebeurtenissen eronder, zodat wit precies in het
+     hart van de examenhalte begint en de lijn eronder ononderbroken doorloopt naar het uitdoven. */
   function tlBeltVoor(geup){
     var best=-1, k;
     for(k in GEUP_DATES){
@@ -5572,9 +5598,17 @@
      helemaal weg. Op de lijn gebruiken we daarom vol wit, precies zoals de kaarten: wit met een
      haarlijntje eromheen leest wél als wit. Alleen hier, zodat de bandkleur elders niet wijzigt. */
   function tlKleur(c){ return c==='#EDEDE7' ? '#FFFFFF' : c; }
-  /* De ring om de halte draagt de bandkleur. Alleen de witte band kan dat niet: een witte ring
-     om een wit rondje is geen ring meer, dus die houdt de gewone lijnkleur. */
-  function tlDotRand(g){ return (!g || g.col==='#EDEDE7') ? 'var(--line)' : g.col; }
+  /* De ring om de halte draagt de bandkleur, en bij een tweekleurige band draagt hij ze allebei:
+     exact dezelfde links/rechts-verdeling als de lijn, zodat de twee sporen zonder kleurbreuk de
+     ring in lopen en de lijn zich echt om de halte heen lijkt te vouwen. Alleen een effen witte
+     band kan dat niet: een witte ring om een wit rondje is geen ring meer, dus die houdt de
+     gewone lijnkleur. Heeft zo'n band wél een tweede kleur, dan is er genoeg om te zien en
+     volgt de ring gewoon de lijn. */
+  function tlDotRand(g){
+    if(!g) return 'var(--line)';
+    if(g.col2) return tlLijnCss(g);
+    return g.col==='#EDEDE7' ? 'var(--line)' : g.col;
+  }
   /* Nog geen enkele band gehaald? Dan is de lijn wit: de aanloop naar je 10e geup. Onderaan dooft
      hij weg naar niets (zie het masker op het laatste blok), zodat de reis uit het niets begint. */
   function tlLijnCss(g){
@@ -5602,7 +5636,7 @@
   function tlOmslagStijl(it){
     var g=geupInfo(it.geup), pre=tlBeltVoor(it.geup);
     return ' style="--tlcol:'+esc(tlLijnCss(g))+';--tldot:'+esc(tlDotRand(g))+
-      ';--tlcoln:'+esc(tlLijnLaag(g))+';--tlcolp:'+esc(tlLijnCss(pre))+'"';
+      ';--tlcoln:'+esc(tlLijnLaag(g))+';--tlcolp:'+esc(pre?tlLijnCss(pre):'var(--line)')+'"';
   }
   function tlDotHtml(it){
     /* Een graduatie krijgt hetzelfde diplomateken als bij het invoeren van een gebeurtenis; de
@@ -7637,11 +7671,10 @@
               '<span class="ot-dunit">min</span></button>'+
           '</div>'+
           '<div class="ot-mode">'+
-            '<span class="ot-lab" id="ot-mode-lab">'+otModeName()+'</span>'+
             '<div class="ot-mmenu"><div class="ot-mmenu-inner"><span class="ot-mthumb"></span>'+mOpts+'</div></div>'+
-            '<button class="ot-fab ot-mode-fab" id="ot-mode" data-act="otmodemenu" aria-label="Kies herhalingen of timer">'+
-              '<span class="ot-mico count">'+otModeIcon('count')+'</span>'+
-              '<span class="ot-mico time">'+otModeIcon('time')+'</span></button>'+
+            '<button class="ot-fab ot-mode-fab" id="ot-mode" data-act="otmodemenu" aria-label="'+otModeAria()+'">'+
+              '<span class="ot-mico count">'+otModeIcon('count')+'<span class="ot-mcap">1-10</span></span>'+
+              '<span class="ot-mico time">'+otModeIcon('time')+'<span class="ot-mcap">3,2,1</span></span></button>'+
           '</div>'+
         '</div>'+
         '<div class="ot-ctl" id="ot-reset-ctl"><span class="ot-lab">Opnieuw</span>'+
@@ -8698,6 +8731,7 @@
   /* ===== Tijd mode: countdown timer (stretch/spar rounds) — 30s..10:00, drag ring or ±30s ===== */
   /* De modus in cijfers: 1 2 3 loopt op (tellen), 3 2 1 loopt terug (aftellen). */
   function otModeName(){ return otState.mode==='time' ? 'Timer' : 'Herhalingen'; }
+  function otModeAria(){ return 'Stand: '+otModeName()+'. Kies herhalingen of timer'; }
   /* Tellen laat zijn richting in de cijfers zien; de timerstand krijgt een zandloper —
      die zegt "de tijd loopt" veel directer dan 3 2 1. */
   function otModeIcon(m){
@@ -8763,7 +8797,7 @@
       b.classList.toggle('on', on); b.setAttribute('aria-selected', on?'true':'false');
     });
     moveModeThumb(true);
-    var ml=host.querySelector('#ot-mode-lab'); if(ml) ml.textContent=otModeName();
+    var mf=host.querySelector('#ot-mode'); if(mf) mf.setAttribute('aria-label',otModeAria());
     otReset();                                   // branches to the selected mode's idle state
   }
   function moveModeThumb(animate){
