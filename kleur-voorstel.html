@@ -80,7 +80,7 @@
     display:flex;flex-direction:column;min-height:300px;padding:26px 22px 20px;
     box-shadow:0 20px 40px -26px rgba(16,24,40,.5)}
   .dag .wm{position:absolute;right:-70px;top:68%;transform:translateY(-50%);height:150%;width:auto;
-    opacity:.16;pointer-events:none;z-index:-1}
+    opacity:.11;pointer-events:none;z-index:-1}
   .dag .brush{height:32px;width:auto;align-self:flex-start;opacity:.92;
     filter:drop-shadow(0 2px 7px rgba(16,24,40,.28))}
   .dag .kop{display:flex;flex-direction:column;gap:9px;margin-bottom:22px}
@@ -167,6 +167,10 @@ pil verdiept worden en verlies je het vrolijke groen op die ene plek. Hieronder 
 <p class="weeg">Links staat wat je vroeg: wit icoon, dus een donkergroene pil. Rechts de bandkleur
 zelf met een donker icoon. Ik heb links aangezet, maar de keuze is aan jou — het is de enige graad
 waar de pil afwijkt van de band.</p>
+<p class="weeg">Eén uitzondering hoort erbij: bij 5e geup (groen-blauw) moet het hele vlak tóch naar
+witte inkt, want blauw kan donkere inkt niet dragen. Het groen wordt daar dus verdiept. Dat is
+bewust — anders zou het blauw opgelicht moeten worden tot een bleke tint, en dan lijkt het of er
+drie kleuren door elkaar lopen in plaats van twee.</p>
 
 <h2>De dagkaarten</h2>
 <p class="note">De échte kaart van het Vandaag-scherm, op ware grootte. Vandaag draagt die kaart
@@ -185,7 +189,7 @@ dezelfde inktregel.</p>
 <p class="weeg">Ik heb dit niet op gevoel beoordeeld maar de pixels uitgelezen: ik leg de
 plekken vast waar écht tekst staat — titel, ondertitel, vinkjes, ring, cijfers — verberg die tekst,
 en meet dan op precies die plekken het slechtste contrast met de inkt. Alle twaalf pillen halen
-minimaal 5,0. De dagkaarten en timers komen uit tussen 4,6 en 11,8, met blauw als krapste. Ter vergelijking: de kaart zoals
+minimaal 5,0. De dagkaarten en timers komen uit tussen 5,0 en 11,3, met groen-blauw als krapste. Ter vergelijking: de kaart zoals
 hij <em>nu</em> in de app staat meet 2,9. De zwakste punten gaan trouwens niet op de veeg zitten
 maar op het watermerk — de lichte trap-illustratie rechts — en dat is een bestaand dingetje, geen
 nieuw.</p>
@@ -251,15 +255,15 @@ function weg(h){ return 'rgba('+hx(h).join(',')+',0)'; }
      wordt de volgende kleur zo nodig opgelicht zodat dezelfde inkt er ook op werkt.
    - Draagt de bandkleur witte inkt beter — blauw, rood, zwart — dan krijgt het vlak witte inkt en
      wordt het zo nodig verdiept. De familie wordt gemeten, niet op helderheid gegokt. */
-function isLicht(h){ return contrast(DONKER, h) >= contrast('#FFFFFF', h); }
+function draagtDonker(h){ return contrast(DONKER, h) >= contrast('#FFFFFF', h); }
+/* Een vlak verdraagt maar één inkt. Bij een tussenstap moeten dus béide kleuren dezelfde inkt
+   aankunnen; kan er één dat niet, dan gaat het hele vlak naar wit en wordt het verdiept. Zo
+   ontstaat er nooit een opgelichte tussentint die als derde kleur gaat meedoen. */
+function isLicht(g){ var b = typeof g === 'string' ? g : g.basis,
+      v = typeof g === 'string' ? null : g.volgend;
+  return draagtDonker(b) && (!v || draagtDonker(v)); }
 /* Verdiep tot witte tekst er comfortabel op staat. Dit is dezelfde lus die de app al gebruikt. */
-/* Het spiegelbeeld: licht op tot donkere inkt er comfortabel op staat. Nodig bij een tussenstap
-   waarvan de basis donkere inkt draagt maar de volgende kleur van zichzelf te diep is — blauw in
-   de hoek van de groen-blauwe kaart bijvoorbeeld. */
-function donkerVeilig(h){ var c = h, w = 0;
-  while(contrast(DONKER,c) < 5.0 && w++ < 30) c = shade(c,10);
-  return c; }
-function witVeilig(h, doel){ var c = h, w = 0, d = doel || 5.2;
+function witVeilig(h, doel){ var c = h, w = 0, d = doel || 5.8;
   while(contrast('#FFFFFF',c) < d && w++ < 30) c = shade(c,-8);
   return c; }
 /* De kop van de kaart staat linksboven, precies waar het verloop het lichtst is. Licht dus niet
@@ -273,13 +277,10 @@ function kop(c, wit){ var p = wit ? 12 : 10;
 
 function veeg(g, hoek){
   var h = (hoek||160)+'deg';
-  if(isLicht(g.basis)){
+  if(isLicht(g)){
     return g.volgend
-      ? (function(){ var nx = donkerVeilig(g.volgend);
-          /* De volgende kleur mag in de uiterste hoek dieper zijn dan de inkt normaal toelaat:
-             daar staat geen tekst. De opgelichte tint pakt de overgang, de echte bandkleur de punt. */
-          return 'linear-gradient('+h+','+kop(g.basis,false)+' 0%,'+shade(g.basis,-10)+' 58%,'+
-            shade(nx,6)+' 84%,'+g.volgend+' 96%,'+shade(g.volgend,-18)+' 100%)'; })()
+      ? 'linear-gradient('+h+','+kop(g.basis,false)+' 0%,'+shade(g.basis,-10)+' 58%,'+
+        g.volgend+' 86%,'+shade(g.volgend,-16)+' 100%)'
       : 'linear-gradient('+h+','+kop(g.basis,false)+' 0%,'+g.basis+' 46%,'+
         shade(g.basis,-6)+' 74%,'+shade(g.basis,-16)+' 100%)';
   }
@@ -291,7 +292,7 @@ function veeg(g, hoek){
     : 'linear-gradient('+h+','+kop(b,true)+' 0%,'+shade(b,-14)+' 44%,'+shade(b,-38)+' 100%)';
 }
 /* Welke inkt hoort bij het vlak? Bij een vlak telt de hele reeks, niet alleen de bandkleur. */
-function vlakInkt(g){ return isLicht(g.basis) ? DONKER : '#FFFFFF'; }
+function vlakInkt(g){ return isLicht(g) ? DONKER : '#FFFFFF'; }
 
 /* Contrast volgens WCAG, zodat de inkt niet op gevoel gekozen wordt maar op meting.
    Dit is dezelfde regel die de app al gebruikt voor de actieve tab. */
@@ -357,10 +358,10 @@ function timerHtml(g, bg, i){
   var rgba = function(h,a){ return 'rgba('+hx(h).join(',')+','+a+')'; };
   /* De gloedbollen volgen dezelfde verdieping als het vlak; anders lichten ze de achtergrond
      net zo ver op dat de witte cijfers er alsnog op wegvallen. */
-  var basis = isLicht(g.basis) ? g.basis : witVeilig(g.basis);
-  var bol1 = 'radial-gradient(circle at 18% 14%,'+rgba(shade(basis,isLicht(g.basis)?18:20),.38)+', transparent 62%)';
+  var basis = isLicht(g) ? g.basis : witVeilig(g.basis);
+  var bol1 = 'radial-gradient(circle at 18% 14%,'+rgba(shade(basis,isLicht(g)?18:20),.38)+', transparent 62%)';
   var bol2 = 'radial-gradient(circle at 88% 92%,'+
-    rgba(g.volgend ? (isLicht(g.basis)?shade(g.volgend,10):witVeilig(g.volgend)) : shade(basis,-14),.4)+', transparent 60%)';
+    rgba(g.volgend ? (isLicht(g)?shade(g.volgend,10):witVeilig(g.volgend)) : shade(basis,-14),.4)+', transparent 60%)';
   var ring = donker ? 'rgba(36,29,18,.22)' : 'rgba(255,255,255,.26)';
   return '<div class="tmr'+(donker?' donker':'')+'" style="background:'+bol1+','+bol2+','+bg+'">'+
     '<div class="ring">'+
