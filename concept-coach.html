@@ -2899,10 +2899,10 @@
   .hb-grouphd:first-child{margin-top:2px}
   .hb-grouphd::after{content:"";flex:1;height:1px;background:var(--line)}
   .hb-lead{font-size:13.5px;line-height:1.55;color:var(--ink);margin:0 2px 14px}
-  /* Onderdeel hero illustration (Gyeokpa breaking, Gyeorugi sparring, Poomsae stance) — a
-     mascot scene grounded by a soft accent wash "from the floor", no hard card. */
-  .hb-illus{position:relative;margin:0 -6px 16px;padding:10px 6px 0;border-radius:20px;
-    background:radial-gradient(126% 94% at 50% 100%, rgba(36,104,214,.13), rgba(36,104,214,0) 72%)}
+  /* Onderdeel hero illustration (Gyeokpa breaking, Gyeorugi sparring, Poomsae stance).
+     Zonder achtergrond: de lichtblauwe waas liep 6px buiten de lijst en de kaarten eronder en
+     las daardoor als een losse vlek achter de tekening in plaats van als grond eronder. */
+  .hb-illus{position:relative;margin:0 -6px 16px;padding:10px 6px 0}
   .hb-illusb{position:relative;width:100%;max-width:330px;margin:0 auto}
   .hb-illus.hb-illus-tall .hb-illusb{max-width:143px}
   .hb-illus.hb-illus-tall{margin-left:0;margin-right:0}
@@ -2954,12 +2954,6 @@
               scale(calc(1 + (var(--pm-s,.3) - 1) * var(--pmc,0)))}
   .pm-mascb{position:relative;width:100%}
   .pm-mascb > img{display:block;width:100%;height:auto}
-  /* Dezelfde zachte gloed als onder een vaste plaat, maar hij dooft weg zodra de mascotte
-     samenkrimpt: als klein maatje naast de titel zou een lichtvlek achter hem alleen maar
-     opvallen als een vlek. */
-  .pm-mascb::before{content:"";position:absolute;left:-6px;right:-6px;top:-10px;bottom:0;z-index:-1;
-    border-radius:20px;opacity:calc(1 - var(--pmc,0));
-    background:radial-gradient(126% 94% at 50% 100%, rgba(36,104,214,.13), rgba(36,104,214,0) 72%)}
   .pm-spacer{width:100%}
   /* "Wat je laat zien" — bare vertical accent bar (same language as the daily quote .gday),
      no card / border / fill, so important info reads consistently across the whole app. */
@@ -4306,6 +4300,15 @@
         ' value="'+esc(d.exam||'')+'" placeholder="Examinator (bijv. R.J. Kawarmala)">'+
       agDatalist('ag-exam-eerder','exam');
   }
+  // Van iets dat nog moet gebeuren heb je geen foto. Bij een gekozen datum is dat gewoon te
+  // zien; zolang er nog geen datum staat gaat het om de plek waar het formulier vandaan komt —
+  // de agenda gaat over wat komt, de tijdlijn over wat gebeurd is. Een al toegevoegde foto
+  // blijft altijd staan, anders kun je hem niet meer weghalen.
+  function agFotoAan(d){
+    if(d.photo) return true;
+    if(!d.date) return agUitslagAan;
+    return agDays(d.end||d.date) <= 0;
+  }
   function agFormHtml(){
     var d=agDraft||agBlankDraft();
     var ph=d.photo||'';
@@ -4317,7 +4320,7 @@
       // Bij een examen is de naam geen vrije tekst maar de graad waar je voor opgaat.
       (examen ? agExamenHtml(d)
               : '<input class="ag-title" id="ag-title" type="text" autocomplete="off" value="'+esc(d.title)+'" placeholder="Naam (bijv. Ilyo Open Poomsae)">')+
-      '<input class="ag-title" id="ag-where" type="text" autocomplete="off" list="ag-where-eerder" value="'+esc(d.where||'')+'" placeholder="Plaats (bijv. Aarschot)">'+
+      '<input class="ag-title" id="ag-where" type="text" autocomplete="off" list="ag-where-eerder" value="'+esc(d.where||'')+'" placeholder="Plaats (bijv. Eindhoven)">'+
       agDatalist('ag-where-eerder','where')+
       '<div class="ag-dates">'+
         agDateHtml('start','Datum', d.date, 'Kies…')+
@@ -4328,7 +4331,7 @@
       (d.type==='wedstrijd' && agUitslagAan ? agUitslagHtml(d) : '')+
       // Wie er voor de zaal stond vraag je alleen bij een cursus.
       (d.type==='cursus' ? agTrainersHtml(d) : '')+
-      phEditHtml(ph, d.focus, 'ag')+
+      (agFotoAan(d) ? phEditHtml(ph, d.focus, 'ag') : '')+
       '<p class="vd-status'+(d.note&&d.noteErr?' err':'')+'" id="ag-status">'+esc(d.note||'')+'</p>'+
       '<div class="ag-formact">'+
         '<button class="ag-cancel" data-act="agcancel">Annuleer</button>'+
@@ -5849,11 +5852,11 @@
         // Wie de cursus gaf staat er net zo bij als de examinator bij een graduatie: dezelfde
         // regel, dezelfde toon. Het is een herinnering, geen prijs.
         (it.kind==='event'&&it.ev.trainers&&it.ev.trainers.length
-          ? '<span class="tl-exam">👤 '+(it.ev.trainers.length>1?'Trainers ':'Trainer ')+esc(it.ev.trainers.join(', '))+'</span>'
+          ? '<span class="tl-exam">'+(it.ev.trainers.length>1?'Trainers: ':'Trainer: ')+esc(it.ev.trainers.join(', '))+'</span>'
           : '')+
         (it.kind==='event'&&it.ev.exam
-          ? '<span class="tl-exam">👤 Examinator '+esc(it.ev.exam)+'</span>' : '')+
-        (it.kind==='graad'&&it.gm.exam?'<span class="tl-exam">👤 Examinator '+esc(it.gm.exam)+'</span>':'')+
+          ? '<span class="tl-exam">Examinator: '+esc(it.ev.exam)+'</span>' : '')+
+        (it.kind==='graad'&&it.gm.exam?'<span class="tl-exam">Examinator: '+esc(it.gm.exam)+'</span>':'')+
         (ph?'<img class="tl-photo'+(foc.fit==='contain'?' fitc':'')+'" src="'+esc(ph)+'" '+
           'style="'+phFocStyle(foc)+'" alt="Foto bij '+esc(it.title)+'" '+
           'role="button" data-act="tlfoto" data-id="'+esc(it.id)+'">':'')+
