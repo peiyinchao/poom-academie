@@ -2823,9 +2823,10 @@
      eronderdoor. Net als de kiezer bij Woorden trekt het blok zijn achtergrond tot in de randmarge,
      anders schemeren de kaartjes langs de zijkanten mee. Het staartje eronder laat zien dat er iets
      onder doorloopt; het randje erboven dekt de bovenmarge van de scroller af, waar sticky zelf
-     niet bij kan. */
+     niet bij kan. De ruimte onder de kop is groter dan dat staartje, zodat de bovenste kaart niet
+     al bij het openen half in de schaduw begint te staan. */
   .hbcat .hb-exhead{position:sticky;top:0;z-index:4;background:var(--page);
-    margin:0 -22px 2px;padding:2px 22px 10px}
+    margin:0 -22px 22px;padding:2px 22px 10px}
   .hbcat .hb-exhead .hb-prog{margin-bottom:0}
   .hbcat .hb-exhead::after{content:"";position:absolute;left:0;right:0;top:100%;height:14px;
     background:linear-gradient(var(--page),var(--page0));pointer-events:none}
