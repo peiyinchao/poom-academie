@@ -2598,13 +2598,19 @@
      rood op de pagina komt te staan. */
   .wcat .cs-chip.hot{background:color-mix(in srgb, var(--seal) 12%, #fff);color:var(--seal-deep);border-color:transparent}
   .wcat .cs-chip.hot svg{color:var(--seal-deep)}
-  /* De onderrand houdt precies de pil vrij: zijn hoogte, de thuisbalk, de 14px waarmee het
-     dienblad hem optilt, plus 16px lucht. Doorrollen brengt de laatste regel dus altijd bóven
-     het glas uit. scroll-padding-bottom zorgt dat springen naar een rij hetzelfde respecteert. */
   .wcat .cs-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
     scrollbar-width:none;margin-top:0;border-radius:0;box-shadow:none;background:var(--page);
-    padding:14px 22px calc(var(--pilh) + env(safe-area-inset-bottom) + 30px);
-    scroll-padding-bottom:calc(var(--pilh) + env(safe-area-inset-bottom) + 30px)}
+    padding:14px 22px 0}
+  /* De ruimte onder de laatste regel is een leeg blokje ín de lijst, geen padding onder het
+     rolvak. Dat lijkt omslachtig, maar het is de enige variant die op een echt toestel bleek te
+     werken. Reserveerde ik de ruimte als padding, dan bleef de laatste regel op de iPhone onder
+     de zwevende pil liggen zonder dat je verder kon rollen — terwijl dezelfde opzet in elke
+     testbrowser hier netjes uitkwam, dus waaróm iOS die rand laat vallen heb ik niet kunnen
+     narekenen. Een blokje is gewone inhoud en telt dus overal mee, ongeacht de eigenaardigheden
+     van het rolvak. Verander dit niet terug in padding zonder het op een toestel te proberen.
+     Hoog genoeg voor de pil, de thuisbalk, de 14px waarmee het dienblad hem optilt en 16px lucht. */
+  .cs-bodem{flex:none;height:calc(env(safe-area-inset-bottom) + 18px)}
+  .met-pil .cs-bodem{height:calc(var(--pilh) + env(safe-area-inset-bottom) + 30px)}
   .wcat .cs-body::-webkit-scrollbar{display:none}
   /* De woordenlijst werkt nu hetzelfde als die in het Handboek: de kaart is zo hoog als zijn
      inhoud en het hele lichaam rolt eronderdoor. Vroeger stond de kaart vast en rolden de
@@ -2937,7 +2943,6 @@
   /* Standen volgt het gewone model: het hele lichaam rolt en de lijst is zo hoog als zijn
      inhoud. Eerder rolde alleen de lijst binnen een vast kader, waardoor je op deze ene
      Handboek-pagina ineens met twee scrollgebieden te maken had. */
-  .hbcat[data-hb="standen"] .cs-body{padding-bottom:calc(env(safe-area-inset-bottom) + 22px)}
   /* De hele stand-regel spreekt het woord uit — diagram en uitleg horen bij hetzelfde woord,
      dus er is geen reden om alleen de titelstrook aan te wijzen. */
   /* De naam stond eerst op een eigen regel bovenaan, met het diagram pas daaronder naast de
@@ -6565,8 +6570,10 @@
       eyebrow:'낱말 · '+(isHard?'MOEILIJK':'WOORDGROEP'),
       titlerow:'<div class="cs-titlewrap"><h2 class="cs-title cs-title-cur">'+esc(name)+'</h2></div><div class="cs-chips">'+chips+'</div>',
       chips:chips, note:note, list:list,
+      // Het bodemblokje is echte inhoud, geen onderrand. Zie .cs-bodem.
       body:(isHard?'':rateHtml(name))+(note?'<div class="cs-note">'+note+'</div>':'')+
-           '<div class="ct-list">'+list+'</div>'
+           '<div class="ct-list">'+list+'</div>'+
+           '<div class="cs-bodem" aria-hidden="true"></div>'
     };
   }
   function applyCatAccent(el, ac){
@@ -7452,8 +7459,11 @@
     // Standen heeft zijn uitleg in de kop staan en daaronder één lijst; die kan dus als vast
     // kader mee-ademen met het scherm, net als een woordgroep. De andere onderdelen hebben
     // tussenkopjes of meerdere lijsten en blijven in hun geheel rollen.
-    if(key==='standen') return '<div class="ct-list">'+rows+'</div>';
-    return pre+'<div class="ct-list">'+rows+'</div>';
+    // Zelfde bodemblokje als bij de woordgroepen: echte inhoud in plaats van een onderrand,
+    // zodat de laatste regel nooit onder de thuisbalk blijft liggen. Zie .cs-bodem.
+    var bodem = '<div class="cs-bodem" aria-hidden="true"></div>';
+    if(key==='standen') return '<div class="ct-list">'+rows+'</div>'+bodem;
+    return pre+'<div class="ct-list">'+rows+'</div>'+bodem;
   }
   var hbSheet=null;
   function hbNames(){ return hbCatsActive().map(function(c){ return c.key; }); }
@@ -10702,6 +10712,75 @@
       }).catch(function(e){ console.warn('SW mislukt', e); });
     });
   }
+</script>
+<!-- Meetvenster. Staat uit, tenzij je de app opent met ?diag erachter. Bedoeld om op een echt
+     toestel af te lezen wat hier in geen enkele testbrowser te zien is: waar de pil hangt, wat
+     er rolt en hoeveel ruimte de thuisbalk werkelijk opeist. -->
+<script>
+(function(){
+  function aan(){ try{ return localStorage.getItem('poom_diag')==='1'; }catch(e){ return false; } }
+  try{ if(location.search.indexOf('diag')>=0) localStorage.setItem('poom_diag','1'); }catch(e){}
+
+  // In een geïnstalleerde app kun je geen ?diag achter de naam plakken, dus zit de schakelaar
+  // in het scherm zelf: vijf keer snel tikken in de linkerbovenhoek. Het luistert alleen mee en
+  // legt niets over het scherm heen, zodat knoppen in die hoek gewoon blijven werken.
+  var tel=0, klok=0;
+  document.addEventListener('click', function(e){
+    if(e.clientX>52 || e.clientY>52){ tel=0; return; }
+    clearTimeout(klok); tel++;
+    klok=setTimeout(function(){ tel=0; }, 700);
+    if(tel>=5){ tel=0;
+      try{ localStorage.setItem('poom_diag', aan()?'0':'1'); }catch(e2){}
+      location.reload();
+    }
+  }, true);
+  if(!aan()) return;
+
+  var el=document.createElement('div');
+  el.id='diagvenster';
+  el.style.cssText='position:fixed;left:6px;right:6px;bottom:6px;z-index:99999;'+
+    'font:10px/1.35 ui-monospace,Menlo,monospace;color:#fff;background:rgba(0,0,0,.82);'+
+    'padding:7px 9px;border-radius:9px;white-space:pre;pointer-events:none;letter-spacing:0';
+  var meter=document.createElement('div');
+  meter.style.cssText='position:fixed;left:-9999px;height:env(safe-area-inset-bottom)';
+  document.body.appendChild(meter); document.body.appendChild(el);
+  function rol(){
+    // het diepste zichtbare vak dat echt kan rollen
+    var kand=document.querySelectorAll('.cs-body,.wscroll,.surface,.sbody');
+    var beste=null;
+    for(var i=0;i<kand.length;i++){ var e=kand[i];
+      if(e.offsetParent!==null && e.scrollHeight-e.clientHeight>2) beste=e; }
+    return beste;
+  }
+  function r(x){ return Math.round(x); }
+  function tik(){
+    var v=window.visualViewport, sc=rol();
+    var pil=document.querySelector('.cs-dots'), dok=document.querySelector('#navdock');
+    var rijen=document.querySelectorAll('.ct-row, .wrow');
+    var laatste=rijen.length? rijen[rijen.length-1] : null;
+    var t=[];
+    t.push('scherm '+r(innerWidth)+'x'+r(innerHeight)+
+      (v? '  zicht '+r(v.height)+' @'+r(v.offsetTop) : '')+
+      '  thuisbalk '+r(meter.getBoundingClientRect().height));
+    if(sc){ var c=sc.className.split(' ').slice(0,2).join('.');
+      t.push('rolt: .'+c+'  top '+r(sc.scrollTop)+'/'+r(sc.scrollHeight-sc.clientHeight)+
+        '  hoog '+r(sc.clientHeight)+'  onderrand '+r(parseFloat(getComputedStyle(sc).paddingBottom)||0));
+      var sb=sc.getBoundingClientRect(); t.push('  vak onder op '+r(sb.bottom));
+    } else t.push('rolt: niets');
+    if(pil){ var pb=pil.getBoundingClientRect();
+      t.push('pil  boven '+r(pb.top)+'  onder '+r(pb.bottom)+'  hoog '+r(pb.height)); }
+    if(dok){ var db=dok.getBoundingClientRect(); t.push('balk boven '+r(db.top)); }
+    if(laatste){ var lb=laatste.getBoundingClientRect();
+      t.push('laatste regel onder op '+r(lb.bottom)+
+        (pil? '   ruimte tot pil '+r(pil.getBoundingClientRect().top-lb.bottom) : ''));
+    }
+    var bodem=document.querySelector('.cs-bodem');
+    t.push('bodemblokje: '+(bodem? r(bodem.getBoundingClientRect().height)+'px' : 'geen'));
+    el.textContent=t.join('\n');
+    requestAnimationFrame(tik);
+  }
+  requestAnimationFrame(tik);
+})();
 </script>
 </body>
 </html>
