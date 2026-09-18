@@ -1461,9 +1461,6 @@
     filter:drop-shadow(0 3px 5px rgba(0,0,0,.16))}
   .checkin .dot{width:9px;height:9px;border-radius:50%;background:var(--seal);flex:none;animation:blink 1.6s ease-in-out infinite}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-  /* Een geregistreerde eigenschap: alleen zo weet de browser dat --pols een getal is en kan hij
-     er vloeiend doorheen bewegen in plaats van hem hard om te klappen. */
-  @property --pols{syntax:'<number>';inherits:true;initial-value:1}
 
   /* ---- Daily challenges (dagdoel) ---- */
   .eye .cnt{font-family:var(--cond);font-weight:700;font-size:12.5px;color:var(--gray)}
@@ -2459,10 +2456,14 @@
      Auto-fades like the scrollbar. */
   /* De puntjes hangen onderin op een eigen dienblad in plaats van in de kop. In de kop deelden
      ze de aandacht met het kopje en de titel, terwijl je ze pas opzoekt als je al aan het lezen
-     bent. Onderin liggen ze binnen duimbereik, en omdat het dienblad zweeft rolt de lijst er
-     gewoon onderdoor: je verliest geen regel aan iets wat maar een paar pixels hoog is. */
-  .cs-dotstray{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 14px);
-    z-index:60;display:flex;justify-content:center;pointer-events:none}
+     bent. Onderin liggen ze binnen duimbereik. Het dienblad zweefde eerst over de lijst heen,
+     met een uitgerekende onderrand om de laatste regel vrij te houden. Dat bleef misgaan: op een
+     toestel met een thuisbalk kwam de pil hoger te liggen dan de ruimte die eronder was
+     gereserveerd, en dan lag de laatste regel eronder zonder dat je nog verder kon rollen. Nu is
+     het dienblad gewoon de laatste rij van het blad. De lijst krijgt de hoogte die overblijft,
+     dus de pil kan per definitie niets meer bedekken. */
+  .cs-dotstray{position:relative;flex:none;z-index:60;display:flex;justify-content:center;
+    pointer-events:none;padding:6px 0 calc(env(safe-area-inset-bottom) + 14px)}
   /* Doorschijnend en vervaagd, net als de zwevende navigatiebalk: zo zie je dat er inhoud
      onderdoor loopt in plaats van dat de lijst daar ophoudt. De navigatiebalk kan met bijna-wit
      toe omdat daar de zandkleurige pagina onderdoor loopt; hier liggen witte kaarten onder het
@@ -2591,7 +2592,7 @@
   .wcat .cs-chip.hot svg{color:var(--seal-deep)}
   .wcat .cs-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
     scrollbar-width:none;margin-top:0;border-radius:0;box-shadow:none;background:var(--page);
-    padding:14px 22px var(--pilruimte, calc(env(safe-area-inset-bottom) + 72px))}
+    padding:14px 22px 18px}
   .wcat .cs-body::-webkit-scrollbar{display:none}
   /* De woordenlijst werkt nu hetzelfde als die in het Handboek: de kaart is zo hoog als zijn
      inhoud en het hele lichaam rolt eronderdoor. Vroeger stond de kaart vast en rolden de
@@ -2784,6 +2785,12 @@
   .wrow-t{display:block;font-family:var(--cond);text-transform:uppercase;letter-spacing:.01em;
     font-weight:800;font-size:16px;color:var(--ink);line-height:1.15}
   .wrow-n{flex:none;font-family:var(--cond);font-weight:700;font-size:13px;color:var(--gray);min-width:16px;text-align:right}
+  /* De stip stond vlak voor het getal, dus een "1" zette hem verder naar rechts dan een "12".
+     Daardoor liep de rij stippen zigzag. Nu is dit vakje even breed voor elke rij: de stip staat
+     links, het getal rechts, en alle stippen delen dezelfde lijn. */
+  .wrow-hard .wrow-n,
+  .wrow-n.n-hard{display:inline-flex;align-items:center;justify-content:space-between;
+    gap:8px;min-width:32px}
   /* Achter "Examenkaart" stond een 3/8. Het deelde kleur en gewicht met de titel en plakte er
      direct achteraan, dus het las als een deel van de naam in plaats van als voortgang. De kaart
      zelf heeft al een balkje met datzelfde cijfer; hier stond het dubbel. Weggelaten. */
@@ -2796,13 +2803,10 @@
   /* Aandachtsstip: een rood bolletje links van het getal zolang er moeilijke woorden zijn. */
   .wrow-hard:not(.off) .wrow-n::before,
   .wrow-n.n-hard::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;
-    background:var(--seal);vertical-align:middle;margin:-1px 8px 0 0;opacity:var(--pols,1)}
-  /* Alle stipjes kloppen op dezelfde hartslag. Gaf ik elk bolletje zijn eigen animatie, dan
-     begint die op het moment dat de rij wordt getekend: rijen die later verschijnen lopen dan
-     uit de pas en de lijst gaat rommelen. Daarom draait er hier één animatie, op de lijst zelf,
-     die een geërfde waarde laat ademen; elk stipje leest alleen die waarde af. */
-  @keyframes polsslag{0%,100%{--pols:1}50%{--pols:.3}}
-  .pols .wlib{animation:polsslag 1.6s ease-in-out infinite}
+    background:var(--seal);vertical-align:middle;flex:none}
+  /* Alleen de bovenste rij ademt. De groepen eronder houden hun stip stil: die vertellen hoevéél
+     er ligt, niet dat je nú iets moet doen. */
+  .wrow-hard:not(.off) .wrow-n::before{animation:blink 1.6s ease-in-out infinite}
   /* Woorden hub: fixed header, list scrolls underneath */
   .surface.wlib{display:flex;flex-direction:column;overflow:hidden}
   .wlib .whead{padding-left:22px;padding-right:22px;position:relative;z-index:2;background:var(--page);flex:none}
@@ -2921,7 +2925,7 @@
   /* Standen volgt het gewone model: het hele lichaam rolt en de lijst is zo hoog als zijn
      inhoud. Eerder rolde alleen de lijst binnen een vast kader, waardoor je op deze ene
      Handboek-pagina ineens met twee scrollgebieden te maken had. */
-  .hbcat[data-hb="standen"] .cs-body{padding-bottom:var(--pilruimte, calc(env(safe-area-inset-bottom) + 22px))}
+  .hbcat[data-hb="standen"] .cs-body{padding-bottom:calc(env(safe-area-inset-bottom) + 22px)}
   /* De hele stand-regel spreekt het woord uit — diagram en uitleg horen bij hetzelfde woord,
      dus er is geen reden om alleen de titelstrook aan te wijzen. */
   /* De naam stond eerst op een eigen regel bovenaan, met het diagram pas daaronder naast de
@@ -6561,20 +6565,6 @@
     el.style.setProperty('--hot', shade(ac,26));
   }
   function catNames(){ return TERMEN.filter(function(g){ return g.items && g.items.length>=2; }).map(function(g){ return g.groep; }); }
-  /* De puntjespil zweeft over de lijst. Stond er te weinig ruimte onder, dan verdween de laatste
-     regel eronder en viel er niets meer weg te rollen. Daarom rekenen we de ruimte uit in plaats
-     van hem te raden: wat er onder de bovenkant van de pil zit, plus een marge, wordt de
-     onderrand van de lijst. Zo komt elke regel er altijd onderuit, op elk schermformaat. */
-  function pilRuimte(sheet){
-    if(!sheet) return;
-    var tray = sheet.querySelector('.cs-dotstray');
-    if(!tray){ sheet.style.removeProperty('--pilruimte'); return; }
-    requestAnimationFrame(function(){
-      var pil = tray.querySelector('.cs-dots'); if(!pil) return;
-      var onder = sheet.getBoundingClientRect().bottom - pil.getBoundingClientRect().top;
-      if(onder > 0) sheet.style.setProperty('--pilruimte', Math.ceil(onder + 14) + 'px');
-    });
-  }
   /* Dezelfde som voor de zwevende tabbalk: wat er onder zijn bovenkant zit, plus een marge,
      is de ruimte die elke lijst eronder nodig heeft. */
   function dokRuimte(){
@@ -6583,10 +6573,7 @@
     var onder = window.innerHeight - dock.getBoundingClientRect().top;
     if(onder > 0) document.documentElement.style.setProperty('--dokruimte', Math.ceil(onder + 14) + 'px');
   }
-  window.addEventListener('resize', function(){
-    dokRuimte();
-    document.querySelectorAll('.catsheet').forEach(pilRuimte);
-  });
+  window.addEventListener('resize', dokRuimte);
   function openCat(name){
     var parts = buildCatParts(name); if(!parts) return;
     catSheet = document.createElement('div');
@@ -6614,7 +6601,6 @@
     stage.appendChild(catSheet);
     moveRateHL(catSheet.querySelector('.cs-rate'), true);
     if(multi){ attachCatSwipe(catSheet); attachDotScrub(catSheet); showDots(); }
-    pilRuimte(catSheet);
     fnav.classList.add('hide');
     void catSheet.offsetWidth; // capture the off-screen start so the drill-in transition runs
     requestAnimationFrame(function(){ catSheet.classList.add('show'); csEdgeFadeAll(catSheet); });
@@ -10670,13 +10656,7 @@
   }
 
   /* ---- boot ---- */
-  /* Oudere browsers kennen @property niet; die zouden --pols hard omklappen in plaats van laten
-     ademen. Dan liever helemaal geen klop: de stipjes blijven gewoon staan. */
-  function polsAan(){
-    var kan = typeof CSS!=='undefined' && typeof CSS.registerProperty==='function';
-    if(kan) document.documentElement.classList.add('pols');
-  }
-  function boot(){ setBelt(GEUP_I, false); renderToday(); scheduleBlink(); polsAan(); dokRuimte();
+  function boot(){ setBelt(GEUP_I, false); renderToday(); scheduleBlink(); dokRuimte();
     requestAnimationFrame(moveNavHL); setTimeout(moveNavHL, 320);
     // preview deep-link: ?open=1 (optionally &ci=goal|reflect) opens the weekly check-in on load
     if(/[?&]open=1/.test(location.search||'')) setTimeout(function(){ openCheckin(_ciOverride||'reflect'); }, 90); }
