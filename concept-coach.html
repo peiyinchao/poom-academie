@@ -260,11 +260,12 @@
   /* quiet circular whistle-only CTA pinned to the training-card top-right */
   .startbtn.compact{position:absolute;top:20px;right:20px;z-index:4;
     width:60px;height:60px;flex:none;margin:0;padding:0;border-radius:50%;gap:0;
-    background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);box-shadow:none}
+    background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.34);box-shadow:none}
   .startbtn.compact .startbtn-ic{width:34px;height:34px}
   /* Pointer-only hover: intensify the frost like the round timer button (no sticky state on touch) */
   @media (hover:hover){
     .startbtn.compact:hover{background:rgba(255,255,255,.34);border-color:rgba(255,255,255,.55)}
+    .trainday.licht .startbtn.compact:hover{background:rgba(36,29,18,.2);border-color:rgba(36,29,18,.38)}
   }
 
   /* ---------- Up next (secondary) ---------- */
@@ -1570,6 +1571,10 @@
   .trainday.licht .td-item.done .ti-ck{background:#241D12;border-color:#241D12;color:#EDEDE7}
   .trainday.licht .td-item.done .ti-t::after{background:#241D12}
   .trainday.licht .hit-pop{background:#241D12}
+  /* Het fluitje rechtsboven draagt dezelfde inkt als de kaart: op een lichte band wordt het
+     wit onleesbaar, dus dan keert de knop mee om. */
+  .trainday.licht .startbtn.compact{color:#241D12;background:rgba(36,29,18,.12);
+    border-color:rgba(36,29,18,.22)}
 
   /* ---- Term van de dag ---- */
   .termcard{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:15px 17px}
@@ -2782,10 +2787,13 @@
   .wrow-hard{--e:var(--seal)}
   .wrow-hard.off{opacity:.55}
   .wrow-hard + .wrow::before{left:0}
-  /* attention badge: pulsing seal dot just left of the count while there are moeilijke woorden */
+  /* Aandachtsstip: een rood bolletje links van het getal zolang er moeilijke woorden zijn. */
   .wrow-hard:not(.off) .wrow-n::before,
   .wrow-n.n-hard::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;
-    background:var(--seal);vertical-align:middle;margin:-1px 8px 0 0;animation:blink 1.6s ease-in-out infinite}
+    background:var(--seal);vertical-align:middle;margin:-1px 8px 0 0}
+  /* Alleen de bovenste rij klopt. Zouden de groepen dat ook doen, dan beweegt de hele lijst
+     naast de draaiende bloemen mee en weet je niet meer waar je moet kijken. */
+  .wrow-hard:not(.off) .wrow-n::before{animation:blink 1.6s ease-in-out infinite}
   /* Woorden hub: fixed header, list scrolls underneath */
   .surface.wlib{display:flex;flex-direction:column;overflow:hidden}
   .wlib .whead{padding-left:22px;padding-right:22px;position:relative;z-index:2;background:var(--page);flex:none}
