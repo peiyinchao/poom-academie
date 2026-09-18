@@ -2460,11 +2460,22 @@
      toe omdat daar de zandkleurige pagina onderdoor loopt; hier liggen witte kaarten onder het
      dienblad, en daarop viel het helemaal weg. Vandaar een zandtint die iets dieper zit dan de
      kaarten, met een hairline eromheen. */
-  .cs-dotstray .cs-dots{pointer-events:auto;margin:0;padding:7px 13px;border-radius:999px;
-    background:rgba(233,226,213,.82);
-    -webkit-backdrop-filter:blur(30px) saturate(1.9);backdrop-filter:blur(30px) saturate(1.9);
-    border:1px solid rgba(26,23,18,.10);
-    box-shadow:0 10px 26px -16px rgba(40,24,12,.4), 0 1px 0 rgba(255,255,255,.5) inset}
+  /* Het dienblad was zo hoog als de puntjes zelf, en dat is smaller dan een duim. Nu heeft het
+     de hoogte van een knop — net als de zwevende balk in de weer-app — zodat je hem kunt pakken
+     zonder te mikken. Hij mag daardoor ook doorschijnender: met meer glas eromheen zie je beter
+     dat de lijst er gewoon onderdoor loopt. touch-action houdt het slepen bij de pil zelf, zodat
+     een sleep over de puntjes de lijst eronder niet meeneemt. */
+  .cs-dotstray .cs-dots{pointer-events:auto;margin:0;padding:14px 18px;border-radius:999px;
+    background:rgba(238,232,221,.56);
+    -webkit-backdrop-filter:blur(34px) saturate(1.9);backdrop-filter:blur(34px) saturate(1.9);
+    border:1px solid rgba(26,23,18,.08);touch-action:none;
+    box-shadow:0 12px 30px -18px rgba(40,24,12,.42), 0 1px 0 rgba(255,255,255,.45) inset;
+    transition:transform .18s cubic-bezier(.22,.9,.3,1), background .18s ease}
+  /* Tijdens het slepen zet de pil zich even schrap en worden de puntjes donkerder: je ziet dat
+     hij je vinger volgt in plaats van dat je per ongeluk iets aanraakt. */
+  .cs-dotstray .cs-dots.scrub{transform:scale(1.05);background:rgba(238,232,221,.74)}
+  .cs-dots.scrub .cs-dot::after{background-color:rgba(30,22,16,.38)}
+  .cs-dots.scrub .cs-dot.on::after{background-color:var(--el,#3E5BD6)}
   .cs-dots{position:relative;z-index:60;display:flex;align-items:center;gap:0;
     margin:11px 0 0 -1px;padding:7px 0;align-self:flex-start}
   /* De knop is een vast vakje van 15px; alleen de inkt erin verandert. Eerder groeide de knop
@@ -2474,7 +2485,7 @@
   .cs-dot{position:relative;width:15px;height:15px;flex:none;border:0;padding:0;margin:0 1px;
     background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
   /* Het raakvlak sluit de tussenruimte weer dicht: de lucht is er voor het oog, niet voor je duim. */
-  .cs-dot::before{content:"";position:absolute;top:-5px;bottom:-5px;left:-1px;right:-1px}
+  .cs-dot::before{content:"";position:absolute;top:-14px;bottom:-14px;left:-1px;right:-1px}
   /* De inkt zit op ::after en wordt vanuit het hart geplaatst, zodat elke maatwissel
      symmetrisch is en het vakje nooit verlaat. */
   .cs-dot::after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;
@@ -2572,7 +2583,7 @@
   .wcat .cs-chip.hot svg{color:var(--seal-deep)}
   .wcat .cs-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
     scrollbar-width:none;margin-top:0;border-radius:0;box-shadow:none;background:var(--page);
-    padding:14px 22px calc(env(safe-area-inset-bottom) + 58px)}
+    padding:14px 22px calc(env(safe-area-inset-bottom) + 72px)}
   .wcat .cs-body::-webkit-scrollbar{display:none}
   /* De woordenlijst werkt nu hetzelfde als die in het Handboek: de kaart is zo hoog als zijn
      inhoud en het hele lichaam rolt eronderdoor. Vroeger stond de kaart vast en rolden de
@@ -2772,7 +2783,8 @@
   .wrow-hard.off{opacity:.55}
   .wrow-hard + .wrow::before{left:0}
   /* attention badge: pulsing seal dot just left of the count while there are moeilijke woorden */
-  .wrow-hard:not(.off) .wrow-n::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;
+  .wrow-hard:not(.off) .wrow-n::before,
+  .wrow-n.n-hard::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;
     background:var(--seal);vertical-align:middle;margin:-1px 8px 0 0;animation:blink 1.6s ease-in-out infinite}
   /* Woorden hub: fixed header, list scrolls underneath */
   .surface.wlib{display:flex;flex-direction:column;overflow:hidden}
@@ -4012,10 +4024,12 @@
     var slug=mascotBelt(geupInfo(GEUP_I));
     return 'assets/mascot/day/kid-'+_mascPose+'-'+slug+'.png';
   }
-  // Belt colour as a CSS paint for the profile ring (dual belts → soft diagonal split).
+  /* De ring om je profielfoto draagt precies dezelfde veeg als de kaart met de training van
+     vandaag: dezelfde kleuren, dezelfde stops en dezelfde hoek. Hij had eerder een eigen
+     diagonale splitsing, en daardoor leek het toevallig dat beide je band tonen. */
   function beltRingCss(g){
-    if(g && g.col2) return 'linear-gradient(135deg,'+g.col+' 0 42%,'+g.col2+' 58% 100%)';
-    return (g && g.col) || '#E6E8EC';
+    if(!g || !g.col) return '#E6E8EC';
+    return beltVeeg(g, 160);
   }
   function setBelt(k, commit){
     k = Math.max(0, Math.min(GEUPS.length-1, k|0));
@@ -5530,6 +5544,14 @@
       '<div class="cc-terms">'+rows+'</div>'+
     '</button>';
   }
+  /* Achter een woordgroep stond hoeveel woorden erin zitten. Dat getal helpt je niet kiezen —
+     het zegt alleen iets over de lengte van de lijst, niet over wat jou nog moeite kost. Nu
+     staat er hoeveel woorden je er zelf als moeilijk hebt gemarkeerd, met hetzelfde kloppende
+     rode stipje als bij de Moeilijk-rij erboven. Een groep zonder bladwijzers houdt zijn plek
+     leeg, zodat de groepen die aandacht vragen er meteen uitspringen. */
+  function hardTellerHtml(n){
+    return '<span class="wrow-n'+(n?' n-hard':'')+'">'+(n||'')+'</span>';
+  }
   function renderLibrary(){
     var cats = TERMEN.filter(function(g){ return g.items && g.items.length>=2; });
     var totalHard = cats.reduce(function(n,g){ return n+catHard(g).length; }, 0);
@@ -5546,7 +5568,7 @@
         '<button class="wrow" data-act="opencat" data-groep="'+esc(g.groep)+'">'+
           growIcon(g.groep)+
           '<span class="wrow-tx"><span class="wrow-t">'+esc(g.groep)+'</span></span>'+
-          '<span class="wrow-n">'+g.items.length+'</span>'+
+          hardTellerHtml(catHard(g).length)+
           '<span class="wrow-ch">'+IC.chev+'</span>'+
         '</button>';
     });
@@ -6385,6 +6407,15 @@
     var el = document.querySelector('#w-hardn'); if(el) el.textContent=total;
     // Keep the empty-state in sync so the pulsing attention dot only shows while there are hard words.
     var row = document.querySelector('.wrow-hard'); if(row) row.classList.toggle('off', total===0);
+    // De groepsrijen tellen hun eigen bladwijzers; die staan achter de hub en moeten kloppen
+    // zodra je hem weer ziet.
+    var rijen = document.querySelectorAll('.wlib .wrow[data-groep]');
+    for(var i=0;i<rijen.length;i++){
+      var g = catByName(rijen[i].getAttribute('data-groep')); if(!g) continue;
+      var n = catHard(g).length, tel = rijen[i].querySelector('.wrow-n'); if(!tel) continue;
+      tel.textContent = n || '';
+      tel.classList.toggle('n-hard', n>0);
+    }
   }
 
   /* ---- mastery growth (seed -> sprout -> bloom, per category) ---- */
@@ -6693,13 +6724,67 @@
     for(var i=0;i<btns.length;i++){ btns[i].classList.toggle('on', !!(items[i] && items[i].id===activeId)); }
     showDots();
   }
-  // Aan de puntjesbalk valt niet te slepen: je tikt een puntje aan en je springt erheen.
-  // De sleepbediening (puntjes groeien, zwevend label van het doel) was een tweede manier
-  // om hetzelfde te doen en ging in de weg zitten bij het gewone vegen.
+  /* Houd de pil vast en schuif je vinger: de pagina volgt het puntje waar je boven staat. Je
+     hoeft dus niet op een stip van zes pixels te mikken — je kunt hem ook gewoon aantikken. Een
+     sleep die hier begint telt nooit als paginaveeg van het blad eronder. */
   function attachDotScrub(sheet){
     var dots=sheet.querySelector('.cs-dots'); if(!dots) return;
-    // Een sleep die op de puntjes begint doet niets — hij mag ook niet als paginaveeg tellen.
-    dots.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
+    var pid=null, versleept=false, wens=null, laatst=0, klok=null, x0=0, pakt=false;
+    function dichtstbij(x){
+      var btns=dots.querySelectorAll('.cs-dot'), best=null, bd=1e9;
+      for(var i=0;i<btns.length;i++){
+        var r=btns[i].getBoundingClientRect(), d=Math.abs(x-(r.left+r.width/2));
+        if(d<bd){ bd=d; best=btns[i]; }
+      }
+      return best;
+    }
+    function nu(){ var a=dots.querySelector('.cs-dot.on'); return a?a.getAttribute('data-id'):null; }
+    /* Sleep je in één haal langs zes groepen, dan wil je niet zes kruisvervagingen achter elkaar.
+       Er gaat er hoogstens één per 140 ms door; wat je daarna nog kiest blijft klaarstaan en
+       wordt alsnog getoond. */
+    function stuur(){
+      if(wens===null || !activePager) return;
+      var t=Date.now();
+      if(t-laatst < 140){
+        if(!klok) klok=setTimeout(function(){ klok=null; stuur(); }, 140-(t-laatst));
+        return;
+      }
+      var doel=wens; wens=null; laatst=t;
+      if(doel!==nu()) activePager.pick(doel);
+    }
+    dots.addEventListener('pointerdown', function(e){
+      e.stopPropagation();                                  // geen paginaveeg van het blad eronder
+      if(e.pointerType==='mouse' && e.button!==0) return;
+      pid=e.pointerId; versleept=false; wens=null; x0=e.clientX; pakt=false;
+    });
+    dots.addEventListener('pointermove', function(e){
+      if(pid===null || e.pointerId!==pid) return;
+      /* Het vangen van de aanwijzer gebeurt pas als je echt schuift. Doe je het al bij het
+         neerzetten, dan wordt de pil zelf het doelwit van de klik die erna komt en gebeurt er
+         bij een gewone tik op een puntje niets meer. */
+      if(!pakt){
+        if(Math.abs(e.clientX-x0) < 4) return;
+        pakt=true; dots.classList.add('scrub');
+        try{ dots.setPointerCapture(pid); }catch(_){}
+      }
+      e.preventDefault();
+      var b=dichtstbij(e.clientX); if(!b) return;
+      var id=b.getAttribute('data-id');
+      if(id && id!==nu()){ versleept=true; wens=id; stuur(); }
+    });
+    function los(e){
+      if(pid===null || (e && e.pointerId!==pid)) return;
+      if(pakt){ try{ dots.releasePointerCapture(pid); }catch(_){} }
+      pid=null; pakt=false; dots.classList.remove('scrub');
+      if(wens!==null){ laatst=0; stuur(); }                 // de laatste keuze gaat altijd door
+    }
+    dots.addEventListener('pointerup', los);
+    dots.addEventListener('pointercancel', los);
+    // Na een sleep komt er nog een klik achteraan; die zou je terugsturen naar het puntje
+    // waar je vinger toevallig boven eindigde.
+    dots.addEventListener('click', function(e){
+      if(versleept){ e.stopPropagation(); e.preventDefault(); versleept=false; }
+    }, true);
   }
   // Swap the Woorden sheet to another woordgroep (dir sets the cross-slide direction).
   // Only the title moves (cross-slide); the rate card + note + list stay fixed and their content crossfades.
