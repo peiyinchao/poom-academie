@@ -1157,7 +1157,10 @@
   .tempo.open .tf-opt:nth-child(4){animation-delay:.15s}
 
   /* ---------- Session overlay ---------- */
-  .session{position:absolute;inset:0;z-index:90;background:var(--page);display:flex;flex-direction:column;
+  /* De hoogte van de zwevende puntjespil. Alles wat met die pil te maken heeft rekent hiermee:
+     de pil zelf en de ruimte die de lijst eronder vrijhoudt. Eén getal, dus ze lopen nooit uiteen.
+     Standaard nul: een blad zonder buren krijgt geen pil en hoeft dus ook niets vrij te houden. */
+  .session{--pilh:0px;position:absolute;inset:0;z-index:90;background:var(--page);display:flex;flex-direction:column;
     transform:translateY(100%);transition:transform .38s cubic-bezier(.32,.72,0,1)}
   .session.show{transform:translateY(0)}
   /* Sluit je met een veeg naar rechts, dan hoort het scherm ook naar rechts weg te gaan:
@@ -2407,6 +2410,7 @@
 
   /* ---------- Naslag: category detail sheet ---------- */
   .catsheet{background:var(--page)}
+  .session.met-pil{--pilh:45px}
   .cs-hero{position:relative;isolation:isolate;overflow:hidden;color:#fff;flex:none;
     padding:calc(env(safe-area-inset-top) + 22px) 22px 34px}
   .cs-mtn{position:absolute;left:0;right:0;bottom:0;height:92px;color:#fff;opacity:.85;z-index:-1}
@@ -2456,13 +2460,16 @@
      Auto-fades like the scrollbar. */
   /* De puntjes hangen onderin op een eigen dienblad in plaats van in de kop. In de kop deelden
      ze de aandacht met het kopje en de titel, terwijl je ze pas opzoekt als je al aan het lezen
-     bent. Onderin liggen ze binnen duimbereik. Het dienblad zweefde eerst over de lijst heen,
-     met een uitgerekende onderrand om de laatste regel vrij te houden. Dat bleef misgaan: op een
-     toestel met een thuisbalk kwam de pil hoger te liggen dan de ruimte die eronder was
-     gereserveerd, en dan lag de laatste regel eronder zonder dat je nog verder kon rollen. Nu is
-     het dienblad gewoon de laatste rij van het blad. De lijst krijgt de hoogte die overblijft,
-     dus de pil kan per definitie niets meer bedekken. */
-  .cs-dotstray{position:relative;flex:none;z-index:60;display:flex;justify-content:center;
+     bent. Onderin liggen ze binnen duimbereik. Het dienblad zweeft over de lijst, zodat de
+     inhoud doorloopt tot onderaan het scherm en onder het glas verdwijnt in plaats van er netjes
+     voor te stoppen.
+
+     De ruimte eronder ging eerder mis omdat JS de pil opmat en die uitkomst als onderrand
+     doorgaf, terwijl de pil zijn hoogte uit CSS haalde: twee bronnen die op een toestel met een
+     thuisbalk uit elkaar liepen, waarna de laatste regel onbereikbaar onder de pil bleef liggen.
+     Nu is er nog maar één bron. --pilh maakt de pil hoog en reserveert de ruimte eronder; die
+     kunnen per definitie niet meer verschillen, op welk toestel dan ook. */
+  .cs-dotstray{position:absolute;left:0;right:0;bottom:0;z-index:60;display:flex;justify-content:center;
     pointer-events:none;padding:6px 0 calc(env(safe-area-inset-bottom) + 14px)}
   /* Doorschijnend en vervaagd, net als de zwevende navigatiebalk: zo zie je dat er inhoud
      onderdoor loopt in plaats van dat de lijst daar ophoudt. De navigatiebalk kan met bijna-wit
@@ -2474,7 +2481,8 @@
      zonder te mikken. Hij mag daardoor ook doorschijnender: met meer glas eromheen zie je beter
      dat de lijst er gewoon onderdoor loopt. touch-action houdt het slepen bij de pil zelf, zodat
      een sleep over de puntjes de lijst eronder niet meeneemt. */
-  .cs-dotstray .cs-dots{pointer-events:auto;margin:0;padding:14px 18px;border-radius:999px;
+  .cs-dotstray .cs-dots{pointer-events:auto;margin:0;height:var(--pilh);box-sizing:border-box;
+    align-items:center;padding:0 18px;border-radius:999px;
     background:rgba(238,232,221,.34);
     -webkit-backdrop-filter:blur(40px) saturate(2.2);backdrop-filter:blur(40px) saturate(2.2);
     border:1px solid rgba(26,23,18,.08);touch-action:none;
@@ -2590,9 +2598,13 @@
      rood op de pagina komt te staan. */
   .wcat .cs-chip.hot{background:color-mix(in srgb, var(--seal) 12%, #fff);color:var(--seal-deep);border-color:transparent}
   .wcat .cs-chip.hot svg{color:var(--seal-deep)}
+  /* De onderrand houdt precies de pil vrij: zijn hoogte, de thuisbalk, de 14px waarmee het
+     dienblad hem optilt, plus 16px lucht. Doorrollen brengt de laatste regel dus altijd bóven
+     het glas uit. scroll-padding-bottom zorgt dat springen naar een rij hetzelfde respecteert. */
   .wcat .cs-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
     scrollbar-width:none;margin-top:0;border-radius:0;box-shadow:none;background:var(--page);
-    padding:14px 22px 18px}
+    padding:14px 22px calc(var(--pilh) + env(safe-area-inset-bottom) + 30px);
+    scroll-padding-bottom:calc(var(--pilh) + env(safe-area-inset-bottom) + 30px)}
   .wcat .cs-body::-webkit-scrollbar{display:none}
   /* De woordenlijst werkt nu hetzelfde als die in het Handboek: de kaart is zo hoog als zijn
      inhoud en het hele lichaam rolt eronderdoor. Vroeger stond de kaart vast en rolden de
@@ -6588,6 +6600,8 @@
         pick:function(id){ gotoCat(id); } };
     } else { activePager = null; }
     var dots = multi ? buildDotsHtml(activePager.items, name, catDotState) : '';
+    // Alleen een blad met een pil houdt er ruimte voor vrij; zie --pilh.
+    if(dots) catSheet.classList.add('met-pil');
     catSheet.innerHTML =
       '<div class="cs-hero">'+
         '<button class="cs-x" data-act="catclose" aria-label="Sluiten">'+IC.x+'</button>'+
