@@ -1461,6 +1461,9 @@
     filter:drop-shadow(0 3px 5px rgba(0,0,0,.16))}
   .checkin .dot{width:9px;height:9px;border-radius:50%;background:var(--seal);flex:none;animation:blink 1.6s ease-in-out infinite}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+  /* Een geregistreerde eigenschap: alleen zo weet de browser dat --pols een getal is en kan hij
+     er vloeiend doorheen bewegen in plaats van hem hard om te klappen. */
+  @property --pols{syntax:'<number>';inherits:true;initial-value:1}
 
   /* ---- Daily challenges (dagdoel) ---- */
   .eye .cnt{font-family:var(--cond);font-weight:700;font-size:12.5px;color:var(--gray)}
@@ -2471,14 +2474,14 @@
      dat de lijst er gewoon onderdoor loopt. touch-action houdt het slepen bij de pil zelf, zodat
      een sleep over de puntjes de lijst eronder niet meeneemt. */
   .cs-dotstray .cs-dots{pointer-events:auto;margin:0;padding:14px 18px;border-radius:999px;
-    background:rgba(238,232,221,.56);
-    -webkit-backdrop-filter:blur(34px) saturate(1.9);backdrop-filter:blur(34px) saturate(1.9);
+    background:rgba(238,232,221,.34);
+    -webkit-backdrop-filter:blur(40px) saturate(2.2);backdrop-filter:blur(40px) saturate(2.2);
     border:1px solid rgba(26,23,18,.08);touch-action:none;
     box-shadow:0 12px 30px -18px rgba(40,24,12,.42), 0 1px 0 rgba(255,255,255,.45) inset;
     transition:transform .18s cubic-bezier(.22,.9,.3,1), background .18s ease}
   /* Tijdens het slepen zet de pil zich even schrap en worden de puntjes donkerder: je ziet dat
      hij je vinger volgt in plaats van dat je per ongeluk iets aanraakt. */
-  .cs-dotstray .cs-dots.scrub{transform:scale(1.05);background:rgba(238,232,221,.74)}
+  .cs-dotstray .cs-dots.scrub{transform:scale(1.05);background:rgba(238,232,221,.52)}
   .cs-dots.scrub .cs-dot::after{background-color:rgba(30,22,16,.38)}
   .cs-dots.scrub .cs-dot.on::after{background-color:var(--el,#3E5BD6)}
   .cs-dots{position:relative;z-index:60;display:flex;align-items:center;gap:0;
@@ -2588,7 +2591,7 @@
   .wcat .cs-chip.hot svg{color:var(--seal-deep)}
   .wcat .cs-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
     scrollbar-width:none;margin-top:0;border-radius:0;box-shadow:none;background:var(--page);
-    padding:14px 22px calc(env(safe-area-inset-bottom) + 72px)}
+    padding:14px 22px var(--pilruimte, calc(env(safe-area-inset-bottom) + 72px))}
   .wcat .cs-body::-webkit-scrollbar{display:none}
   /* De woordenlijst werkt nu hetzelfde als die in het Handboek: de kaart is zo hoog als zijn
      inhoud en het hele lichaam rolt eronderdoor. Vroeger stond de kaart vast en rolden de
@@ -2651,8 +2654,11 @@
      woord een markerveeg, zoals je in een boek zou doen: onregelmatige vorm, rafelige uiteinden,
      iets scheef. De vorm zit in een masker in plaats van in een plaatje, zodat de kleur het
      thema volgt en er niets extra&#39;s geladen hoeft te worden. */
-  .wcat .ct-row.hard .ct-meta b{position:relative;z-index:0}
-  .wcat .ct-row.hard .ct-meta b::before{content:"";position:absolute;z-index:-1;
+  /* De veeg zat eerst op de uitspraak. Maar je zoekt in deze lijst op het Koreaanse woord, dus
+     daar hoort de markering ook te liggen — net als wanneer je in een boek het woord zelf
+     aanstreept en niet de voetnoot eronder. */
+  .wcat .ct-row.hard .ct-ko-w{position:relative;z-index:0}
+  .wcat .ct-row.hard .ct-ko-w::before{content:"";position:absolute;z-index:-1;
     left:-5px;right:-6px;top:4%;bottom:-10%;transform:rotate(-.7deg);
     background:color-mix(in srgb, var(--seal) 32%, transparent);
     -webkit-mask:center/100% 100% no-repeat var(--mark-svg);
@@ -2790,15 +2796,21 @@
   /* Aandachtsstip: een rood bolletje links van het getal zolang er moeilijke woorden zijn. */
   .wrow-hard:not(.off) .wrow-n::before,
   .wrow-n.n-hard::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;
-    background:var(--seal);vertical-align:middle;margin:-1px 8px 0 0}
-  /* Alleen de bovenste rij klopt. Zouden de groepen dat ook doen, dan beweegt de hele lijst
-     naast de draaiende bloemen mee en weet je niet meer waar je moet kijken. */
-  .wrow-hard:not(.off) .wrow-n::before{animation:blink 1.6s ease-in-out infinite}
+    background:var(--seal);vertical-align:middle;margin:-1px 8px 0 0;opacity:var(--pols,1)}
+  /* Alle stipjes kloppen op dezelfde hartslag. Gaf ik elk bolletje zijn eigen animatie, dan
+     begint die op het moment dat de rij wordt getekend: rijen die later verschijnen lopen dan
+     uit de pas en de lijst gaat rommelen. Daarom draait er hier één animatie, op de lijst zelf,
+     die een geërfde waarde laat ademen; elk stipje leest alleen die waarde af. */
+  @keyframes polsslag{0%,100%{--pols:1}50%{--pols:.3}}
+  .pols .wlib{animation:polsslag 1.6s ease-in-out infinite}
   /* Woorden hub: fixed header, list scrolls underneath */
   .surface.wlib{display:flex;flex-direction:column;overflow:hidden}
   .wlib .whead{padding-left:22px;padding-right:22px;position:relative;z-index:2;background:var(--page);flex:none}
+  /* De zwevende tabbalk hangt over deze lijst heen. Met een vaste onderrand van 20px bleef de
+     laatste groep op een korter scherm onder de balk liggen, ook als je helemaal doorrolde.
+     De ruimte wordt nu uit de balk zelf gemeten. */
   .wscroll{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;
-    padding:0 22px 20px;-webkit-overflow-scrolling:touch}
+    padding:0 22px var(--dokruimte, 96px);-webkit-overflow-scrolling:touch}
   .wscroll::-webkit-scrollbar{display:none}
   .wlib .wlist{margin-top:14px}
   /* mastery growth icons (seed -> sprout -> bloom) */
@@ -2909,7 +2921,7 @@
   /* Standen volgt het gewone model: het hele lichaam rolt en de lijst is zo hoog als zijn
      inhoud. Eerder rolde alleen de lijst binnen een vast kader, waardoor je op deze ene
      Handboek-pagina ineens met twee scrollgebieden te maken had. */
-  .hbcat[data-hb="standen"] .cs-body{padding-bottom:calc(env(safe-area-inset-bottom) + 22px)}
+  .hbcat[data-hb="standen"] .cs-body{padding-bottom:var(--pilruimte, calc(env(safe-area-inset-bottom) + 22px))}
   /* De hele stand-regel spreekt het woord uit — diagram en uitleg horen bij hetzelfde woord,
      dus er is geen reden om alleen de titelstrook aan te wijzen. */
   /* De naam stond eerst op een eigen regel bovenaan, met het diagram pas daaronder naast de
@@ -6380,7 +6392,7 @@
     return '<div class="ct-row'+(h?' hard':'')+'" data-term="'+esc(it.roman)+'" data-act="say" data-ko="'+esc(it.ko)+'" aria-label="Zeg '+esc(it.roman)+' hardop">'+
       '<button class="ct-bk-btn'+(h?' on':'')+'" data-act="hardterm" data-k="'+esc(it.roman)+'" '+
         'aria-pressed="'+(h?'true':'false')+'" aria-label="Bewaar bij moeilijke woorden">'+bkmk({on:h})+'</button>'+
-      '<div class="ct-tx"><div class="ct-ko">'+esc(it.ko)+(groupName?'<span class="ct-grp">'+esc(groupName)+'</span>':'')+'</div>'+
+      '<div class="ct-tx"><div class="ct-ko"><span class="ct-ko-w">'+esc(it.ko)+'</span>'+(groupName?'<span class="ct-grp">'+esc(groupName)+'</span>':'')+'</div>'+
         '<div class="ct-meta"><b>'+esc(it.roman)+'</b><span class="ct-nl"> · '+esc(it.nl)+'</span></div></div>'+
       '<span class="ct-say ct-say-ind" aria-hidden="true">'+IC.spk+IC.speak+'</span>'+
     '</div>';
@@ -6549,6 +6561,32 @@
     el.style.setProperty('--hot', shade(ac,26));
   }
   function catNames(){ return TERMEN.filter(function(g){ return g.items && g.items.length>=2; }).map(function(g){ return g.groep; }); }
+  /* De puntjespil zweeft over de lijst. Stond er te weinig ruimte onder, dan verdween de laatste
+     regel eronder en viel er niets meer weg te rollen. Daarom rekenen we de ruimte uit in plaats
+     van hem te raden: wat er onder de bovenkant van de pil zit, plus een marge, wordt de
+     onderrand van de lijst. Zo komt elke regel er altijd onderuit, op elk schermformaat. */
+  function pilRuimte(sheet){
+    if(!sheet) return;
+    var tray = sheet.querySelector('.cs-dotstray');
+    if(!tray){ sheet.style.removeProperty('--pilruimte'); return; }
+    requestAnimationFrame(function(){
+      var pil = tray.querySelector('.cs-dots'); if(!pil) return;
+      var onder = sheet.getBoundingClientRect().bottom - pil.getBoundingClientRect().top;
+      if(onder > 0) sheet.style.setProperty('--pilruimte', Math.ceil(onder + 14) + 'px');
+    });
+  }
+  /* Dezelfde som voor de zwevende tabbalk: wat er onder zijn bovenkant zit, plus een marge,
+     is de ruimte die elke lijst eronder nodig heeft. */
+  function dokRuimte(){
+    var dock = document.getElementById('navdock'), nav = document.getElementById('fnav');
+    if(!dock || (nav && nav.classList.contains('hide'))) return;
+    var onder = window.innerHeight - dock.getBoundingClientRect().top;
+    if(onder > 0) document.documentElement.style.setProperty('--dokruimte', Math.ceil(onder + 14) + 'px');
+  }
+  window.addEventListener('resize', function(){
+    dokRuimte();
+    document.querySelectorAll('.catsheet').forEach(pilRuimte);
+  });
   function openCat(name){
     var parts = buildCatParts(name); if(!parts) return;
     catSheet = document.createElement('div');
@@ -6576,6 +6614,7 @@
     stage.appendChild(catSheet);
     moveRateHL(catSheet.querySelector('.cs-rate'), true);
     if(multi){ attachCatSwipe(catSheet); attachDotScrub(catSheet); showDots(); }
+    pilRuimte(catSheet);
     fnav.classList.add('hide');
     void catSheet.offsetWidth; // capture the off-screen start so the drill-in transition runs
     requestAnimationFrame(function(){ catSheet.classList.add('show'); csEdgeFadeAll(catSheet); });
@@ -10631,7 +10670,13 @@
   }
 
   /* ---- boot ---- */
-  function boot(){ setBelt(GEUP_I, false); renderToday(); scheduleBlink();
+  /* Oudere browsers kennen @property niet; die zouden --pols hard omklappen in plaats van laten
+     ademen. Dan liever helemaal geen klop: de stipjes blijven gewoon staan. */
+  function polsAan(){
+    var kan = typeof CSS!=='undefined' && typeof CSS.registerProperty==='function';
+    if(kan) document.documentElement.classList.add('pols');
+  }
+  function boot(){ setBelt(GEUP_I, false); renderToday(); scheduleBlink(); polsAan(); dokRuimte();
     requestAnimationFrame(moveNavHL); setTimeout(moveNavHL, 320);
     // preview deep-link: ?open=1 (optionally &ci=goal|reflect) opens the weekly check-in on load
     if(/[?&]open=1/.test(location.search||'')) setTimeout(function(){ openCheckin(_ciOverride||'reflect'); }, 90); }
