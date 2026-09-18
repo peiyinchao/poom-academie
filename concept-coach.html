@@ -6593,6 +6593,21 @@
     if(onder > 0) document.documentElement.style.setProperty('--dokruimte', Math.ceil(onder + 14) + 'px');
   }
   window.addEventListener('resize', dokRuimte);
+  /* Vangnet onder het bodemblokje. De vaste maat in CSS klopt, maar hij gaat uit van aannames:
+     de hoogte van de pil en wat de thuisbalk opeist. Deze som kijkt in plaats daarvan naar waar
+     de pil werkelijk hangt ten opzichte van de onderkant van het rolvak, en maakt het blokje
+     hoger als dat te krap blijkt. Hij kan alleen groeien, nooit krimpen, dus hij kan de ruimte
+     hoogstens ruimer maken - en daarmee kan een toekomstige wijziging aan de pil of de rand van
+     het scherm de laatste regel niet meer onbereikbaar maken. */
+  function bodemVangnet(sheet){
+    if(!sheet) return;
+    var bodem = sheet.querySelector('.cs-bodem'), pil = sheet.querySelector('.cs-dots');
+    var body = sheet.querySelector('.cs-body');
+    if(!bodem || !pil || !body) return;
+    var nodig = Math.ceil(body.getBoundingClientRect().bottom - pil.getBoundingClientRect().top) + 16;
+    if(nodig > Math.ceil(bodem.getBoundingClientRect().height) + 1) bodem.style.height = nodig + 'px';
+  }
+  window.addEventListener('resize', function(){ bodemVangnet(catSheet); });
   function openCat(name){
     var parts = buildCatParts(name); if(!parts) return;
     catSheet = document.createElement('div');
@@ -6624,7 +6639,8 @@
     if(multi){ attachCatSwipe(catSheet); attachDotScrub(catSheet); showDots(); }
     fnav.classList.add('hide');
     void catSheet.offsetWidth; // capture the off-screen start so the drill-in transition runs
-    requestAnimationFrame(function(){ catSheet.classList.add('show'); csEdgeFadeAll(catSheet); });
+    requestAnimationFrame(function(){ catSheet.classList.add('show'); csEdgeFadeAll(catSheet);
+      bodemVangnet(catSheet); });
   }
   // Cross-slide only the woordgroep title, mirroring the belt-picker meta swap (old slides out, new in)
   function csTitleSwap(sheet, name, dir){
@@ -10741,6 +10757,10 @@
   el.style.cssText='position:fixed;left:6px;right:6px;bottom:6px;z-index:99999;'+
     'font:10px/1.35 ui-monospace,Menlo,monospace;color:#fff;background:rgba(0,0,0,.82);'+
     'padding:7px 9px;border-radius:9px;white-space:pre;pointer-events:none;letter-spacing:0';
+  var versie='?';
+  fetch('sw.js',{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
+    var m=t.match(/CACHE\s*=\s*'([^']+)'/); if(m) versie=m[1];
+  }).catch(function(){});
   var meter=document.createElement('div');
   meter.style.cssText='position:fixed;left:-9999px;height:env(safe-area-inset-bottom)';
   document.body.appendChild(meter); document.body.appendChild(el);
@@ -10759,7 +10779,7 @@
     var rijen=document.querySelectorAll('.ct-row, .wrow');
     var laatste=rijen.length? rijen[rijen.length-1] : null;
     var t=[];
-    t.push('scherm '+r(innerWidth)+'x'+r(innerHeight)+
+    t.push(versie+'   scherm '+r(innerWidth)+'x'+r(innerHeight)+
       (v? '  zicht '+r(v.height)+' @'+r(v.offsetTop) : '')+
       '  thuisbalk '+r(meter.getBoundingClientRect().height));
     if(sc){ var c=sc.className.split(' ').slice(0,2).join('.');
@@ -10771,8 +10791,10 @@
       t.push('pil  boven '+r(pb.top)+'  onder '+r(pb.bottom)+'  hoog '+r(pb.height)); }
     if(dok){ var db=dok.getBoundingClientRect(); t.push('balk boven '+r(db.top)); }
     if(laatste){ var lb=laatste.getBoundingClientRect();
+      var onderaan = sc ? (sc.scrollHeight-sc.clientHeight-sc.scrollTop) <= 2 : true;
       t.push('laatste regel onder op '+r(lb.bottom)+
-        (pil? '   ruimte tot pil '+r(pil.getBoundingClientRect().top-lb.bottom) : ''));
+        (pil? (onderaan ? '   ruimte tot pil '+r(pil.getBoundingClientRect().top-lb.bottom)
+                        : '   (rol eerst helemaal naar beneden)') : ''));
     }
     var bodem=document.querySelector('.cs-bodem');
     t.push('bodemblokje: '+(bodem? r(bodem.getBoundingClientRect().height)+'px' : 'geen'));
