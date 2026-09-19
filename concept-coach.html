@@ -717,14 +717,22 @@
   .tl-ttl[role="button"]{cursor:pointer;-webkit-tap-highlight-color:transparent}
   .tl-ttl[role="button"]:active{opacity:.6}
   .tl-photo[role="button"]{cursor:zoom-in}
-  /* De titel mag niet onder het potlood doorlopen zodra dat er is. */
-  .tl-item.tl-atop .tl-date,.tl-item.tl-atop .tl-ttl{padding-right:38px}
+  /* De titel mag niet onder het potlood doorlopen. Die ruimte staat er altijd, ook als het
+     potlood er nog niet is: reserveerden we hem pas bij het verschijnen, dan brak de titel op
+     dat moment naar een extra regel en sprong de kaart — en zijn buren — omlaag. Nu breekt de
+     titel meteen op de goede plek en verandert er niets meer als het potlood opkomt. */
+  .tl-date,.tl-ttl{padding-right:38px}
   .tl-item.fut .tl-card{border-style:dashed;border-color:rgba(30,22,16,.3);background:transparent}
   .tl-date{display:block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
     color:var(--gray);font-family:var(--cond)}
   /* Hoe lang geleden staat in dezelfde letter als de datum, maar iets lichter: het is een
-     toelichting bij die datum en mag hem niet naar de tweede plaats duwen. */
-  .tl-sinds{font-style:normal;font-weight:600;opacity:.72}
+     toelichting bij die datum en mag hem niet naar de tweede plaats duwen.
+     Een zwevende punt ertussen, zoals bij de uitslagen: twee dingen op één regel die niet in
+     elkaar mogen lopen. Hij komt op met het potlood, als de kaart bovenaan staat en je er dus
+     naar kijkt — bij elke kaart tegelijk wordt het ruis. Hij blijft wel altijd in de opmaak
+     staan, zodat de regel niet verspringt op het moment dat hij verschijnt. */
+  .tl-sinds{font-style:normal;font-weight:600;opacity:0;transition:opacity .22s ease}
+  .tl-item.tl-atop .tl-sinds{opacity:.66}
   .tl-ttl{display:block;margin-top:3px;font-size:15.5px;font-weight:800;line-height:1.25;color:var(--ink)}
   .tl-meta{display:block;margin-top:3px;font-size:12.5px;color:var(--gray)}
   .tl-meta i{font-style:normal;font-weight:700;color:var(--el)}
@@ -6257,7 +6265,7 @@
       '<div class="tl-card">'+
         '<button class="tl-pen" '+ed+' aria-label="'+esc(edit)+'" title="'+esc(edit)+'">'+IC.potlood+'</button>'+
         '<span class="tl-date">'+esc(tlWhen(it))+
-          (tlGeleden(it.date,today)?' <i class="tl-sinds">('+esc(tlGeleden(it.date,today))+')</i>':'')+
+          (tlGeleden(it.date,today)?' <i class="tl-sinds">&middot; '+esc(tlGeleden(it.date,today))+'</i>':'')+
         '</span>'+
         '<b class="tl-ttl" role="button" tabindex="0" '+ed+'>'+esc(it.title)+'</b>'+
         (meta.length?'<span class="tl-meta">'+meta.join(' · ')+'</span>':'')+
