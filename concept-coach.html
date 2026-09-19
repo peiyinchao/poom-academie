@@ -704,10 +704,13 @@
   .ic-tl-wedstrijd{-webkit-mask-image:url('assets/icons/Wedstrijd.png');mask-image:url('assets/icons/Wedstrijd.png')}
   .ic-tl-examen{-webkit-mask-image:url('assets/icons/Examen.png');mask-image:url('assets/icons/Examen.png')}
   .ic-tl-cursus{-webkit-mask-image:url('assets/icons/Cursus.png');mask-image:url('assets/icons/Cursus.png')}
-  .tl-card{position:relative;border:1px solid var(--line);border-radius:16px;padding:13px 15px;background:var(--surface)}
+  /* Wat ruimer aan de kop: de datumregel stond met 13px bijna tegen de rand aan, en juist daar
+     komt nu ook het potlood naast staan. Met dubbel zoveel lucht krijgt de regel wat adem en
+     staat de kaart rustiger in de lijst. Onderaan blijft het krap — daar sluit de kaart af. */
+  .tl-card{position:relative;border:1px solid var(--line);border-radius:16px;padding:26px 15px 13px;background:var(--surface)}
   /* Het potlood hangt in de hoek en is er alleen als de kaart bovenaan staat. Het blijft in de
      opmaak staan (alleen onzichtbaar), zodat de tekst niet verspringt als het verschijnt. */
-  .tl-pen{position:absolute;top:9px;right:9px;z-index:2;width:34px;height:34px;padding:0;border:0;
+  .tl-pen{position:absolute;top:14px;right:9px;z-index:2;width:34px;height:34px;padding:0;border:0;
     border-radius:50%;background:var(--soft);color:var(--gray);display:grid;place-items:center;
     opacity:0;pointer-events:none;transform:scale(.86);
     transition:opacity .22s ease,transform .22s cubic-bezier(.22,1,.36,1)}
@@ -725,14 +728,17 @@
   .tl-item.fut .tl-card{border-style:dashed;border-color:rgba(30,22,16,.3);background:transparent}
   .tl-date{display:block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
     color:var(--gray);font-family:var(--cond)}
-  /* Hoe lang geleden staat in dezelfde letter als de datum, maar iets lichter: het is een
-     toelichting bij die datum en mag hem niet naar de tweede plaats duwen.
+  /* Hoe lang geleden staat in precies dezelfde letter als de datum — zelfde maat, zelfde
+     gewicht — maar in het blauw van "nog 14 dagen" in de kop. Daar telt het blauw af naar iets
+     dat komt, hier telt het terug van iets dat was. Alleen de kleur springt eruit; zou ook het
+     gewicht meedoen, dan viel de tekst uit de lijn van de datum waar hij bij hoort.
+     Geen onderstreping: in de kop is die het teken dat je erop kunt tikken, en dat kan hier niet.
      Een zwevende punt ertussen, zoals bij de uitslagen: twee dingen op één regel die niet in
-     elkaar mogen lopen. Hij komt op met het potlood, als de kaart bovenaan staat en je er dus
-     naar kijkt — bij elke kaart tegelijk wordt het ruis. Hij blijft wel altijd in de opmaak
-     staan, zodat de regel niet verspringt op het moment dat hij verschijnt. */
-  .tl-sinds{font-style:normal;font-weight:600;opacity:0;transition:opacity .22s ease}
-  .tl-item.tl-atop .tl-sinds{opacity:.66}
+     elkaar mogen lopen. Hij komt op met het potlood, bij de kaart die je op dat moment leest —
+     bij elke kaart tegelijk wordt het ruis. Hij blijft wel altijd in de opmaak staan, zodat de
+     regel niet verspringt op het moment dat hij verschijnt. */
+  .tl-sinds{font-style:normal;color:var(--blue);opacity:0;transition:opacity .22s ease}
+  .tl-item.tl-atop .tl-sinds{opacity:1}
   .tl-ttl{display:block;margin-top:3px;font-size:15.5px;font-weight:800;line-height:1.25;color:var(--ink)}
   .tl-meta{display:block;margin-top:3px;font-size:12.5px;color:var(--gray)}
   .tl-meta i{font-style:normal;font-weight:700;color:var(--el)}
@@ -6378,18 +6384,22 @@
     if(!sc) return;
     csFades(sc); csEdgeFade(sc); tlAtop(sc);
   }
-  /* Welke kaart staat bovenaan? De laatste waarvan de bovenkant nog boven de leeslijn ligt.
-     Zo hoort het potlood altijd bij de kaart waar je naar kijkt, ook als er eentje half buiten
-     beeld hangt. Alleen de klas wisselen als hij echt verandert, anders flikkert de overgang. */
+  // Welke kaart ben je aan het lezen? De bovenste waarvan de kop nog helemaal in beeld staat.
+  // Daar zitten datum, "hoe lang geleden" en het potlood, en die moeten alledrie te zien zijn:
+  // eerder koos hij de kaart op een vaste leeslijn, maar die was net zo vaak half onder de
+  // koptekst weggeschoven — dan wees het potlood naar iets dat je niet kon lezen, en tussen
+  // twee kaarten in verdween hij zelfs helemaal. Nu geeft een kaart het stokje door zodra zijn
+  // eigen kop het beeld uit rolt, en staat er dus altijd precies één kaart klaar om te wijzigen.
   function tlAtop(sc){
     var items=sc.querySelectorAll('.tl-item');
     if(!items.length) return;
-    var lijn=sc.getBoundingClientRect().top + 72, kies=null, i, r;
+    var box=sc.getBoundingClientRect(), kies=null, i, r;
     for(i=0;i<items.length;i++){
       r=items[i].getBoundingClientRect();
-      if(r.top<=lijn && r.bottom>lijn+20){ kies=items[i]; break; }
+      if(r.top>=box.top-2 && r.top<box.bottom-40){ kies=items[i]; break; }
     }
-    if(!kies && sc.scrollTop<=2) kies=items[0];
+    // Helemaal onderaan past er geen hele kop meer: dan houdt de laatste kaart hem.
+    if(!kies) kies=items[items.length-1];
     for(i=0;i<items.length;i++) items[i].classList.toggle('tl-atop', items[i]===kies);
   }
   /* Naar rechts vegen sluit de tijdlijn, net als bij het handboek. Met één hand is de X
