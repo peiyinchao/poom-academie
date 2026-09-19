@@ -123,7 +123,11 @@
   /* Agenda teaser: the date grows a second line counting down to the next wedstrijd, examen or
      cursus. That line is itself the tap target — its count token is painted blue so it reads as
      tappable without adding a second button to an already busy header. */
-  .status-when{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1 1 auto;align-items:flex-start}
+  /* De hele hoek linksboven is het tikvlak, niet alleen de blauwe telling: dat is een regel
+     van elf pixels hoog en die mis je met een duim net zo vaak als je hem raakt. Datum,
+     telling en de lucht ernaast horen bij elkaar, dus vangen ze samen de tik op. */
+  .status-when{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1 1 auto;align-items:flex-start;
+    align-self:stretch;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .status-next{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:11.5px;
     color:var(--gray);max-width:100%;
     /* Altijd één regel: de header mag nooit drie regels hoog worden. Hij pakt wel de volle
@@ -920,6 +924,7 @@
   /* ---- Coach: eigen weekprogramma ---- */
   .coachscreen .shead{padding-bottom:4px}
   .pl-title{flex:1;min-width:0;order:0}
+  #tlscreen .pl-title{cursor:pointer;-webkit-tap-highlight-color:transparent}
   .pl-title .han-lab{display:block;font-size:11px;letter-spacing:.05em;color:var(--gray);line-height:1}
   /* Het Koreaanse kopje stond met 3px bijna tegen de titel aan, terwijl het op de overzichts-
      pagina's gewoon zijn eigen regel krijgt. Zelfde lucht dus, anders leest de kop hier als
@@ -5679,8 +5684,8 @@
   function statusBar(){
     var nx=agNext();
     return '<div class="status">'+
-      '<span class="status-when"><span class="date">'+esc(dateStr())+'</span>'+
-        '<span class="status-next" role="button" data-act="agenda" title="Agenda">'+
+      '<span class="status-when" role="button" data-act="agenda" title="Agenda"><span class="date">'+esc(dateStr())+'</span>'+
+        '<span class="status-next">'+
           (nx ? agNextLine(nx) : '<b>Niets gepland</b>')+
         '</span></span>'+
       '<span class="status-end">'+
@@ -6816,7 +6821,7 @@
     el.innerHTML=
       '<div class="shead">'+
         '<button class="sx" data-act="tlexit" aria-label="Sluiten">'+IC.x+'</button>'+
-        '<div class="pl-title"><span class="han-lab">발자취 · Baljachwi</span><h2>Jayden&#39;s TKD Tijdlijn</h2></div>'+
+        '<div class="pl-title" role="button" data-act="tltop" title="Terug naar boven"><span class="han-lab">발자취 · Baljachwi</span><h2>Jayden&#39;s TKD Tijdlijn</h2></div>'+
       '</div>'+
       '<div class="sbody" id="tl-scroll">'+
         '<p class="tl-lead" id="tl-lead">'+esc(tlCountLine())+'</p>'+
@@ -6852,6 +6857,18 @@
     csFades(sc);
     sc.addEventListener('scroll', function(){ csEdgeFade(sc); tlAtop(sc); }, {passive:true});
     tlVeegTerug(el, sc);
+  }
+  /* Zoals de statusbalk van iOS: een tik op de kop brengt je in één keer terug naar het begin
+     van je verhaal. Handig, want de tijdlijn wordt alleen maar langer. Het rollen vuurt zelf
+     geen betrouwbare laatste scroll-gebeurtenis af, dus zetten we het potlood na afloop
+     nog een keer op de juiste kaart. */
+  function tlNaarBoven(){
+    if(!tlScreen) return;
+    var sc=tlScreen.querySelector('#tl-scroll');
+    if(!sc || sc.scrollTop<=0) return;
+    sc.scrollTo({top:0,behavior:'smooth'});
+    buzz(8);
+    setTimeout(function(){ tlNaTekenen(); }, 520);
   }
   function tlNaTekenen(){
     if(!tlScreen) return;
@@ -10618,6 +10635,7 @@
     else if(a==='beltsheet'){ openBeltSheet(); }
     else if(a==='beltsheetclose'){ closeBeltSheet(); }
     else if(a==='agenda'){ openAgendaSheet(); }
+    else if(a==='tltop'){ tlNaarBoven(); }
     else if(a==='agendaclose'){ closeAgendaSheet(); }
     else if(a==='agtype'){ if(!agDraft||!agSheet) return; agSync(); agDraft.type=act.getAttribute('data-k');
       agRender(); }
