@@ -662,6 +662,12 @@
     mask:linear-gradient(180deg,#000 58%,transparent)}
   /* Zo groot als een gebeurtenistitel en in dezelfde inkt: een jaartal is een kop, geen bijschrift. */
   .tl-year{position:relative;margin:2px 0 10px;padding-top:4px}
+  /* Een nieuw jaartal is een adempauze in je verhaal. Een regel extra lucht erboven laat dat
+     zien zonder er een streep voor nodig te hebben. Het eerste jaartal krijgt hem niet: daar
+     begint de lijst en is er niets om afstand van te nemen. De lijn erlangs groeit mee, anders
+     valt er precies in die lucht een gat in de tijdlijn. */
+  .tl-line>.tl-year:not(:first-child){margin-top:20px}
+  .tl-line>.tl-year:not(:first-child)::before{top:-22px}
   .tl-year span{display:inline-block;font-family:var(--cond);font-size:15.5px;font-weight:800;
     letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
   .tl-item{position:relative;margin-bottom:12px}
@@ -716,6 +722,9 @@
   .tl-item.fut .tl-card{border-style:dashed;border-color:rgba(30,22,16,.3);background:transparent}
   .tl-date{display:block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
     color:var(--gray);font-family:var(--cond)}
+  /* Hoe lang geleden staat in dezelfde letter als de datum, maar iets lichter: het is een
+     toelichting bij die datum en mag hem niet naar de tweede plaats duwen. */
+  .tl-sinds{font-style:normal;font-weight:600;opacity:.72}
   .tl-ttl{display:block;margin-top:3px;font-size:15.5px;font-weight:800;line-height:1.25;color:var(--ink)}
   .tl-meta{display:block;margin-top:3px;font-size:12.5px;color:var(--gray)}
   .tl-meta i{font-style:normal;font-weight:700;color:var(--el)}
@@ -6119,6 +6128,30 @@
     }
     return s;
   }
+  /* Hoe lang is dit geleden? Een datum vertelt wanneer iets was, niet hoe ver weg het ligt.
+     De maat groeit mee met de afstand: binnen een maand tel je nog dagen, daarna maanden, en
+     voorbij een jaar noem je het jaartal met de maanden erbij — "2 jaar" zegt weinig als het
+     er bijna drie zijn. Maanden tellen we op de kalender en niet in dagen van 30, zodat 6 mei
+     tot 6 juni precies één maand is, ongeacht de lengte van die maand.
+     Wat nog moet komen krijgt niets: daar is de aftelling op de kaart zelf al voor. */
+  function tlGeleden(iso, today){
+    if(!iso || !today || iso>today) return '';
+    var a=String(iso).split('-'), b=String(today).split('-');
+    if(a.length<3 || b.length<3) return '';
+    var mnd=(+b[0]-+a[0])*12 + (+b[1]-+a[1]);
+    if(+b[2] < +a[2]) mnd--;
+    if(mnd<1){
+      var dag=Math.round((Date.UTC(+b[0],+b[1]-1,+b[2]) - Date.UTC(+a[0],+a[1]-1,+a[2]))/864e5);
+      if(dag<=0) return 'vandaag';
+      if(dag===1) return 'gisteren';
+      return dag+' dagen geleden';
+    }
+    if(mnd<12) return mnd===1 ? '1 maand geleden' : mnd+' maanden geleden';
+    var jr=Math.floor(mnd/12), rest=mnd%12;
+    var sj=jr===1?'1 jaar':jr+' jaar';
+    if(!rest) return sj+' geleden';
+    return sj+' en '+(rest===1?'1 maand':rest+' maanden')+' geleden';
+  }
   /* Welke band droeg je op deze datum? De hoogste graad die je toen al gehaald had. Een
      graduatie kleurt dus vanaf zijn eigen datum, want die dag ging de nieuwe band om. */
   function tlBeltAt(iso){
@@ -6223,7 +6256,9 @@
       tlDotHtml(it)+
       '<div class="tl-card">'+
         '<button class="tl-pen" '+ed+' aria-label="'+esc(edit)+'" title="'+esc(edit)+'">'+IC.potlood+'</button>'+
-        '<span class="tl-date">'+esc(tlWhen(it))+'</span>'+
+        '<span class="tl-date">'+esc(tlWhen(it))+
+          (tlGeleden(it.date,today)?' <i class="tl-sinds">('+esc(tlGeleden(it.date,today))+')</i>':'')+
+        '</span>'+
         '<b class="tl-ttl" role="button" tabindex="0" '+ed+'>'+esc(it.title)+'</b>'+
         (meta.length?'<span class="tl-meta">'+meta.join(' · ')+'</span>':'')+
         // Elke podiumplaats krijgt zijn eigen medaille en zijn eigen pil. Eén pil met twee
