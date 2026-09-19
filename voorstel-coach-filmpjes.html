@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poom Academy — voorstel: Coach &amp; Filmpjes</title>
+<link rel="stylesheet" href="fonts/inter.css">
+<link rel="stylesheet" href="fonts/poster.css">
+<style>
+  :root{
+    --ink:#1A1712; --page:#F4F1EA; --gray:#6B6459; --line:#E7E1D5;
+    --surface:#FFFFFF; --soft:#EFEADF;
+    --seal:#C1121F; --seal-deep:#8E0D17; --blue:#3E5BD6;
+    --text:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --cond:'Big Shoulders Display',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--ink);font-family:var(--text);
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:44px 24px 90px}
+  .eyebrow{font-family:var(--cond);text-transform:uppercase;letter-spacing:.18em;
+    font-size:10px;font-weight:700;color:var(--gray);margin:0 0 6px}
+  h1{font-family:var(--cond);text-transform:uppercase;font-size:44px;line-height:1;margin:0 0 10px}
+  h2{font-family:var(--cond);text-transform:uppercase;font-size:27px;line-height:1.05;
+    margin:56px 0 4px;padding-top:26px;border-top:1px solid var(--line)}
+  h3{font-size:14px;margin:0 0 3px;font-weight:650}
+  .lead{max-width:640px;color:#3b352c;line-height:1.55;margin:0 0 6px;font-size:14.5px}
+  .sub{max-width:660px;color:var(--gray);line-height:1.5;font-size:13.5px;margin:6px 0 0}
+
+  .rij{display:flex;gap:30px;flex-wrap:wrap;margin-top:26px;align-items:flex-start}
+  .kolom{width:290px}
+  .kop{margin:0 0 11px}
+  .kop .nr{font-family:var(--cond);font-size:11px;letter-spacing:.14em;color:var(--seal);
+    text-transform:uppercase;font-weight:700}
+  .kop p{margin:3px 0 0;font-size:12.5px;color:var(--gray);line-height:1.45}
+
+  /* --- telefoon --- */
+  .tel{width:290px;height:600px;border-radius:38px;background:var(--page);position:relative;
+    overflow:hidden;border:7px solid #191510;box-shadow:0 22px 50px -26px rgba(40,24,12,.5)}
+  .tel .binnen{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden}
+  .statusbalk{height:26px;flex:none;display:flex;align-items:center;justify-content:space-between;
+    padding:0 16px;font-size:10px;color:var(--gray);font-weight:600}
+  .scroll{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+  .scroll::-webkit-scrollbar{display:none}
+
+  .sheadje{padding:6px 16px 10px;flex:none}
+  .sheadje .eyebrow{margin-bottom:3px}
+  .sheadje h4{font-family:var(--cond);text-transform:uppercase;font-size:23px;margin:0;line-height:1}
+
+  /* --- tabbalk onderin --- */
+  .dock{position:absolute;left:14px;right:14px;bottom:12px;height:46px;border-radius:999px;
+    background:rgba(252,250,245,.82);backdrop-filter:blur(22px) saturate(1.8);
+    -webkit-backdrop-filter:blur(22px) saturate(1.8);border:1px solid rgba(26,23,18,.07);
+    display:flex;align-items:center;justify-content:space-around;
+    box-shadow:0 12px 26px -16px rgba(40,24,12,.4);z-index:8}
+  .dock i{width:17px;height:17px;border-radius:5px;background:#CFC8B9;display:block}
+  .dock i.aan{background:var(--ink)}
+
+  /* --- filmpjes --- */
+  .catbar{display:flex;gap:7px;padding:2px 16px 11px;overflow-x:auto;flex:none;scrollbar-width:none}
+  .catbar::-webkit-scrollbar{display:none}
+  .pil{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;
+    padding:6px 12px;font-size:11.5px;font-weight:600;color:#463f34;white-space:nowrap;cursor:pointer;
+    font-family:var(--text)}
+  .pil.aan{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .pil .tel-n{opacity:.55;margin-left:5px;font-variant-numeric:tabular-nums}
+
+  .gereed{display:flex;align-items:center;justify-content:space-between;padding:0 16px 9px;flex:none}
+  .gereed .links{font-size:11px;color:var(--gray)}
+  .schakel{display:flex;gap:3px;background:var(--soft);border-radius:9px;padding:3px}
+  .schakel button{border:0;background:none;border-radius:6px;padding:3px 8px;cursor:pointer;
+    font-size:10.5px;color:var(--gray);font-family:var(--text);font-weight:600}
+  .schakel button.aan{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(40,24,12,.14)}
+
+  .raster{display:grid;grid-template-columns:1fr 1fr;gap:13px 11px;padding:0 16px 16px}
+  .kaart{cursor:pointer}
+  .duim{position:relative;aspect-ratio:3/2;border-radius:11px;overflow:hidden;background:#DED7C8;
+    border:1px solid var(--line)}
+  .duim .verloop{position:absolute;inset:0}
+  .duim .speel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:29px;height:29px;border-radius:50%;background:rgba(255,255,255,.9);
+    display:grid;place-items:center;box-shadow:0 3px 9px rgba(0,0,0,.24)}
+  .duim .speel::after{content:'';border-left:8px solid var(--ink);border-top:5.5px solid transparent;
+    border-bottom:5.5px solid transparent;margin-left:2px}
+  .duim .duur{position:absolute;right:5px;bottom:5px;background:rgba(0,0,0,.66);color:#fff;
+    font-size:9px;padding:1.5px 4.5px;border-radius:4px;font-variant-numeric:tabular-nums}
+  .duim .bron{position:absolute;left:5px;top:5px;width:16px;height:16px;border-radius:5px;
+    display:grid;place-items:center;font-size:8px;font-weight:800;color:#fff}
+  .bron.yt{background:#FF0033}
+  .bron.fb{background:#1877F2}
+  .bron.eigen{background:var(--seal)}
+  .kaart h5{margin:6px 0 1px;font-size:11.5px;line-height:1.25;font-weight:620}
+  .kaart .meta{margin:0;font-size:10px;color:var(--gray)}
+
+  .lijst{padding:0 16px 16px;display:flex;flex-direction:column}
+  .lr{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+  .lr:last-child{border-bottom:0}
+  .lr .mini{width:58px;aspect-ratio:3/2;border-radius:7px;flex:none;overflow:hidden;position:relative;
+    border:1px solid var(--line)}
+  .lr h5{margin:0 0 2px;font-size:11.5px;font-weight:620;line-height:1.2}
+  .lr .meta{margin:0;font-size:10px;color:var(--gray)}
+  .lr .grijp{margin-left:auto;color:#C3BCAD;font-size:13px;letter-spacing:1px}
+
+  .plank{padding:0 0 4px}
+  .plankkop{display:flex;align-items:baseline;justify-content:space-between;padding:10px 16px 7px}
+  .plankkop h5{margin:0;font-family:var(--cond);text-transform:uppercase;font-size:14px;letter-spacing:.02em}
+  .plankkop span{font-size:10.5px;color:var(--gray)}
+  .baan{display:flex;gap:10px;overflow-x:auto;padding:0 16px 4px;scrollbar-width:none}
+  .baan::-webkit-scrollbar{display:none}
+  .baan .kaart{width:132px;flex:none}
+
+  .plus{position:absolute;right:16px;bottom:70px;width:48px;height:48px;border-radius:50%;
+    background:var(--ink);color:#fff;display:grid;place-items:center;font-size:25px;z-index:9;
+    box-shadow:0 12px 26px -12px rgba(40,24,12,.7);line-height:0;padding-bottom:3px}
+
+  /* --- vel (bottom sheet) --- */
+  .vel{position:absolute;left:0;right:0;bottom:0;background:var(--surface);
+    border-radius:22px 22px 0 0;box-shadow:0 -14px 40px -20px rgba(40,24,12,.5);z-index:12;
+    padding:9px 16px 18px;max-height:82%;overflow-y:auto;scrollbar-width:none}
+  .vel::-webkit-scrollbar{display:none}
+  .greep{width:38px;height:4px;border-radius:2px;background:#DCD5C6;margin:0 auto 12px}
+  .vel h5{font-family:var(--cond);text-transform:uppercase;font-size:17px;margin:0 0 3px}
+  .vel .uitleg{font-size:11px;color:var(--gray);margin:0 0 12px;line-height:1.4}
+  .veld{border:1px solid var(--line);border-radius:11px;padding:9px 11px;margin-bottom:9px;background:#FCFBF8}
+  .veld label{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;
+    color:var(--gray);font-family:var(--cond);font-weight:700;margin-bottom:2px}
+  .veld .waarde{font-size:12.5px;color:#2a251d}
+  .veld .waarde.grijs{color:#A79F90}
+  .keuzes{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:11px}
+  .keuze{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 9px;
+    font-size:11px;display:flex;align-items:center;gap:5px;cursor:pointer}
+  .keuze.aan{border-color:var(--ink);background:var(--ink);color:#fff}
+  .knop{display:block;width:100%;border:0;border-radius:12px;background:var(--ink);color:#fff;
+    padding:12px;font-size:13px;font-weight:650;font-family:var(--text);cursor:pointer}
+  .knop.zacht{background:var(--soft);color:var(--ink)}
+  .tweeknop{display:flex;gap:8px;margin-top:4px}
+  .tweeknop .knop{margin:0}
+
+  /* --- coach --- */
+  .weekstrip{display:flex;gap:5px;padding:2px 16px 12px;flex:none}
+  .dag{flex:1;border-radius:11px;border:1px solid var(--line);background:var(--surface);
+    padding:7px 0 6px;text-align:center;cursor:pointer;position:relative}
+  .dag b{display:block;font-family:var(--cond);font-size:12px;text-transform:uppercase;line-height:1}
+  .dag i{display:block;width:4px;height:4px;border-radius:50%;background:var(--blue);margin:4px auto 0}
+  .dag i.leeg{background:#DCD5C6}
+  .dag.aan{background:var(--ink);border-color:var(--ink);color:#fff}
+  .dag.aan i{background:#fff}
+
+  .blok{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    margin:0 16px 9px;padding:11px 12px;display:flex;gap:10px;align-items:flex-start}
+  .blok .ico{width:32px;height:32px;border-radius:9px;background:var(--soft);display:grid;
+    place-items:center;font-size:15px;flex:none}
+  .blok .vul{flex:1;min-width:0}
+  .blok h5{margin:0 0 2px;font-size:12.5px;font-weight:650}
+  .blok .regel{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+  .merk{font-size:9.5px;border:1px solid var(--line);border-radius:6px;padding:2.5px 6px;
+    color:#4c453a;display:flex;align-items:center;gap:4px;background:#FCFBF8}
+  .merk.tijd{border-color:rgba(62,91,214,.3);color:var(--blue);background:rgba(62,91,214,.06)}
+  .merk.film{border-color:rgba(193,18,31,.25);color:var(--seal);background:rgba(193,18,31,.05)}
+  .blok .grijp{color:#C3BCAD;font-size:13px;letter-spacing:1px;flex:none;padding-top:2px}
+  .totaal{margin:2px 16px 12px;font-size:11px;color:var(--gray);display:flex;
+    justify-content:space-between;align-items:center}
+  .startknop{margin:0 16px 14px;border:0;border-radius:13px;background:var(--seal);color:#fff;
+    padding:13px;font-size:13.5px;font-weight:650;width:calc(100% - 32px);font-family:var(--text);
+    display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
+
+  .runner{position:absolute;inset:0;background:linear-gradient(170deg,#2B2C6B,#151530);color:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:26px;z-index:14}
+  .runner .stap{font-family:var(--cond);text-transform:uppercase;font-size:10px;letter-spacing:.18em;
+    opacity:.6}
+  .runner h4{font-family:var(--cond);text-transform:uppercase;font-size:29px;margin:5px 0 2px}
+  .runner .klok{font-family:var(--cond);font-size:74px;line-height:1;margin:16px 0 4px;
+    font-variant-numeric:tabular-nums}
+  .runner .straks{opacity:.62;font-size:11.5px;margin-top:auto;padding-top:20px}
+  .runner .ring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:210px;height:210px;border-radius:50%;border:2px solid rgba(255,255,255,.16)}
+  .runner .filmknop{margin-top:16px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);
+    color:#fff;border-radius:999px;padding:8px 15px;font-size:11.5px;font-family:var(--text);cursor:pointer}
+
+  .notitie{background:#FFFDF7;border:1px solid var(--line);
+    border-radius:9px;padding:13px 15px;margin-top:22px;max-width:660px}
+  .notitie h4{margin:0 0 5px;font-size:13px;display:flex;align-items:center;gap:7px}
+  /* Een klein zegelstipje in plaats van een gekleurde balk langs de rand: het wijst het blok
+     aan zonder de bladzijde in tweeën te delen. */
+  .notitie h4::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--seal);flex:none}
+  .notitie.blauw h4::before{background:var(--blue)}
+  .notitie p{margin:0;font-size:12.5px;color:#463f34;line-height:1.5}
+  .notitie ul{margin:7px 0 0;padding-left:17px;font-size:12.5px;color:#463f34;line-height:1.6}
+  .vraag{color:var(--seal-deep);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Poom Academy · voorstel</p>
+  <h1>Coach &amp; Filmpjes</h1>
+  <p class="lead">Eerste voorstellen voor de twee laatste grote onderdelen. De schermen hieronder
+    zijn aantikbaar waar dat iets verduidelijkt — probeer de schakelaar raster/lijst en de dagen
+    van de week. Alles staat in de stijl die de app al heeft, zodat je kunt beoordelen of het past
+    en niet of het mooi is.</p>
+
+  <!-- ==================== FILMPJES ==================== -->
+  <h2>1 · Filmpjes</h2>
+  <p class="lead">Je vroeg om categorie-eerst in plaats van een "alle"-lijst. Dat kan op twee
+    manieren, en ze sluiten elkaar niet uit: <b>A</b> laat alle categorieën tegelijk zien als
+    planken, <b>B</b> geeft één categorie de volle breedte. A is om te grasduinen, B om te zoeken.</p>
+
+  <div class="rij">
+
+    <!-- A: planken -->
+    <div class="kolom">
+      <div class="kop">
+        <span class="nr">A · planken</span>
+        <h3>Alle categorieën onder elkaar</h3>
+        <p>Per categorie een horizontale baan. Je ziet in één blik waar wat zit, en lege
+          categorieën vallen meteen op.</p>
+      </div>
+      <div class="tel"><div class="binnen">
+        <div class="statusbalk"><span>09:41</span><span>▮▮▮</span></div>
+        <div class="sheadje">
+          <p class="eyebrow">영상 · verzameling</p>
+          <h4>Filmpjes</h4>
+        </div>
+        <div class="scroll" style="padding-bottom:64px">
+          <div class="plank">
+            <div class="plankkop"><h5>Opwarmen</h5><span>6 →</span></div>
+            <div class="baan">
+              <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#8FA8D8,#3C4E86)"></div><span class="bron yt">▶</span><span class="speel"></span><span class="duur">7:12</span></div><h5>Dynamisch opwarmen</h5><p class="meta">Taekwondo Life</p></div>
+              <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#E2B27A,#A96B32)"></div><span class="bron fb">f</span><span class="speel"></span></div><h5>Warming-up dojang</h5><p class="meta">facebook.com</p></div>
+              <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#9ED0B4,#3F7D5E)"></div><span class="bron yt">▶</span><span class="speel"></span><span class="duur">4:03</span></div><h5>Enkels en heupen</h5><p class="meta">MoveDaily</p></div>
+            </div>
+          </div>
+          <div class="plank">
+            <div class="plankkop"><h5>Poomsae</h5><span>14 →</span></div>
+            <div class="baan">
+              <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#D9A0A8,#8E2230)"></div><span class="bron eigen">★</span><span class="speel"></span><span class="duur">1:48</span></div><h5>Taeguk 3 — vast</h5><p class="meta">Uit de app</p></div>
+              <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#B8C6E8,#4A5C9C)"></div><span class="bron yt">▶</span><span class="speel"></span><span class="duur">2:31</span></div><h5>Taeguk 4 langzaam</h5><p class="meta">Kukkiwon</p></div>
+              <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#CFCAB8,#736B58)"></div><span class="bron yt">▶</span><span class="speel"></span></div><h5>Detail: hand</h5><p class="meta">Master Kim</p></div>
+            </div>
+          </div>
+          <div class="plank">
+            <div class="plankkop"><h5>Gyeorugi</h5><span>9 →</span></div>
+            <div class="baan">
+              <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#F0A98C,#B0442B)"></div><span class="bron fb">f</span><span class="speel"></span></div><h5>Sparren tactiek</h5><p class="meta">facebook.com</p></div>
+              <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#A9B8C9,#485B72)"></div><span class="bron yt">▶</span><span class="speel"></span><span class="duur">5:20</span></div><h5>Voetenwerk</h5><p class="meta">WT Academy</p></div>
+            </div>
+          </div>
+          <div class="plank">
+            <div class="plankkop"><h5>Hosinsul</h5><span style="color:#B3AA99">leeg</span></div>
+            <div class="baan"><div style="border:1px dashed var(--line);border-radius:11px;width:132px;
+              aspect-ratio:3/2;display:grid;place-items:center;color:#B3AA99;font-size:11px">+ eerste</div></div>
+          </div>
+          <div style="height:14px"></div>
+        </div>
+        <div class="plus">+</div>
+        <div class="dock"><i></i><i></i><i></i><i class="aan"></i></div>
+      </div></div>
+    </div>
+
+    <!-- B: één categorie, met schakelaar -->
+    <div class="kolom">
+      <div class="kop">
+        <span class="nr">B · één categorie</span>
+        <h3>Volle breedte, raster of lijst</h3>
+        <p>De categoriepillen blijven bovenaan staan. Rechtsboven schakel je tussen
+          <b>raster</b> (3:2, titel eronder) en <b>lijst</b>. Probeer het.</p>
+      </div>
+      <div class="tel"><div class="binnen">
+        <div class="statusbalk"><span>09:41</span><span>▮▮▮</span></div>
+        <div class="sheadje">
+          <p class="eyebrow">영상 · verzameling</p>
+          <h4>Filmpjes</h4>
+        </div>
+        <div class="catbar">
+          <button class="pil aan">Poomsae<span class="tel-n">14</span></button>
+          <button class="pil">Opwarmen<span class="tel-n">6</span></button>
+          <button class="pil">Gyeorugi<span class="tel-n">9</span></button>
+          <button class="pil">Taeryon<span class="tel-n">3</span></button>
+        </div>
+        <div class="gereed">
+          <span class="links">Sorteer: <b style="color:#2a251d">meest bekeken</b> ▾</span>
+          <div class="schakel" id="schakel">
+            <button class="aan" data-w="raster">Raster</button>
+            <button data-w="lijst">Lijst</button>
+          </div>
+        </div>
+        <div class="scroll" style="padding-bottom:64px">
+          <div class="raster" id="rasterweergave">
+            <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#D9A0A8,#8E2230)"></div><span class="bron eigen">★</span><span class="speel"></span><span class="duur">1:48</span></div><h5>Taeguk 3 — vast in de app</h5><p class="meta">Uit de app · 12×</p></div>
+            <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#B8C6E8,#4A5C9C)"></div><span class="bron yt">▶</span><span class="speel"></span><span class="duur">2:31</span></div><h5>Taeguk 4 langzaam</h5><p class="meta">Kukkiwon · 9×</p></div>
+            <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#F0A98C,#B0442B)"></div><span class="bron fb">f</span><span class="speel"></span></div><h5>Poomsae wedstrijd 2024</h5><p class="meta">facebook.com · 7×</p></div>
+            <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#9ED0B4,#3F7D5E)"></div><span class="bron yt">▶</span><span class="speel"></span><span class="duur">3:44</span></div><h5>Ap kubi uitgelegd</h5><p class="meta">Master Kim · 5×</p></div>
+            <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#CFCAB8,#736B58)"></div><span class="bron eigen">★</span><span class="speel"></span><span class="duur">0:36</span></div><h5>Jayden — eigen opname</h5><p class="meta">Fotoalbum · 4×</p></div>
+            <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#A9B8C9,#485B72)"></div><span class="bron yt">▶</span><span class="speel"></span><span class="duur">6:02</span></div><h5>Taeguk 5 detail</h5><p class="meta">WT Academy · 2×</p></div>
+          </div>
+          <div class="lijst" id="lijstweergave" style="display:none">
+            <div class="lr"><div class="mini"><div class="verloop" style="background:linear-gradient(140deg,#D9A0A8,#8E2230);position:absolute;inset:0"></div></div><div><h5>Taeguk 3 — vast in de app</h5><p class="meta">Uit de app · 1:48 · 12×</p></div><span class="grijp">⋮⋮</span></div>
+            <div class="lr"><div class="mini"><div class="verloop" style="background:linear-gradient(140deg,#B8C6E8,#4A5C9C);position:absolute;inset:0"></div></div><div><h5>Taeguk 4 langzaam</h5><p class="meta">Kukkiwon · 2:31 · 9×</p></div><span class="grijp">⋮⋮</span></div>
+            <div class="lr"><div class="mini"><div class="verloop" style="background:linear-gradient(140deg,#F0A98C,#B0442B);position:absolute;inset:0"></div></div><div><h5>Poomsae wedstrijd 2024</h5><p class="meta">facebook.com · 7×</p></div><span class="grijp">⋮⋮</span></div>
+            <div class="lr"><div class="mini"><div class="verloop" style="background:linear-gradient(140deg,#9ED0B4,#3F7D5E);position:absolute;inset:0"></div></div><div><h5>Ap kubi uitgelegd</h5><p class="meta">Master Kim · 3:44 · 5×</p></div><span class="grijp">⋮⋮</span></div>
+            <div class="lr"><div class="mini"><div class="verloop" style="background:linear-gradient(140deg,#CFCAB8,#736B58);position:absolute;inset:0"></div></div><div><h5>Jayden — eigen opname</h5><p class="meta">Fotoalbum · 0:36 · 4×</p></div><span class="grijp">⋮⋮</span></div>
+            <div class="lr"><div class="mini"><div class="verloop" style="background:linear-gradient(140deg,#A9B8C9,#485B72);position:absolute;inset:0"></div></div><div><h5>Taeguk 5 detail</h5><p class="meta">WT Academy · 6:02 · 2×</p></div><span class="grijp">⋮⋮</span></div>
+          </div>
+        </div>
+        <div class="plus">+</div>
+        <div class="dock"><i></i><i></i><i></i><i class="aan"></i></div>
+      </div></div>
+    </div>
+
+    <!-- C: toevoegen -->
+    <div class="kolom">
+      <div class="kop">
+        <span class="nr">C · toevoegen</span>
+        <h3>Eén vel, zoals een agenda-item</h3>
+        <p>Plakken is de hoofdweg: de app haalt zelf titel en kanaal op. Categorie kiezen
+          gebeurt in hetzelfde vel, want anders belandt alles op één hoop.</p>
+      </div>
+      <div class="tel"><div class="binnen">
+        <div class="statusbalk"><span>09:41</span><span>▮▮▮</span></div>
+        <div class="sheadje"><p class="eyebrow">영상 · verzameling</p><h4>Filmpjes</h4></div>
+        <div class="scroll" style="filter:blur(2px);opacity:.5">
+          <div class="raster">
+            <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#D9A0A8,#8E2230)"></div></div><h5>Taeguk 3</h5></div>
+            <div class="kaart"><div class="duim"><div class="verloop" style="background:linear-gradient(140deg,#B8C6E8,#4A5C9C)"></div></div><h5>Taeguk 4</h5></div>
+          </div>
+        </div>
+        <div class="vel">
+          <div class="greep"></div>
+          <h5>Filmpje toevoegen</h5>
+          <p class="uitleg">Plak een link of kies iets uit je fotoalbum.</p>
+          <div class="tweeknop" style="margin-bottom:11px">
+            <button class="knop zacht" style="font-size:11.5px;padding:10px">🔗 Link plakken</button>
+            <button class="knop zacht" style="font-size:11.5px;padding:10px">🎬 Uit album</button>
+          </div>
+          <div class="veld">
+            <label>Link</label>
+            <div class="waarde">youtube.com/watch?v=dQw4…</div>
+          </div>
+          <div class="veld">
+            <label>Titel <span style="text-transform:none;letter-spacing:0;font-family:var(--text);font-weight:400">— automatisch opgehaald</span></label>
+            <div class="waarde">Taeguk 4 Jang — langzaam</div>
+          </div>
+          <label style="display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;
+            color:var(--gray);font-family:var(--cond);font-weight:700;margin:12px 0 5px">Categorie</label>
+          <div class="keuzes">
+            <span class="keuze">🔥 Opwarmen</span>
+            <span class="keuze">🤸 Strekken</span>
+            <span class="keuze aan">🥋 Poomsae</span>
+            <span class="keuze">🥊 Gyeorugi</span>
+            <span class="keuze">👥 Taeryon</span>
+            <span class="keuze">🛡️ Hosinsul</span>
+            <span class="keuze">💥 Gyeokpa</span>
+            <span class="keuze">🌬️ Cooling</span>
+          </div>
+          <button class="knop">Bewaren</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- D: facebook + preview -->
+    <div class="kolom">
+      <div class="kop">
+        <span class="nr">D · Facebook &amp; bekijken</span>
+        <h3>Het miniatuurprobleem, en wat wél kan</h3>
+        <p>Facebook geeft geen miniatuur vrij. In plaats van een grijs gat: een eigen kaart in
+          de huisstijl, met de mogelijkheid zelf een beeld te kiezen.</p>
+      </div>
+      <div class="tel"><div class="binnen">
+        <div class="statusbalk"><span>09:41</span><span>▮▮▮</span></div>
+        <div class="sheadje"><p class="eyebrow">영상 · bekijken</p><h4>Voorvertoning</h4></div>
+        <div class="scroll" style="padding-bottom:16px">
+          <div style="padding:0 16px">
+            <div class="duim" style="aspect-ratio:3/2;border-radius:13px">
+              <div class="verloop" style="background:linear-gradient(140deg,#1877F2,#0B4FA8)"></div>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;
+                align-items:center;justify-content:center;color:#fff;gap:6px">
+                <span style="font-size:23px;font-weight:800">f</span>
+                <span style="font-size:10.5px;opacity:.85">Facebook geeft geen beeld vrij</span>
+              </div>
+            </div>
+            <p style="font-size:12.5px;font-weight:620;margin:9px 0 2px">Poomsae wedstrijd 2024</p>
+            <p style="font-size:10.5px;color:var(--gray);margin:0">facebook.com · toegevoegd 12 sep</p>
+            <div class="tweeknop" style="margin-top:12px">
+              <button class="knop" style="font-size:11.5px;padding:10px">Openen in Facebook</button>
+              <button class="knop zacht" style="font-size:11.5px;padding:10px">Beeld kiezen</button>
+            </div>
+            <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:13px">
+              <p style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;
+                font-family:var(--cond);font-weight:700;color:var(--gray);margin:0 0 7px">YouTube speelt wél in de app</p>
+              <div class="duim" style="aspect-ratio:3/2;border-radius:13px">
+                <div class="verloop" style="background:linear-gradient(140deg,#B8C6E8,#4A5C9C)"></div>
+                <span class="speel"></span>
+                <span class="duur">2:31</span>
+              </div>
+              <p style="font-size:11px;color:var(--gray);margin:8px 0 0;line-height:1.45">
+                Zonder de app te verlaten, zodat je tijdens een sessie niet je plek kwijtraakt.</p>
+            </div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="notitie">
+    <h4>Wat ik onderweg tegenkwam in de code</h4>
+    <ul>
+      <li>Je verzameling staat al in de reservekopie: <code>poom_videos</code> zit in
+        <code>STORE_KEYS</code>, dus een back-up van je links werkt automatisch mee met de
+        bestaande tijdlijn-back-up. Daar hoeft niets voor gebouwd te worden.</li>
+      <li>De app kent nu drie categorieën (Stretch, Gyeorugi, Poomsae). Jouw lijst heeft er acht.
+        Oude filmpjes vallen netjes terug op de laatste plank, dus uitbreiden kan zonder dat er
+        iets omvalt.</li>
+      <li>Titel en kanaal van een YouTube-link worden al automatisch opgehaald. Voor Facebook
+        bestaat die mogelijkheid niet — vandaar voorstel D.</li>
+    </ul>
+    <p style="margin-top:9px" class="vraag">Vraag: wil je het "aantal keer bekeken" echt tellen?
+      Dan moet de app bijhouden wanneer je iets opent. Dat kan, maar het is de eerste keer dat de
+      app je gedrag registreert. Alternatief is sorteren op "laatst toegevoegd" en "laatst geopend".</p>
+  </div>
+
+  <!-- ==================== COACH ==================== -->
+  <h2>2 · De persoonlijke coach</h2>
+  <p class="lead">De app heeft hier al een fundament: een weekprogramma per dag met onderdelen,
+    minuten en gekoppelde filmpjes (<code>PLAN</code>, <code>PL_COMPS</code>). Wat ontbreekt is
+    de herhalingen-variant, de volledige lijst onderdelen, en een scherm dat je dóór de sessie
+    leidt. Daar gaan deze voorstellen over.</p>
+
+  <div class="rij">
+
+    <!-- E: weekplan -->
+    <div class="kolom">
+      <div class="kop">
+        <span class="nr">E · het weekplan</span>
+        <h3>Een dag kiezen, blokken stapelen</h3>
+        <p>De weekstrip bovenaan; een stip betekent "hier staat iets". Tik op een andere dag.</p>
+      </div>
+      <div class="tel"><div class="binnen">
+        <div class="statusbalk"><span>09:41</span><span>▮▮▮</span></div>
+        <div class="sheadje"><p class="eyebrow">코치 · weekprogramma</p><h4 id="dagtitel">Woensdag</h4></div>
+        <div class="weekstrip" id="weekstrip">
+          <div class="dag"><b>ma</b><i></i></div>
+          <div class="dag"><b>di</b><i class="leeg"></i></div>
+          <div class="dag aan"><b>wo</b><i></i></div>
+          <div class="dag"><b>do</b><i></i></div>
+          <div class="dag"><b>vr</b><i class="leeg"></i></div>
+          <div class="dag"><b>za</b><i></i></div>
+          <div class="dag"><b>zo</b><i class="leeg"></i></div>
+        </div>
+        <div class="scroll" style="padding-bottom:64px">
+          <div class="blok">
+            <span class="ico">🔥</span>
+            <div class="vul"><h5>Opwarmen</h5>
+              <div class="regel"><span class="merk tijd">⏱ 5:00</span><span class="merk film">▶ 1 filmpje</span></div>
+            </div><span class="grijp">⋮⋮</span>
+          </div>
+          <div class="blok">
+            <span class="ico">🤸</span>
+            <div class="vul"><h5>Strekken</h5>
+              <div class="regel"><span class="merk tijd">⏱ 3:00</span></div>
+            </div><span class="grijp">⋮⋮</span>
+          </div>
+          <div class="blok">
+            <span class="ico">🥋</span>
+            <div class="vul"><h5>Poomsae</h5>
+              <div class="regel"><span class="merk">× 5 herhalingen</span><span class="merk film">▶ 2 filmpjes</span></div>
+            </div><span class="grijp">⋮⋮</span>
+          </div>
+          <div class="blok">
+            <span class="ico">🥊</span>
+            <div class="vul"><h5>Gyeorugi</h5>
+              <div class="regel"><span class="merk tijd">⏱ 8:00</span></div>
+            </div><span class="grijp">⋮⋮</span>
+          </div>
+          <div class="blok">
+            <span class="ico">🌬️</span>
+            <div class="vul"><h5>Cooling down</h5>
+              <div class="regel"><span class="merk tijd">⏱ 3:00</span></div>
+            </div><span class="grijp">⋮⋮</span>
+          </div>
+          <div style="margin:0 16px 12px">
+            <div style="border:1px dashed var(--line);border-radius:13px;padding:11px;
+              text-align:center;color:#A79F90;font-size:12px">+ Onderdeel toevoegen</div>
+          </div>
+          <div class="totaal"><span>5 onderdelen</span><span><b style="color:#2a251d">≈ 24 min</b></span></div>
+          <button class="startknop">▶ Start de sessie</button>
+        </div>
+        <div class="dock"><i class="aan"></i><i></i><i></i><i></i></div>
+      </div></div>
+    </div>
+
+    <!-- F: onderdeel kiezen -->
+    <div class="kolom">
+      <div class="kop">
+        <span class="nr">F · onderdeel kiezen</span>
+        <h3>Alle acht in één greep</h3>
+        <p>Een raster in plaats van een keuzelijst: je herkent ze aan het beeld en hoeft niet te
+          lezen. "Auto" bestaat al in de app en vult zichzelf met de missies van vandaag.</p>
+      </div>
+      <div class="tel"><div class="binnen">
+        <div class="statusbalk"><span>09:41</span><span>▮▮▮</span></div>
+        <div class="sheadje"><p class="eyebrow">코치 · weekprogramma</p><h4>Woensdag</h4></div>
+        <div class="scroll" style="filter:blur(2px);opacity:.5">
+          <div class="blok"><span class="ico">🔥</span><div class="vul"><h5>Opwarmen</h5></div></div>
+          <div class="blok"><span class="ico">🤸</span><div class="vul"><h5>Strekken</h5></div></div>
+        </div>
+        <div class="vel">
+          <div class="greep"></div>
+          <h5>Welk onderdeel?</h5>
+          <p class="uitleg">Je kunt hetzelfde onderdeel meerdere keren op een dag zetten.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="keuze" style="flex-direction:column;align-items:flex-start;gap:2px;padding:10px">
+              <span style="font-size:17px">✨</span><b style="font-size:11.5px">Auto</b>
+              <span style="font-size:9.5px;color:var(--gray)">Missies van vandaag</span></div>
+            <div class="keuze" style="flex-direction:column;align-items:flex-start;gap:2px;padding:10px">
+              <span style="font-size:17px">🔥</span><b style="font-size:11.5px">Opwarmen</b>
+              <span style="font-size:9.5px;color:var(--gray)">Losmaken</span></div>
+            <div class="keuze" style="flex-direction:column;align-items:flex-start;gap:2px;padding:10px">
+              <span style="font-size:17px">🤸</span><b style="font-size:11.5px">Strekken</b>
+              <span style="font-size:9.5px;color:var(--gray)">Lenigheid</span></div>
+            <div class="keuze aan" style="flex-direction:column;align-items:flex-start;gap:2px;padding:10px">
+              <span style="font-size:17px">🥋</span><b style="font-size:11.5px">Poomsae</b>
+              <span style="font-size:9.5px;opacity:.7">Vormen van je band</span></div>
+            <div class="keuze" style="flex-direction:column;align-items:flex-start;gap:2px;padding:10px">
+              <span style="font-size:17px">🥊</span><b style="font-size:11.5px">Gyeorugi</b>
+              <span style="font-size:9.5px;color:var(--gray)">Sparren</span></div>
+            <div class="keuze" style="flex-direction:column;align-items:flex-start;gap:2px;padding:10px">
+              <span style="font-size:17px">👥</span><b style="font-size:11.5px">Taeryon</b>
+              <span style="font-size:9.5px;color:var(--gray)">Stapsparren</span></div>
+            <div class="keuze" style="flex-direction:column;align-items:flex-start;gap:2px;padding:10px">
+              <span style="font-size:17px">🛡️</span><b style="font-size:11.5px">Hosinsul</b>
+              <span style="font-size:9.5px;color:var(--gray)">Zelfverdediging</span></div>
+            <div class="keuze" style="flex-direction:column;align-items:flex-start;gap:2px;padding:10px">
+              <span style="font-size:17px">💥</span><b style="font-size:11.5px">Gyeokpa</b>
+              <span style="font-size:9.5px;color:var(--gray)">Breektechniek</span></div>
+            <div class="keuze" style="flex-direction:column;align-items:flex-start;gap:2px;padding:10px">
+              <span style="font-size:17px">🌬️</span><b style="font-size:11.5px">Cooling down</b>
+              <span style="font-size:9.5px;color:var(--gray)">Uitlopen</span></div>
+          </div>
+          <button class="knop" style="margin-top:11px">Verder</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- G: timer of herhalingen -->
+    <div class="kolom">
+      <div class="kop">
+        <span class="nr">G · tijd of herhalingen</span>
+        <h3>Twee soorten werk in één vel</h3>
+        <p>Poomsae tel je in herhalingen, sparren klok je. Eén schakelaar bovenaan; wat je niet
+          kiest verdwijnt, zodat het vel nooit voller is dan nodig.</p>
+      </div>
+      <div class="tel"><div class="binnen">
+        <div class="statusbalk"><span>09:41</span><span>▮▮▮</span></div>
+        <div class="sheadje"><p class="eyebrow">코치 · weekprogramma</p><h4>Woensdag</h4></div>
+        <div class="scroll" style="filter:blur(2px);opacity:.5">
+          <div class="blok"><span class="ico">🥋</span><div class="vul"><h5>Poomsae</h5></div></div>
+        </div>
+        <div class="vel">
+          <div class="greep"></div>
+          <h5>🥋 Poomsae</h5>
+          <p class="uitleg">Hoe wil je dit onderdeel doen?</p>
+          <div class="schakel" style="width:100%;margin-bottom:13px">
+            <button style="flex:1">⏱ Aflopende tijd</button>
+            <button class="aan" style="flex:1">× Herhalingen</button>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:18px;
+            padding:12px 0 16px">
+            <span style="width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+              display:grid;place-items:center;font-size:17px;color:var(--gray);background:#fff">−</span>
+            <span style="font-family:var(--cond);font-size:52px;line-height:1">5</span>
+            <span style="width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+              display:grid;place-items:center;font-size:17px;color:var(--gray);background:#fff">+</span>
+          </div>
+          <p style="text-align:center;font-size:11px;color:var(--gray);margin:-8px 0 14px">
+            keer uitvoeren, met pauze ertussen</p>
+          <label style="display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;
+            color:var(--gray);font-family:var(--cond);font-weight:700;margin:0 0 6px">Filmpjes erbij</label>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <div style="width:74px;flex:none">
+              <div class="duim" style="border-radius:8px"><div class="verloop" style="background:linear-gradient(140deg,#D9A0A8,#8E2230)"></div></div>
+              <p style="font-size:9px;margin:3px 0 0;line-height:1.2">Taeguk 3</p>
+            </div>
+            <div style="width:74px;flex:none">
+              <div class="duim" style="border-radius:8px"><div class="verloop" style="background:linear-gradient(140deg,#B8C6E8,#4A5C9C)"></div></div>
+              <p style="font-size:9px;margin:3px 0 0;line-height:1.2">Taeguk 4</p>
+            </div>
+            <div style="width:74px;flex:none">
+              <div style="border:1px dashed var(--line);border-radius:8px;aspect-ratio:3/2;
+                display:grid;place-items:center;color:#B3AA99;font-size:17px">+</div>
+              <p style="font-size:9px;margin:3px 0 0;color:var(--gray)">Uit Poomsae</p>
+            </div>
+          </div>
+          <button class="knop">Toevoegen aan woensdag</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- H: sessie draaien -->
+    <div class="kolom">
+      <div class="kop">
+        <span class="nr">H · de sessie zelf</span>
+        <h3>Eén ding tegelijk</h3>
+        <p>Tijdens het trainen is het scherm ver weg en zweet je. Dus: groot, weinig, en het
+          filmpje binnen handbereik zonder de sessie kwijt te raken.</p>
+      </div>
+      <div class="tel"><div class="binnen">
+        <div class="runner">
+          <div class="ring"></div>
+          <div class="stap">Onderdeel 3 van 5</div>
+          <h4>Poomsae</h4>
+          <div style="font-size:11.5px;opacity:.7">herhaling 2 van 5</div>
+          <div class="klok">1:12</div>
+          <button class="filmknop">▶ Taeguk 3 bekijken</button>
+          <div class="straks">Hierna · 🥊 Gyeorugi, 8 min</div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="notitie">
+    <h4>Keuzes waar ik jouw oordeel over wil</h4>
+    <ul>
+      <li><b>Weekstrip of dagkaart?</b> Voorstel E zet de week bovenaan. Maar je komt hier binnen
+        via het fluitje op de <i>dagkaart</i> — dus misschien wil je meteen op vandaag landen en
+        is de week een stap terug in plaats van de hoofdnavigatie.</li>
+      <li><b>Sessie opslaan als sjabloon?</b> Nu hangt een programma aan een weekdag. Wil je ook
+        losse sessies kunnen bewaren ("korte avondtraining") die je op elke dag kunt zetten?</li>
+      <li><b>Pauze tussen herhalingen:</b> vaste 30 seconden, of per onderdeel in te stellen?
+        Ik zou beginnen met vast, en pas splitsen als het knelt.</li>
+      <li><b>Gyeokpa</b> stond in jouw lijst van onderdelen maar niet bij de filmpjescategorieën.
+        In de voorstellen staat hij bij beide — zeg het als dat niet klopt.</li>
+    </ul>
+  </div>
+
+  <div class="notitie blauw">
+    <h4>Volgorde die ik zou aanhouden</h4>
+    <p>Eerst Filmpjes, dan Coach. De coach leunt op de filmpjesverzameling (je koppelt er
+      filmpjes aan), dus andersom bouw je twee keer. Binnen Filmpjes zou ik beginnen met de acht
+      categorieën en het toevoegvel, want dat is wat je nodig hebt om je Facebook-bladwijzers over
+      te hevelen — en dat is het werk waar jij op wacht.</p>
+  </div>
+
+</div>
+
+<script>
+  // Raster of lijst — dezelfde schakelaar als in het voorstel bedoeld is.
+  var sch = document.getElementById('schakel');
+  if(sch){
+    sch.addEventListener('click', function(e){
+      var b = e.target.closest('button'); if(!b) return;
+      [].forEach.call(sch.children, function(k){ k.classList.toggle('aan', k===b); });
+      var raster = b.dataset.w === 'raster';
+      document.getElementById('rasterweergave').style.display = raster ? 'grid' : 'none';
+      document.getElementById('lijstweergave').style.display  = raster ? 'none' : 'flex';
+    });
+  }
+  // De weekstrip laat zien hoe het voelt om van dag te wisselen.
+  var strip = document.getElementById('weekstrip');
+  if(strip){
+    var namen = {ma:'Maandag',di:'Dinsdag',wo:'Woensdag',do:'Donderdag',
+                 vr:'Vrijdag',za:'Zaterdag',zo:'Zondag'};
+    strip.addEventListener('click', function(e){
+      var d = e.target.closest('.dag'); if(!d) return;
+      [].forEach.call(strip.children, function(k){ k.classList.toggle('aan', k===d); });
+      document.getElementById('dagtitel').textContent = namen[d.querySelector('b').textContent] || '';
+    });
+  }
+</script>
+</body>
+</html>
