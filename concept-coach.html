@@ -497,52 +497,38 @@
      Eén categorie tegelijk, over de volle breedte. Planken naast elkaar nodigen uit tot
      grasduinen; taekwondo gaat over focus, dus je kiest eerst waar je mee bezig bent en ziet
      dan alleen dat. */
-  /* De categoriebalk: een rij die je horizontaal doorschuift, met de gekozen categorie als
-     gevulde pil. Hij hangt rechtstreeks in de schermlaag, die zelf geen kantlijn heeft, zodat
-     hij van rand tot rand mag rollen; de kantlijn zit in zijn eigen padding, waardoor de eerste
-     en de laatste pil op één lijn staan met de kop en de lijst eronder. */
-  .vd-bar{display:flex;flex:none;gap:8px;overflow-x:auto;scrollbar-width:none;
-    margin:0;padding:2px 22px 0;-webkit-overflow-scrolling:touch}
-  .vd-bar::-webkit-scrollbar{display:none}
-  .vd-chip{flex:none;border:1px solid var(--line);border-radius:999px;padding:8px 14px;
-    background:var(--surface);color:var(--gray);font-size:13px;font-weight:700;
-    white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent;
-    transition:background .18s ease,color .18s ease,border-color .18s ease}
-  .vd-chip.on{background:var(--ink);border-color:var(--ink);color:var(--page)}
-  .vd-chip:active{opacity:.72}
-  /* Hoeveel er in een categorie zitten hoort bij de categorie, niet bij de kop erboven. */
-  .vd-chipn{margin-left:6px;opacity:.6;font-weight:800}
-  /* De gereedschapsregel: waarop je sorteert links, hoe je kijkt rechts. Zo licht mogelijk —
-     het is de bediening, niet de inhoud. */
-  .vd-tools{display:flex;flex:none;align-items:center;justify-content:space-between;gap:10px;
-    margin:14px 22px 2px}
+  /* Het overzicht is een lijst, net als het Handboek en de Woordenschat: je ziet alle
+     onderdelen tegelijk en hoeft niets opzij te schuiven om te weten wat er is. Het kopje boven
+     een blok noemt het onderdeel waar de regels bij horen, zodat "Techniek" niet in de lucht
+     hangt. */
+  .vd-secl{margin:22px 0 -8px;padding:0 4px;font-family:var(--cond);text-transform:uppercase;
+    letter-spacing:.12em;font-size:11px;font-weight:700;color:var(--gray)}
+  .vd-secl + .wlist{margin-top:12px}
+  .vd-emb{font-size:16px;line-height:1}
+  /* Hoeveel filmpjes er in zitten hoort bij de regel, links van het pijltje: een leeg onderdeel
+     laat het getal gewoon weg in plaats van een nul te tonen. */
+  .vd-rown{flex:none;min-width:22px;padding:2px 7px;border-radius:999px;background:var(--soft);
+    color:var(--gray);font-size:11.5px;font-weight:800;text-align:center}
+  /* De gereedschapsregel: alleen nog waarop je sorteert. Een keuze tussen weergaven is er niet
+     meer — zonder voorbeeldplaatje bij Facebook en bij je eigen filmpjes is een raster een rij
+     grijze vlakken, en dan is de lijst gewoon de betere. */
+  .vd-tools{display:flex;flex:none;align-items:center;justify-content:flex-start;gap:10px;
+    margin:2px 0 2px}
   .vd-sortb{border:0;background:none;padding:4px 2px;color:var(--gray);font-size:12.5px;
     font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .vd-sortb:active{opacity:.6}
   .vd-sortb b{color:var(--ink)}
-  /* Lijst, groot of dubbel in één schakelaar: het zijn drie standen van dezelfde vraag
-     ("hoe groot wil je ze zien"), dus horen ze in één rij en niet in twee knoppen. */
-  .vd-seg{display:flex;gap:2px;padding:2px;border-radius:999px;background:var(--soft)}
-  .vd-segb{width:34px;height:28px;border:0;border-radius:999px;background:none;color:var(--gray);
-    display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
-    transition:background .18s ease,color .18s ease}
-  .vd-segb.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(20,17,13,.12)}
-  .vd-segb svg{width:15px;height:15px}
-  #vd-scroll{padding-top:4px}
-  .vd-grid{display:grid;gap:18px 12px;padding-top:14px}
-  .vd-grid.dubbel{grid-template-columns:1fr 1fr}
-  .vd-grid.groot{grid-template-columns:1fr}
-  /* In de lijst staat het beeld naast de tekst in plaats van erboven: dan passen er veel meer
-     op een scherm en blijft de titel leesbaar. */
-  .vd-grid.lijst{grid-template-columns:1fr;gap:0}
-  .vd-grid.lijst .vd-tile{display:grid;grid-template-columns:104px 1fr;gap:12px;align-items:center;
+  /* Het beeld staat naast de tekst: dan passen er veel meer op een scherm en blijft de titel
+     leesbaar. */
+  .vd-grid{display:grid;grid-template-columns:1fr;gap:0;padding-top:6px}
+  .vd-grid .vd-tile{display:grid;grid-template-columns:104px 1fr;gap:12px;align-items:center;
     padding:10px 0;border-bottom:1px solid var(--line)}
-  .vd-grid.lijst .vd-tt{margin-top:0;-webkit-line-clamp:2;font-size:14px}
-  .vd-grid.lijst .vd-play{width:26px;height:26px}
-  .vd-grid.lijst .vd-play::after{border-width:5px 0 5px 8px}
-  .vd-grid.lijst .vd-more{top:50%;right:0;transform:translateY(-50%);background:none;
+  .vd-grid .vd-tt{margin-top:0;-webkit-line-clamp:2;font-size:14px}
+  .vd-grid .vd-play{width:26px;height:26px}
+  .vd-grid .vd-play::after{border-width:5px 0 5px 8px}
+  .vd-grid .vd-more{top:50%;right:0;transform:translateY(-50%);background:none;
     color:var(--gray);-webkit-backdrop-filter:none;backdrop-filter:none}
-  .vd-grid.lijst .vd-tlink{display:contents}
+  .vd-grid .vd-tlink{display:contents}
   .vd-tile{position:relative}
   .vd-tlink{display:block;text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent}
   .vd-tlink:active{opacity:.72}
@@ -573,13 +559,6 @@
     display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
     -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
   .vd-more:active{opacity:.6}
-  /* De mascotte van de categorie, klein naast de titel: dezelfde tekeningen als in het
-     handboek, zodat je aan het plaatje al ziet waar je bent. Hij mag geen tikken opvangen. */
-  .vd-masc{flex:0 0 auto;align-self:flex-end;position:relative;width:78px;height:96px;
-    margin:0 0 -6px;display:block;pointer-events:none}
-  .vd-masc img{width:100%;height:100%;object-fit:contain;object-position:bottom center;display:block}
-  .vd-masc .vd-blink{position:absolute;inset:0;opacity:0}
-  @media (prefers-reduced-motion:no-preference){.vd-masc .vd-blink{animation:wheadBlink 5.6s ease-in-out infinite}}
   /* De speler legt zich over het scherm in plaats van je de app uit te sturen: je bent aan het
      trainen, en dan wil je met één tik terug zijn bij je lijstje. */
   .vd-player{position:fixed;inset:0;z-index:130;display:grid;place-items:center;padding:16px;
@@ -600,6 +579,9 @@
   .vd-chips{flex-wrap:wrap;gap:7px}
   .vd-chips .ag-chip{flex:0 0 auto;padding:8px 12px}
   .vd-lab{margin:4px 0 -4px;font-size:12.5px;font-weight:700;color:var(--gray)}
+  /* Waar het filmpje terechtkomt is bij toevoegen geen keuze maar een mededeling; de naam van
+     de plek mag er wel uitspringen, zodat je hem leest voor je op Bewaar drukt. */
+  .vd-labp{color:var(--ink)}
   /* De keuze waar het filmpje vandaan komt: twee even grote blokken met een regel uitleg, want
      "link" en "album" zeggen op zichzelf nog niet wat er dan gebeurt. */
   .vd-mi{flex-wrap:wrap}
@@ -618,6 +600,16 @@
   .vd-mi:active{opacity:.7}
   .vd-mi.danger{color:#B23A48}
   .vd-mi.cancel{justify-content:center;color:var(--gray)}
+  /* De bevestigingsknop is rood en gevuld, niet een regeltje in een lijst: weggooien is de
+     enige stap in dit vel die je niet meer terug kunt draaien, en dat hoort te zien te zijn
+     voordat je hem aanraakt. */
+  .vd-mi.gevaar{justify-content:center;background:#B23A48;border-color:#B23A48;color:#fff}
+  .vd-mi.gevaar:active{opacity:.85}
+  .vd-warn{margin:0 0 4px;font-size:13px;line-height:1.5;color:var(--gray)}
+  /* De stand waarop je nu sorteert krijgt een vinkje; een gevulde knop zou te zwaar zijn voor
+     iets wat je zo weer omzet. */
+  .vd-mi.on{border-color:var(--ink)}
+  .vd-mick{margin-left:auto;color:var(--ink);font-weight:800}
   /* Feedback while the title is fetched from YouTube — the form stays usable if it fails. */
   /* Het bijschrift hoort bij het veld erboven, dus plakt het eraan vast in plaats van op de
      volle regelafstand van het vel te staan. Zolang er niets te melden is blijft de hoogte wel
@@ -869,13 +861,15 @@
     transition:opacity .3s ease .16s, transform .4s cubic-bezier(.24,1.25,.4,1) .16s}
   .tlscreen.show .tl-fab:active{transform:scale(.92);transition:transform .12s}
   .tl-fab svg{position:relative;z-index:2;width:27px;height:27px}
-  /* Dezelfde knop als op de tijdlijn, maar hier staat de tabbalk nog onderin beeld.
-     Daarom schuift hij een knophoogte omhoog: hij gaat op de timerknop staan in plaats van
-     ernaast te vechten. En hij hoeft niet op te komen, want dit scherm schuift niet open. */
-  .vd-fab{opacity:1;transform:none;bottom:calc(env(safe-area-inset-bottom) + 96px)}
-  .vd-fab:active{transform:scale(.92);transition:transform .12s}
+  /* Dezelfde knop als op de tijdlijn. Hij staat alleen op de pagina van een onderdeel, nooit
+     op het overzicht: je voegt een filmpje altijd érgens aan toe, en dat "ergens" is de pagina
+     waar je op staat. De tabbalk is daar weggeschoven, dus hij mag gewoon onderin. */
+  .vdcat .vd-fab{position:fixed;opacity:0;transform:translateY(16px) scale(.88)}
+  .vdcat.show .vd-fab{opacity:1;transform:none;
+    transition:opacity .3s ease .16s, transform .4s cubic-bezier(.24,1.25,.4,1) .16s}
+  .vdcat.show .vd-fab:active{transform:scale(.92);transition:transform .12s}
   /* Ruimte onder de lijst zodat de knop nooit het laatste filmpje afdekt. */
-  #vd-scroll{padding-bottom:calc(env(safe-area-inset-bottom) + 170px)}
+  .vdcat .cs-body{padding-bottom:calc(env(safe-area-inset-bottom) + 118px)}
 
   /* ---- Eén familie voor alle "voeg toe"-knoppen ---- */
   /* Agenda, tijdlijn en filmpjes vroegen alledrie om iets toevoegen, maar zagen er alledrie
@@ -3455,7 +3449,7 @@
   var STORE_KEYS = ['poom_agenda','poom_videos','poom_belt','poom_hard','poom_mastery',
                     'poom_missions','poom_ot_mode','poom_ot_dur','poom_plan','poom_plandone',
                     'poom_photos','poom_geup_dates','poom_geupmeta','poom_exam','ciUx',
-                    'poom_vidseen','poom_vidview'];
+                    'poom_vidseen','poom_vidview','poom_vidmig'];
   var store = (function(){
     var ok = true;
     try{ localStorage.setItem('poom_probe','1'); localStorage.removeItem('poom_probe'); }
@@ -3525,9 +3519,13 @@
     var d=new Date(t); if(isNaN(d.getTime())) return 'Nog geen reservekopie gemaakt';
     return 'Laatste reservekopie: '+fmtDateNL(d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2));
   }
+  // De regel "laatste reservekopie" staat op de tijdlijn én bij de filmpjes: het is één kopie
+  // voor de hele app, dus beide plekken horen hetzelfde te melden.
   function tlBackupVerversen(){
-    var n=document.getElementById('tl-backup-note');
-    if(n) n.textContent=backupRegel();
+    ['tl-backup-note','vd-backup-note'].forEach(function(id){
+      var n=document.getElementById(id);
+      if(n) n.textContent=backupRegel();
+    });
   }
   /* Op de telefoon gaat de kopie via het deelvenster naar Bestanden of iCloud Drive; op een
      computer is er geen deelvenster en valt hij terug op een gewone download. */
@@ -4032,33 +4030,91 @@
   /* De acht onderdelen van een training, in de volgorde waarin een les verloopt: je warmt op,
      strekt, en eindigt met uitlopen. Een mascotte hoort bij een categorie als de app er al een
      tekening voor heeft — zo is de pagina meteen herkenbaar als hetzelfde huis. */
+  /* De onderdelen van een training, in de volgorde waarin je ze doet. Twee ervan hebben
+     genoeg filmpjes om zelf weer te splitsen: bij Gyeorugi is het verschil tussen een techniek
+     oefenen en een aanval opzetten wezenlijk, en bij Poomsae tussen de vorm leren en hem op
+     een wedstrijd zien lopen.
+
+     "Overig" staat er als vangnet: elk filmpje waarvan de categorie niet meer bestaat komt
+     daar terecht in plaats van te verdwijnen. Zo kost het herindelen van deze lijst nooit
+     iemand zijn verzameling. */
   var VD_CATS = [
-    {k:'opwarmen', label:'Opwarmen',     ico:'🔥'},
-    {k:'stretch',  label:'Strekken',     ico:'🤸'},
-    {k:'gyeorugi', label:'Gyeorugi',     ico:'🥊', masc:'gyeorugi-pair'},
-    {k:'poomsae',  label:'Poomsae',      ico:'🥋', masc:'poomsae-stance'},
-    {k:'hosinsul', label:'Hosinsul',     ico:'🛡️'},
-    {k:'taeryon',  label:'Taeryon',      ico:'👥', masc:'ilbo-taeryon'},
-    {k:'gyeokpa',  label:'Gyeokpa',      ico:'🧱', masc:'gyeokpa-scene'},
-    {k:'cooling',  label:'Cooling down', ico:'🌬️'}
+    {k:'opwarmen', label:'Opwarmen',     han:'준비', ico:'🔥', el:'#C8794A'},
+    {k:'stretch',  label:'Strekken',     han:'유연', ico:'🤸', el:'#6FA38B'},
+    {k:'gyeorugi', label:'Gyeorugi',     han:'겨루기', ico:'🥊', el:'#B23A48', masc:'gyeorugi-pair',
+      subs:[{k:'techniek',label:'Techniek',ico:'🥊'},{k:'aanval',label:'Aanval',ico:'⚡'},
+            {k:'counter',label:'Counter',ico:'🔄'}]},
+    {k:'poomsae',  label:'Poomsae',      han:'품새', ico:'🥋', el:'#4A6FA5', masc:'poomsae-stance',
+      subs:[{k:'techniek',label:'Techniek',ico:'🥋'},{k:'poomsaes',label:'Poomsaes',ico:'🌀'},
+            {k:'wedstrijden',label:'Wedstrijden',ico:'🏆'}]},
+    {k:'hosinsul', label:'Hosinsul',     han:'호신술', ico:'🛡️', el:'#7A6AA8'},
+    {k:'taeryon',  label:'Taeryon',      han:'대련', ico:'👥', el:'#C98A2B', masc:'ilbo-taeryon'},
+    {k:'cooling',  label:'Cooling down', han:'정리', ico:'🌬️', el:'#5E8CA8'},
+    {k:'overig',   label:'Overig',       han:'기타', ico:'📦', el:'#6B6459'}
   ];
-  // Een onbekende of afgeschafte sleutel (een vroege versie had ook "Overig") valt terug op
-  // Strekken — dat was toen de standaardkeuze, dus daar stonden ze feitelijk al. Zo kan een
-  // bewaard filmpje nooit van het scherm verdwijnen.
+  /* Een onbekende of afgeschafte sleutel valt terug op Overig. Vroeger was dat Strekken, maar
+     dan verdwijnt een filmpje stilletjes tussen de rekoefeningen; in een mapje dat "Overig"
+     heet zie je meteen dat het daar niet hoort en kun je het verplaatsen. */
   function vdCat(k){
     for(var i=0;i<VD_CATS.length;i++) if(VD_CATS[i].k===k) return VD_CATS[i];
-    return vdCatOf('stretch');
+    return vdCatOf('overig');
   }
   function vdCatOf(k){
     for(var i=0;i<VD_CATS.length;i++) if(VD_CATS[i].k===k) return VD_CATS[i];
     return VD_CATS[0];
   }
+  // De subcategorie binnen een onderdeel. Heeft het onderdeel er geen, dan is het antwoord leeg
+  // en is het onderdeel zelf de plek; anders valt een onbekende sleutel terug op de eerste.
+  function vdSub(c, k){
+    if(!c || !c.subs) return null;
+    for(var i=0;i<c.subs.length;i++) if(c.subs[i].k===k) return c.subs[i];
+    return c.subs[0];
+  }
+  // Waar hoort dit filmpje? Altijd een bestaande plek, ook als de bewaarde sleutels niet meer
+  // kloppen — zo kan een lijst nooit filmpjes bevatten die nergens te zien zijn.
+  function vdPlek(v){
+    var c=vdCat(v&&v.cat), su=vdSub(c, v&&v.sub);
+    return {cat:c.k, sub:su?su.k:''};
+  }
+  function vdPlekLabel(cat, sub){
+    var c=vdCatOf(cat), su=vdSub(c, sub);
+    return su ? c.label+' · '+su.label : c.label;
+  }
   var VIDEOS = [];
   function vdLoad(){
-    try{ var r=JSON.parse(localStorage.getItem('poom_videos')); if(r && r.length){ VIDEOS=r; return; } }catch(e){}
+    try{ var r=JSON.parse(localStorage.getItem('poom_videos')); if(r && r.length){ VIDEOS=r; vdMigreer(); return; } }catch(e){}
     VIDEOS=[];
   }
   function vdSave(){ try{ localStorage.setItem('poom_videos', JSON.stringify(VIDEOS)); }catch(e){} }
+
+  /* Toen de categorieën werden herzien verdween Gyeokpa en kregen Gyeorugi en Poomsae
+     subcategorieën. Filmpjes die er al stonden weten daar niets van, dus krijgen ze hier
+     eenmalig een geldige plek toegewezen. Twee regels maken dat veilig: de onbewerkte lijst
+     gaat eerst als kopie opzij (poom_videos_v1), en niets wordt ooit weggegooid — een
+     categorie die niet meer bestaat wordt Overig, niet niets. Het vlaggetje zorgt dat dit
+     precies één keer gebeurt, zodat een later handmatig ingedeeld filmpje blijft staan. */
+  function vdMigreer(){
+    var gedaan=false;
+    try{ gedaan = localStorage.getItem('poom_vidmig')==='2'; }catch(e){}
+    if(gedaan) return;
+    try{
+      var rauw=localStorage.getItem('poom_videos');
+      if(rauw && !localStorage.getItem('poom_videos_v1')) localStorage.setItem('poom_videos_v1', rauw);
+    }catch(e){}
+    VIDEOS.forEach(function(v){
+      var c=null;
+      for(var i=0;i<VD_CATS.length;i++) if(VD_CATS[i].k===v.cat) c=VD_CATS[i];
+      if(!c){ v.cat='overig'; v.sub=''; return; }
+      if(!c.subs){ v.sub=''; return; }
+      // Een poomsae-filmpje dat je zelf bewaarde is meestal een uitvoering van de vorm; bij
+      // gyeorugi is "techniek" de brede bak waar alles in past tot je het zelf verplaatst.
+      var heeft=false;
+      for(var j=0;j<c.subs.length;j++) if(c.subs[j].k===v.sub) heeft=true;
+      if(!heeft) v.sub = (c.k==='poomsae' ? 'poomsaes' : 'techniek');
+    });
+    vdSave();
+    try{ localStorage.setItem('poom_vidmig','2'); }catch(e){}
+  }
 
   /* De filmpjes die de app zelf meebrengt: de instructievideo boven elke poomsae-pagina en de
      twee reels van Taekwondo Kawarmala bij Taeryon en Hosinsul. Ze horen bij de leerstof en
@@ -4073,7 +4129,7 @@
       (C.poomsae||[]).forEach(function(f){
         if(!f.video) return;
         uit.push({id:'vast-poomsae-'+f.id, vid:f.video, url:'https://www.youtube.com/watch?v='+f.video,
-                  title:f.korean, author:'Kyuhyung Lee', cat:'poomsae', vast:true});
+                  title:f.korean, author:'Kyuhyung Lee', cat:'poomsae', sub:'poomsaes', vast:true});
       });
       [{key:'ilbo',cat:'taeryon'},{key:'hosinsul',cat:'hosinsul'}].forEach(function(x){
         var n=C.naslag&&C.naslag[x.key], v=n&&n.video; if(!v) return;
@@ -4105,33 +4161,52 @@
   /* Welke categorie stond open, hoe stond het raster en waarop sorteerde je? Dat hoort bij
      "waar was ik gebleven" en niet bij je inhoud, maar het is wel vervelend om elke keer
      opnieuw in te stellen. */
-  var VD_VIEW={cat:'poomsae', mode:'groot', sort:'gezien'};
+  var VD_SORTS=[{k:'nieuw',label:'laatst toegevoegd'},{k:'gezien',label:'laatst bekeken'},{k:'naam',label:'naam'}];
+  function vdSortLabel(k){
+    for(var i=0;i<VD_SORTS.length;i++) if(VD_SORTS[i].k===k) return VD_SORTS[i].label;
+    return VD_SORTS[0].label;
+  }
+  var VD_VIEW={cat:'poomsae', sub:'poomsaes', sort:'nieuw'};
   function vdViewLoad(){
     try{
       var r=JSON.parse(localStorage.getItem('poom_vidview'));
       if(r && typeof r==='object'){
         if(r.cat) VD_VIEW.cat=vdCat(r.cat).k;
-        if(r.mode==='lijst'||r.mode==='groot'||r.mode==='dubbel') VD_VIEW.mode=r.mode;
-        if(r.sort==='gezien'||r.sort==='nieuw') VD_VIEW.sort=r.sort;
+        var su=vdSub(vdCatOf(VD_VIEW.cat), r.sub); VD_VIEW.sub = su?su.k:'';
+        for(var i=0;i<VD_SORTS.length;i++) if(VD_SORTS[i].k===r.sort) VD_VIEW.sort=r.sort;
       }
     }catch(e){}
   }
   function vdViewSave(){ try{ localStorage.setItem('poom_vidview', JSON.stringify(VD_VIEW)); }catch(e){} }
 
-  // Laatst bekeken bovenaan; wat je nog nooit opende zakt naar onderen en valt daar terug op
-  // hoe pas het is. Zo zie je in één oogopslag waar je gebleven was én wat je laat liggen.
+  /* Drie manieren om te kijken. Laatst toegevoegd is de standaard: wat je net bewaarde wil je
+     meteen terugzien. Laatst bekeken zet voorop waar je gebleven was en laat onderin liggen wat
+     je al lang niet meer opende. Op naam is er voor als je precies weet wat je zoekt — die
+     sorteert taalbewust, anders komt "Éénstap" achter de Z terecht. */
   function vdSorted(list){
     var s=list.slice();
     if(VD_VIEW.sort==='gezien'){
       s.sort(function(a,b){ return (vdSeenAt(b)-vdSeenAt(a)) || ((b.addedAt||0)-(a.addedAt||0)); });
+    } else if(VD_VIEW.sort==='naam'){
+      s.sort(function(a,b){
+        var ta=(a.title||''), tb=(b.title||'');
+        try{ return ta.localeCompare(tb, 'nl', {sensitivity:'base', numeric:true}); }
+        catch(e){ return ta<tb?-1:ta>tb?1:0; }
+      });
     } else {
       s.sort(function(a,b){ return ((b.addedAt||0)-(a.addedAt||0)) || (vdSeenAt(b)-vdSeenAt(a)); });
     }
     return s;
   }
-  function vdInCat(k){
-    return vdSorted(vdAlles().filter(function(v){ return vdCat(v.cat).k===k; }));
+  // Alles wat in één plek hoort. Zonder subcategorie is dat het hele onderdeel; mét, alleen dat
+  // hoekje ervan.
+  function vdInPlek(cat, sub){
+    return vdSorted(vdAlles().filter(function(v){
+      var p=vdPlek(v);
+      return p.cat===cat && (sub ? p.sub===sub : true);
+    }));
   }
+  function vdTel(cat, sub){ return vdInPlek(cat, sub).length; }
 
   // The 11-character id out of the usual YouTube shapes: watch, youtu.be, shorts, embed, live.
   function ytId(u){
@@ -5914,11 +5989,6 @@
   /* ---- Het filmpjesscherm: jouw eigen verzameling ----
      Eén categorie tegelijk. Je kiest bovenaan waar je mee bezig bent en ziet daaronder alleen
      die filmpjes — in de lijst, groot, of twee naast elkaar. */
-  var VD_SEG={
-    lijst: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
-    groot: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="2"/></svg>',
-    dubbel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="8" height="14" rx="1.6"/><rect x="13" y="5" width="8" height="14" rx="1.6"/></svg>'
-  };
   function vdTileHtml(v){
     var th=vdThumb(v), src=vdSource(v), title=v.title||vdUrl(v);
     return '<div class="vd-tile">'+
@@ -5937,37 +6007,21 @@
       (v.vast?'':'<button class="vd-more" data-act="vdmenu" data-id="'+esc(v.id)+'" aria-label="Meer opties voor '+esc(title)+'">•••</button>')+
     '</div>';
   }
-  function vdBarHtml(){
-    return '<div class="vd-bar" id="vd-bar">'+VD_CATS.map(function(c){
-      var n=vdAlles().filter(function(v){ return vdCat(v.cat).k===c.k; }).length;
-      return '<button class="vd-chip'+(c.k===VD_VIEW.cat?' on':'')+'" data-act="vdpick" data-k="'+c.k+'"'+
-        (c.k===VD_VIEW.cat?' aria-current="true"':'')+'>'+c.ico+' '+esc(c.label)+
-        (n?'<span class="vd-chipn">'+n+'</span>':'')+'</button>';
-    }).join('')+'</div>';
-  }
   function vdToolsHtml(){
     return '<div class="vd-tools">'+
-      '<button class="vd-sortb" data-act="vdsort">Sorteer op <b>'+
-        (VD_VIEW.sort==='gezien'?'laatst bekeken':'laatst toegevoegd')+'</b> ▾</button>'+
-      '<div class="vd-seg" role="group" aria-label="Hoe groot je de filmpjes ziet">'+
-        ['lijst','groot','dubbel'].map(function(m){
-          var lab={lijst:'Als lijst',groot:'Groot',dubbel:'Twee naast elkaar'}[m];
-          return '<button class="vd-segb'+(VD_VIEW.mode===m?' on':'')+'" data-act="vdmode" data-m="'+m+'" '+
-            'aria-label="'+lab+'" title="'+lab+'" aria-pressed="'+(VD_VIEW.mode===m?'true':'false')+'">'+VD_SEG[m]+'</button>';
-        }).join('')+
-      '</div>'+
+      '<button class="vd-sortb" data-act="vdsort">Sorteer op <b>'+esc(vdSortLabel(VD_VIEW.sort))+'</b> ▾</button>'+
     '</div>';
   }
-  /* Een lege categorie is geen fout maar een beginpunt: hij wijst naar de knop waarmee je hem
-     vult, in plaats van alleen te melden dat er niets is. */
-  function vdLeegHtml(c){
-    return '<p class="vd-empty">Nog geen filmpjes bij <b>'+esc(c.label)+'</b>.<br>'+
+  /* Een lege plek is geen fout maar een beginpunt: hij wijst naar de knop waarmee je hem vult,
+     in plaats van alleen te melden dat er niets is. */
+  function vdLeegHtml(cat, sub){
+    return '<p class="vd-empty">Nog geen filmpjes bij <b>'+esc(vdPlekLabel(cat, sub))+'</b>.<br>'+
       'Druk op + om er een toe te voegen.</p>';
   }
-  function vdBodyHtml(){
-    var c=vdCatOf(VD_VIEW.cat), items=vdInCat(c.k);
-    if(!items.length) return vdLeegHtml(c);
-    return '<div class="vd-grid '+VD_VIEW.mode+'">'+items.map(vdTileHtml).join('')+'</div>';
+  function vdBodyHtml(cat, sub){
+    var items=vdInPlek(cat, sub);
+    if(!items.length) return vdLeegHtml(cat, sub);
+    return '<div class="vd-grid">'+items.map(vdTileHtml).join('')+'</div>';
   }
   /* A thumbnail can fail in two ways. A real network error fires `error`, but a removed clip gets a
      120x90 grey "not found" tile from YouTube that loads fine, so size is the only tell (a genuine
@@ -5982,45 +6036,56 @@
       im.addEventListener('load',  check, {once:true});
     });
   }
-  // De mascotte hoort bij de categorie, dus hij wisselt mee als je van categorie wisselt.
-  function vdMascHtml(){
-    var c=vdCatOf(VD_VIEW.cat);
-    if(!c.masc) return '';
-    return '<span class="vd-masc" aria-hidden="true">'+
-      '<img src="assets/mascot/'+c.masc+'.png" alt="">'+
-      '<img class="vd-blink" src="assets/mascot/'+c.masc+'-blink.png" alt="">'+
-    '</span>';
+
+  /* ---- Het overzicht ----
+     Een lijst, net als het Handboek en de Woordenschat, in plaats van een balk met pillen die
+     je horizontaal moet doorzoeken. Je ziet in één blik alle onderdelen én hoeveel er in elk
+     zitten, en je hoeft niets weg te schuiven om te weten wat er is. De onderdelen die zelf
+     zijn opgesplitst krijgen een eigen blok met hun naam erboven, zodat "Techniek" niet in de
+     lucht hangt. */
+  function vdRowHtml(cat, sub, label){
+    var c=vdCatOf(cat), n=vdTel(cat, sub), su=sub?vdSub(c, sub):null;
+    return '<button class="wrow" data-act="vdopen" data-c="'+esc(cat)+'" data-s="'+esc(sub||'')+'" '+
+      'aria-label="'+esc(vdPlekLabel(cat, sub))+' — '+n+(n===1?' filmpje':' filmpjes')+'">'+
+      '<span class="wrow-emb hb-emb vd-emb" style="--e:'+c.el+'" aria-hidden="true">'+
+        esc((su&&su.ico)||c.ico)+'</span>'+
+      '<span class="wrow-tx"><span class="wrow-t">'+esc(label)+'</span></span>'+
+      (n?'<span class="vd-rown">'+n+'</span>':'')+
+      '<span class="wrow-ch">'+IC.chev+'</span>'+
+    '</button>';
   }
-  // De categoriebalk loopt met een negatieve marge van rand tot rand en is dus breder dan het
-  // scherm eronder. Tikte je op een categorie die nog rechts buiten beeld stond, dan schoof de
-  // browser hem zelf in zicht — en nam daarbij de hele schermlaag 22px mee, waardoor de plusknop
-  // scheef kwam te staan. Daarom schuiven we de balk zelf, en zetten we de laag eronder terug.
-  function vdChipInBeeld(bar){
-    if(!bar) return;
-    var on=bar.querySelector('.vd-chip.on');
-    if(on){
-      var doel=on.offsetLeft-(bar.clientWidth-on.offsetWidth)/2;
-      bar.scrollLeft=Math.max(0, Math.min(doel, bar.scrollWidth-bar.clientWidth));
-    }
-    var su=bar.closest('.surface'); if(su) su.scrollLeft=0;
+  function vdHubHtml(){
+    var uit='';
+    // Onderdelen zonder eigen indeling schuiven samen in één blok tot er een met subcategorieën
+    // langskomt; die krijgt zijn eigen kaart met een kopje.
+    var los='';
+    VD_CATS.forEach(function(c){
+      if(c.k==='overig') return;
+      if(c.subs){
+        if(los){ uit+='<div class="wlist">'+los+'</div>'; los=''; }
+        uit+='<p class="vd-secl">'+esc(c.label)+'</p><div class="wlist">'+
+          c.subs.map(function(su){ return vdRowHtml(c.k, su.k, su.label); }).join('')+'</div>';
+      } else {
+        los+=vdRowHtml(c.k, '', c.label);
+      }
+    });
+    if(los) uit+='<div class="wlist">'+los+'</div>';
+    // Overig hoort er alleen te staan als er iets in zit: een leeg vangnet is ruis.
+    if(vdTel('overig','')) uit+='<div class="wlist">'+vdRowHtml('overig','','Overig')+'</div>';
+    return uit;
   }
-  function vdRefresh(){
-    var sc=stage.querySelector('#vd-scroll');
-    if(sc){ sc.innerHTML=vdBodyHtml(); vdBindThumbs(sc); }
-    var bar=stage.querySelector('#vd-bar');
-    if(bar){
-      var nw=document.createElement('div'); nw.innerHTML=vdBarHtml();
-      bar.parentNode.replaceChild(nw.firstChild, bar);
-      vdChipInBeeld(stage.querySelector('#vd-bar'));
-    }
-    var tl=stage.querySelector('.vd-tools');
-    if(tl){ var n2=document.createElement('div'); n2.innerHTML=vdToolsHtml();
-      tl.parentNode.replaceChild(n2.firstChild, tl); }
-    var m=stage.querySelector('.whead');
-    if(m){
-      var oud=m.querySelector('.vd-masc'); if(oud) oud.remove();
-      var h=vdMascHtml(); if(h) m.insertAdjacentHTML('beforeend', h);
-    }
+  /* De reservekopie staat onderaan, net als op de tijdlijn: eerst je verzameling, dan pas het
+     veiligstellen ervan. Het is één bestand voor de hele app, dus een kopie die je hier maakt
+     bevat ook je tijdlijn — en omgekeerd. */
+  function vdBackupHtml(){
+    return '<div class="tl-backup">'+
+      '<p class="tl-backup-note" id="vd-backup-note">'+esc(backupRegel())+'</p>'+
+      '<div class="tl-backup-act">'+
+        '<button class="tl-edit" data-act="vdbackup">Reservekopie maken</button>'+
+        '<button class="tl-edit" data-act="vdrestore">Terugzetten</button>'+
+      '</div>'+
+      '<input type="file" id="vd-restore-file" accept="application/json,.json" hidden>'+
+    '</div>';
   }
   function renderVideos(){
     var html =
@@ -6029,19 +6094,82 @@
         '<div class="jhead"><div class="jk"><span class="han-lab">영상 · Yeongsang</span></div>'+
           '<h1>Filmpjes</h1>'+
           '<div class="js">Kies een onderdeel en bewaar wat je wilt naspelen.</div></div>'+
-        vdMascHtml()+
       '</div>'+
-      vdBarHtml()+
-      vdToolsHtml()+
-      '<div class="wscroll" id="vd-scroll">'+vdBodyHtml()+'</div>'+
-      '<button class="tl-fab vd-fab" data-act="vdnew" aria-label="Filmpje toevoegen" title="Filmpje toevoegen">'+
-        '<span class="tl-fab-glint" aria-hidden="true"></span>'+IC.plus+'</button>'+
+      '<div class="wscroll" id="vd-hub">'+vdHubHtml()+vdBackupHtml()+'</div>'+
     '</div>';
     stage.insertAdjacentHTML('beforeend', wrapScreen(html));
-    var el = stage.lastElementChild;
+    return stage.lastElementChild;
+  }
+  function vdHubRefresh(){
+    var h=stage.querySelector('#vd-hub');
+    if(h) h.innerHTML=vdHubHtml()+vdBackupHtml();
+  }
+
+  /* ---- De pagina van één onderdeel ----
+     Dezelfde vorm als een onderdeel van het Handboek: een kop met het kruisje rechtsboven om
+     terug te gaan naar het overzicht, en daaronder de lijst. De plusknop hoort hier thuis en
+     niet op het overzicht — je voegt een filmpje altijd érgens aan toe, en dat "ergens" is de
+     pagina waar je op staat. */
+  var vdCatSheet=null;
+  function vdSheetBodyHtml(cat, sub){
+    return mascSpacer(vdCatOf(cat).masc ? 'vd-'+cat : '') +
+      vdToolsHtml() + vdBodyHtml(cat, sub);
+  }
+  function openVdCat(cat, sub){
+    if(vdCatSheet) return;
+    var c=vdCatOf(cat), su=vdSub(c, sub);
+    sub = su?su.k:'';
+    VD_VIEW.cat=c.k; VD_VIEW.sub=sub; vdViewSave();
+    var el=document.createElement('div');
+    el.className='session catsheet hbcat vdcat';
+    el.setAttribute('data-hb', c.masc ? 'vd-'+c.k : 'vd-geen');
+    applyCatAccent(el, c.el);
+    el.innerHTML=
+      '<div class="cs-hero">'+
+        '<button class="cs-x" data-act="vdcatclose" aria-label="Sluiten">'+IC.x+'</button>'+
+        '<div class="cs-head">'+
+          '<div class="cs-eye">영상 · FILMPJES</div>'+
+          '<div class="cs-titlerow">'+
+            '<div class="cs-titlewrap"><h2 class="cs-title cs-title-cur">'+esc(su?su.label:c.label)+'</h2></div>'+
+            '<div class="cs-chips">'+(su?'<span class="cs-standen-sub">'+esc(c.label)+'</span>':'')+'</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="cs-body" id="vd-scroll">'+vdSheetBodyHtml(c.k, sub)+'</div>'+
+      '<button class="tl-fab vd-fab" data-act="vdnew" aria-label="Filmpje toevoegen" title="Filmpje toevoegen">'+
+        '<span class="tl-fab-glint" aria-hidden="true"></span>'+IC.plus+'</button>';
+    stage.appendChild(el);
+    vdCatSheet=el;
+    attachHbBackSwipe(el);
+    fnav.classList.add('hide');
     vdBindThumbs(el);
-    vdChipInBeeld(el.querySelector('#vd-bar'));
-    return el;
+    void el.offsetWidth;
+    requestAnimationFrame(function(){ el.classList.add('show'); csEdgeFadeAll(el); });
+    mascSetup(el);
+  }
+  function closeVdCat(){
+    if(!vdCatSheet) return;
+    var s=vdCatSheet; vdCatSheet=null;
+    if(s._pmResize){ window.removeEventListener('resize', s._pmResize); s._pmResize=null; }
+    s.classList.remove('show');
+    setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 400);
+    fnav.classList.remove('hide');
+    vdHubRefresh();
+  }
+  // De lijst opnieuw tekenen zonder de kop en de mascotte aan te raken: die horen bij de pagina
+  // en niet bij de inhoud, en opnieuw opbouwen zou de tekening laten knipperen.
+  function vdRefresh(){
+    vdHubRefresh();
+    if(!vdCatSheet) return;
+    var oudTools=vdCatSheet.querySelector('.vd-tools');
+    if(oudTools){ var n=document.createElement('div'); n.innerHTML=vdToolsHtml();
+      oudTools.parentNode.replaceChild(n.firstChild, oudTools); }
+    var grid=vdCatSheet.querySelector('.vd-grid'), leeg=vdCatSheet.querySelector('.vd-empty');
+    var oudLijst=grid||leeg;
+    var nw=document.createElement('div'); nw.innerHTML=vdBodyHtml(VD_VIEW.cat, VD_VIEW.sub);
+    if(oudLijst) oudLijst.parentNode.replaceChild(nw.firstChild, oudLijst);
+    else vdCatSheet.querySelector('.cs-body').appendChild(nw.firstChild);
+    vdBindThumbs(vdCatSheet);
   }
 
   /* ---- De speler ----
@@ -6096,7 +6224,7 @@
   var vdSheet=null, vdDraft=null, vdSeq=0, vdTimer=null, vdEditId=null, vdMenuSheet=null;
   function vdBlankDraft(){
     return {stap:'bron', bron:'', url:'', title:'', author:'', cat:vdCatOf(VD_VIEW.cat).k,
-            poster:'', film:'', filmBlob:null, note:'', state:'', fetchedId:''};
+            sub:VD_VIEW.sub, poster:'', film:'', filmBlob:null, note:'', state:'', fetchedId:''};
   }
   function vdBronHtml(){
     return '<div class="vd-menu">'+
@@ -6140,15 +6268,34 @@
           '<p class="vd-status'+(d.state==='err'?' err':'')+'" id="vd-status">'+esc(d.note)+'</p>')+
       '<input class="ag-title" id="vd-title" type="text" autocomplete="off" value="'+esc(d.title)+'" placeholder="Naam van het filmpje">'+
       '<div id="vd-posterwrap">'+vdPosterHtml(d)+'</div>'+
-      '<p class="vd-lab">Bij welk onderdeel hoort het?</p>'+
-      '<div class="ag-chips vd-chips">'+VD_CATS.map(function(t){
-        return '<button class="ag-chip'+(t.k===d.cat?' on':'')+'" data-act="vdcat" data-k="'+t.k+'">'+t.ico+' '+t.label+'</button>';
-      }).join('')+'</div>'+
+      vdPlekKiezerHtml(d)+
       '<div class="ag-formact">'+
         '<button class="ag-cancel" data-act="vdclose">Annuleer</button>'+
         '<button class="ag-save" data-act="vdsave"'+(vdKlaar(d)?'':' disabled')+'>Bewaar</button>'+
       '</div>'+
     '</div>';
+  }
+  /* Bij toevoegen weet de app al waar het filmpje hoort: je staat op die pagina. Dan is een
+     rij keuzeknoppen alleen maar werk dat al gedaan is, dus staat er één regel die zegt waar
+     het terechtkomt. Bij bewerken is verplaatsen juist de reden dat je het vel opent, dus dan
+     verschijnen de knoppen wél — eerst het onderdeel, en daaronder het hoekje ervan als dat
+     onderdeel is opgesplitst. */
+  function vdPlekKiezerHtml(d){
+    if(!vdEditId){
+      return '<p class="vd-lab">Komt terecht bij <b class="vd-labp">'+esc(vdPlekLabel(d.cat, d.sub))+'</b></p>';
+    }
+    var c=vdCatOf(d.cat);
+    var h='<p class="vd-lab">Bij welk onderdeel hoort het?</p>'+
+      '<div class="ag-chips vd-chips">'+VD_CATS.map(function(t){
+        return '<button class="ag-chip'+(t.k===c.k?' on':'')+'" data-act="vdcat" data-k="'+t.k+'">'+t.ico+' '+esc(t.label)+'</button>';
+      }).join('')+'</div>';
+    if(c.subs){
+      h+='<p class="vd-lab">Waar binnen '+esc(c.label)+'?</p>'+
+        '<div class="ag-chips vd-chips">'+c.subs.map(function(su){
+          return '<button class="ag-chip'+(su.k===d.sub?' on':'')+'" data-act="vdsubcat" data-k="'+su.k+'">'+esc(su.label)+'</button>';
+        }).join('')+'</div>';
+    }
+    return h;
   }
   function vdKlaar(d){ return !!(d && (d.bron==='album' ? d.filmBlob||d.film : d.url)); }
   function vdFormHtml(){
@@ -6208,18 +6355,22 @@
     var doe=function(filmSleutel){
       if(bestaand){
         bestaand.vid=id; bestaand.url=url; bestaand.title=title;
-        bestaand.author=d.author||''; bestaand.cat=d.cat; bestaand.poster=d.poster||bestaand.poster||'';
+        bestaand.author=d.author||''; bestaand.cat=d.cat; bestaand.sub=d.sub||'';
+        bestaand.poster=d.poster||bestaand.poster||'';
         if(filmSleutel) bestaand.film=filmSleutel;
       } else {
         VIDEOS.unshift({
           id:'v'+Date.now(), vid:id, url:url, title:title, author:d.author||'',
-          cat:d.cat, poster:d.poster||'', film:filmSleutel||'', addedAt:Date.now()
+          cat:d.cat, sub:d.sub||'', poster:d.poster||'', film:filmSleutel||'', addedAt:Date.now()
         });
       }
       vdSave();
-      // Je landt op de categorie waar het filmpje in valt, anders bewaar je iets en zie je niets.
-      VD_VIEW.cat=vdCat(d.cat).k; vdViewSave();
-      closeVideoSheet(); vdRefresh();
+      // Je landt op de plek waar het filmpje in valt, anders bewaar je iets en zie je niets.
+      var _p=vdPlek(d);
+      closeVideoSheet();
+      if(vdCatSheet && (VD_VIEW.cat!==_p.cat || VD_VIEW.sub!==_p.sub)){
+        closeVdCat(); openVdCat(_p.cat, _p.sub);
+      } else { vdRefresh(); }
       buzz(18); try{ sfx('complete'); }catch(_e){}
     };
     if(d.bron==='album' && d.filmBlob){
@@ -6239,7 +6390,8 @@
     if(edit){
       vdDraft.stap='velden'; vdDraft.bron=edit.film?'album':'link';
       vdDraft.url=edit.url||''; vdDraft.title=edit.title||''; vdDraft.author=edit.author||'';
-      vdDraft.cat=vdCat(edit.cat).k; vdDraft.titleTouched=true; vdDraft.fetchedId=edit.vid||'';
+      var _ep=vdPlek(edit);
+      vdDraft.cat=_ep.cat; vdDraft.sub=_ep.sub; vdDraft.titleTouched=true; vdDraft.fetchedId=edit.vid||'';
       vdDraft.poster=edit.poster||''; vdDraft.film=edit.film||'';
     }
     vdSheet=document.createElement('div');
@@ -6303,17 +6455,14 @@
     var v=vdById(id); if(!v || v.vast || vdMenuSheet) return;
     vdMenuSheet=document.createElement('div');
     vdMenuSheet.className='beltsheet-ov'; vdMenuSheet.id='vidmenu-ov';
+    vdMenuSheet.setAttribute('data-id', id);
     applyTheme(vdMenuSheet, CUR);
     vdMenuSheet.innerHTML=
       '<div class="bs-backdrop" data-act="vdmclose"></div>'+
       '<div class="beltsheet">'+
         '<div class="bs-grab"></div>'+
         '<div class="bs-head"><h3>'+esc(v.title||'Filmpje')+'</h3></div>'+
-        '<div class="vd-menu">'+
-          '<button class="vd-mi" data-act="vdedit" data-id="'+esc(id)+'">✏️ Bewerken</button>'+
-          '<button class="vd-mi danger" data-act="vddel" data-id="'+esc(id)+'">🗑️ Verwijderen</button>'+
-          '<button class="vd-mi cancel" data-act="vdmclose">Annuleer</button>'+
-        '</div>'+
+        '<div class="vd-menu" id="vd-menu-body">'+vdMenuHtml(id)+'</div>'+
       '</div>';
     stage.appendChild(vdMenuSheet);
     fnav.classList.add('hide');
@@ -6326,10 +6475,65 @@
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
     if(!keepNav) fnav.classList.remove('hide');
   }
-  /* Waarop sorteren: twee standen, dus geen vel met een lijstje maar gewoon omschakelen. */
-  function vdSortToggle(){
-    VD_VIEW.sort = VD_VIEW.sort==='gezien' ? 'nieuw' : 'gezien';
-    vdViewSave(); vdRefresh();
+  /* Een filmpje weggooien mag niet in één tik kunnen. De ••• zit vlak naast de titel en je
+     duim is groot; wie er per ongeluk op komt en dan op het verkeerde knopje tikt, is een link
+     kwijt die hij misschien nooit meer terugvindt. Dus vervangt het menu zichzelf door de vraag
+     of je het zeker weet, met de rode knop op de plek waar eerst "Annuleer" stond — dan is
+     doorklikken op de automatische piloot geen optie. */
+  function vdMenuHtml(id){
+    return '<button class="vd-mi" data-act="vdedit" data-id="'+esc(id)+'">✏️ Bewerken</button>'+
+      '<button class="vd-mi danger" data-act="vddelvraag" data-id="'+esc(id)+'">🗑️ Verwijderen</button>'+
+      '<button class="vd-mi cancel" data-act="vdmclose">Annuleer</button>';
+  }
+  function vdDelVraagHtml(id){
+    return '<p class="vd-warn">Dit filmpje verdwijnt uit je verzameling. '+
+      'De link zelf blijft bestaan, maar je moet hem opnieuw opzoeken.</p>'+
+      '<button class="vd-mi cancel" data-act="vddelnee">Toch maar niet</button>'+
+      '<button class="vd-mi gevaar" data-act="vddel" data-id="'+esc(id)+'">Ja, verwijder</button>';
+  }
+  function vdDelVraag(id){
+    var b=vdMenuSheet && vdMenuSheet.querySelector('#vd-menu-body'); if(!b) return;
+    b.innerHTML=vdDelVraagHtml(id);
+    var k=vdMenuSheet.querySelector('.bs-head h3'); if(k) k.textContent='Weet je het zeker?';
+    buzz(12);
+  }
+  function vdDelNee(id){
+    var b=vdMenuSheet && vdMenuSheet.querySelector('#vd-menu-body'); if(!b) return;
+    var v=vdById(vdMenuSheet.getAttribute('data-id'));
+    b.innerHTML=vdMenuHtml(vdMenuSheet.getAttribute('data-id'));
+    var k=vdMenuSheet.querySelector('.bs-head h3'); if(k) k.textContent=(v&&v.title)||'Filmpje';
+  }
+  /* Waarop sorteren: drie standen, dus een lijstje in plaats van een knop die telkens iets
+     anders doet dan je verwacht. */
+  var vdSortSheet=null;
+  function openVdSort(){
+    if(vdSortSheet) return;
+    vdSortSheet=document.createElement('div');
+    vdSortSheet.className='beltsheet-ov'; vdSortSheet.id='vdsort-ov';
+    applyTheme(vdSortSheet, CUR);
+    vdSortSheet.innerHTML=
+      '<div class="bs-backdrop" data-act="vdsortclose"></div>'+
+      '<div class="beltsheet">'+
+        '<div class="bs-grab"></div>'+
+        '<div class="bs-head"><h3>Sorteer op</h3></div>'+
+        '<div class="vd-menu">'+VD_SORTS.map(function(o){
+          return '<button class="vd-mi'+(o.k===VD_VIEW.sort?' on':'')+'" data-act="vdsortpick" data-k="'+o.k+'">'+
+            esc(o.label.charAt(0).toUpperCase()+o.label.slice(1))+
+            (o.k===VD_VIEW.sort?'<span class="vd-mick">✓</span>':'')+'</button>';
+        }).join('')+
+        '<button class="vd-mi cancel" data-act="vdsortclose">Annuleer</button>'+
+        '</div>'+
+      '</div>';
+    stage.appendChild(vdSortSheet);
+    fnav.classList.add('hide');
+    requestAnimationFrame(function(){ vdSortSheet.classList.add('show'); syncTopDim(); });
+  }
+  function closeVdSort(){
+    if(!vdSortSheet) return;
+    vdSortSheet.classList.remove('show'); syncTopDim();
+    var s=vdSortSheet; vdSortSheet=null;
+    setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 340);
+    fnav.classList.add('hide');
   }
 
   /* ---- Coach-scherm ---------------------------------------------------------------
@@ -7528,7 +7732,9 @@
   })();
   // Handboek onderdelen are hub-and-spoke: no lateral paging between them. Only a rightward swipe
   // (iOS-style back gesture) returns to the Handboek overview; leftward swipes do nothing.
-  function attachHbBackSwipe(el){
+  // Het veeggebaar terug. Welk scherm er sluit verschilt per pagina, dus dat komt mee als
+  // argument; zonder argument blijft het het Handboek, zoals het altijd was.
+  function attachHbBackSwipe(el, sluit){
     var x0=0,y0=0,down=false,swiped=false;
     el.addEventListener('pointerdown', function(e){
       if(e.pointerType==='mouse' && e.button!==0) return;
@@ -7538,7 +7744,7 @@
       if(!down || swiped) return;
       var dx=e.clientX-x0, dy=e.clientY-y0;
       if(Math.abs(dx)<=Math.abs(dy)*1.4) return;           // vertical scroll — ignore
-      if(dx>60){ swiped=true; down=false; closeHb(); }      // swipe right → back to overview
+      if(dx>60){ swiped=true; down=false; (sluit||closeHb)(); }   // swipe right → back to overview
       else if(dx<-40){ down=false; }                        // swipe left → do nothing (no paging)
     });
     el.addEventListener('pointerup', function(){ down=false; });
@@ -7907,7 +8113,12 @@
     poomsae:  {slug:'poomsae-stance', wh:520/793, delay:-1.7, rest:0.42, restMax:154},
     ilbo:     {slug:'ilbo-taeryon',   wh:1.515,   delay:-0.4, rest:0.92, restMax:330, pair:true},
     gyeorugi: {slug:'gyeorugi-pair',  wh:1.445,   delay:-0.4, rest:0.92, restMax:330, pair:true},
-    gyeokpa:  {slug:'gyeokpa-scene',  wh:1.593,   delay:-2.9, rest:0.92, restMax:330, pair:true}
+    gyeokpa:  {slug:'gyeokpa-scene',  wh:1.593,   delay:-2.9, rest:0.92, restMax:330, pair:true},
+    // De filmpjespagina's lenen dezelfde tekeningen: op het overzicht staat er geen, maar
+    // eenmaal in een onderdeel herken je aan het plaatje meteen waar je bent.
+    'vd-poomsae':  {slug:'poomsae-stance', wh:520/793, delay:-1.7, rest:0.42, restMax:154},
+    'vd-taeryon':  {slug:'ilbo-taeryon',   wh:1.515,   delay:-0.4, rest:0.92, restMax:330, pair:true},
+    'vd-gyeorugi': {slug:'gyeorugi-pair',  wh:1.445,   delay:-0.4, rest:0.92, restMax:330, pair:true}
   };
   function mascSpacer(key){
     return HB_MASC[key] ? '<div class="pm-spacer" id="pm-spacer" aria-hidden="true"></div>' : '';
@@ -8832,7 +9043,7 @@
   // op zwart terwijl de sluier eronder nog rustig indonkerde. Daarom rekenen we de overgang
   // hier zelf uit: dezelfde duur en dezelfde curve als .beltsheet-ov, maar als gewone
   // stijlwijziging per frame in plaats van als transitie.
-  var DIM_MS=280, DIM_MAX=.58;
+  var DIM_MS=280, DIM_MAX=.58, DIM_FILM=.94;
   // De standaardcurve 'ease' van CSS is cubic-bezier(.25,.1,.25,1); die zoeken we per frame op.
   function dimEase(t){
     function bz(a,b,u){ var v=1-u; return 3*v*v*u*a + 3*v*u*u*b + u*u*u; }
@@ -8857,8 +9068,14 @@
     if(!dimDoel){ document.documentElement.classList.remove('dimmed'); dimTeken(0); }
   }
   function syncTopDim(){
-    var aan = !!document.querySelector('.beltsheet-ov.show');
-    var doel = aan ? DIM_MAX : 0;
+    // Ook de filmpjesspeler: die legt zich over de hele app, dus moet de strook boven de
+    // iOS-statusbalk net zo goed meedoven — anders blijft er een lichte reep boven het beeld.
+    var film = !!document.querySelector('.vd-player.show');
+    var aan = film || !!document.querySelector('.beltsheet-ov.show');
+    // De speler dekt het scherm veel dieper af dan een kaartje. Zou de strook op de lichtere
+    // waarde van een kaartje blijven staan, dan zie je boven het beeld precies de band die we
+    // hier wegwerken — dus volgt hij de donkerte van de laag die eronder ligt.
+    var doel = aan ? (film ? DIM_FILM : DIM_MAX) : 0;
     if(doel===dimDoel && !dimRaf) return;
     dimDoel=doel; dimVan=dimNu; dimT0=performance.now();
     // Eerst de huidige stand vastzetten en pas daarna tonen: anders staat de strook één
@@ -10804,9 +11021,10 @@
     else if(a==='plmiss'){ closeCoach(); missionGo(act.getAttribute('data-id')); }
     else if(a==='plexit'){ closeCoach(); buzz(10); }
     else if(a==='vdclose'){ closeVideoSheet(); }
-    else if(a==='vdcat'){ if(vdDraft){ vdDraft.cat=act.getAttribute('data-k');
-      [].forEach.call(vdSheet.querySelectorAll('.ag-chip'),function(c){ c.classList.toggle('on', c===act); });
-      buzz(10); } }
+    else if(a==='vdcat'){ if(vdDraft){ var _nc=vdCatOf(act.getAttribute('data-k'));
+      vdDraft.cat=_nc.k; vdDraft.sub=_nc.subs?_nc.subs[0].k:'';
+      vdTeken(); buzz(10); } }
+    else if(a==='vdsubcat'){ if(vdDraft){ vdDraft.sub=act.getAttribute('data-k'); vdTeken(); buzz(10); } }
     else if(a==='vdsave'){ vdCommit(); }
     else if(a==='vdmenu'){ openVideoMenu(act.getAttribute('data-id')); buzz(10); }
     else if(a==='vdmclose'){ closeVideoMenu(); }
@@ -10818,10 +11036,24 @@
       if(_vw && _vw.film){ try{ filmDB.weg(_vw.film); }catch(_e){} }
       if(VD_SEEN[_vid]){ delete VD_SEEN[_vid]; vdSeenSave(); }
       VIDEOS=VIDEOS.filter(function(v){ return v.id!==_vid; });
-      vdSave(); closeVideoMenu(); vdRefresh(); buzz(12); }
-    else if(a==='vdpick'){ VD_VIEW.cat=vdCat(act.getAttribute('data-k')).k; vdViewSave(); vdRefresh(); buzz(10); }
-    else if(a==='vdmode'){ VD_VIEW.mode=act.getAttribute('data-m'); vdViewSave(); vdRefresh(); buzz(10); }
-    else if(a==='vdsort'){ vdSortToggle(); buzz(10); }
+      vdSave(); closeVideoMenu(); vdRefresh(); buzz(18); }
+    else if(a==='vddelvraag'){ vdDelVraag(act.getAttribute('data-id')); }
+    else if(a==='vddelnee'){ vdDelNee(); buzz(8); }
+    else if(a==='vdopen'){ openVdCat(act.getAttribute('data-c'), act.getAttribute('data-s')); buzz(10); }
+    else if(a==='vdcatclose'){ closeVdCat(); buzz(8); }
+    else if(a==='vdsort'){ openVdSort(); buzz(10); }
+    else if(a==='vdsortclose'){ closeVdSort(); }
+    else if(a==='vdsortpick'){ VD_VIEW.sort=act.getAttribute('data-k'); vdViewSave();
+      closeVdSort(); vdRefresh(); buzz(10); }
+    else if(a==='vdbackup'){ backupMaken(); buzz(12); }
+    else if(a==='vdrestore'){
+      var _vrf=document.getElementById('vd-restore-file');
+      if(_vrf){
+        _vrf.value='';
+        _vrf.onchange=function(){ backupTerugzetten(_vrf.files && _vrf.files[0]); };
+        _vrf.click();
+      }
+      buzz(10); }
     else if(a==='vdbron'){ if(vdDraft){ vdDraft.bron=act.getAttribute('data-b'); vdDraft.stap='velden'; vdTeken(); buzz(10); } }
     else if(a==='vdposterdel'){ if(vdDraft){ vdDraft.poster=''; vdTeken(); buzz(10); } }
     else if(a==='vdpclose'){ closeVdPlayer(); }
