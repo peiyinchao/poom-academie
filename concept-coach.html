@@ -497,18 +497,22 @@
      Eén categorie tegelijk, over de volle breedte. Planken naast elkaar nodigen uit tot
      grasduinen; taekwondo gaat over focus, dus je kiest eerst waar je mee bezig bent en ziet
      dan alleen dat. */
-  /* Het overzicht is een lijst, net als het Handboek en de Woordenschat: je ziet alle
-     onderdelen tegelijk en hoeft niets opzij te schuiven om te weten wat er is. Het kopje boven
-     een blok noemt het onderdeel waar de regels bij horen, zodat "Techniek" niet in de lucht
-     hangt. */
-  .vd-secl{margin:22px 0 -8px;padding:0 4px;font-family:var(--cond);text-transform:uppercase;
+  /* Het overzicht is één lijst, net als het Handboek en de Woordenschat. De twee onderdelen
+     die zelf zijn opgesplitst krijgen geen los kopje boven een eigen kaart meer — dat liet de
+     blokken springen en het kopje leek net zo goed bij het blok eronder te horen. In plaats
+     daarvan staat de naam als groepsregel ín de kaart, met zijn eigen regels ingesprongen
+     eronder. Zo hoort alles zichtbaar bij elkaar en is er maar één kaart. */
+  .vdlist .wrow{padding:12px 16px}
+  /* Zonder tekentje links hoort de scheidslijn ook links te beginnen, anders zweeft hij. */
+  .vdlist .wrow + .wrow::before{left:16px}
+  .vdlist .wrow-grp + .wrow::before{display:none}
+  .vdlist .vd-in + .vd-in::before{left:32px}
+  .wrow-grp{display:flex;align-items:center;gap:10px;width:100%;padding:15px 16px 7px;
+    background:none;border:0;text-align:left;cursor:default}
+  .wrow-grp .wrow-gt{flex:1 1 auto;min-width:0;font-family:var(--cond);text-transform:uppercase;
     letter-spacing:.12em;font-size:11px;font-weight:700;color:var(--gray)}
-  .vd-secl + .wlist{margin-top:12px}
-  .vd-emb{font-size:16px;line-height:1}
-  /* Hoeveel filmpjes er in zitten hoort bij de regel, links van het pijltje: een leeg onderdeel
-     laat het getal gewoon weg in plaats van een nul te tonen. */
-  .vd-rown{flex:none;min-width:22px;padding:2px 7px;border-radius:999px;background:var(--soft);
-    color:var(--gray);font-size:11.5px;font-weight:800;text-align:center}
+  /* Een ingesprongen regel hoort bij de groepsregel erboven. */
+  .vdlist .vd-in{padding-left:32px}
   /* De gereedschapsregel: alleen nog waarop je sorteert. Een keuze tussen weergaven is er niet
      meer — zonder voorbeeldplaatje bij Facebook en bij je eigen filmpjes is een raster een rij
      grijze vlakken, en dan is de lijst gewoon de betere. */
@@ -591,14 +595,20 @@
   /* In de lijstweergave staat de tekst naast het beeld; in een raster eronder. Eén omhulsel
      maakt dat verschil met één regel opmaak in plaats van twee verschillende kaarten. */
   .vd-txt{display:block;min-width:0}
-  .vd-empty{font-size:13.5px;color:var(--gray);line-height:1.5;text-align:center;padding:30px 10px 18px}
+  /* Nog niets hier: net als een aanstaand evenement op de tijdlijn staat de tekst in een
+     gestippeld kader. Het is duidelijk een lege plek die nog gevuld mag worden, geen fout. */
+  .vd-empty{margin:26px 2px 8px;padding:26px 18px;border:1px dashed rgba(30,22,16,.3);
+    border-radius:16px;font-size:13.5px;color:var(--gray);line-height:1.6;text-align:center}
+  .vd-empty b{color:var(--ink)}
   /* Per-item menu, as a compact sheet so it matches every other sheet in the app. */
   .vd-menu{display:flex;flex-direction:column;gap:9px}
   .vd-mi{display:flex;align-items:center;gap:11px;width:100%;border:1px solid var(--line);border-radius:14px;
     padding:14px 16px;background:var(--surface);color:var(--ink);font-size:14.5px;font-weight:700;
     cursor:pointer;-webkit-tap-highlight-color:transparent}
   .vd-mi:active{opacity:.7}
-  .vd-mi.danger{color:#B23A48}
+  /* Weggooien is de enige stap die je niet terug kunt draaien; daarom draagt hij die kleur
+     al in het menu, niet pas in de vraag erna. */
+  .vd-mi.danger{color:#B23A48;border-color:rgba(178,58,72,.34);background:#FDF3F4}
   .vd-mi.cancel{justify-content:center;color:var(--gray)}
   /* De bevestigingsknop is rood en gevuld, niet een regeltje in een lijst: weggooien is de
      enige stap in dit vel die je niet meer terug kunt draaien, en dat hoort te zien te zijn
@@ -6049,36 +6059,33 @@
      zitten, en je hoeft niets weg te schuiven om te weten wat er is. De onderdelen die zelf
      zijn opgesplitst krijgen een eigen blok met hun naam erboven, zodat "Techniek" niet in de
      lucht hangt. */
-  function vdRowHtml(cat, sub, label){
-    var c=vdCatOf(cat), n=vdTel(cat, sub), su=sub?vdSub(c, sub):null;
-    return '<button class="wrow" data-act="vdopen" data-c="'+esc(cat)+'" data-s="'+esc(sub||'')+'" '+
+  function vdRowHtml(cat, sub, label, klas){
+    var n=vdTel(cat, sub);
+    return '<button class="wrow'+(klas?' '+klas:'')+'" data-act="vdopen" data-c="'+esc(cat)+'" data-s="'+esc(sub||'')+'" '+
       'aria-label="'+esc(vdPlekLabel(cat, sub))+' — '+n+(n===1?' filmpje':' filmpjes')+'">'+
-      '<span class="wrow-emb hb-emb vd-emb" style="--e:'+c.el+'" aria-hidden="true">'+
-        esc((su&&su.ico)||c.ico)+'</span>'+
       '<span class="wrow-tx"><span class="wrow-t">'+esc(label)+'</span></span>'+
-      (n?'<span class="vd-rown">'+n+'</span>':'')+
+      '<span class="wrow-n">'+(n||'')+'</span>'+
       '<span class="wrow-ch">'+IC.chev+'</span>'+
     '</button>';
   }
   function vdHubHtml(){
     var uit='';
-    // Onderdelen zonder eigen indeling schuiven samen in één blok tot er een met subcategorieën
-    // langskomt; die krijgt zijn eigen kaart met een kopje.
-    var los='';
     VD_CATS.forEach(function(c){
       if(c.k==='overig') return;
       if(c.subs){
-        if(los){ uit+='<div class="wlist">'+los+'</div>'; los=''; }
-        uit+='<p class="vd-secl">'+esc(c.label)+'</p><div class="wlist">'+
-          c.subs.map(function(su){ return vdRowHtml(c.k, su.k, su.label); }).join('')+'</div>';
+        // De naam van het onderdeel staat als groepsregel ín de kaart, met zijn eigen regels
+        // ingesprongen eronder: zo hoort zichtbaar bij elkaar wat bij elkaar hoort.
+        uit+='<div class="wrow wrow-grp"><span class="wrow-gt">'+esc(c.label)+'</span></div>'+
+          c.subs.map(function(su,i){
+            return vdRowHtml(c.k, su.k, su.label, 'vd-in');
+          }).join('');
       } else {
-        los+=vdRowHtml(c.k, '', c.label);
+        uit+=vdRowHtml(c.k, '', c.label);
       }
     });
-    if(los) uit+='<div class="wlist">'+los+'</div>';
     // Overig hoort er alleen te staan als er iets in zit: een leeg vangnet is ruis.
-    if(vdTel('overig','')) uit+='<div class="wlist">'+vdRowHtml('overig','','Overig')+'</div>';
-    return uit;
+    if(vdTel('overig','')) uit+=vdRowHtml('overig','','Overig');
+    return '<div class="wlist vdlist">'+uit+'</div>';
   }
   /* De reservekopie staat onderaan, net als op de tijdlijn: eerst je verzameling, dan pas het
      veiligstellen ervan. Het is één bestand voor de hele app, dus een kopie die je hier maakt
