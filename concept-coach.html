@@ -166,7 +166,7 @@
     background:none;box-shadow:none;
     display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
   .tlbtn::before,.tlbtn::after{content:"";grid-area:1/1;width:38px;height:38px;
-    background:rgba(30,22,16,.56)}
+    background:rgba(30,22,16,.74)}
   .tlbtn::after{-webkit-mask:url(assets/icons/Journey-berg.png) center/contain no-repeat;
     mask:url(assets/icons/Journey-berg.png) center/contain no-repeat}
   .tlbtn::before{-webkit-mask:url(assets/icons/Journey-vlag.png) center/contain no-repeat;
@@ -530,8 +530,12 @@
   .vd-grid .vd-tt{margin-top:0;-webkit-line-clamp:2;font-size:14px}
   .vd-grid .vd-play{width:26px;height:26px}
   .vd-grid .vd-play::after{border-width:5px 0 5px 8px}
+  /* In de lijst staan de puntjes zonder vlakje naast de titel; op die kale ondergrond trekken ze
+     bij dezelfde korpsgrootte te veel aandacht. Alleen het tekentje krimpt — de knop eromheen
+     houdt zijn maat, zodat je hem met een duim nog steeds raakt. */
   .vd-grid .vd-more{top:50%;right:0;transform:translateY(-50%);background:none;
-    color:var(--gray);-webkit-backdrop-filter:none;backdrop-filter:none}
+    color:var(--gray);font-size:11px;letter-spacing:.3px;
+    -webkit-backdrop-filter:none;backdrop-filter:none}
   .vd-grid .vd-tlink{display:contents}
   .vd-tile{position:relative}
   .vd-tlink{display:block;text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent}
@@ -875,6 +879,15 @@
      op het overzicht: je voegt een filmpje altijd érgens aan toe, en dat "ergens" is de pagina
      waar je op staat. De tabbalk is daar weggeschoven, dus hij mag gewoon onderin. */
   .vdcat .vd-fab{position:fixed;opacity:0;transform:translateY(16px) scale(.88)}
+  /* De puntjesbalk staat onderin; de lijst moet erboven uit kunnen rollen en de plusknop mag er
+     niet half overheen hangen, dus die schuift een verdieping omhoog. */
+  .vdcat.met-pil .cs-body{padding-bottom:calc(env(safe-area-inset-bottom) + var(--pilh) + 40px)}
+  .vdcat.met-pil .vd-fab{bottom:calc(env(safe-area-inset-bottom) + var(--pilh) + 24px)}
+  /* Hetzelfde verloop als op het overzicht: de lijst lost op in de pagina op de hoogte waar de
+     puntjesbalk zweeft, in plaats van er onleesbaar onderdoor te schuiven. */
+  .vdcat::after{content:"";position:absolute;left:0;right:0;bottom:0;z-index:38;pointer-events:none;
+    height:calc(env(safe-area-inset-bottom) + 118px);
+    background:linear-gradient(var(--page0),var(--page) 52%)}
   .vdcat.show .vd-fab{opacity:1;transform:none;
     transition:opacity .3s ease .16s, transform .4s cubic-bezier(.24,1.25,.4,1) .16s}
   .vdcat.show .vd-fab:active{transform:scale(.92);transition:transform .12s}
@@ -1123,13 +1136,16 @@
   .summit .node.goal .ndot{width:64px;height:64px;border-radius:18px;background:transparent;border:0;padding:0}
 
   /* ---------- Bottom floating nav (2 items) ---------- */
+  /* De rustende tekentjes stonden op 56% zwart. Naast een felgekleurd actief tabblad leest zo'n
+     lichte grijstint als "kan niet", terwijl je er juist heen moet kunnen. Op 74% blijft het
+     verschil met het actieve tabblad groot genoeg, maar ziet het er beschikbaar uit. */
   .navdock{position:absolute;left:22px;right:22px;bottom:calc(env(safe-area-inset-bottom) + 20px);
     z-index:60;display:flex;align-items:center;gap:10px}
   .fnav{position:relative;flex:1;min-height:58px;display:flex;justify-content:space-between;gap:4px;background:rgba(252,250,246,.5);
     -webkit-backdrop-filter:blur(30px) saturate(1.9);backdrop-filter:blur(30px) saturate(1.9);border-radius:999px;padding:3px;
     border:1px solid rgba(255,255,255,.55);
     box-shadow:0 14px 32px -16px rgba(40,24,12,.4), 0 1px 0 rgba(255,255,255,.75) inset}
-  .fnav button{position:relative;z-index:1;flex:1 1 0;border:0;background:transparent;color:rgba(30,22,16,.56);border-radius:17px;
+  .fnav button{position:relative;z-index:1;flex:1 1 0;border:0;background:transparent;color:rgba(30,22,16,.74);border-radius:17px;
     padding:4px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-family:var(--cond);text-transform:uppercase;
     font-weight:700;letter-spacing:.03em;font-size:8.5px;line-height:1;transition:color .32s ease, transform .14s ease}
   .fnav button svg{width:24px;height:24px}
@@ -1155,7 +1171,7 @@
     -webkit-backdrop-filter:blur(30px) saturate(1.9);backdrop-filter:blur(30px) saturate(1.9);
     border:1px solid rgba(255,255,255,.55);
     box-shadow:0 14px 32px -16px rgba(40,24,12,.4), 0 1px 0 rgba(255,255,255,.75) inset;
-    color:rgba(30,22,16,.56);display:grid;place-items:center;
+    color:rgba(30,22,16,.74);display:grid;place-items:center;
     transition:opacity .25s, transform .25s, color .2s ease, background .2s ease}
   .fab-timer svg{width:25px;height:25px}
   .fab-timer-ic{width:34px;height:34px;background:currentColor;
@@ -2850,6 +2866,10 @@
   /* De filmpjesmascotte doet niet mee met knipperen maar met zijn wenkbrauwen: die wippen
      even omhoog, alsof er iets spannends op het doek gebeurt. Verder dezelfde maat en plek
      als de mascotte bij de woorden. */
+  /* De bioscoopjongen staat in een kop zonder ondertitelrail, dus boven hem bleef een strook
+     leeg. Hij mag die opvullen: groter getekend leest zijn bril beter en oogt de kop minder
+     kaal. De breedte volgt de tekening zelf, zodat hij niet uitrekt. */
+  .wlib .whead-film{width:auto;height:156px;aspect-ratio:820/855;margin:0 -8px -6px 0}
   .whead-masc .whead-brow{position:absolute;inset:0;opacity:0}
   @media (prefers-reduced-motion:no-preference){.whead-masc .whead-brow{animation:wheadBrow 6.4s ease-in-out infinite}}
   @keyframes wheadBrow{0%,70%,100%{opacity:0}74%,84%{opacity:1}88%{opacity:0}91%,95%{opacity:1}}
@@ -2950,6 +2970,13 @@
   .wrow-hard:not(.off) .wrow-n::before{animation:blink 1.6s ease-in-out infinite}
   /* Woorden hub: fixed header, list scrolls underneath */
   .surface.wlib{display:flex;flex-direction:column;overflow:hidden}
+  /* De zwevende tabbalk hangt over de lijst heen. Op het filmpjesoverzicht loopt de
+     reservekopie er dwars onderdoor: de balk wordt er onleesbaar van en je oog blijft haken
+     aan tekst die je toch niet kunt lezen. Een verloop op de hoogte van de balk lost de inhoud
+     op in de pagina, zodat daar alleen de balk nog staat. */
+  .surface.vdlib::after{content:"";position:absolute;left:0;right:0;bottom:0;z-index:5;
+    pointer-events:none;height:calc(env(safe-area-inset-bottom) + 132px);
+    background:linear-gradient(var(--page0),var(--page) 48%)}
   .wlib .whead{padding-left:22px;padding-right:22px;position:relative;z-index:2;background:var(--page);flex:none}
   /* De zwevende tabbalk hangt over deze lijst heen. Met een vaste onderrand van 20px bleef de
      laatste groep op een korter scherm onder de balk liggen, ook als je helemaal doorrolde.
@@ -3465,7 +3492,7 @@
   var STORE_KEYS = ['poom_agenda','poom_videos','poom_belt','poom_hard','poom_mastery',
                     'poom_missions','poom_ot_mode','poom_ot_dur','poom_plan','poom_plandone',
                     'poom_photos','poom_geup_dates','poom_geupmeta','poom_exam','ciUx',
-                    'poom_vidseen','poom_vidview','poom_vidmig'];
+                    'poom_vidseen','poom_vidview','poom_vidmig','poom_vidvast'];
   var store = (function(){
     var ok = true;
     try{ localStorage.setItem('poom_probe','1'); localStorage.removeItem('poom_probe'); }
@@ -4057,14 +4084,14 @@
   var VD_CATS = [
     {k:'opwarmen', label:'Opwarmen',     han:'준비', ico:'🔥', el:'#C8794A'},
     {k:'stretch',  label:'Strekken',     han:'유연', ico:'🤸', el:'#6FA38B'},
-    {k:'gyeorugi', label:'Gyeorugi',     han:'겨루기', ico:'🥊', el:'#B23A48', masc:'gyeorugi-pair',
+    {k:'gyeorugi', label:'Gyeorugi',     han:'겨루기', ico:'🥊', el:'#B23A48',
       subs:[{k:'techniek',label:'Techniek',ico:'🥊'},{k:'aanval',label:'Aanval',ico:'⚡'},
             {k:'counter',label:'Counter',ico:'🔄'}]},
-    {k:'poomsae',  label:'Poomsae',      han:'품새', ico:'🥋', el:'#4A6FA5', masc:'poomsae-stance',
-      subs:[{k:'techniek',label:'Techniek',ico:'🥋'},{k:'poomsaes',label:'Poomsaes',ico:'🌀'},
+    {k:'poomsae',  label:'Poomsae',      han:'품새', ico:'🥋', el:'#4A6FA5',
+      subs:[{k:'techniek',label:'Techniek',ico:'🥋'},{k:'poomsaes',label:'Vormen',ico:'🌀'},
             {k:'wedstrijden',label:'Wedstrijden',ico:'🏆'}]},
     {k:'hosinsul', label:'Hosinsul',     han:'호신술', ico:'🛡️', el:'#7A6AA8'},
-    {k:'taeryon',  label:'Taeryon',      han:'대련', ico:'👥', el:'#C98A2B', masc:'ilbo-taeryon'},
+    {k:'taeryon',  label:'Taeryon',      han:'대련', ico:'👥', el:'#C98A2B'},
     {k:'cooling',  label:'Cooling down', han:'정리', ico:'🌬️', el:'#5E8CA8'},
     {k:'overig',   label:'Overig',       han:'기타', ico:'📦', el:'#6B6459'}
   ];
@@ -4133,11 +4160,22 @@
   }
 
   /* De filmpjes die de app zelf meebrengt: de instructievideo boven elke poomsae-pagina en de
-     twee reels van Taekwondo Kawarmala bij Taeryon en Hosinsul. Ze horen bij de leerstof en
-     niet bij jouw verzameling — je kunt ze bekijken en aan een training koppelen, maar niet
-     weggooien of hernoemen. Ze worden uit curriculum.js gelezen en niet overgeschreven, zodat
-     er maar één plek is waar zo'n link staat. */
-  var VD_VAST=null;
+     twee reels van Taekwondo Kawarmala bij Taeryon en Hosinsul. Ze komen uit curriculum.js en
+     dat bestand wordt nooit overschreven, zodat er maar één plek is waar zo'n link staat.
+     Aanpassen mag wel: wie zo'n filmpje hernoemt, verplaatst of wegdoet, legt dat als een
+     los briefje ernaast (poom_vidvast). Het meegeleverde blijft dus heel, en een briefje
+     weghalen zet het filmpje terug zoals het bedoeld was. */
+  var VD_VAST=null, VD_OVR=null;
+  function vdOvr(){
+    if(VD_OVR) return VD_OVR;
+    try{ VD_OVR=JSON.parse(localStorage.getItem('poom_vidvast'))||{}; }catch(e){ VD_OVR={}; }
+    return VD_OVR;
+  }
+  function vdOvrZet(id, wijziging){
+    var o=vdOvr(); o[id]=wijziging;
+    try{ localStorage.setItem('poom_vidvast', JSON.stringify(o)); }catch(e){}
+    VD_VAST=null;   // de lijst is gebouwd mét de oude briefjes erin
+  }
   function vdVast(){
     if(VD_VAST) return VD_VAST;
     var uit=[];
@@ -4153,6 +4191,15 @@
                   poster:v.poster, cat:x.cat, vast:true});
       });
     }catch(e){}
+    var o=vdOvr();
+    uit=uit.filter(function(v){
+      var x=o[v.id]; if(!x) return true;
+      if(x.weg) return false;
+      if(x.title) v.title=x.title;
+      if(x.url){ v.url=x.url; v.vid=x.vid||''; }
+      if(x.cat){ v.cat=x.cat; v.sub=x.sub||''; }
+      return true;
+    });
     VD_VAST=uit; return uit;
   }
   function vdAlles(){ return vdVast().concat(VIDEOS); }
@@ -4670,7 +4717,10 @@
       // At the top grade the belt colour runs out to the track's end cap, so the whole bar reads
       // as complete; below it the fill stops at the thumb's centre (hidden under the thumb).
       fill.style.width = (k===GEUPS.length-1) ? '100%' : cx;
-      fill.style.background = dualBg(g);
+      // Dezelfde veeg als op de dagkaart, alleen liggend: de baan loopt van links naar rechts,
+      // dus de haal ook. Eerder stonden de twee kleuren hier hard tegen elkaar, waardoor de
+      // schuif als enige plek in de app een ander soort verloop droeg dan de rest.
+      fill.style.background = beltVeeg(g, 90);
     }
     // stop marks: dark on the light track, light over a dark fill → keeps AA (≥3:1) either way,
     // and flips as the fill sweeps past each mark (the nice micro-interaction)
@@ -6007,7 +6057,7 @@
      die filmpjes — in de lijst, groot, of twee naast elkaar. */
   function vdTileHtml(v){
     var th=vdThumb(v), src=vdSource(v), title=v.title||vdUrl(v);
-    return '<div class="vd-tile">'+
+    return '<div class="vd-tile" data-id="'+esc(v.id)+'"'+(v.vast?' data-vast="1"':'')+'>'+
       '<a class="vd-tlink" href="'+esc(vdUrl(v))+'" data-act="vdplay" data-id="'+esc(v.id)+'" '+
         'target="_blank" rel="noopener noreferrer">'+
         '<span class="vd-thumb">'+
@@ -6018,9 +6068,7 @@
           (src?'<span class="vd-ts">'+esc(src)+'</span>':'')+
         '</span>'+
       '</a>'+
-      // De filmpjes die de app zelf meebrengt horen bij de leerstof: die kun je bekijken,
-      // maar niet hernoemen of weggooien. Dus krijgen ze ook geen menuknop.
-      (v.vast?'':'<button class="vd-more" data-act="vdmenu" data-id="'+esc(v.id)+'" aria-label="Meer opties voor '+esc(title)+'">•••</button>')+
+      '<button class="vd-more" data-act="vdmenu" data-id="'+esc(v.id)+'" aria-label="Meer opties voor '+esc(title)+'">•••</button>'+
     '</div>';
   }
   function vdToolsHtml(){
@@ -6102,12 +6150,12 @@
   }
   function renderVideos(){
     var html =
-    '<div class="surface wlib">'+statusBar()+
+    '<div class="surface wlib vdlib">'+statusBar()+
       '<div class="whead">'+
         '<div class="jhead"><div class="jk"><span class="han-lab">영상 · Yeongsang</span></div>'+
           '<h1>Filmpjes</h1>'+
           '<div class="js">Kies een onderdeel en bewaar wat je wilt naspelen.</div></div>'+
-        '<span class="whead-masc" aria-hidden="true"><img src="assets/mascot/film-3d.png" alt=""><img class="whead-brow" src="assets/mascot/film-3d-brow.png" alt=""></span>'+
+        '<span class="whead-masc whead-film" aria-hidden="true"><img src="assets/mascot/film-3d.png" alt=""><img class="whead-brow" src="assets/mascot/film-3d-brow.png" alt=""></span>'+
       '</div>'+
       '<div class="wscroll" id="vd-hub">'+vdHubHtml()+vdBackupHtml()+'</div>'+
     '</div>';
@@ -6126,8 +6174,34 @@
      pagina waar je op staat. */
   var vdCatSheet=null;
   function vdSheetBodyHtml(cat, sub){
-    return mascSpacer(vdCatOf(cat).masc ? 'vd-'+cat : '') +
-      vdToolsHtml() + vdBodyHtml(cat, sub);
+    return vdToolsHtml() + vdBodyHtml(cat, sub);
+  }
+  /* De titel van een onderdeel dat is opgesplitst noemt eerst het onderdeel zelf: "Techniek"
+     alleen zegt niet of je bij Poomsae of bij Gyeorugi zit, en dat is precies de vraag als je
+     er met een veeg in beland bent. Het onderdeel zonder hoekjes houdt zijn eigen naam. */
+  function vdTitel(cat, sub){
+    var c=vdCatOf(cat), su=vdSub(c, sub);
+    return su ? c.label+' · '+su.label : c.label;
+  }
+  /* Alle plekken op een rij, in dezelfde volgorde als het overzicht. Dat is de reeks waar je
+     met een veeg doorheen loopt, en de puntjes onderin tellen hem af. Overig doet alleen mee
+     als er iets in zit — anders veeg je naar een lege bak die er niet eens staat. */
+  function vdPlekken(){
+    var uit=[];
+    VD_CATS.forEach(function(c){
+      if(c.k==='overig') return;
+      if(c.subs) c.subs.forEach(function(su){ uit.push({cat:c.k, sub:su.k}); });
+      else uit.push({cat:c.k, sub:''});
+    });
+    if(vdTel('overig','')) uit.push({cat:'overig', sub:''});
+    return uit.map(function(p){
+      return {id:p.cat+'/'+p.sub, cat:p.cat, sub:p.sub, label:vdTitel(p.cat, p.sub)};
+    });
+  }
+  function vdPlekIndex(cat, sub){
+    var lijst=vdPlekken(), id=cat+'/'+(sub||'');
+    for(var i=0;i<lijst.length;i++) if(lijst[i].id===id) return i;
+    return -1;
   }
   function openVdCat(cat, sub){
     if(vdCatSheet) return;
@@ -6135,35 +6209,72 @@
     sub = su?su.k:'';
     VD_VIEW.cat=c.k; VD_VIEW.sub=sub; vdViewSave();
     var el=document.createElement('div');
-    el.className='session catsheet hbcat vdcat';
-    el.setAttribute('data-hb', c.masc ? 'vd-'+c.k : 'vd-geen');
+    el.className='session catsheet hbcat vdcat met-pil';
+    el.setAttribute('data-hb', 'vd-geen');
     applyCatAccent(el, c.el);
+    var items=vdPlekken();
+    activePager={ sheet:el, items:items,
+      step:function(dir){ navVdCat(dir); },
+      pick:function(id){ gotoVdCat(id); } };
     el.innerHTML=
       '<div class="cs-hero">'+
         '<button class="cs-x" data-act="vdcatclose" aria-label="Sluiten">'+IC.x+'</button>'+
         '<div class="cs-head">'+
           '<div class="cs-eye">영상 · FILMPJES</div>'+
           '<div class="cs-titlerow">'+
-            '<div class="cs-titlewrap"><h2 class="cs-title cs-title-cur">'+esc(su?su.label:c.label)+'</h2></div>'+
-            '<div class="cs-chips">'+(su?'<span class="cs-standen-sub">'+esc(c.label)+'</span>':'')+'</div>'+
+            '<div class="cs-titlewrap"><h2 class="cs-title cs-title-cur">'+esc(vdTitel(c.k, sub))+'</h2></div>'+
+            '<div class="cs-chips"></div>'+
           '</div>'+
         '</div>'+
       '</div>'+
       '<div class="cs-body" id="vd-scroll">'+vdSheetBodyHtml(c.k, sub)+'</div>'+
+      '<div class="cs-dotstray">'+buildDotsHtml(items, c.k+'/'+sub)+'</div>'+
       '<button class="tl-fab vd-fab" data-act="vdnew" aria-label="Filmpje toevoegen" title="Filmpje toevoegen">'+
         '<span class="tl-fab-glint" aria-hidden="true"></span>'+IC.plus+'</button>';
     stage.appendChild(el);
     vdCatSheet=el;
-    attachHbBackSwipe(el);
+    attachCatSwipe(el);
+    attachDotScrub(el);
     fnav.classList.add('hide');
     vdBindThumbs(el);
     void el.offsetWidth;
     requestAnimationFrame(function(){ el.classList.add('show'); csEdgeFadeAll(el); });
-    mascSetup(el);
+  }
+  /* Van de ene map naar de andere zonder het blad te sluiten: de titel kruist net als bij de
+     woordgroepen, de lijst eronder wisselt met een vervaging. Zo houd je het gevoel dat je
+     langs een reeks loopt in plaats van telkens opnieuw ergens binnen te vallen. */
+  function swapVdCat(cat, sub, dir){
+    if(!vdCatSheet) return;
+    var c=vdCatOf(cat), su=vdSub(c, sub); sub=su?su.k:'';
+    VD_VIEW.cat=c.k; VD_VIEW.sub=sub; vdViewSave();
+    applyCatAccent(vdCatSheet, c.el);
+    csTitleSwap(vdCatSheet, esc(vdTitel(c.k, sub)), dir);
+    fadeSwap(vdCatSheet.querySelector('.cs-body'), vdSheetBodyHtml(c.k, sub));
+    setTimeout(function(){ vdBindThumbs(vdCatSheet); csEdgeFadeAll(vdCatSheet); }, 220);
+    updateDots(c.k+'/'+sub);
+  }
+  /* Voorbij het einde veert het scherm terug; vóór de eerste map is er wél iets achter je,
+     namelijk het overzicht waar je vandaan kwam. Daar terugvegen sluit het blad dus gewoon,
+     zoals een veeg terug overal in de app doet. */
+  function navVdCat(dir){
+    if(!vdCatSheet) return;
+    var lijst=vdPlekken(), i=vdPlekIndex(VD_VIEW.cat, VD_VIEW.sub);
+    if(i<0) return;
+    var j=i+dir;
+    if(j<0){ closeVdCat(); return; }
+    if(j>=lijst.length){ catEdgeBounce(dir); return; }
+    swapVdCat(lijst[j].cat, lijst[j].sub, dir);
+  }
+  function gotoVdCat(id){
+    if(!vdCatSheet) return;
+    var lijst=vdPlekken(), ci=vdPlekIndex(VD_VIEW.cat, VD_VIEW.sub), ti=-1;
+    for(var i=0;i<lijst.length;i++) if(lijst[i].id===id) ti=i;
+    if(ci<0 || ti<0 || ti===ci) return;
+    swapVdCat(lijst[ti].cat, lijst[ti].sub, ti>ci ? 1 : -1);
   }
   function closeVdCat(){
     if(!vdCatSheet) return;
-    var s=vdCatSheet; vdCatSheet=null;
+    var s=vdCatSheet; vdCatSheet=null; activePager=null;
     if(s._pmResize){ window.removeEventListener('resize', s._pmResize); s._pmResize=null; }
     s.classList.remove('show');
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 400);
@@ -6175,6 +6286,14 @@
   function vdRefresh(){
     vdHubRefresh();
     if(!vdCatSheet) return;
+    // Overig verschijnt en verdwijnt met zijn inhoud, dus de reeks puntjes kan korter of langer
+    // worden terwijl het blad openstaat.
+    var tray=vdCatSheet.querySelector('.cs-dotstray'), items=vdPlekken();
+    if(tray && activePager && activePager.items.length!==items.length){
+      activePager.items=items;
+      tray.innerHTML=buildDotsHtml(items, VD_VIEW.cat+'/'+(VD_VIEW.sub||''));
+      attachDotScrub(vdCatSheet);
+    }
     var oudTools=vdCatSheet.querySelector('.vd-tools');
     if(oudTools){ var n=document.createElement('div'); n.innerHTML=vdToolsHtml();
       oudTools.parentNode.replaceChild(n.firstChild, oudTools); }
@@ -6299,9 +6418,13 @@
       return '<p class="vd-lab">Komt terecht bij <b class="vd-labp">'+esc(vdPlekLabel(d.cat, d.sub))+'</b></p>';
     }
     var c=vdCatOf(d.cat);
+    // Overig is een vangnet, geen keuze: daar komt iets terecht doordat zijn plek verdween,
+    // niet doordat je hem daar neerlegt. Hij staat dus niet tussen de knoppen — tenzij het
+    // filmpje er nu toevallig in zit, want dan moet je wel kunnen zien waar je vandaan komt.
+    var keuzes=VD_CATS.filter(function(t){ return t.k!=='overig' || c.k==='overig'; });
     var h='<p class="vd-lab">Bij welk onderdeel hoort het?</p>'+
-      '<div class="ag-chips vd-chips">'+VD_CATS.map(function(t){
-        return '<button class="ag-chip'+(t.k===c.k?' on':'')+'" data-act="vdcat" data-k="'+t.k+'">'+t.ico+' '+esc(t.label)+'</button>';
+      '<div class="ag-chips vd-chips">'+keuzes.map(function(t){
+        return '<button class="ag-chip'+(t.k===c.k?' on':'')+'" data-act="vdcat" data-k="'+t.k+'">'+esc(t.label)+'</button>';
       }).join('')+'</div>';
     if(c.subs){
       h+='<p class="vd-lab">Waar binnen '+esc(c.label)+'?</p>'+
@@ -6367,6 +6490,14 @@
     var title=d.title || (id?'YouTube-filmpje':(d.bron==='album'?'Filmpje van je telefoon':url));
     var bestaand=vdEditId && vdById(vdEditId);
     var doe=function(filmSleutel){
+      // Een meegeleverd filmpje blijft in curriculum.js staan; wat jij eraan verandert komt als
+      // briefje ernaast te liggen.
+      if(bestaand && bestaand.vast){
+        vdOvrZet(bestaand.id, {title:title, url:url, vid:id, cat:d.cat, sub:d.sub||''});
+        closeVideoSheet(); vdRefresh();
+        buzz(18); try{ sfx('complete'); }catch(_e){}
+        return;
+      }
       if(bestaand){
         bestaand.vid=id; bestaand.url=url; bestaand.title=title;
         bestaand.author=d.author||''; bestaand.cat=d.cat; bestaand.sub=d.sub||'';
@@ -6379,10 +6510,13 @@
         });
       }
       vdSave();
-      // Je landt op de plek waar het filmpje in valt, anders bewaar je iets en zie je niets.
+      /* Een nieuw filmpje valt ergens in en dan wil je zien waar, dus daar landen we. Bij
+         verplaatsen niet: dan ben je aan het opruimen en hoor je te blijven staan waar je bezig
+         bent. Eerder sprong de app mee naar de nieuwe map, en dan was je de map kwijt waarin je
+         nog verder wilde. */
       var _p=vdPlek(d);
       closeVideoSheet();
-      if(vdCatSheet && (VD_VIEW.cat!==_p.cat || VD_VIEW.sub!==_p.sub)){
+      if(!bestaand && vdCatSheet && (VD_VIEW.cat!==_p.cat || VD_VIEW.sub!==_p.sub)){
         closeVdCat(); openVdCat(_p.cat, _p.sub);
       } else { vdRefresh(); }
       buzz(18); try{ sfx('complete'); }catch(_e){}
@@ -6466,7 +6600,7 @@
   }
   /* Per-clip menu behind the ••• button: edit or delete, instead of a bare delete cross. */
   function openVideoMenu(id){
-    var v=vdById(id); if(!v || v.vast || vdMenuSheet) return;
+    var v=vdById(id); if(!v || vdMenuSheet) return;
     vdMenuSheet=document.createElement('div');
     vdMenuSheet.className='beltsheet-ov'; vdMenuSheet.id='vidmenu-ov';
     vdMenuSheet.setAttribute('data-id', id);
@@ -6495,13 +6629,18 @@
      of je het zeker weet, met de rode knop op de plek waar eerst "Annuleer" stond — dan is
      doorklikken op de automatische piloot geen optie. */
   function vdMenuHtml(id){
-    return '<button class="vd-mi" data-act="vdedit" data-id="'+esc(id)+'">✏️ Bewerken</button>'+
-      '<button class="vd-mi danger" data-act="vddelvraag" data-id="'+esc(id)+'">🗑️ Verwijderen</button>'+
+    return '<button class="vd-mi" data-act="vdedit" data-id="'+esc(id)+'">Bewerken</button>'+
+      '<button class="vd-mi danger" data-act="vddelvraag" data-id="'+esc(id)+'">Verwijderen</button>'+
       '<button class="vd-mi cancel" data-act="vdmclose">Annuleer</button>';
   }
   function vdDelVraagHtml(id){
-    return '<p class="vd-warn">Dit filmpje verdwijnt uit je verzameling. '+
-      'De link zelf blijft bestaan, maar je moet hem opnieuw opzoeken.</p>'+
+    var v=vdById(id);
+    var uitleg = (v && v.vast)
+      ? 'Dit filmpje hoort bij de leerstof van de app. Het verdwijnt uit je mappen; '+
+        'zet je een reservekopie terug, dan staat het er weer.'
+      : 'Dit filmpje verdwijnt uit je verzameling. De link zelf blijft bestaan, maar je moet '+
+        'hem opnieuw opzoeken.';
+    return '<p class="vd-warn">'+esc(uitleg)+'</p>'+
       '<button class="vd-mi cancel" data-act="vddelnee">Toch maar niet</button>'+
       '<button class="vd-mi gevaar" data-act="vddel" data-id="'+esc(id)+'">Ja, verwijder</button>';
   }
@@ -8127,12 +8266,7 @@
     poomsae:  {slug:'poomsae-stance', wh:520/793, delay:-1.7, rest:0.42, restMax:154},
     ilbo:     {slug:'ilbo-taeryon',   wh:1.515,   delay:-0.4, rest:0.92, restMax:330, pair:true},
     gyeorugi: {slug:'gyeorugi-pair',  wh:1.445,   delay:-0.4, rest:0.92, restMax:330, pair:true},
-    gyeokpa:  {slug:'gyeokpa-scene',  wh:1.593,   delay:-2.9, rest:0.92, restMax:330, pair:true},
-    // De filmpjespagina's lenen dezelfde tekeningen: op het overzicht staat er geen, maar
-    // eenmaal in een onderdeel herken je aan het plaatje meteen waar je bent.
-    'vd-poomsae':  {slug:'poomsae-stance', wh:520/793, delay:-1.7, rest:0.42, restMax:154},
-    'vd-taeryon':  {slug:'ilbo-taeryon',   wh:1.515,   delay:-0.4, rest:0.92, restMax:330, pair:true},
-    'vd-gyeorugi': {slug:'gyeorugi-pair',  wh:1.445,   delay:-0.4, rest:0.92, restMax:330, pair:true}
+    gyeokpa:  {slug:'gyeokpa-scene',  wh:1.593,   delay:-2.9, rest:0.92, restMax:330, pair:true}
   };
   function mascSpacer(key){
     return HB_MASC[key] ? '<div class="pm-spacer" id="pm-spacer" aria-hidden="true"></div>' : '';
@@ -11045,6 +11179,9 @@
     else if(a==='vdedit'){ var _ev=vdById(act.getAttribute('data-id'));
       closeVideoMenu(true); if(_ev) openVideoSheet(_ev); buzz(12); }
     else if(a==='vddel'){ var _vid=act.getAttribute('data-id'), _vw=vdById(_vid);
+      // Een meegeleverd filmpje staat niet in jouw lijst, dus wordt het niet weggehaald maar
+      // weggelegd: een briefje ernaast houdt het uit je mappen.
+      if(_vw && _vw.vast) vdOvrZet(_vid, {weg:true});
       // Staat de film op dit toestel, dan moet ook het bestand zelf weg — anders blijft er een
       // filmpje van tientallen megabytes achter dat nergens meer bij hoort.
       if(_vw && _vw.film){ try{ filmDB.weg(_vw.film); }catch(_e){} }
