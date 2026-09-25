@@ -2837,6 +2837,12 @@
   .whead-masc .whead-blink{position:absolute;inset:0;opacity:0}
   @media (prefers-reduced-motion:no-preference){.whead-masc .whead-blink{animation:wheadBlink 5.6s ease-in-out infinite}}
   @keyframes wheadBlink{0%,88%,100%{opacity:0}90%,92%{opacity:1}94%{opacity:0}96%,98%{opacity:1}}
+  /* De filmpjesmascotte doet niet mee met knipperen maar met zijn wenkbrauwen: die wippen
+     even omhoog, alsof er iets spannends op het doek gebeurt. Verder dezelfde maat en plek
+     als de mascotte bij de woorden. */
+  .whead-masc .whead-brow{position:absolute;inset:0;opacity:0}
+  @media (prefers-reduced-motion:no-preference){.whead-masc .whead-brow{animation:wheadBrow 6.4s ease-in-out infinite}}
+  @keyframes wheadBrow{0%,70%,100%{opacity:0}74%,84%{opacity:1}88%{opacity:0}91%,95%{opacity:1}}
   /* Handboek header: interactive hanging punch-bag — ceiling mount + hook stay static,
      the bag + straps swing left↔right from the hook pivot; tap it to land a hit. */
   .whead-masc.whead-bag{width:auto;height:178px;aspect-ratio:695/2400;margin:0 38px -6px 0;pointer-events:auto;overflow:visible}
@@ -6094,6 +6100,7 @@
         '<div class="jhead"><div class="jk"><span class="han-lab">영상 · Yeongsang</span></div>'+
           '<h1>Filmpjes</h1>'+
           '<div class="js">Kies een onderdeel en bewaar wat je wilt naspelen.</div></div>'+
+        '<span class="whead-masc" aria-hidden="true"><img src="assets/mascot/film-3d.png" alt=""><img class="whead-brow" src="assets/mascot/film-3d-brow.png" alt=""></span>'+
       '</div>'+
       '<div class="wscroll" id="vd-hub">'+vdHubHtml()+vdBackupHtml()+'</div>'+
     '</div>';
