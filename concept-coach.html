@@ -261,6 +261,12 @@
   .startbtn-ic{width:44px;height:44px;flex:none;background:currentColor;transform:translateZ(0);backface-visibility:hidden;
     -webkit-mask:url(assets/icons/Coach1.png) center/contain no-repeat;
     mask:url(assets/icons/Coach1.png) center/contain no-repeat}
+  /* De trainingsregel draagt geen vinkje maar het fluitje: hij is een ingang, geen taak. */
+  .td-train .ti-ck{color:rgba(255,255,255,.95)}
+  .trainday.licht .td-train .ti-ck{color:rgba(36,29,18,.9)}
+  .ti-fluit{width:17px;height:17px;background:currentColor;opacity:.95;
+    -webkit-mask:url(assets/icons/Coach1.png) center/contain no-repeat;
+    mask:url(assets/icons/Coach1.png) center/contain no-repeat}
   /* quiet circular whistle-only CTA pinned to the training-card top-right */
   .startbtn.compact{position:absolute;top:20px;right:20px;z-index:4;
     width:60px;height:60px;flex:none;margin:0;padding:0;border-radius:50%;gap:0;
@@ -925,12 +931,12 @@
   .tlscreen .sbody{padding-bottom:calc(env(safe-area-inset-bottom) + 104px)}
   /* Het kruisje hoeft geen wit rondje met randje: net als bij het proefexamen en de
      check-in is sluiten een stille actie die niet om aandacht hoort te vragen. */
-  #tlscreen .shead .sx{width:64px;height:64px;flex:none;margin:0;border:0;border-radius:50%;
+  #tlscreen .shead .sx,#coachscreen .shead .sx{width:64px;height:64px;flex:none;margin:0;border:0;border-radius:50%;
     background:transparent;color:var(--gray);display:grid;place-items:center;
     transition:transform .16s ease, background .2s ease, color .2s ease}
-  #tlscreen .shead .sx:hover{background:rgba(20,23,18,.05);color:var(--ink)}
-  #tlscreen .shead .sx:active{transform:scale(.9)}
-  #tlscreen .shead .sx svg{width:24px;height:24px}
+  #tlscreen .shead .sx:hover,#coachscreen .shead .sx:hover{background:rgba(20,23,18,.05);color:var(--ink)}
+  #tlscreen .shead .sx:active,#coachscreen .shead .sx:active{transform:scale(.9)}
+  #tlscreen .shead .sx svg,#coachscreen .shead .sx svg{width:24px;height:24px}
   /* Korte melding, boven alles — ook boven sheets (z-index 120) en schermen (90). */
   .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translate(-50%,14px);
     z-index:400;max-width:min(88vw,420px);padding:12px 18px;border-radius:999px;
@@ -938,21 +944,23 @@
     opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
   .toast.show{opacity:1;transform:translate(-50%,0)}
 
-  /* ---- Coach: eigen weekprogramma ---- */
+  /* ---- Coach: eigen weekprogramma ----
+     Het programma van een dag is een tijdlijn, net als je taekwondo-verhaal: een doorlopende
+     lijn met haltes en kaarten ernaast. Daar is het dezelfde vorm voor dezelfde vraag — wat
+     komt er na wat — en het scheelt de app een tweede manier om een rij dingen te tonen. */
   .coachscreen .shead{padding-bottom:4px}
   .pl-title{flex:1;min-width:0;order:0}
   #tlscreen .pl-title{cursor:pointer;-webkit-tap-highlight-color:transparent}
   .pl-title .han-lab{display:block;font-size:11px;letter-spacing:.05em;color:var(--gray);line-height:1}
-  /* Het Koreaanse kopje stond met 3px bijna tegen de titel aan, terwijl het op de overzichts-
-     pagina's gewoon zijn eigen regel krijgt. Zelfde lucht dus, anders leest de kop hier als
-     één samengeperst blok terwijl hij elders ademt. */
   .pl-title h2{margin:8px 0 0;font-family:var(--cond);text-transform:uppercase;letter-spacing:.02em;
     font-size:23px;font-weight:800;color:var(--ink);line-height:1}
-  #pl-scroll{padding-top:0}
+  /* De dagtitel wisselt met een veeg, net als de woordgroepen: de oude naam schuift met je mee
+     naar buiten en de nieuwe komt van de andere kant in beeld. */
+  #pl-scroll{padding-top:0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 118px)}
   /* Weekstrip: zeven vaste kolommen, dus hij schuift niet en de dag van vandaag staat altijd
      op dezelfde plek. De strip plakt boven de lijst mee met de scroll. */
   .pl-week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;
-    position:sticky;top:0;z-index:3;background:var(--page);padding:10px 0 12px}
+    position:sticky;top:0;z-index:6;background:var(--page);padding:10px 0 12px}
   .pl-day{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;
     border:1px solid var(--line);border-radius:13px;background:var(--surface);padding:9px 0 8px;
     font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;
@@ -966,100 +974,217 @@
   .pl-day.on .pl-dots i{opacity:.9}
   .pl-dnum{font-size:13px;line-height:1}
 
-  .pl-head{display:flex;align-items:baseline;gap:8px;margin:2px 0 10px}
+  .pl-head{display:flex;align-items:baseline;gap:8px;margin:2px 0 12px}
   .pl-headt{flex:1;font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;
     font-size:13.5px;font-weight:800;color:var(--ink)}
   .pl-headn{font-size:11.5px;font-weight:700;color:var(--gray);letter-spacing:.04em}
 
-  .pl-list{display:flex;flex-direction:column;gap:10px;margin:0 0 18px}
-  .pl-item{border:1px solid var(--line);border-radius:17px;background:var(--surface);
-    overflow:hidden;transition:opacity .2s ease}
-  .pl-item.done{opacity:.62}
-  .pl-top{display:flex;align-items:stretch}
-  /* Net als de dagkaart: een brede tekstknop die navigeert, met het vinkje en ••• ernaast. */
-  .pl-ck{flex:none;width:52px;border:0;background:transparent;display:grid;place-items:center;
-    cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0}
-  .pl-ck span{width:25px;height:25px;border-radius:50%;box-sizing:border-box;
-    border:2px solid var(--line);display:grid;place-items:center;color:transparent;
-    transition:background .18s ease,border-color .18s ease,color .18s ease}
-  .pl-ck svg{width:14px;height:14px}
-  .pl-item.done .pl-ck span{background:var(--beltfill,var(--el));border-color:var(--beltfill,var(--el));color:var(--beltink,#fff)}
-  .pl-ck:active{transform:scale(.9)}
-  .pl-ckoff{display:block}
-  .pl-go{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:10px;border:0;background:transparent;
-    padding:14px 6px 14px 0;text-align:left;font:inherit;color:inherit;cursor:pointer;
-    -webkit-tap-highlight-color:transparent}
-  .pl-go:active{opacity:.7}
-  .pl-ico{flex:none;font-size:19px;line-height:1}
-  .pl-txt{flex:1;min-width:0}
-  .pl-lab{display:block;font-size:15px;font-weight:800;color:var(--ink);line-height:1.2}
-  .pl-item.done .pl-lab{text-decoration:line-through;text-decoration-color:var(--gray)}
-  .pl-sub{display:block;font-size:11.5px;color:var(--gray);line-height:1.35;margin-top:2px;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .pl-go .pl-chev{flex:none;width:15px;height:15px;color:var(--gray)}
-  .pl-more{flex:none;width:44px;border:0;background:transparent;color:var(--gray);
-    font-size:15px;letter-spacing:.5px;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
-  .pl-more:active{opacity:.5}
-
-  /* Timer en filmpjes hangen onder de regel: losse knoppen, want een knop in een knop mag niet. */
-  .pl-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;
-    padding:0 14px 13px 52px;-webkit-overflow-scrolling:touch}
-  .pl-chips::-webkit-scrollbar{display:none}
-  .pl-chip{flex:none;display:inline-flex;align-items:center;gap:6px;max-width:190px;
-    border:1px solid var(--line);border-radius:999px;background:var(--page);padding:6px 12px 6px 8px;
-    font-family:var(--cond);text-transform:uppercase;letter-spacing:.03em;font-size:11.5px;
-    font-weight:800;color:var(--ink);text-decoration:none;cursor:pointer;
-    -webkit-tap-highlight-color:transparent}
-  .pl-chip:active{opacity:.65}
-  .pl-chip b{font-weight:800}
-  .pl-chip .pl-ctx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:none;
-    letter-spacing:0;font-weight:700;font-size:12px}
-  .pl-chip.tmr{border-color:var(--beltfill,var(--el));color:var(--beltfill,var(--el))}
-  .pl-cthumb{flex:none;width:30px;height:19px;border-radius:5px;object-fit:cover;display:block;
+  /* De lijn en de haltes lenen hun maatvoering van de tijdlijn, zodat de twee schermen als één
+     app aanvoelen. Alleen de kleur is hier niet de bandkleur maar de rust van de haarlijn: een
+     trainingsavond heeft geen graden. */
+  .plt-line{position:relative;padding-left:37px}
+  .plt-item::before,.plt-kop::before{content:"";position:absolute;left:-25px;width:6px;
+    background:var(--line)}
+  .plt-line>:first-child::before{border-radius:3px 3px 0 0}
+  .plt-item::before{top:0;bottom:-12px}
+  .plt-kop::before{top:-2px;bottom:-10px}
+  .plt-line>.plt-item:last-child::before{-webkit-mask:linear-gradient(180deg,#000 58%,transparent);
+    mask:linear-gradient(180deg,#000 58%,transparent)}
+  /* De onderdeelnaam staat boven zijn kaarten zoals het jaartal boven de gebeurtenissen van dat
+     jaar: dezelfde letter, dezelfde adempauze ervoor. Zet je twee keer poomsae achter elkaar,
+     dan staan ze onder één kop. */
+  .plt-kop{position:relative;margin:2px 0 10px;padding-top:4px}
+  .plt-line>.plt-kop:not(:first-child){margin-top:20px}
+  .plt-line>.plt-kop:not(:first-child)::before{top:-22px}
+  .plt-kop span{display:inline-block;font-family:var(--cond);font-size:15.5px;font-weight:800;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+  .plt-kop i{font-style:normal;font-family:var(--cond);font-size:12px;font-weight:700;
+    letter-spacing:.04em;color:var(--gray);margin-left:7px}
+  .plt-item{position:relative;margin-bottom:12px}
+  /* De halte draagt het nummer van de stap, zodat je onderweg ziet hoe ver je bent. Is het
+     onderdeel af, dan staat er een vinkje. Zelfde maat en zelfde plaatsing als op de tijdlijn. */
+  .plt-dot{--tlsz:32px;box-sizing:border-box;
+    position:absolute;left:calc(-22px - var(--tlsz) / 2);top:calc(40px - var(--tlsz) / 2);
+    width:var(--tlsz);height:var(--tlsz);border-radius:50%;
+    font-family:var(--cond);font-size:13px;font-weight:800;line-height:30px;
+    text-align:center;color:var(--gray);background:var(--surface);border:1px solid var(--line)}
+  .plt-dot svg{width:15px;height:15px;vertical-align:-3px}
+  .plt-item.af .plt-dot{background:var(--beltfill,var(--el));border-color:var(--beltfill,var(--el));
+    color:var(--beltink,#fff)}
+  .plt-item.nu .plt-dot{border-color:var(--blue);color:var(--blue)}
+  .plt-card{position:relative;min-height:106px;border:1px solid var(--line);border-radius:16px;
+    padding:26px 15px 13px;background:var(--surface);
+    transition:background .2s ease,border-color .2s ease,opacity .2s ease}
+  /* Het onderdeel dat nu aan de beurt is licht blauw op: je hoeft niet te zoeken waar je was. */
+  .plt-item.nu .plt-card{background:rgba(58,92,246,.07);border-color:rgba(58,92,246,.4)}
+  .plt-item.af .plt-card{opacity:.6}
+  /* Rechts in de kaart staan twee knoppen boven elkaar: bewerken bovenaan, precies waar het
+     potlood op de tijdlijn hangt, en starten eronder. De tekst houdt die strook vrij. */
+  .plt-when,.plt-ttl,.plt-eis{padding-right:58px}
+  .plt-pen{position:absolute;top:14px;right:9px;z-index:2;width:34px;height:34px;padding:0;border:0;
+    border-radius:50%;background:var(--soft);color:var(--gray);display:grid;place-items:center;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:transform .2s cubic-bezier(.22,1,.36,1)}
+  .plt-pen svg{width:16px;height:16px}
+  .plt-pen:active{transform:scale(.9)}
+  /* De startknop is de enige gevulde knop op de kaart: er is maar één ding dat je hier echt
+     doet. Hij staat rechtsonder, waar je duim toch al is. */
+  /* Alleen het onderdeel dat aan de beurt is draagt het blauwe fluitje. De andere kaarten kun
+     je ook starten, maar in dezelfde stille toon als het potlood: een scherm vol accentknoppen
+     zegt over elke regel even hard "begin hier", en dan wijst er niets meer. */
+  .plt-play{position:absolute;right:9px;bottom:11px;z-index:2;width:38px;height:38px;padding:0;border:0;
+    border-radius:50%;background:var(--soft);color:var(--gray);display:grid;place-items:center;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:transform .2s cubic-bezier(.22,1,.36,1), background .2s ease, color .2s ease}
+  .plt-item.nu .plt-play{width:42px;height:42px;background:var(--blue);color:#fff;
+    box-shadow:0 8px 18px -10px rgba(30,50,160,.8)}
+  .plt-item.nu .plt-fluit{width:21px;height:21px}
+  .plt-play:active{transform:scale(.9)}
+  .plt-item.af .plt-play{background:var(--soft);color:var(--gray);box-shadow:none}
+  .plt-when{display:block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--gray);font-family:var(--cond)}
+  .plt-ttl{display:block;margin-top:3px;font-size:15.5px;font-weight:800;line-height:1.25;color:var(--ink)}
+  .plt-item.af .plt-ttl{text-decoration:line-through;text-decoration-color:var(--gray)}
+  .plt-eis{display:block;margin-top:3px;font-size:12.5px;color:var(--gray)}
+  /* De filmpjes staan met hun naam onder het onderdeel. Juist die naam maakt duidelijk wát je
+     gaat doen; een rij naamloze miniaturen zegt niets. */
+  .plt-vids{display:flex;flex-direction:column;gap:6px;margin-top:9px;padding-right:58px}
+  .plt-vid{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:11px;
+    background:var(--page);padding:5px 10px 5px 5px;color:var(--ink);text-decoration:none;
+    cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .plt-vid:active{opacity:.65}
+  .plt-vth{flex:none;width:46px;height:29px;border-radius:7px;object-fit:cover;display:block;
     background:repeating-linear-gradient(135deg,var(--soft) 0 6px,rgba(20,17,13,.04) 6px 12px)}
-  .pl-cdot{flex:none;width:15px;height:15px;color:var(--gray)}
+  .plt-vt{flex:1;min-width:0;font-size:12.5px;font-weight:700;line-height:1.25;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Slepen: de kaart die je vasthoudt komt los van de lijst en volgt je vinger. */
+  .plt-item.sleep{z-index:9;position:relative}
+  .plt-item.sleep .plt-card{box-shadow:0 18px 30px -16px rgba(30,22,16,.55);transform:scale(1.02)}
+  .plt-line.sleept .plt-item:not(.sleep){transition:transform .18s cubic-bezier(.22,1,.36,1)}
 
-  .pl-add{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
-    border-radius:17px;padding:15px;
-    font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:13px;font-weight:800}
-  .pl-add:active{transform:translateY(1px)}
   .pl-empty{font-size:13.5px;color:var(--gray);line-height:1.5;text-align:center;padding:22px 10px 16px}
+  /* Dezelfde gestippelde uitnodiging als bij een lege filmpjesmap. */
+  .pl-leeg{margin:6px 0 4px;padding:24px 18px;border:1px dashed rgba(30,22,16,.3);border-radius:16px;
+    font-size:13.5px;color:var(--gray);line-height:1.55;text-align:center}
   .pl-cta{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border:0;border-radius:16px;
-    padding:15px;margin:0 0 12px;background:var(--beltfill,var(--el));color:var(--beltink,#fff);
+    padding:15px;margin:12px 0 0;background:var(--beltfill,var(--el));color:var(--beltink,#fff);
     box-shadow:0 10px 22px -12px rgba(40,28,18,.55);cursor:pointer;
     font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:13px;font-weight:800}
   .pl-cta:active{transform:translateY(1px)}
+  /* De puntjesbalk en de sluier onderaan werken net als in de filmpjesmap. */
+  .coachscreen::after{content:"";position:absolute;left:0;right:0;bottom:0;z-index:5;pointer-events:none;
+    height:calc(env(safe-area-inset-bottom,0px) + 118px);
+    background:linear-gradient(var(--page0),var(--page) 48%)}
+
+  /* De zwevende plusknop is dezelfde als op de tijdlijn; hij moet alleen boven de sluier
+     blijven en meekomen als het scherm openschuift. */
+  .coachscreen .tl-fab{position:fixed;z-index:40;
+    bottom:calc(env(safe-area-inset-bottom,0px) + var(--pilh) + 24px)}
+  /* De lijst mag onder de puntjesbalk door rollen, maar nooit achter de laatste kaart stoppen. */
+  .coachscreen .sbody{padding-bottom:calc(env(safe-area-inset-bottom) + var(--pilh) + 52px)}
+  /* De dagnaam in de kop wisselt mee met de veeg; het spook schuift de andere kant op. */
+  .coachscreen .pl-title{position:relative;overflow:hidden}
+  .pl-dagghost{position:absolute;left:0;bottom:0;width:100%;margin:0;pointer-events:none}
+  .coachscreen .pl-dagttl.enter-r{animation:bpEnterR .38s cubic-bezier(.22,.9,.3,1)}
+  .coachscreen .pl-dagttl.enter-l{animation:bpEnterL .38s cubic-bezier(.22,.9,.3,1)}
+  .pl-dagghost.exit-l{animation:bpExitL .38s cubic-bezier(.22,.9,.3,1) forwards}
+  .pl-dagghost.exit-r{animation:bpExitR .38s cubic-bezier(.22,.9,.3,1) forwards}
+  @media (prefers-reduced-motion: reduce){
+    .coachscreen .pl-dagttl.enter-r,.coachscreen .pl-dagttl.enter-l,
+    .pl-dagghost.exit-l,.pl-dagghost.exit-r{animation:none}
+  }
+  /* Het fluitje dat van de dagkaart af kwam staat nu op de startknop: hier begint de training. */
+  .plt-fluit{width:18px;height:18px;background:currentColor;
+    -webkit-mask:url(assets/icons/Coach1.png) center/contain no-repeat;
+    mask:url(assets/icons/Coach1.png) center/contain no-repeat}
+  .coachscreen.show .tl-fab{opacity:1;transform:none;
+    transition:opacity .3s ease .16s, transform .4s cubic-bezier(.24,1.25,.4,1) .16s}
+  .coachscreen.show .tl-fab:active{transform:scale(.92);transition:transform .12s}
+  /* Van dag wisselen: de lijst lost op en komt terug, de dagnaam schuift met de veeg mee. */
+  .coachscreen #pl-body{transition:opacity .17s ease}
+  .coachscreen #pl-body.cs-fading{opacity:0}
+  .coachscreen .pl-headt.enter-r{animation:bpEnterR .38s cubic-bezier(.22,.9,.3,1)}
+  .coachscreen .pl-headt.enter-l{animation:bpEnterL .38s cubic-bezier(.22,.9,.3,1)}
+  @media (prefers-reduced-motion: reduce){
+    .coachscreen .pl-headt.enter-r,.coachscreen .pl-headt.enter-l{animation:none}
+  }
 
   /* Kiezer: alle onderdelen als tegels, twee op een rij. */
   .pl-pick{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-  .pl-pi{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:15px;
+  .pl-pi{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:15px;
     padding:13px 12px;background:var(--surface);color:var(--ink);text-align:left;cursor:pointer;
     -webkit-tap-highlight-color:transparent}
   .pl-pi:active{opacity:.7}
-  .pl-pi .pl-ico{font-size:18px}
+  .pl-pi.on{border-color:var(--blue);background:rgba(58,92,246,.07)}
   .pl-pl{font-size:13.5px;font-weight:800;line-height:1.15}
   .pl-ph{font-size:10.5px;color:var(--gray);line-height:1.25;margin-top:1px}
-  /* Bewerken: timer, filmpjes en volgorde in één vel. */
+  /* Bewerken: stand, timer, filmpjes en volgorde in één vel. */
   .pl-sect{font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:11.5px;
-    font-weight:800;color:var(--gray);margin:2px 0 8px}
-  .pl-mins{display:flex;gap:6px;margin-bottom:16px}
-  .pl-vlist{display:flex;flex-direction:column;gap:7px;max-height:196px;overflow-y:auto;margin-bottom:16px;
-    scrollbar-width:none}
+    font-weight:800;color:var(--gray);margin:14px 0 8px}
+  .pl-sect:first-child{margin-top:2px}
+  .pl-seg{display:flex;gap:6px;margin-bottom:2px}
+  .pl-seg button{flex:1;border:1px solid var(--line);border-radius:12px;background:var(--surface);
+    padding:11px 8px;font-family:var(--cond);text-transform:uppercase;letter-spacing:.05em;
+    font-size:12px;font-weight:800;color:var(--gray);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .pl-seg button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  /* De duur als baan: tien minuten in stappen van een halve, dat zijn twintig standen — te veel
+     voor losse knoppen en precies goed voor een schuif. */
+  .pl-slide{display:flex;align-items:center;gap:12px}
+  .pl-slide input[type=range]{flex:1;width:100%;-webkit-appearance:none;appearance:none;height:30px;
+    background:transparent;margin:0}
+  .pl-slide input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:var(--soft)}
+  .pl-slide input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:24px;height:24px;border-radius:50%;background:var(--blue);border:3px solid var(--surface);
+    box-shadow:0 2px 8px -2px rgba(30,50,160,.8);margin-top:-9px}
+  .pl-slide b{flex:none;min-width:62px;text-align:right;font-family:var(--cond);font-size:16px;
+    font-weight:800;color:var(--ink);letter-spacing:.02em}
+  .pl-stap{display:flex;align-items:center;gap:10px}
+  .pl-stap button{width:38px;height:38px;flex:none;border:1px solid var(--line);border-radius:50%;
+    background:var(--surface);color:var(--ink);font-size:19px;font-weight:700;line-height:1;
+    cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .pl-stap button:active{opacity:.6}
+  .pl-stap b{flex:1;text-align:center;font-family:var(--cond);font-size:17px;font-weight:800;color:var(--ink)}
+  .pl-chips2{display:flex;gap:6px;flex-wrap:wrap}
+  .pl-chips2 .ag-chip{flex:1;min-width:62px;text-align:center}
+  .pl-uit{margin:10px 0 0;font-size:12px;color:var(--gray);line-height:1.45}
+  /* Filmpjes kiezen begint bij een map, want de hele verzameling in één lijst is niet te doen. */
+  .pl-mappen{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;margin-bottom:10px;padding-bottom:2px}
+  .pl-mappen::-webkit-scrollbar{display:none}
+  .pl-map{flex:none;border:1px solid var(--line);border-radius:999px;background:var(--surface);
+    padding:8px 13px;font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;
+    font-size:11.5px;font-weight:800;color:var(--gray);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .pl-map.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  /* Dagmerken onder een filmpje in de map: klein, rustig, en met het fluitje als aankondiging
+     dat het om een training gaat. */
+  .vd-dagen{display:flex;align-items:center;gap:4px;margin-top:5px}
+  .vd-fluit{width:14px;height:14px;flex:none;background:var(--blue);opacity:.8;
+    -webkit-mask:url(assets/icons/Coach1.png) center/contain no-repeat;
+    mask:url(assets/icons/Coach1.png) center/contain no-repeat}
+  .vd-dag{display:inline-block;padding:1px 6px;border-radius:999px;background:rgba(58,92,246,.12);
+    color:var(--blue);font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;
+    font-size:10px;font-weight:800;line-height:1.6}
+  .pl-vlist{display:flex;flex-direction:column;gap:7px;max-height:224px;overflow-y:auto;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch}
   .pl-vlist::-webkit-scrollbar{display:none}
   .pl-vi{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:13px;
     padding:7px 11px 7px 7px;background:var(--surface);color:var(--ink);text-align:left;cursor:pointer;
     -webkit-tap-highlight-color:transparent}
   .pl-vi:active{opacity:.7}
-  .pl-vi.on{border-color:var(--beltfill,var(--el))}
+  .pl-vi.on{border-color:var(--blue)}
   .pl-vthumb{flex:none;width:52px;height:32px;border-radius:7px;object-fit:cover;display:block;
     background:repeating-linear-gradient(135deg,var(--soft) 0 6px,rgba(20,17,13,.04) 6px 12px)}
-  .pl-vt{flex:1;min-width:0;font-size:13px;font-weight:700;line-height:1.25;
+  .pl-vwrap{flex:1;min-width:0}
+  .pl-vt{display:block;font-size:13px;font-weight:700;line-height:1.25;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Staat een filmpje al ergens in je week, dan zie je hier op welke dagen. */
+  .pl-dagen{display:flex;gap:4px;margin-top:3px}
+  .pl-dag{font-family:var(--cond);font-size:9.5px;font-weight:800;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--gray);background:var(--soft);border-radius:4px;padding:1px 4px}
   .pl-vck{flex:none;width:21px;height:21px;border-radius:50%;box-sizing:border-box;border:2px solid var(--line);
     display:grid;place-items:center;color:transparent}
   .pl-vck svg{width:12px;height:12px}
-  .pl-vi.on .pl-vck{background:var(--beltfill,var(--el));border-color:var(--beltfill,var(--el));color:var(--beltink,#fff)}
-  .pl-ord{display:flex;gap:8px;margin-bottom:9px}
+  .pl-vi.on .pl-vck{background:var(--blue);border-color:var(--blue);color:#fff}
+  .pl-ord{display:flex;gap:8px;margin:14px 0 9px}
   .pl-ord .vd-mi{justify-content:center}
   .pl-ord .vd-mi[disabled]{opacity:.35;cursor:default}
   /* Reis grade chip (opens the belt sheet) */
@@ -4387,37 +4512,69 @@
      Het vaste lesplan is vervangen door een programma dat de student zelf samenstelt: per dag
      van de week een rijtje onderdelen, elk met een timer en/of filmpjes uit de eigen verzameling.
      De sleutel is de JS-weekdag (0=zondag), zodat "vandaag" altijd zonder omrekenen klopt. */
+  /* De onderdelen die je op een trainingsavond doet, in de volgorde waarin ze aan bod komen.
+     Dezelfde sleutels als de filmpjesmappen, zodat het kiezen van een filmpje vanzelf in de
+     goede map begint. Geen tekentjes ervoor: de namen zijn kort genoeg om te herkennen en een
+     rij emoji maakt van een trainingsschema een kleurplaat. */
   var PL_COMPS = [
-    {k:'auto',     ico:'✨', label:'Auto',         hint:'De missies van vandaag'},
-    {k:'opwarmen', ico:'🔥', label:'Opwarmen',     hint:'Losmaken en strekken',       min:5},
-    {k:'poomsae',  ico:'🥋', label:'Poomsae',      hint:'Vormen van je band'},
-    {k:'gyeorugi', ico:'🥊', label:'Gyeorugi',     hint:'Sparren'},
-    {k:'taeryon',  ico:'👥', label:'Taeryon',      hint:'Stapsparren met een partner'},
-    {k:'hosinsul', ico:'🛡️', label:'Hosinsul',     hint:'Zelfverdediging'},
-    {k:'woorden',  ico:'🇰🇷', label:'Woorden',      hint:'Koreaanse woorden'},
-    {k:'cooling',  ico:'🌬️', label:'Cooling down', hint:'Rustig uitlopen',            min:3}
+    {k:'opwarmen', label:'Opwarmen',     han:'준비',   hint:'Losmaken en op temperatuur komen', sec:300},
+    {k:'stretch',  label:'Strekken',     han:'유연',   hint:'Rustig uitrekken',                 sec:180},
+    {k:'gyeorugi', label:'Gyeorugi',     han:'겨루기', hint:'Sparren'},
+    {k:'poomsae',  label:'Poomsae',      han:'품새',   hint:'Vormen van je band'},
+    {k:'hosinsul', label:'Hosinsul',     han:'호신술', hint:'Zelfverdediging'},
+    {k:'taeryon',  label:'Taeryon',      han:'대련',   hint:'Stapsparren met een partner'},
+    {k:'gyeokpa',  label:'Gyeokpa',      han:'격파',   hint:'Breektest'},
+    {k:'cooling',  label:'Cooling down', han:'정리',   hint:'Rustig uitlopen',                  sec:180}
   ];
   function plComp(k){
     for(var i=0;i<PL_COMPS.length;i++) if(PL_COMPS[i].k===k) return PL_COMPS[i];
     return null;
   }
+  /* Taeryon kent drie vormen. Welke je mag oefenen hangt af van je graad: pas als de exameneisen
+     ibo of sambo noemen, heeft het zin ze aan te bieden. Sambo staat niet in de eisenlijst van
+     deze school, maar wie er eentje wil plannen mag dat — hij komt onderaan te staan. */
+  var PL_TAERYON = [
+    {k:'ilbo',  label:'Ilbo Taeryon',  han:'일보 대련', hint:'Eén stap'},
+    {k:'ibo',   label:'Ibo Taeryon',   han:'이보 대련', hint:'Twee stappen'},
+    {k:'sambo', label:'Sambo Taeryon', han:'삼보 대련', hint:'Drie stappen'}
+  ];
+  function plTaeryon(k){ for(var i=0;i<PL_TAERYON.length;i++) if(PL_TAERYON[i].k===k) return PL_TAERYON[i]; return null; }
   var PL_DAYS = [
     {d:1,s:'ma',label:'Maandag'},   {d:2,s:'di',label:'Dinsdag'}, {d:3,s:'wo',label:'Woensdag'},
     {d:4,s:'do',label:'Donderdag'}, {d:5,s:'vr',label:'Vrijdag'}, {d:6,s:'za',label:'Zaterdag'},
     {d:0,s:'zo',label:'Zondag'}
   ];
   function plDayLabel(d){ for(var i=0;i<PL_DAYS.length;i++) if(PL_DAYS[i].d===d) return PL_DAYS[i].label; return ''; }
+  function plDayKort(d){ for(var i=0;i<PL_DAYS.length;i++) if(PL_DAYS[i].d===d) return PL_DAYS[i].s; return ''; }
   var PLAN = {};
-  // Een onbekende component-sleutel wordt stilzwijgend overgeslagen: dan verdwijnt één regel in
-  // plaats van dat het hele programma op een oude sleutel stukloopt.
+  /* Een onderdeel loopt op tijd of op tellen. Bij tijd hoort één getal: hoe lang. Bij tellen
+     horen er drie: hoeveel tellen per ronde, hoeveel seconden één tel duurt en hoeveel rondes.
+     De grenzen komen uit de oefentimer, zodat een onderdeel altijd te starten is. */
+  function plClampSec(v){ v=parseInt(v,10); if(!(v>=30)) return 0; return Math.min(600, Math.round(v/30)*30); }
+  function plClampReps(v){ v=parseInt(v,10); return (v>=1&&v<=10)?v:10; }
+  function plClampRondes(v){ v=parseInt(v,10); return (v>=1&&v<=20)?v:2; }
+  // Het tempo staat als seconden per tel, want zo staat het ook in de oefentimer.
+  var PL_TEMPOS = [4,2,1,0.5];
+  function plClampTempo(v){ v=parseFloat(v); for(var i=0;i<PL_TEMPOS.length;i++) if(PL_TEMPOS[i]===v) return v; return 2; }
+  // Een onbekende of afgeschafte sleutel wordt stilzwijgend overgeslagen: dan verdwijnt één regel
+  // in plaats van dat het hele programma op een oude sleutel stukloopt.
   function plLoad(){
     var raw = store.get('poom_plan', null), out = {};
     for(var d=0; d<7; d++){
       var src = (raw && raw[d]) || [], list = [];
       for(var i=0;i<src.length;i++){
         var it = src[i]; if(!it || !plComp(it.k)) continue;
+        // Uit de eerste opzet kwam alleen "min". Die lezen we één keer om naar seconden, zodat
+        // een bestaand programma niet leegloopt op de nieuwe velden.
+        var sec = it.sec!=null ? plClampSec(it.sec) : plClampSec((parseInt(it.min,10)||0)*60);
         list.push({ id: it.id || plId(), k: it.k,
-                    min: plClampMin(it.min), vids: (it.vids||[]).slice(0,8) });
+                    mode: it.mode==='reps' ? 'reps' : 'tijd',
+                    sec: sec,
+                    reps: plClampReps(it.reps), tempo: plClampTempo(it.tempo),
+                    rondes: plClampRondes(it.rondes),
+                    sub: (it.k==='taeryon' && plTaeryon(it.sub)) ? it.sub : '',
+                    doel: parseInt(it.doel,10)||0,
+                    vids: (it.vids||[]).slice(0,8) });
       }
       out[d] = list;
     }
@@ -4425,13 +4582,24 @@
   }
   function plSave(){ store.set('poom_plan', PLAN); }
   function plId(){ return 'pl'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36); }
-  // De oefentimer accepteert 30–600 seconden; buiten dat bereik telt het als "geen timer".
-  function plClampMin(m){ m = parseInt(m,10); return (m>=1 && m<=10) ? m : 0; }
   function plDay(d){ return PLAN[d] || (PLAN[d]=[]); }
   function plFind(d,id){ var l=plDay(d); for(var i=0;i<l.length;i++) if(l[i].id===id) return l[i]; return null; }
   function plIdx(d,id){ var l=plDay(d); for(var i=0;i<l.length;i++) if(l[i].id===id) return i; return -1; }
   function plWeekCount(){ var n=0; for(var d=0;d<7;d++) n+=plDay(d).length; return n; }
   plLoad();
+
+  /* Op welke dagen een filmpje in je programma staat. De filmpjesmap zet die dagen als kleine
+     letters bij het filmpje, zodat je ziet wat je al ergens gebruikt — en bij het kiezen zie je
+     meteen of je iets voor de tweede keer inplant. */
+  function plVidDagen(vid){
+    var uit=[];
+    for(var i=0;i<PL_DAYS.length;i++){
+      var d=PL_DAYS[i], lijst=plDay(d.d), raak=false;
+      for(var j=0;j<lijst.length;j++) if((lijst[j].vids||[]).indexOf(vid)>=0){ raak=true; break; }
+      if(raak) uit.push(d.s);
+    }
+    return uit;
+  }
 
   /* Afvinken telt alleen voor vandaag: bij een nieuwe dag begint het programma weer leeg, want
      ritme opbouwen is juist het punt. Dezelfde datumstempel-aanpak als de dagkaart. */
@@ -4442,11 +4610,12 @@
   }
   function plDoneSave(){ PLDONE.date=todayISO(); store.set('poom_plandone', PLDONE); }
   function plIsDone(id){ return PLDONE.date===todayISO() && !!PLDONE.ids[id]; }
-  function plToggleDone(id){
+  function plZetDone(id, aan){
     if(PLDONE.date!==todayISO()){ PLDONE={date:todayISO(), ids:{}}; }
-    if(PLDONE.ids[id]) delete PLDONE.ids[id]; else PLDONE.ids[id]=1;
+    if(aan) PLDONE.ids[id]=1; else delete PLDONE.ids[id];
     plDoneSave();
   }
+  function plToggleDone(id){ plZetDone(id, !plIsDone(id)); }
   plDoneLoad();
 
   function geupSpan(fromISO, toISO){
@@ -5636,11 +5805,45 @@
       examen:  {id:'examen',  short:'Examen',  n:ex.total,        label:'Slaag voor een proefexamen', sub:ex.total+' vragen'}
     };
   }
+  /* De eerste regel van de dagkaart is je eigen training van deze weekdag. Hij vertelt hoeveel
+     onderdelen er klaarstaan en hoe ver je bent; tikken opent de coach. Staat er nog niets, dan
+     nodigt hij uit om hem samen te stellen — het fluitje in de hoek is daarmee overbodig. */
+  function plDuurTotaal(d){
+    var l=plDay(d), sec=0;
+    for(var i=0;i<l.length;i++){
+      var it=l[i];
+      sec += it.mode==='reps'
+        ? Math.round(plClampReps(it.reps)*plClampTempo(it.tempo)*plClampRondes(it.rondes))
+        : (it.sec||0);
+    }
+    return sec;
+  }
+  function tdTrainingHtml(){
+    plDoneLoad();
+    var d=new Date().getDay(), l=plDay(d), naam=plDayLabel(d).toLowerCase();
+    var af=0; for(var i=0;i<l.length;i++) if(plIsDone(l[i].id)) af++;
+    var klaar = l.length>0 && af===l.length;
+    var sub = l.length
+      ? l.length+(l.length===1?' onderdeel':' onderdelen')+' · '+
+        (af?af+' afgestreept · ':'')+Math.max(1,Math.round(plDuurTotaal(d)/60))+' min'
+      : 'Nog niets gepland · tik om te vullen';
+    return '<div class="td-item td-train'+(klaar?' done':'')+'" '+
+        (klaar?'style="--sk:'+strikeVar()+'" ':'')+'data-id="training">'+
+      '<button class="ti-ck" data-act="start" aria-label="Open je '+esc(naam)+'training">'+
+        (klaar?IC.check:'<span class="ti-fluit" aria-hidden="true"></span>')+'</button>'+
+      '<button class="ti-txt" data-act="start" aria-label="Open je '+esc(naam)+'training">'+
+        '<span class="ti-t">Je '+esc(naam)+'training</span>'+
+        '<span class="ti-s">'+esc(sub)+'</span>'+
+        '<span class="ti-chev" aria-hidden="true">'+IC.chev+'</span>'+
+      '</button>'+
+    '</div>';
+  }
+
   // Vast: poomsae + proefexamen (hoort standaard bij de begeleide training).
   // Daartussen 1 wisselende missie — gekozen op weekfocus + dagrotatie.
   function pickExtras(){
     // Hosinsul verschijnt pas vanaf 4e geup; ilbo pas als er eisen zijn (8e geup+).
-    var all=['woorden'];
+    var all=['woorden','poomsae'];
     if(ilboCount()>0)     all.push('ilbo');
     if(iboCount()>0)      all.push('ibo');
     if(hosinsulCount()>0) all.push('hosinsul');
@@ -5653,7 +5856,10 @@
     chosen.push('examen');   // proefexamen sluit de dag af (de 'test' na het oefenen)
     return chosen;
   }
-  function todayMissionIds(){ return ['poomsae'].concat(pickExtras()); }
+  /* De dagkaart opent met je eigen training van deze weekdag; daaronder draagt de app nog twee
+     dingen aan. Vroeger stond poomsae bovenaan vastgeschroefd — die schuift nu mee in de
+     rotatie, want wat je oefent bepaal je zelf in de coach. */
+  function todayMissionIds(){ return pickExtras(); }
   function todaysMissions(){ var meta=missionMeta(); return todayMissionIds().map(function(id){return meta[id];}); }
   /* Waar de tekstkant van een dagkaart-rij heen gaat. De meeste missies hebben een eigen
      Handboek-onderdeel met de stof; ibo heeft er geen, en woorden wonen in hun eigen sectie. */
@@ -5866,6 +6072,7 @@
             '<span class="dot"></span></div>';
     }
     var missions = todaysMissions();
+    var trainRij = tdTrainingHtml();
     var doneN = missions.filter(function(m){return missionDone[m.id];}).length;
     var missionCols = missions.map(function(m){
       var dn = missionDone[m.id];
@@ -5913,9 +6120,9 @@
               '<div class="td-title">Training van vandaag</div>'+
               '<div class="td-goal">'+trainSub+'</div>'+
             '</div>'+
-            '<button class="startbtn compact" data-act="start" aria-label="Open je coachprogramma" title="Coach — stel je training samen"><span class="startbtn-ic" aria-hidden="true"></span></button>'+
+
           '</div>'+
-          '<div class="td-list">'+missionCols+'</div>'+
+          '<div class="td-list">'+trainRij+missionCols+'</div>'+
         '</div>'+ ddBanner +
 
       '</div>'+
@@ -6066,10 +6273,19 @@
         '<span class="vd-txt">'+
           '<span class="vd-tt">'+esc(title)+'</span>'+
           (src?'<span class="vd-ts">'+esc(src)+'</span>':'')+
+          vdDagenHtml(v)+
         '</span>'+
       '</a>'+
       '<button class="vd-more" data-act="vdmenu" data-id="'+esc(v.id)+'" aria-label="Meer opties voor '+esc(title)+'">•••</button>'+
     '</div>';
+  }
+  /* Staat dit filmpje ergens in je weekprogramma, dan hangen de dagletters eronder met het
+     fluitje ervoor: zo zie je in de map meteen wat je deze week gaat doen. */
+  function vdDagenHtml(v){
+    var d=[]; try{ d=plVidDagen(v.id); }catch(e){}
+    if(!d.length) return '';
+    return '<span class="vd-dagen"><i class="vd-fluit" aria-hidden="true"></i>'+
+      d.map(function(s){ return '<span class="vd-dag">'+esc(s)+'</span>'; }).join('')+'</span>';
   }
   function vdToolsHtml(){
     return '<div class="vd-tools">'+
@@ -6692,108 +6908,168 @@
   }
 
   /* ---- Coach-scherm ---------------------------------------------------------------
-     Eén pagina per weekdag. De dag van vandaag staat vooraan geselecteerd, zodat de app
-     bij het openen meteen laat zien wat er vandaag te doen is; de andere dagen zijn er om
-     vooruit te plannen. Elke regel is een snelkoppeling naar het echte onderdeel in de
-     app, met daaronder de timer en de filmpjes die eraan gekoppeld zijn. */
+     Eén pagina per weekdag, als tijdlijn. De dag van vandaag staat vooraan geselecteerd, zodat
+     de app bij het openen meteen laat zien wat er vandaag te doen is; vegen brengt je naar de
+     dag ervoor of erna. Elke kaart is één onderdeel van de training: starten met de blauwe
+     knop, bijstellen met het potlood. */
   var plSel = null;                                  // gekozen weekdag; null = volg vandaag
   function plToday(){ return new Date().getDay(); }
   function plCur(){ return plSel===null ? plToday() : plSel; }
+  // De weekvolgorde loopt van maandag naar zondag, dus vegen volgt PL_DAYS en niet de JS-dag.
+  function plDagIndex(d){ for(var i=0;i<PL_DAYS.length;i++) if(PL_DAYS[i].d===d) return i; return 0; }
 
-  function plWeekHtml(){
-    var today=plToday(), cur=plCur();
-    return '<div class="pl-week">'+PL_DAYS.map(function(d){
-      var n=plDay(d.d).length;
-      var dots=''; for(var i=0;i<Math.min(n,3);i++) dots+='<i></i>';
-      return '<button class="pl-day'+(d.d===cur?' on':'')+(d.d===today?' today':'')+'" '+
-        'data-act="plday" data-d="'+d.d+'" aria-label="'+esc(d.label)+' — '+n+' onderdelen"'+
-        (d.d===cur?' aria-current="true"':'')+'>'+
-        '<span class="pl-dnum">'+d.s.toUpperCase()+'</span>'+
-        '<span class="pl-dots">'+dots+'</span>'+
-      '</button>';
-    }).join('')+'</div>';
+  // De dag staat in de titel en je bladert met een veeg; een balk met zeven knoppen erboven
+  // zei hetzelfde nog een keer en nam de ruimte van de eerste kaart in.
+  function plKopTitel(){ return 'Training · '+plDayLabel(plCur()); }
+  // Onderaan één puntje per dag, zoals bij de woorden en de filmpjes: waar je bent in de week.
+  function plDotsHtml(){
+    var cur=plCur(), today=plToday();
+    var h='<div class="cs-dotstray"><div class="cs-dots">';
+    for(var i=0;i<PL_DAYS.length;i++){
+      var d=PL_DAYS[i], n=plDay(d.d).length;
+      h+='<button class="cs-dot'+(d.d===cur?' on':'')+(n?' st-todo':'')+'" '+
+        'data-act="plday" data-d="'+d.d+'" aria-label="'+esc(d.label)+
+        (d.d===today?', vandaag':'')+(n?', '+n+' onderdelen':', leeg')+'"></button>';
+    }
+    return h+'</div></div>';
   }
-  // "Auto" heeft geen eigen inhoud: het leent de missies van de dagkaart. Op een andere dag dan
-  // vandaag zijn dat de missies die dán gelden, dus daar tonen we alleen de belofte.
-  function plAutoChips(isToday){
-    if(!isToday) return '<span class="pl-chip"><span class="pl-ctx">De missies van die dag</span></span>';
-    return todaysMissions().map(function(m){
-      return '<button class="pl-chip" data-act="plmiss" data-id="'+esc(m.id)+'">'+
-        '<span class="pl-cdot">'+IC.chev+'</span><span class="pl-ctx">'+esc(m.label)+'</span></button>';
-    }).join('');
+
+  /* Hoeveel onderdelen de exameneisen van je graad voorschrijven. Bij hosinsul en taeryon staat
+     dat aantal op de examenkaart; door het hier over te nemen hoef je het niet zelf op te
+     zoeken en klopt het vanzelf weer zodra je een graad verder bent. */
+  function plEisAantal(k, sub){
+    var e=curEis();
+    if(k==='hosinsul') return e.hosinsul||0;
+    if(k==='taeryon'){
+      if(sub==='ibo')   return e.ibo||0;
+      if(sub==='sambo') return 0;                  // sambo staat niet in de eisen van deze school
+      return e.ilbo||0;
+    }
+    return 0;
   }
-  function plChipsHtml(it, isToday){
-    var out='';
-    if(it.k==='auto') out += plAutoChips(isToday);
-    if(it.min) out += '<button class="pl-chip tmr" data-act="pltimer" data-min="'+it.min+'">'+
-      '⏱ <b>'+it.min+' min</b></button>';
-    (it.vids||[]).forEach(function(vid){
-      var v=vdById(vid); if(!v) return;
-      var th=vdThumb(v);
-      out += '<a class="pl-chip" href="'+esc(vdUrl(v))+'" target="_blank" rel="noopener noreferrer">'+
-        (th?'<img class="pl-cthumb" src="'+esc(th)+'" alt="" loading="lazy" decoding="async">':'')+
-        '<span class="pl-ctx">'+esc(v.title||'Filmpje')+'</span></a>';
-    });
-    return out ? '<div class="pl-chips">'+out+'</div>' : '';
+  // Welke vormen van taeryon zinvol zijn bij je graad. Sambo hoort er niet bij in de eisen, maar
+  // blijft kiesbaar voor wie hem toch wil oefenen.
+  function plTaeryonKeuzes(){
+    var e=curEis(), uit=[];
+    if(e.ilbo) uit.push('ilbo');
+    if(e.ibo)  uit.push('ibo');
+    uit.push('sambo');
+    if(!uit.length) uit=['ilbo'];
+    return uit;
   }
-  function plItemHtml(it, isToday){
+  function plItemNaam(it){
     var c=plComp(it.k); if(!c) return '';
-    var nv=(it.vids||[]).filter(function(id){ return !!vdById(id); }).length;
-    var bits=[]; if(it.min) bits.push(it.min+' min');
-    if(nv) bits.push(nv+(nv===1?' filmpje':' filmpjes'));
-    var sub = bits.length ? bits.join(' · ') : c.hint;
-    var done = isToday && plIsDone(it.id);
-    return '<div class="pl-item'+(done?' done':'')+'">'+
-      '<div class="pl-top">'+
-        (isToday
-          ? '<button class="pl-ck" data-act="plcheck" data-id="'+esc(it.id)+'" aria-pressed="'+(done?'true':'false')+'" aria-label="'+esc(c.label)+' afvinken"><span>'+IC.check+'</span></button>'
-          : '<span class="pl-ck pl-ckoff" aria-hidden="true"></span>')+
-        '<button class="pl-go" data-act="plgo" data-k="'+esc(it.k)+'" data-min="'+(it.min||0)+'">'+
-          '<span class="pl-ico">'+c.ico+'</span>'+
-          '<span class="pl-txt"><span class="pl-lab">'+esc(c.label)+'</span>'+
-            '<span class="pl-sub">'+esc(sub)+'</span></span>'+
-          '<span class="pl-chev">'+IC.chev+'</span>'+
-        '</button>'+
-        '<button class="pl-more" data-act="pledit" data-id="'+esc(it.id)+'" aria-label="Opties voor '+esc(c.label)+'">•••</button>'+
+    if(it.k==='taeryon' && plTaeryon(it.sub)) return plTaeryon(it.sub).label;
+    return c.label;
+  }
+  function plFmtSec(sec){
+    if(sec<60) return sec+' sec';
+    var m=Math.floor(sec/60), r=sec%60;
+    return r ? m+':'+(r<10?'0':'')+r+' min' : m+' min';
+  }
+  function plTempoTekst(t){ return (t===0.5?'0,5':String(t).replace('.',','))+' sec per tel'; }
+  // De regel boven de titel vertelt in één blik hoe lang het duurt of hoe vaak je het doet.
+  function plStandTekst(it){
+    if(it.mode==='reps') return it.reps+'× · '+it.rondes+(it.rondes===1?' ronde':' rondes')+' · '+plTempoTekst(it.tempo);
+    return it.sec ? plFmtSec(it.sec) : 'Geen timer';
+  }
+
+  /* Welk onderdeel nu aan de beurt is: het eerste dat vandaag nog niet is afgestreept. Alleen
+     vandaag, want op een andere dag kijk je vooruit en is er niets "aan de beurt". */
+  function plNuId(){
+    var d=plCur(); if(d!==plToday()) return null;
+    var l=plDay(d);
+    for(var i=0;i<l.length;i++) if(!plIsDone(l[i].id)) return l[i].id;
+    return null;
+  }
+
+  function plVidRegels(it){
+    var rijen=(it.vids||[]).map(function(vid){
+      var v=vdById(vid); if(!v) return '';
+      var th=vdThumb(v);
+      return '<a class="plt-vid" href="'+esc(vdUrl(v))+'" data-act="vdplay" data-id="'+esc(v.id)+'" '+
+        'target="_blank" rel="noopener noreferrer">'+
+        '<img class="plt-vth" src="'+esc(th||'')+'" alt="" loading="lazy" decoding="async">'+
+        '<span class="plt-vt">'+esc(v.title||'Filmpje')+'</span></a>';
+    }).filter(Boolean);
+    return rijen.length ? '<div class="plt-vids">'+rijen.join('')+'</div>' : '';
+  }
+
+  function plKaartHtml(it, nr, isToday, nuId){
+    var c=plComp(it.k); if(!c) return '';
+    var af = isToday && plIsDone(it.id);
+    var nu = it.id===nuId;
+    var eis = plEisAantal(it.k, it.sub);
+    return '<div class="plt-item'+(af?' af':'')+(nu?' nu':'')+'" data-id="'+esc(it.id)+'">'+
+      '<span class="plt-dot">'+(af?IC.check:nr)+'</span>'+
+      '<div class="plt-card">'+
+        '<button class="plt-pen" data-act="pledit" data-id="'+esc(it.id)+'" '+
+          'aria-label="'+esc(plItemNaam(it))+' aanpassen">'+IC.potlood+'</button>'+
+        '<button class="plt-play" data-act="plstart" data-id="'+esc(it.id)+'" '+
+          'aria-label="'+esc(plItemNaam(it))+' starten">'+
+          '<span class="plt-fluit" aria-hidden="true"></span></button>'+
+        '<span class="plt-when">'+esc(plStandTekst(it))+'</span>'+
+        '<b class="plt-ttl">'+esc(plItemNaam(it))+'</b>'+
+        (eis?'<span class="plt-eis">'+eis+' afwerkingen volgens je exameneisen</span>':'')+
+        plVidRegels(it)+
       '</div>'+
-      plChipsHtml(it, isToday)+
     '</div>';
   }
+
+  /* De onderdeelnaam staat als kop boven zijn kaarten, precies zoals het jaartal boven de
+     gebeurtenissen van dat jaar. Staan er twee poomsae-blokken achter elkaar, dan delen ze één
+     kop; wissel je van onderdeel, dan begint er een nieuwe. */
+  function plLijstHtml(){
+    var d=plCur(), list=plDay(d), isToday=(d===plToday()), nuId=plNuId();
+    var h='<div class="plt-line" id="pl-line">', vorig=null;
+    for(var i=0;i<list.length;i++){
+      var it=list[i], c=plComp(it.k);
+      if(it.k!==vorig){
+        vorig=it.k;
+        h+='<div class="plt-kop"><span>'+esc(c.label)+'</span><i>'+esc(c.han)+'</i></div>';
+      }
+      h+=plKaartHtml(it, i+1, isToday, nuId);
+    }
+    return h+'</div>';
+  }
   function plBodyHtml(){
-    var d=plCur(), list=plDay(d), isToday=(d===plToday());
-    var head='<div class="pl-head"><span class="pl-headt">'+esc(plDayLabel(d))+
-      (isToday?' · vandaag':'')+'</span>'+
-      (list.length?'<span class="pl-headn">'+list.length+(list.length===1?' onderdeel':' onderdelen')+'</span>':'')+'</div>';
+    var d=plCur(), list=plDay(d);
+    var head='';                                   // de dag staat al in de kop van het scherm
     if(!list.length){
       return head+
-        '<p class="pl-empty">Nog niets gepland voor '+esc(plDayLabel(d).toLowerCase())+'.<br>'+
-          'Stel je eigen training samen: kies onderdelen en hang er een timer of filmpjes aan.</p>'+
-        '<button class="pl-cta" data-act="plquick">Snelle start</button>'+
-        '<button class="pl-add" data-act="pladd"><span class="add-lab">+ Onderdeel</span></button>';
+        '<div class="pl-leeg">Nog niets gepland voor '+esc(plDayLabel(d).toLowerCase())+'.<br>'+
+          'Druk op + om een onderdeel toe te voegen.</div>'+
+        '<button class="pl-cta" data-act="plquick">Snelle start</button>';
     }
-    return head+'<div class="pl-list">'+list.map(function(it){ return plItemHtml(it,isToday); }).join('')+'</div>'+
-      '<button class="pl-add" data-act="pladd"><span class="add-lab">+ Onderdeel</span></button>';
+    return head+plLijstHtml();
   }
   /* Coach opent als volledig scherm boven de dagkaart — dezelfde laag als de oefentimer en het
      examen, want het is een modus en geen aparte sectie van de app. */
   var coachScreen=null;
-  function openCoach(){
+  function openCoach(dag){
     if(coachScreen) return coachScreen;
-    plSel=null; plDoneLoad();
+    plSel = (dag!=null && dag>=0 && dag<=6) ? dag : null;
+    plDoneLoad();
     var el=document.createElement('div');
     el.className='session coachscreen'; el.id='coachscreen';
     applyTheme(el, CUR);
     el.innerHTML=
       '<div class="shead">'+
         '<button class="sx" data-act="plexit" aria-label="Sluiten">'+IC.x+'</button>'+
-        '<div class="pl-title"><span class="han-lab">코치 · Kochi</span><h2>Coach</h2></div>'+
+        '<div class="pl-title"><span class="han-lab">코치 · Kochi</span>'+
+          '<h2 class="pl-dagttl">'+esc(plKopTitel())+'</h2></div>'+
       '</div>'+
-      '<div class="sbody" id="pl-scroll">'+plWeekHtml()+plBodyHtml()+'</div>';
+      '<div class="sbody" id="pl-scroll"><div id="pl-body">'+plBodyHtml()+'</div></div>'+
+      plDotsHtml()+
+      '<button class="tl-fab" data-act="pladd" aria-label="Onderdeel toevoegen">'+
+        '<span class="tl-fab-glint" aria-hidden="true"></span>'+IC.plus+'</button>';
     stage.appendChild(el);
     coachScreen=el;
     fnav.classList.add('hide');
     requestAnimationFrame(function(){ el.classList.add('show'); });
     vdBindThumbs(el);
+    plBindSwipe(el);
+    plBindSleep(el);
     return el;
   }
   function closeCoach(){
@@ -6804,46 +7080,222 @@
     var s=coachScreen; coachScreen=null;
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 380);
   }
-  // Alleen de scrollinhoud verversen: de kop en de scrollpositie blijven dan staan.
+  // Alleen de lijst verversen: de dagbalk en de scrollpositie blijven dan staan.
+  function plVerversDots(){
+    var tray=coachScreen && coachScreen.querySelector('.cs-dotstray'); if(!tray) return;
+    var n=document.createElement('div'); n.innerHTML=plDotsHtml();
+    tray.parentNode.replaceChild(n.firstChild, tray);
+  }
   function plRefresh(){
     var w=stage.querySelector('#pl-scroll'); if(!w) return;
     var y=w.scrollTop;
-    w.innerHTML=plWeekHtml()+plBodyHtml();
+    var body=w.querySelector('#pl-body');
+    if(body) body.innerHTML=plBodyHtml();
+    plVerversDots();
     vdBindThumbs(w); w.scrollTop=y;
+    plBindSleep(coachScreen);
+  }
+  /* Van dag wisselen: de lijst vervaagt en komt terug, de dagnaam schuift met de veegrichting
+     mee naar buiten. Dezelfde beweging als tussen de woordgroepen. */
+  function plSwapDag(d, dir){
+    plSel=d;
+    var w=stage.querySelector('#pl-scroll'); if(!w) return;
+    plVerversDots();
+    plTitelSwap(dir);
+    var body=w.querySelector('#pl-body'); if(!body) return;
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      body.innerHTML=plBodyHtml(); vdBindThumbs(body); plBindSleep(coachScreen); return;
+    }
+    body.classList.add('cs-fading');
+    setTimeout(function(){
+      body.innerHTML=plBodyHtml(); body.classList.remove('cs-fading');
+      vdBindThumbs(body); plBindSleep(coachScreen); w.scrollTop=0;
+    }, 170);
+  }
+  // De dagnaam in de kop schuift met de veegrichting mee naar buiten, net als bij de woorden.
+  function plTitelSwap(dir){
+    var wrap=coachScreen && coachScreen.querySelector('.pl-title');
+    var cur=wrap && wrap.querySelector('.pl-dagttl'); if(!cur) return;
+    var naam=plKopTitel();
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      cur.textContent=naam; return;
+    }
+    var stale=wrap.querySelectorAll('.pl-dagghost');
+    for(var i=0;i<stale.length;i++) if(stale[i].parentNode) stale[i].parentNode.removeChild(stale[i]);
+    var ghost=cur.cloneNode(true);
+    ghost.className='pl-dagttl pl-dagghost';
+    wrap.appendChild(ghost);
+    cur.textContent=naam;
+    cur.classList.remove('enter-r','enter-l'); void cur.offsetWidth;
+    cur.classList.add(dir<0 ? 'enter-l' : 'enter-r');
+    ghost.classList.add(dir<0 ? 'exit-r' : 'exit-l');
+    ghost.addEventListener('animationend', function(){ if(ghost.parentNode) ghost.parentNode.removeChild(ghost); });
+  }
+  // De week loopt rond: voorbij zondag komt maandag weer. Een training plan je in een ritme
+  // dat zich herhaalt, dus een muur aan het eind van de rij zou alleen maar in de weg staan.
+  function plNavDag(dir){
+    var i=(plDagIndex(plCur())+dir+PL_DAYS.length)%PL_DAYS.length;
+    plSwapDag(PL_DAYS[i].d, dir); buzz(8);
   }
   function plPickDay(d){
     d=parseInt(d,10); if(!(d>=0&&d<=6)) return;
-    plSel = d; plRefresh();
+    if(d===plCur()) return;
+    plSwapDag(d, plDagIndex(d) > plDagIndex(plCur()) ? 1 : -1);
   }
-  // Een eerste dag in één tik: opwarmen, de missies van de dag, uitlopen.
+  /* Vegen over de lijst bladert door de week. De kaarten zelf zijn knoppen, dus een veeg mag
+     geen tik worden: pas boven de 55px telt het als bladeren en slikken we de klik in. */
+  function plBindSwipe(el){
+    var host=el.querySelector('#pl-scroll'); if(!host) return;
+    var x0=0,y0=0,down=false,swiped=false;
+    host.addEventListener('pointerdown', function(e){
+      if(e.pointerType==='mouse' && e.button!==0) return;
+      if(e.target && e.target.closest && e.target.closest('.cs-dots')) return;
+      x0=e.clientX; y0=e.clientY; down=true; swiped=false;
+    });
+    host.addEventListener('pointermove', function(e){
+      if(!down || plSleep.actief) return;
+      var dx=e.clientX-x0, dy=e.clientY-y0;
+      if(!swiped && Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)*1.4){
+        swiped=true; down=false; plNavDag(dx<0?1:-1);
+      }
+    });
+    host.addEventListener('pointerup', function(){ down=false; });
+    host.addEventListener('pointercancel', function(){ down=false; });
+    host.addEventListener('click', function(e){
+      if(swiped){ e.stopPropagation(); e.preventDefault(); swiped=false; } }, true);
+  }
+
+  /* ---- Slepen: een kaart naar eerder of later in de training ----
+     Even vasthouden maakt de kaart los; daarna volgt hij je vinger en schuiven de buren op.
+     Een korte tik blijft gewoon een tik, dus starten en bewerken werken onveranderd. */
+  var plSleep={actief:false};
+  function plBindSleep(el){
+    if(!el) return;
+    var line=el.querySelector('#pl-line'); if(!line) return;
+    if(line._plGebonden) return;
+    line._plGebonden=true;
+    var wachtT=null, start=null, kaart=null, hoogtes=null, dy=0, van=-1;
+    function opruimen(){
+      clearTimeout(wachtT); wachtT=null;
+      if(kaart){ kaart.classList.remove('sleep'); kaart.style.transform=''; }
+      var ks=line.querySelectorAll('.plt-item');
+      for(var i=0;i<ks.length;i++) ks[i].style.transform='';
+      line.classList.remove('sleept');
+      kaart=null; start=null; plSleep.actief=false;
+    }
+    line.addEventListener('pointerdown', function(e){
+      if(e.pointerType==='mouse' && e.button!==0) return;
+      if(e.target.closest && (e.target.closest('button') || e.target.closest('a'))) return;
+      var k=e.target.closest && e.target.closest('.plt-item'); if(!k) return;
+      start={x:e.clientX, y:e.clientY};
+      wachtT=setTimeout(function(){
+        kaart=k; van=plIdx(plCur(), k.getAttribute('data-id'));
+        hoogtes=[].map.call(line.querySelectorAll('.plt-item'), function(n){
+          return n.getBoundingClientRect().height+12; });
+        kaart.classList.add('sleep'); line.classList.add('sleept');
+        plSleep.actief=true; buzz(18);
+      }, 420);
+    });
+    line.addEventListener('pointermove', function(e){
+      if(!start) return;
+      if(!kaart){
+        if(Math.abs(e.clientY-start.y)>8 || Math.abs(e.clientX-start.x)>8){ clearTimeout(wachtT); start=null; }
+        return;
+      }
+      e.preventDefault();
+      dy=e.clientY-start.y;
+      kaart.style.transform='translateY('+dy+'px)';
+      // Hoeveel plaatsen de kaart is opgeschoven: de buren schuiven de andere kant op, zodat je
+      // ziet waar hij terechtkomt als je loslaat.
+      var stap=hoogtes[van]||90, verzet=Math.round(dy/stap);
+      var naar=Math.max(0, Math.min(hoogtes.length-1, van+verzet));
+      var ks=line.querySelectorAll('.plt-item');
+      for(var i=0;i<ks.length;i++){
+        if(i===van){ continue; }
+        var v=0;
+        if(naar>van && i>van && i<=naar) v=-stap;
+        else if(naar<van && i<van && i>=naar) v=stap;
+        ks[i].style.transform = v ? 'translateY('+v+'px)' : '';
+      }
+    });
+    function los(e){
+      if(!kaart){ clearTimeout(wachtT); start=null; return; }
+      var stap=hoogtes[van]||90, verzet=Math.round(dy/stap);
+      var naar=Math.max(0, Math.min(hoogtes.length-1, van+verzet));
+      opruimen();
+      if(naar!==van){
+        var lijst=plDay(plCur());
+        lijst.splice(naar, 0, lijst.splice(van,1)[0]);
+        plSave(); buzz(14);
+      }
+      plRefresh();
+    }
+    line.addEventListener('pointerup', los);
+    line.addEventListener('pointercancel', function(){ opruimen(); });
+    // Tijdens het slepen mag de lijst niet meerollen.
+    line.addEventListener('touchmove', function(e){ if(kaart) e.preventDefault(); }, {passive:false});
+  }
+
+  // Een eerste dag in één tik: opwarmen, een poomsae-ronde en uitlopen.
   function plQuickStart(){
     var d=plCur();
-    PLAN[d]=[{id:plId(),k:'opwarmen',min:5,vids:[]},
-             {id:plId(),k:'auto',min:0,vids:[]},
-             {id:plId(),k:'cooling',min:3,vids:[]}];
-    plSave(); plRefresh(); buzz(18); try{ sfx('complete'); }catch(_e){}
+    PLAN[d]=[plNieuwItem('opwarmen'), plNieuwItem('poomsae'), plNieuwItem('cooling')];
+    plSave(); plRefresh(); buzz(18);
   }
-  /* Wat een regel opent. Poomsae, hosinsul en woorden hebben al een echte plek in de app; de
-     onderdelen die dat niet hebben (opwarmen, cooling down, taeryon) openen de oefentimer, want
-     dat is daar het bruikbaarste gereedschap. */
-  function plGo(k, min){
-    if(k==='auto'){ closeCoach(); showScreen('today'); return; }
-    if(k==='poomsae' || k==='hosinsul' || k==='woorden'){ closeCoach(); missionGo(k); return; }
-    if(k==='gyeorugi' && hbCat('gyeorugi') && (!hbCat('gyeorugi').show || hbCat('gyeorugi').show())){
-      closeCoach(); csEnter('handboek'); openHb('gyeorugi'); return;
-    }
-    if(k==='taeryon'){ openDrill('ilbo'); return; }   // stapsparren = de ilbo-oefengids
-    plOpenTimer(min || plComp(k).min || 3);
+  function plNieuwItem(k){
+    var c=plComp(k)||{};
+    var it={id:plId(), k:k, mode:'tijd', sec:plClampSec(c.sec||180),
+            reps:10, tempo:2, rondes:2, sub:'', doel:0, vids:[]};
+    // Onderdelen die je telt in plaats van klokt beginnen meteen in de juiste stand.
+    if(k==='taeryon'){ it.sub=plTaeryonKeuzes()[0]; it.mode='reps'; it.sec=0; }
+    if(k==='hosinsul' || k==='gyeokpa'){ it.mode='reps'; it.sec=0; }
+    return it;
   }
-  // De oefentimer leest zijn stand uit localStorage, dus eerst zetten en dan pas openen.
-  function plOpenTimer(min){
-    var sec=Math.max(30, Math.min(600, (plClampMin(min)||3)*60));
-    try{ otSetMode('time'); otSetDur(sec); }catch(e){}
+
+  /* ---- Een onderdeel starten ----
+     De oefentimer is het gereedschap: bij "tijd" telt hij af, bij "tellen" telt hij in het
+     Koreaans mee. Wat je in de coach instelt, staat klaar zodra hij opent. Loopt hij af, dan
+     ben je terug op de tijdlijn en is het onderdeel afgestreept. */
+  var plLopendId=null, PL_WENS=null;
+  function plStart(id){
+    var it=plFind(plCur(), id); if(!it) return;
+    plLopendId = (plCur()===plToday()) ? id : null;
+    // De timer herstelt bij het openen zijn eigen laatste stand; deze wens zetten we daar
+    // overheen zodat je precies krijgt wat er op de kaart staat.
+    PL_WENS = it.mode==='reps'
+      ? {mode:'count', rondes:plClampRondes(it.rondes), upto:plClampReps(it.reps), tempo:plClampTempo(it.tempo)}
+      : {mode:'time', sec:plClampSec(it.sec||180)||180};
     openTimer();
+  }
+  // Wordt door openTimer aangeroepen zodra het scherm staat.
+  function plPasWensToe(){
+    var w=PL_WENS; PL_WENS=null;
+    otState.upto=0;                       // zonder wens telt de timer gewoon tot tien
+    if(!w) return;
+    try{
+      if(w.mode==='count'){
+        otSetMode('count');
+        otState.reps=w.rondes; otState.left=w.rondes;
+        otState.upto=w.upto; otState.speed=1/w.tempo;
+      } else {
+        otSetMode('time'); otSetDur(w.sec);
+      }
+    }catch(e){}
+  }
+  /* De timer meldt dat hij klaar is. Was hij gestart vanuit de coach, dan strepen we het
+     onderdeel af en gaan we terug naar het programma: de volgende kaart licht dan vanzelf op. */
+  function plTimerKlaar(){
+    if(!plLopendId) return;
+    var id=plLopendId; plLopendId=null;
+    plZetDone(id, true);
+    setTimeout(function(){
+      closeTimer();
+      if(coachScreen) plRefresh(); else openCoach();
+    }, 1100);
   }
 
   /* ---- Onderdeel kiezen ---- */
-  var plSheet=null, plEditId=null;
+  var plSheet=null, plEditId=null, plVidMap='';
   function plOpenSheet(title, body, id){
     if(plSheet) return;
     plSheet=document.createElement('div');
@@ -6871,65 +7323,178 @@
     plOpenSheet('Onderdeel toevoegen',
       '<div class="pl-pick">'+PL_COMPS.map(function(c){
         return '<button class="pl-pi" data-act="plpick" data-k="'+esc(c.k)+'">'+
-          '<span class="pl-ico">'+c.ico+'</span>'+
-          '<span><span class="pl-pl">'+esc(c.label)+'</span>'+
-            '<span class="pl-ph">'+esc(c.hint)+'</span></span></button>';
+          '<span class="pl-pl">'+esc(c.label)+'</span>'+
+          '<span class="pl-ph">'+esc(c.hint)+'</span></button>';
       }).join('')+'</div>', 'plan-add-ov');
   }
   function plAdd(k){
     var c=plComp(k); if(!c) return;
-    plDay(plCur()).push({id:plId(), k:k, min:c.min||0, vids:[]});
+    plDay(plCur()).push(plNieuwItem(k));
     plSave(); plCloseSheet(); plRefresh(); buzz(14);
   }
 
-  /* ---- Onderdeel bewerken: timer, filmpjes en volgorde in één vel ---- */
-  var PL_MINS = [0,1,2,3,5,10];
+  /* ---- Onderdeel bewerken: stand, timer, filmpjes en volgorde in één vel ---- */
+  var PL_REP_TEMPO = [{v:4,l:'4 sec'},{v:2,l:'2 sec'},{v:1,l:'1 sec'},{v:0.5,l:'0,5 sec'}];
   function plEditBody(){
     var d=plCur(), it=plFind(d,plEditId); if(!it) return '';
     var i=plIdx(d,plEditId), last=plDay(d).length-1;
-    var mins='<div class="pl-sect">Timer</div><div class="pl-mins">'+PL_MINS.map(function(m){
-      return '<button class="ag-chip'+(m===it.min?' on':'')+'" data-act="plmin" data-v="'+m+'">'+
-        (m?m+'m':'Geen')+'</button>';
-    }).join('')+'</div>';
-    var vids='<div class="pl-sect">Filmpjes uit je verzameling</div>';
-    if(!VIDEOS.length){
-      vids+='<p class="pl-empty" style="padding:4px 2px 14px;text-align:left">'+
-        'Je hebt nog geen filmpjes bewaard. Voeg ze toe bij Filmpjes, dan kun je ze hier koppelen.</p>';
-    } else {
-      vids+='<div class="pl-vlist">'+VIDEOS.map(function(v){
-        var on=(it.vids||[]).indexOf(v.id)>=0, th=vdThumb(v);
-        return '<button class="pl-vi'+(on?' on':'')+'" data-act="plvid" data-id="'+esc(v.id)+'">'+
-          '<img class="pl-vthumb" src="'+esc(th||'')+'" alt="" loading="lazy" decoding="async">'+
-          '<span class="pl-vt">'+esc(v.title||'Filmpje')+'</span>'+
-          '<span class="pl-vck">'+IC.check+'</span></button>';
-      }).join('')+'</div>';
+    var h='';
+    // Taeryon eerst: welke vorm je oefent bepaalt ook hoeveel afwerkingen de eisen vragen.
+    if(it.k==='taeryon'){
+      var keuzes=plTaeryonKeuzes();
+      h+='<div class="pl-sect">Welke taeryon?</div><div class="pl-chips2">'+
+        keuzes.map(function(k){
+          var t=plTaeryon(k);
+          return '<button class="ag-chip'+(k===it.sub?' on':'')+'" data-act="plsub" data-k="'+k+'">'+
+            esc(t.label.replace(' Taeryon',''))+'</button>';
+        }).join('')+'</div>';
+      var eis=plEisAantal('taeryon', it.sub);
+      h+='<p class="pl-uit">'+(eis
+        ? 'Je exameneisen vragen '+eis+' afwerkingen.'
+        : 'Hier staan geen exameneisen voor bij je graad.')+'</p>';
     }
-    var ord='<div class="pl-ord">'+
-      '<button class="vd-mi" data-act="plmove" data-v="-1"'+(i<=0?' disabled':'')+'>↑ Omhoog</button>'+
-      '<button class="vd-mi" data-act="plmove" data-v="1"'+(i>=last?' disabled':'')+'>↓ Omlaag</button>'+
+    if(it.k==='hosinsul'){
+      var he=plEisAantal('hosinsul','');
+      h+='<p class="pl-uit" style="margin-top:2px">'+(he
+        ? 'Je exameneisen vragen '+he+' verdedigingen.'
+        : 'Hosinsul staat nog niet in je exameneisen.')+'</p>';
+    }
+    h+='<div class="pl-sect">Hoe houd je het bij?</div>'+
+      '<div class="pl-seg">'+
+        '<button class="'+(it.mode==='tijd'?'on':'')+'" data-act="plmode" data-m="tijd">Duur</button>'+
+        '<button class="'+(it.mode==='reps'?'on':'')+'" data-act="plmode" data-m="reps">Herhalingen</button>'+
+      '</div>';
+    if(it.mode==='tijd'){
+      h+='<div class="pl-sect">Hoe lang</div>'+
+        '<div class="pl-slide">'+
+          '<input type="range" id="pl-dur" min="30" max="600" step="30" value="'+(it.sec||30)+'" '+
+            'aria-label="Duur in seconden">'+
+          '<b id="pl-durlab">'+esc(plFmtSec(it.sec||30))+'</b>'+
+        '</div>';
+    } else {
+      h+='<div class="pl-sect">Herhalingen per ronde</div>'+
+        '<div class="pl-stap">'+
+          '<button data-act="plreps" data-v="-1" aria-label="Eén minder">−</button>'+
+          '<b id="pl-repslab">'+it.reps+'×</b>'+
+          '<button data-act="plreps" data-v="1" aria-label="Eén meer">+</button>'+
+        '</div>'+
+        '<div class="pl-sect">Rondes</div>'+
+        '<div class="pl-stap">'+
+          '<button data-act="plrondes" data-v="-1" aria-label="Eén ronde minder">−</button>'+
+          '<b id="pl-rondlab">'+it.rondes+'</b>'+
+          '<button data-act="plrondes" data-v="1" aria-label="Eén ronde meer">+</button>'+
+        '</div>'+
+        '<div class="pl-sect">Tempo per tel</div>'+
+        '<div class="pl-chips2">'+PL_REP_TEMPO.map(function(t){
+          return '<button class="ag-chip'+(t.v===it.tempo?' on':'')+'" data-act="pltempo" data-v="'+t.v+'">'+
+            esc(t.l)+'</button>';
+        }).join('')+'</div>';
+    }
+    h+='<div class="pl-sect">Filmpjes erbij</div>'+plVidKiezer(it);
+    h+='<div class="pl-ord">'+
+      '<button class="vd-mi" data-act="plmove" data-v="-1"'+(i<=0?' disabled':'')+'>Eerder in de training</button>'+
+      '<button class="vd-mi" data-act="plmove" data-v="1"'+(i>=last?' disabled':'')+'>Later in de training</button>'+
     '</div>'+
     '<div class="vd-menu">'+
-      '<button class="vd-mi danger" data-act="pldel">🗑️ Verwijderen</button>'+
+      '<button class="vd-mi danger" data-act="pldel">Verwijderen</button>'+
       '<button class="vd-mi cancel" data-act="plclose">Klaar</button>'+
     '</div>';
-    return mins+vids+ord;
+    return h;
+  }
+  /* Filmpjes kies je per map. De hele verzameling in één lijst werd onvindbaar zodra je er
+     twintig had; de map van het onderdeel zelf staat vooraan geselecteerd. */
+  function plVidMappen(){
+    var uit=[];
+    for(var i=0;i<VD_CATS.length;i++){
+      var c=VD_CATS[i];
+      if(vdInPlek(c.k, '').length) uit.push({k:c.k, label:c.label});
+    }
+    return uit;
+  }
+  function plVidKiezer(it){
+    var mappen=plVidMappen();
+    if(!mappen.length){
+      return '<p class="pl-uit">Je hebt nog geen filmpjes bewaard. Voeg ze toe bij Filmpjes, '+
+        'dan kun je ze hier aan een onderdeel hangen.</p>';
+    }
+    var huidig=plVidMap;
+    for(var i=0;i<mappen.length;i++) if(mappen[i].k===huidig) break;
+    if(i===mappen.length){
+      huidig = null;
+      for(var j=0;j<mappen.length;j++) if(mappen[j].k===it.k) huidig=it.k;
+      if(!huidig) huidig=mappen[0].k;
+      plVidMap=huidig;
+    }
+    var balk='<div class="pl-mappen">'+mappen.map(function(m){
+      return '<button class="pl-map'+(m.k===huidig?' on':'')+'" data-act="plvmap" data-k="'+esc(m.k)+'">'+
+        esc(m.label)+'</button>';
+    }).join('')+'</div>';
+    var films=vdInPlek(huidig, '');
+    var lijst='<div class="pl-vlist">'+films.map(function(v){
+      var on=(it.vids||[]).indexOf(v.id)>=0, th=vdThumb(v);
+      // Op welke dagen dit filmpje al in je week staat — zo plan je niet per ongeluk dubbel.
+      var dagen=plVidDagen(v.id);
+      return '<button class="pl-vi'+(on?' on':'')+'" data-act="plvid" data-id="'+esc(v.id)+'">'+
+        '<img class="pl-vthumb" src="'+esc(th||'')+'" alt="" loading="lazy" decoding="async">'+
+        '<span class="pl-vwrap"><span class="pl-vt">'+esc(v.title||'Filmpje')+'</span>'+
+          (dagen.length?'<span class="pl-dagen">'+dagen.map(function(s){
+            return '<span class="pl-dag">'+esc(s)+'</span>'; }).join('')+'</span>':'')+
+        '</span>'+
+        '<span class="pl-vck">'+IC.check+'</span></button>';
+    }).join('')+'</div>';
+    return balk+lijst;
   }
   function plOpenEdit(id){
     var it=plFind(plCur(), id); if(!it || plSheet) return;
-    plEditId=id;
-    var c=plComp(it.k);
-    plOpenSheet(c.ico+' '+c.label, plEditBody(), 'plan-edit-ov');
-    vdBindThumbs(plSheet);
+    plEditId=id; plVidMap='';
+    plOpenSheet(plItemNaam(it), plEditBody(), 'plan-edit-ov');
+    vdBindThumbs(plSheet); plBindDur();
   }
   // Het vel opnieuw vullen zonder het te sluiten, zodat een keuze meteen zichtbaar is.
   function plEditRefresh(){
     var b=plSheet && plSheet.querySelector('#pl-sheet-body'); if(!b) return;
-    b.innerHTML=plEditBody(); vdBindThumbs(b);
+    var y=b.querySelector('.pl-vlist'), top=y?y.scrollTop:0;
+    b.innerHTML=plEditBody(); vdBindThumbs(b); plBindDur();
+    var n=b.querySelector('.pl-vlist'); if(n) n.scrollTop=top;
+    var kop=plSheet.querySelector('.bs-head h3');
+    var it=plFind(plCur(), plEditId); if(kop && it) kop.textContent=plItemNaam(it);
   }
-  function plSetMin(v){
+  /* De duurschuif geeft bij elke stap meteen terugkoppeling; pas bij loslaten gaat hij de kast
+     in, anders schrijven we twintig keer naar de opslag tijdens één beweging. */
+  function plBindDur(){
+    var r=plSheet && plSheet.querySelector('#pl-dur'); if(!r) return;
+    var lab=plSheet.querySelector('#pl-durlab');
+    r.addEventListener('input', function(){
+      if(lab) lab.textContent=plFmtSec(+r.value);
+    });
+    r.addEventListener('change', function(){
+      var it=plFind(plCur(), plEditId); if(!it) return;
+      it.sec=plClampSec(r.value); plSave(); plRefresh(); buzz(8);
+    });
+  }
+  function plSetMode(m){
     var it=plFind(plCur(), plEditId); if(!it) return;
-    it.min=plClampMin(v); plSave(); plEditRefresh(); plRefresh(); buzz(10);
+    it.mode = m==='reps' ? 'reps' : 'tijd';
+    if(it.mode==='tijd' && !it.sec) it.sec=plClampSec((plComp(it.k)||{}).sec||180)||180;
+    plSave(); plEditRefresh(); plRefresh(); buzz(10);
   }
+  function plSetSub(k){
+    var it=plFind(plCur(), plEditId); if(!it || !plTaeryon(k)) return;
+    it.sub=k; plSave(); plEditRefresh(); plRefresh(); buzz(10);
+  }
+  function plStapReps(v){
+    var it=plFind(plCur(), plEditId); if(!it) return;
+    it.reps=plClampReps(it.reps+v); plSave(); plEditRefresh(); plRefresh(); buzz(8);
+  }
+  function plStapRondes(v){
+    var it=plFind(plCur(), plEditId); if(!it) return;
+    it.rondes=plClampRondes(it.rondes+v); plSave(); plEditRefresh(); plRefresh(); buzz(8);
+  }
+  function plSetTempo(v){
+    var it=plFind(plCur(), plEditId); if(!it) return;
+    it.tempo=plClampTempo(v); plSave(); plEditRefresh(); plRefresh(); buzz(8);
+  }
+  function plZetVidMap(k){ plVidMap=k; plEditRefresh(); buzz(8); }
   function plToggleVid(vid){
     var it=plFind(plCur(), plEditId); if(!it) return;
     it.vids=it.vids||[];
@@ -6948,6 +7513,7 @@
     plDay(d).splice(i,1);
     plSave(); plCloseSheet(); plRefresh(); buzz(16);
   }
+
   /* ---------- Tijdlijn: de taekwondo-geschiedenis van de leerling ----------
      Graden en agenda-events stonden al in de app, maar alles wat voorbij was verdween uit beeld.
      De tijdlijn zet ze samen op één lijn, nieuw naar oud, met plaats, uitslag en foto erbij. */
@@ -9390,6 +9956,7 @@
     }
     attachTimerSwipe(el);
     attachModeSwipe(el);
+    plPasWensToe();
     requestAnimationFrame(function(){ el.classList.add('show'); moveModeThumb(false); });
     otReset();
     var hn=el.querySelector('#ot-start');
@@ -9814,7 +10381,7 @@
      en niet bij het tempo waarin je telt: op "4 sec / tel" bleef hij anders seconden nadraaien.
      OT_WIS is het tempo van de snelste stand, 0,5 seconde per tel. */
   var OT_WIS = OT_BASE / 2;
-  var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, reps:0, left:0, _lastFrac:0, _wrapT:null,
+  var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, reps:0, left:0, upto:0, _lastFrac:0, _wrapT:null,
                   mode:'time', dur:60, total:0, endAt:0, raf:null, _lastSec:0, _dragged:false, _windT:null, dragC:null, _pd:null };
   var otTmT=null; // tempo fold-out collapse/close timer
   var otRepT=null; // herhaal fold-out close timer
@@ -10013,8 +10580,8 @@
       var c=COUNT[otState.i];
       numEl.textContent=(otState.i+1);
       if(wordEl) wordEl.innerHTML='<span class="w-ko">'+c[0]+'</span><span class="w-dot">·</span><span class="w-ro">'+c[1]+'</span>';
-      frac=(otState.i+1)/COUNT.length;
-      var done=(otState.i>=COUNT.length-1);
+      frac=(otState.i+1)/otEind();
+      var done=(otState.i>=otEind()-1);
       if(hint){ hint.textContent = otState.running ? '' : (done ? 'tik voor opnieuw' : 'tik om verder te tellen');
         hint.style.opacity = otState.running ? '0' : '1'; }
     } else {
@@ -10119,7 +10686,7 @@
       }, OT_LEADIN);
       return;
     }
-    if(otState.i>=COUNT.length-1){
+    if(otState.i>=otEind()-1){
       if(otState.reps===Infinity){ otLoopWrap(); otSchedule(); }
       else if(otState.reps>0){
         otState.left--;
@@ -10127,12 +10694,18 @@
         else {                                        // klaar: de keuze blijft staan, alleen de teller staat weer op vol
           otState.left=otState.reps;
           otStop(); otRender(); otSyncControls(); buzz(22); if(Math.random()<0.55) otMascotPeek();
+          plTimerKlaar();
         }
       }
-      else { otStop(); otRender(); otSyncControls(); buzz(22); if(Math.random()<0.45) otMascotPeek(); }
+      else { otStop(); otRender(); otSyncControls(); buzz(22); if(Math.random()<0.45) otMascotPeek(); plTimerKlaar(); }
       return;
     }
     otState.i++; otRender(); otPop(); speak(COUNT[otState.i][0]); buzz(6); otSchedule();
+  }
+  // Tot hoe ver één ronde telt. Standaard alle tien; een coach-onderdeel kan om minder vragen.
+  function otEind(){
+    var n=otState.upto|0;
+    return (n>0 && n<COUNT.length) ? n : COUNT.length;
   }
   function otStart(){
     otCloseFan(); otCloseReps(); otCloseMode();
@@ -10175,7 +10748,7 @@
     if(wm && wm.classList.contains('open')){ otCloseMode(); return; }
     if(!otInDial(e)) return;
     if(otState.running){ otPause(); return; }
-    var finished=(otState.phase==='count' && otState.i>=COUNT.length-1);
+    var finished=(otState.phase==='count' && otState.i>=otEind()-1);
     if(otState.phase==='idle' || finished){ otStart(); }
     else { otResume(); }
   }
@@ -10793,6 +11366,7 @@
     sfx('complete'); buzz(30);
     otSyncTime();
     if(Math.random()<0.6) otMascotPeek();
+    plTimerKlaar();
   }
   function otPauseTime(){
     if(otState.raf){ cancelAnimationFrame(otState.raf); otState.raf=null; }
@@ -11160,13 +11734,17 @@
     else if(a==='plquick'){ plQuickStart(); }
     else if(a==='plclose'){ plCloseSheet(); }
     else if(a==='pledit'){ plOpenEdit(act.getAttribute('data-id')); buzz(10); }
-    else if(a==='plmin'){ plSetMin(act.getAttribute('data-v')); }
+    else if(a==='plstart'){ plStart(act.getAttribute('data-id')); buzz(14); }
+    else if(a==='plmode'){ plSetMode(act.getAttribute('data-m')); }
+    else if(a==='plsub'){ plSetSub(act.getAttribute('data-k')); }
+    else if(a==='plreps'){ plStapReps(parseInt(act.getAttribute('data-v'),10)); }
+    else if(a==='plrondes'){ plStapRondes(parseInt(act.getAttribute('data-v'),10)); }
+    else if(a==='pltempo'){ plSetTempo(parseFloat(act.getAttribute('data-v'))); }
+    else if(a==='plvmap'){ plZetVidMap(act.getAttribute('data-k')); }
     else if(a==='plvid'){ plToggleVid(act.getAttribute('data-id')); }
     else if(a==='plmove'){ plMove(parseInt(act.getAttribute('data-v'),10)); }
     else if(a==='pldel'){ plDelete(); }
     else if(a==='plcheck'){ plToggleDone(act.getAttribute('data-id')); plRefresh(); buzz(14); }
-    else if(a==='plgo'){ plGo(act.getAttribute('data-k'), parseInt(act.getAttribute('data-min'),10)||0); }
-    else if(a==='pltimer'){ plOpenTimer(parseInt(act.getAttribute('data-min'),10)); buzz(12); }
     else if(a==='plmiss'){ closeCoach(); missionGo(act.getAttribute('data-id')); }
     else if(a==='plexit'){ closeCoach(); buzz(10); }
     else if(a==='vdclose'){ closeVideoSheet(); }

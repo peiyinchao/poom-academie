@@ -2,7 +2,7 @@
    Mijn Poom Academie — Service Worker (offline-first)
    Verhoog CACHE bij elke inhoud-/codewijziging om te verversen.
    ============================================================ */
-var CACHE = 'poom-v178';
+var CACHE = 'poom-v179';
 
 /* Kern-schil die vooraf wordt gecachet (rest volgt tijdens gebruik). */
 var PRECACHE = [
