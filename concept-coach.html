@@ -4086,7 +4086,7 @@
     {k:'stretch',  label:'Strekken',     han:'유연', ico:'🤸', el:'#6FA38B'},
     {k:'gyeorugi', label:'Gyeorugi',     han:'겨루기', ico:'🥊', el:'#B23A48',
       subs:[{k:'techniek',label:'Techniek',ico:'🥊'},{k:'aanval',label:'Aanval',ico:'⚡'},
-            {k:'counter',label:'Counter',ico:'🔄'}]},
+            {k:'counter',label:'Counter',ico:'🔄'},{k:'wedstrijden',label:'Wedstrijden',ico:'🏆'}]},
     {k:'poomsae',  label:'Poomsae',      han:'품새', ico:'🥋', el:'#4A6FA5',
       subs:[{k:'techniek',label:'Techniek',ico:'🥋'},{k:'poomsaes',label:'Vormen',ico:'🌀'},
             {k:'wedstrijden',label:'Wedstrijden',ico:'🏆'}]},
@@ -6495,7 +6495,7 @@
       if(bestaand && bestaand.vast){
         vdOvrZet(bestaand.id, {title:title, url:url, vid:id, cat:d.cat, sub:d.sub||''});
         closeVideoSheet(); vdRefresh();
-        buzz(18); try{ sfx('complete'); }catch(_e){}
+        buzz(18);
         return;
       }
       if(bestaand){
@@ -6519,7 +6519,9 @@
       if(!bestaand && vdCatSheet && (VD_VIEW.cat!==_p.cat || VD_VIEW.sub!==_p.sub)){
         closeVdCat(); openVdCat(_p.cat, _p.sub);
       } else { vdRefresh(); }
-      buzz(18); try{ sfx('complete'); }catch(_e){}
+      // Een filmpje toevoegen doe je vaak achter elkaar door; een tuneje per link wordt dan
+      // vermoeiend. Het trilkje is genoeg bevestiging.
+      buzz(18);
     };
     if(d.bron==='album' && d.filmBlob){
       var sleutel='f'+Date.now();
@@ -11050,7 +11052,6 @@
     else if(a==='agsave'){ agSync();
       if(agDraft && agDraft.date){
         var _ev = agEditId ? agById(agEditId) : null;
-        var _nieuw = !_ev;
         if(!_ev){ _ev={id:'a'+Date.now()}; AGENDA.push(_ev); }
         _ev.type=agDraft.type; _ev.title=(agDraft.title||'').trim(); _ev.date=agDraft.date;
         /* Bij een examen komt de naam uit de gekozen graad, zodat de kaart altijd leesbaar is
@@ -11086,9 +11087,9 @@
         });
         var _after=agAfterSave; agAfterSave=null;
         agMode='list'; agDraft=null; agEditId=null;
-        // Het tuneje viert dat er iets bij je verhaal komt. Naderhand nog een foto of een
-        // uitslag aanvullen is bijwerken, geen mijlpaal, dus dan blijft het stil.
-        buzz(20); if(_nieuw){ try{ sfx('complete'); }catch(_e){} }
+        // Het trilkje bevestigt dat het bewaard is; een tuneje erbij is te veel voor iets
+        // wat je vaker op een avond doet.
+        buzz(20);
         if(_after){ closeAgendaSheet(); _after(); } else agRender();
       } }
     else if(a==='agdel'){ var _aid=act.getAttribute('data-id');
