@@ -531,6 +531,8 @@
   /* Het beeld staat naast de tekst: dan passen er veel meer op een scherm en blijft de titel
      leesbaar. */
   .vd-grid{display:grid;grid-template-columns:1fr;gap:0;padding-top:6px}
+  .vd-uitlab{margin:16px 0 0;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+  .vd-uitlab:first-child{margin-top:4px}
   .vd-grid .vd-tile{display:grid;grid-template-columns:104px 1fr;gap:12px;align-items:center;
     padding:10px 0;border-bottom:1px solid var(--line)}
   .vd-grid .vd-tt{margin-top:0;-webkit-line-clamp:2;font-size:14px}
@@ -1032,12 +1034,15 @@
   .plt-item.plt-atop .plt-acts{grid-template-rows:1fr;opacity:1;pointer-events:auto}
   .plt-strook{display:flex;align-items:center;justify-content:space-between;gap:12px;
     margin-top:11px;padding-top:11px;border-top:1px solid var(--line)}
-  .plt-grp{display:flex;align-items:center;gap:7px}
+  .plt-grp{display:flex;align-items:center;gap:7px;margin-left:-9px}
+  /* Drie rondjes naast elkaar met een vulling erachter lezen als drie knoppen die om aandacht
+     vragen; het gaat hier om bijstellen, niet om beginnen. Alleen de tekeningen blijven staan,
+     de aanraakvlakken blijven even groot. */
   .plt-act{width:36px;height:36px;flex:none;padding:0;border:0;border-radius:50%;
-    background:var(--soft);color:var(--gray);display:grid;place-items:center;
+    background:none;color:var(--gray);display:grid;place-items:center;
     cursor:pointer;-webkit-tap-highlight-color:transparent;
     transition:transform .2s cubic-bezier(.22,1,.36,1), opacity .2s ease}
-  .plt-act svg{width:16px;height:16px}
+  .plt-act svg{width:18px;height:18px}
   .plt-act[disabled]{opacity:.32;cursor:default}
   .plt-act:not([disabled]):active{transform:scale(.9)}
   /* Alleen het onderdeel dat aan de beurt is draagt het blauwe fluitje. De andere kaarten kun
@@ -5828,7 +5833,10 @@
      overblijft is wat je ernaast doet: iets leren en iets kijken. */
   function vidMissieSub(cat, sub){
     var n=vdTel(cat, sub);
-    return n ? n+(n===1?' filmpje':' filmpjes')+' · techniek' : 'Nog geen filmpjes · tik om er een toe te voegen';
+    if(!n) return 'Nog geen filmpjes · tik om er een toe te voegen';
+    var top=vdUitgelicht(cat, sub);
+    if(top.length) return top.length+' uitgelicht · '+weekFocusShort();
+    return n+(n===1?' filmpje':' filmpjes')+' · techniek';
   }
   function woordenSub(vd){
     if(vd.hard)              return vd.hard+(vd.hard===1?' moeilijk woord':' moeilijke woorden')+' · '+esc(clusterShort(vd.label));
@@ -5867,14 +5875,15 @@
      maakten, maar dat was de vorm die de app koos — en niet wat jij vandaag hebt ingepland.
      Nu somt de regel je eigen programma op, zodat de kop en de lijst eronder hetzelfde zeggen. */
   function tdGoalTekst(){
-    var l=plDay(new Date().getDay()), namen=[], i;
+    plDoneLoad();
+    var l=plDay(new Date().getDay()), af=0, eerst=null, i;
     for(i=0;i<l.length;i++){
-      var c=plComp(l[i].k); if(!c) continue;
-      if(namen.indexOf(c.label)<0) namen.push(c.label);
+      if(plIsDone(l[i].id)) af++;
+      else if(!eerst) eerst=l[i];
     }
-    if(!namen.length) return 'Stel je training samen';
-    if(namen.length<=3) return namen.join(' · ');
-    return namen.slice(0,3).join(' · ')+' · +'+(namen.length-3);
+    if(!l.length)  return 'Nog niets gepland · stel je training samen';
+    if(!eerst)     return 'Je hebt alles afgestreept · mooi gedaan';
+    return (af ? 'Verder met ' : 'Je begint met ')+esc(plKaartTitel(eerst));
   }
   function tdTrainingHtml(){
     plDoneLoad();
@@ -6354,10 +6363,46 @@
     return '<p class="vd-empty">Nog geen filmpjes bij <b>'+esc(vdPlekLabel(cat, sub))+'</b>.<br>'+
       'Druk op + om er een toe te voegen.</p>';
   }
+  /* Een map met elf techniekfilmpjes is geen opdracht maar een archief: "bekijk techniek" zegt
+     dan nog steeds niet waar je vandaag naar moet kijken. Daarom zoeken we er de filmpjes uit
+     die bij je doel van deze week horen — op wat er in de titel staat — en zetten we er hooguit
+     drie van bovenaan. Is er geen doel of past er niets bij, dan blijft de map gewoon de map. */
+  var VD_FOCUS_WOORDEN = {
+    standen: ['stand','seogi','stance','kubi','juchum'],
+    trappen: ['trap','chagi','kick','dollyo','yop','naeryo','dwi'],
+    blokken: ['blok','makgi','stoot','jireugi','punch','block','slag','chigi'],
+    tempo:   ['tempo','ritme','snelheid','speed','timing'],
+    kihap:   ['kihap','kracht','power','hard'],
+    balans:  ['balans','balance','stabiel'],
+    blik:    ['blik','focus','kijk'],
+    adem:    ['adem','breath','ademhaling'],
+    termen:  ['term','woord','naam','naming']
+  };
+  function vdUitgelicht(cat, sub){
+    if(!WEEK_FOCUS.length) return [];
+    var woorden=[], i;
+    for(i=0;i<WEEK_FOCUS.length;i++){
+      var w=VD_FOCUS_WOORDEN[WEEK_FOCUS[i]]; if(w) woorden=woorden.concat(w);
+    }
+    if(!woorden.length) return [];
+    return vdInPlek(cat, sub).filter(function(v){
+      var t=String((v.title||'')+' '+vdSource(v)).toLowerCase();
+      for(var j=0;j<woorden.length;j++) if(t.indexOf(woorden[j])>=0) return true;
+      return false;
+    }).slice(0,3);
+  }
   function vdBodyHtml(cat, sub){
     var items=vdInPlek(cat, sub);
     if(!items.length) return vdLeegHtml(cat, sub);
-    return '<div class="vd-grid">'+items.map(vdTileHtml).join('')+'</div>';
+    var top=vdUitgelicht(cat, sub);
+    if(!top.length) return '<div class="vd-grid">'+items.map(vdTileHtml).join('')+'</div>';
+    var ids=top.map(function(v){return v.id;});
+    var rest=items.filter(function(v){ return ids.indexOf(v.id)<0; });
+    var h='<p class="vd-lab vd-uitlab">Bij je weekdoel · '+esc(weekFocusShort())+'</p>'+
+      '<div class="vd-grid vd-uit">'+top.map(vdTileHtml).join('')+'</div>';
+    if(rest.length) h+='<p class="vd-lab vd-uitlab">De rest van deze map</p>'+
+      '<div class="vd-grid">'+rest.map(vdTileHtml).join('')+'</div>';
+    return h;
   }
   /* A thumbnail can fail in two ways. A real network error fires `error`, but a removed clip gets a
      120x90 grey "not found" tile from YouTube that loads fine, so size is the only tell (a genuine
