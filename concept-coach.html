@@ -261,12 +261,12 @@
   .startbtn-ic{width:44px;height:44px;flex:none;background:currentColor;transform:translateZ(0);backface-visibility:hidden;
     -webkit-mask:url(assets/icons/Coach1.png) center/contain no-repeat;
     mask:url(assets/icons/Coach1.png) center/contain no-repeat}
-  /* De trainingsregel draagt geen vinkje maar het fluitje: hij is een ingang, geen taak. */
+  /* De trainingsregel is een ingang en geen taak, dus hij draagt alleen een vinkje zodra je
+     de hele training hebt gelopen. Er stond eerst een fluitje in de cirkel, maar die cirkel is
+     overal elders het vakje dat je afvinkt — en dan zegt een knopje erin iets anders dan het
+     doet. */
   .td-train .ti-ck{color:rgba(255,255,255,.95)}
   .trainday.licht .td-train .ti-ck{color:rgba(36,29,18,.9)}
-  .ti-fluit{width:17px;height:17px;background:currentColor;opacity:.95;
-    -webkit-mask:url(assets/icons/Coach1.png) center/contain no-repeat;
-    mask:url(assets/icons/Coach1.png) center/contain no-repeat}
   /* quiet circular whistle-only CTA pinned to the training-card top-right */
   .startbtn.compact{position:absolute;top:20px;right:20px;z-index:4;
     width:60px;height:60px;flex:none;margin:0;padding:0;border-radius:50%;gap:0;
@@ -593,6 +593,8 @@
   .vd-chips{flex-wrap:wrap;gap:7px}
   .vd-chips .ag-chip{flex:0 0 auto;padding:8px 12px}
   .vd-lab{margin:4px 0 -4px;font-size:12.5px;font-weight:700;color:var(--gray)}
+  .vd-lab-uit{font-weight:600;opacity:.8;margin:-2px 0 2px}
+  .vd-dagen-kies{margin:10px 0 2px}
   /* Waar het filmpje terechtkomt is bij toevoegen geen keuze maar een mededeling; de naam van
      de plek mag er wel uitspringen, zodat je hem leest voor je op Bewaar drukt. */
   .vd-labp{color:var(--ink)}
@@ -1012,35 +1014,43 @@
   .plt-item.af .plt-dot{background:var(--beltfill,var(--el));border-color:var(--beltfill,var(--el));
     color:var(--beltink,#fff)}
   .plt-item.nu .plt-dot{border-color:var(--blue);color:var(--blue)}
-  .plt-card{position:relative;min-height:106px;border:1px solid var(--line);border-radius:16px;
-    padding:26px 15px 13px;background:var(--surface);
+  .plt-card{position:relative;border:1px solid var(--line);border-radius:16px;
+    padding:14px 15px 13px;background:var(--surface);
     transition:background .2s ease,border-color .2s ease,opacity .2s ease}
   /* Het onderdeel dat nu aan de beurt is licht blauw op: je hoeft niet te zoeken waar je was. */
   .plt-item.nu .plt-card{background:rgba(58,92,246,.07);border-color:rgba(58,92,246,.4)}
   .plt-item.af .plt-card{opacity:.6}
-  /* Rechts in de kaart staan twee knoppen boven elkaar: bewerken bovenaan, precies waar het
-     potlood op de tijdlijn hangt, en starten eronder. De tekst houdt die strook vrij. */
-  .plt-when,.plt-ttl,.plt-eis{padding-right:58px}
-  .plt-pen{position:absolute;top:14px;right:9px;z-index:2;width:34px;height:34px;padding:0;border:0;
-    border-radius:50%;background:var(--soft);color:var(--gray);display:grid;place-items:center;
+  /* De knoppen staan niet op elke kaart, maar alleen op de kaart die je aan het lezen bent —
+     dezelfde regel als het potlood op de tijdlijn. Een lijst waar op elke regel vier knoppen
+     staan leest als een gereedschapskist; zo leest hij als een programma waar je doorheen loopt.
+     Ze staan in een strookje onder de titel: links de dingen die je aan het onderdeel doet,
+     rechts het enige dat je met het onderdeel doet. De hoogte groeit en krimpt mee, en omdat er
+     altijd precies één kaart open staat verschuift de lijst er per saldo niet van. */
+  .plt-acts{display:grid;grid-template-rows:0fr;opacity:0;pointer-events:none;
+    transition:grid-template-rows .22s cubic-bezier(.22,1,.36,1), opacity .16s ease}
+  .plt-acts > div{overflow:hidden;min-height:0}
+  .plt-item.plt-atop .plt-acts{grid-template-rows:1fr;opacity:1;pointer-events:auto}
+  .plt-strook{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin-top:11px;padding-top:11px;border-top:1px solid var(--line)}
+  .plt-grp{display:flex;align-items:center;gap:7px}
+  .plt-act{width:36px;height:36px;flex:none;padding:0;border:0;border-radius:50%;
+    background:var(--soft);color:var(--gray);display:grid;place-items:center;
     cursor:pointer;-webkit-tap-highlight-color:transparent;
-    transition:transform .2s cubic-bezier(.22,1,.36,1)}
-  .plt-pen svg{width:16px;height:16px}
-  .plt-pen:active{transform:scale(.9)}
-  /* De startknop is de enige gevulde knop op de kaart: er is maar één ding dat je hier echt
-     doet. Hij staat rechtsonder, waar je duim toch al is. */
+    transition:transform .2s cubic-bezier(.22,1,.36,1), opacity .2s ease}
+  .plt-act svg{width:16px;height:16px}
+  .plt-act[disabled]{opacity:.32;cursor:default}
+  .plt-act:not([disabled]):active{transform:scale(.9)}
   /* Alleen het onderdeel dat aan de beurt is draagt het blauwe fluitje. De andere kaarten kun
      je ook starten, maar in dezelfde stille toon als het potlood: een scherm vol accentknoppen
      zegt over elke regel even hard "begin hier", en dan wijst er niets meer. */
-  .plt-play{position:absolute;right:9px;bottom:11px;z-index:2;width:38px;height:38px;padding:0;border:0;
-    border-radius:50%;background:var(--soft);color:var(--gray);display:grid;place-items:center;
-    cursor:pointer;-webkit-tap-highlight-color:transparent;
+  .plt-play{display:flex;align-items:center;gap:8px;height:36px;padding:0 15px;border:0;
+    border-radius:999px;background:var(--soft);color:var(--gray);cursor:pointer;
+    -webkit-tap-highlight-color:transparent;font-family:var(--cond);text-transform:uppercase;
+    letter-spacing:.06em;font-size:12px;font-weight:800;
     transition:transform .2s cubic-bezier(.22,1,.36,1), background .2s ease, color .2s ease}
-  .plt-item.nu .plt-play{width:42px;height:42px;background:var(--blue);color:#fff;
+  .plt-item.nu .plt-play{background:var(--blue);color:#fff;
     box-shadow:0 8px 18px -10px rgba(30,50,160,.8)}
-  .plt-item.nu .plt-fluit{width:21px;height:21px}
-  .plt-play:active{transform:scale(.9)}
-  .plt-item.af .plt-play{background:var(--soft);color:var(--gray);box-shadow:none}
+  .plt-play:active{transform:scale(.95)}
   .plt-when{display:block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
     color:var(--gray);font-family:var(--cond)}
   .plt-ttl{display:block;margin-top:3px;font-size:15.5px;font-weight:800;line-height:1.25;color:var(--ink)}
@@ -1048,7 +1058,7 @@
   .plt-eis{display:block;margin-top:3px;font-size:12.5px;color:var(--gray)}
   /* De filmpjes staan met hun naam onder het onderdeel. Juist die naam maakt duidelijk wát je
      gaat doen; een rij naamloze miniaturen zegt niets. */
-  .plt-vids{display:flex;flex-direction:column;gap:6px;margin-top:9px;padding-right:58px}
+  .plt-vids{display:flex;flex-direction:column;gap:6px;margin-top:9px}
   .plt-vid{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:11px;
     background:var(--page);padding:5px 10px 5px 5px;color:var(--ink);text-decoration:none;
     cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -4574,6 +4584,8 @@
                     rondes: plClampRondes(it.rondes),
                     sub: (it.k==='taeryon' && plTaeryon(it.sub)) ? it.sub : '',
                     doel: parseInt(it.doel,10)||0,
+                    naam: String(it.naam||'').slice(0,40),
+                    auto: it.auto?1:0,
                     vids: (it.vids||[]).slice(0,8) });
       }
       out[d] = list;
@@ -5785,20 +5797,53 @@
     return arr.map(shortForm).join(' · ');
   }
   function clusterShort(s){ return String(s==null?'':s).replace(/\s*\(.*\)\s*$/,''); }
+  /* Welke woorden de dagkaart aandraagt. Een willekeurige groep bood net zo vaak de woorden aan
+     die je allang kent, en dan is de suggestie geen suggestie meer. Voorrang krijgt daarom wat
+     je zelf als moeilijk hebt weggelegd; daarna de groepen die nog niet op "ken ik" staan. Pas
+     als alles klaar is mag de hele lijst weer meedoen, want herhalen blijft goed. */
   function vocabOfDay(){
-    var groups=C.termen||[]; if(!groups.length) return {n:0,label:'',terms:[]};
-    var lead=dseed()%groups.length, terms=[], name=groups[lead].groep;
-    for(var k=0;k<groups.length && terms.length<15;k++){
-      var g=groups[(lead+k)%groups.length];
-      for(var j=0;j<(g.items||[]).length && terms.length<15;j++) terms.push(g.items[j]);
+    var groups=TERMEN.length ? TERMEN : (C.termen||[]);
+    if(!groups.length) return {n:0,label:'',terms:[],reden:''};
+    var moeilijk=groups.filter(function(g){ return catHard(g).length; });
+    var open=groups.filter(function(g){ return catStage(g.groep)<2; });
+    var pool = moeilijk.length ? moeilijk : (open.length ? open : groups);
+    var reden = moeilijk.length ? 'moeilijk' : (open.length ? 'open' : '');
+    var lead=dseed()%pool.length, g=pool[lead], name=g.groep, terms=[], j;
+    // De woorden die je zelf hebt weggelegd staan vooraan: daar begint het oefenen.
+    var hard=catHard(g);
+    for(j=0;j<hard.length && terms.length<15;j++) terms.push(hard[j]);
+    for(j=0;j<(g.items||[]).length && terms.length<15;j++){
+      if(terms.indexOf(g.items[j])<0) terms.push(g.items[j]);
     }
-    return {n:terms.length, label:name, terms:terms};
+    // Een kleine groep vullen we aan met de groepen erna, zodat een setje nooit half leeg is.
+    for(var k=1;k<pool.length && terms.length<15;k++){
+      var extra=pool[(lead+k)%pool.length];
+      for(j=0;j<(extra.items||[]).length && terms.length<15;j++) terms.push(extra.items[j]);
+    }
+    return {n:terms.length, label:name, terms:terms, reden:reden, hard:hard.length};
+  }
+  /* Wat de app zelf aandraagt: een setje woorden en een techniekfilmpje. Sparring en
+     zelfverdediging stonden hier ook, maar die plan je tegenwoordig zelf in bij de dag waarop
+     je traint — ze twee keer aanbieden maakte van de dagkaart een tweede programma. Wat er
+     overblijft is wat je ernaast doet: iets leren en iets kijken. */
+  function vidMissieSub(cat, sub){
+    var n=vdTel(cat, sub);
+    return n ? n+(n===1?' filmpje':' filmpjes')+' · techniek' : 'Nog geen filmpjes · tik om er een toe te voegen';
+  }
+  function woordenSub(vd){
+    if(vd.hard)              return vd.hard+(vd.hard===1?' moeilijk woord':' moeilijke woorden')+' · '+esc(clusterShort(vd.label));
+    if(vd.reden==='open')    return vd.n+' begrippen · '+esc(clusterShort(vd.label))+' · nog te leren';
+    return vd.n+' begrippen · '+esc(clusterShort(vd.label));
   }
   function missionMeta(){
     var pk=poomsaeOfDay(), vd=vocabOfDay(), ex=examRule();
     return {
       poomsae: {id:'poomsae', short:'Poomsae', n:pk.length,       label:'Poomsae',           sub:esc(poomsaeLabel(pk))},
-      woorden: {id:'woorden', short:'Woorden', n:vd.n,            label:'Koreaanse woorden', sub:vd.n+' begrippen · '+esc(clusterShort(vd.label))},
+      woorden: {id:'woorden', short:'Woorden', n:vd.n,            label:'Koreaanse woorden', sub:woordenSub(vd)},
+      vgyeorugi:{id:'vgyeorugi',short:'Gyeorugi',n:vdTel('gyeorugi','techniek'),
+                 label:'Bekijk gyeorugi-techniek', sub:esc(vidMissieSub('gyeorugi','techniek'))},
+      vpoomsae:{id:'vpoomsae',short:'Poomsae', n:vdTel('poomsae','techniek'),
+                 label:'Bekijk poomsae-techniek',  sub:esc(vidMissieSub('poomsae','techniek'))},
       hosinsul:{id:'hosinsul',short:'Hosinsul',n:hosinsulCount(), label:'Hosinsul',          sub:hosinsulCount()+' zelfverdedigingen'},
       ilbo:    {id:'ilbo',    short:'Ilbo',    n:ilboCount(),     label:'Ilbo Taeryon',      sub:ilboCount()+' één-stap sparringen'},
       ibo:     {id:'ibo',     short:'Ibo',     n:iboCount(),      label:'Ibo Taeryon',       sub:iboCount()+' twee-stap sparringen'},
@@ -5818,6 +5863,19 @@
     }
     return sec;
   }
+  /* Wat er onder "Training van vandaag" staat. Eerder stond daar welke poomsae we sterker
+     maakten, maar dat was de vorm die de app koos — en niet wat jij vandaag hebt ingepland.
+     Nu somt de regel je eigen programma op, zodat de kop en de lijst eronder hetzelfde zeggen. */
+  function tdGoalTekst(){
+    var l=plDay(new Date().getDay()), namen=[], i;
+    for(i=0;i<l.length;i++){
+      var c=plComp(l[i].k); if(!c) continue;
+      if(namen.indexOf(c.label)<0) namen.push(c.label);
+    }
+    if(!namen.length) return 'Stel je training samen';
+    if(namen.length<=3) return namen.join(' · ');
+    return namen.slice(0,3).join(' · ')+' · +'+(namen.length-3);
+  }
   function tdTrainingHtml(){
     plDoneLoad();
     var d=new Date().getDay(), l=plDay(d), naam=plDayLabel(d).toLowerCase();
@@ -5830,7 +5888,7 @@
     return '<div class="td-item td-train'+(klaar?' done':'')+'" '+
         (klaar?'style="--sk:'+strikeVar()+'" ':'')+'data-id="training">'+
       '<button class="ti-ck" data-act="start" aria-label="Open je '+esc(naam)+'training">'+
-        (klaar?IC.check:'<span class="ti-fluit" aria-hidden="true"></span>')+'</button>'+
+        (klaar?IC.check:'')+'</button>'+
       '<button class="ti-txt" data-act="start" aria-label="Open je '+esc(naam)+'training">'+
         '<span class="ti-t">Je '+esc(naam)+'training</span>'+
         '<span class="ti-s">'+esc(sub)+'</span>'+
@@ -5839,22 +5897,12 @@
     '</div>';
   }
 
-  // Vast: poomsae + proefexamen (hoort standaard bij de begeleide training).
-  // Daartussen 1 wisselende missie — gekozen op weekfocus + dagrotatie.
+  /* Twee suggesties naast je eigen training: woorden om te leren en een techniekfilmpje om te
+     bekijken. De filmpjeskant wisselt per dag tussen gyeorugi en poomsae, zodat je ze allebei
+     langs ziet komen zonder dat de kaart elke dag hetzelfde zegt. */
   function pickExtras(){
-    // Hosinsul verschijnt pas vanaf 4e geup; ilbo pas als er eisen zijn (8e geup+).
-    var all=['woorden','poomsae'];
-    if(ilboCount()>0)     all.push('ilbo');
-    if(iboCount()>0)      all.push('ibo');
-    if(hosinsulCount()>0) all.push('hosinsul');
-    var chosen=[];
-    if(WEEK_FOCUS.indexOf('termen')>=0) chosen.push('woorden');   // check-in focus op termen → woorden staat vast
-    var rot=all.filter(function(m){return chosen.indexOf(m)<0;});
-    if(rot.length){ var start=dseed()%rot.length;
-      for(var k=0; chosen.length<1 && k<rot.length; k++) chosen.push(rot[(start+k)%rot.length]); }
-    chosen=chosen.slice(0,1);
-    chosen.push('examen');   // proefexamen sluit de dag af (de 'test' na het oefenen)
-    return chosen;
+    var vids=['vgyeorugi','vpoomsae'];
+    return ['woorden', vids[dseed()%vids.length]];
   }
   /* De dagkaart opent met je eigen training van deze weekdag; daaronder draagt de app nog twee
      dingen aan. Vroeger stond poomsae bovenaan vastgeschroefd — die schuift nu mee in de
@@ -5869,11 +5917,19 @@
   function missionGoLabel(m){
     if(m.id==='examen')  return 'Start '+m.label;
     if(m.id==='woorden') return 'Open Koreaanse woorden';
+    if(m.id==='vgyeorugi' || m.id==='vpoomsae') return 'Open de filmpjes van '+
+      (m.id==='vgyeorugi'?'gyeorugi':'poomsae')+' · techniek';
     if(MISSION_HB[m.id]) return 'Open '+m.label+' in het handboek';
     return 'Oefen '+m.label;
   }
   function missionGo(id){
     if(id==='examen'){ openExam(); return; }
+    // De techniekfilmpjes wonen in hun eigen map; daar landen we rechtstreeks.
+    if(id==='vgyeorugi' || id==='vpoomsae'){
+      csEnter('filmpjes');
+      openVdCat(id==='vgyeorugi' ? 'gyeorugi' : 'poomsae', 'techniek');
+      return;
+    }
     // Woorden is zelf het tabblad, daar valt niets te sluiten — dus ook niets om naar terug te keren.
     if(id==='woorden'){ showScreen('woorden'); return; }
     var hb = MISSION_HB[id];
@@ -6050,7 +6106,7 @@
     }).join('');
     var quote = curQuote();
     var wfSet = WEEK_FOCUS.length>0;
-    var trainSub = 'We maken '+esc(f.korean)+' sterker';
+    var trainSub = tdGoalTekst();
     var ciWk = 'wk '+weekNo();
     var checkin;
     if(weekPhase()==='reflect'){
@@ -6846,10 +6902,76 @@
      kwijt die hij misschien nooit meer terugvindt. Dus vervangt het menu zichzelf door de vraag
      of je het zeker weet, met de rode knop op de plek waar eerst "Annuleer" stond — dan is
      doorklikken op de automatische piloot geen optie. */
+  /* Wanneer je dit filmpje oefent, kies je hier. Tot nu toe moest je daarvoor naar de coach,
+     de juiste dag zoeken, een onderdeel aanmaken en daar het filmpje aan hangen — terwijl je op
+     het moment dat je een filmpje bewaart al weet wanneer je ermee aan de slag wilt. Aanzetten
+     hangt het filmpje aan het onderdeel van die dag, of maakt er een; uitzetten haalt het er
+     weer af, en ruimt het onderdeel op als het alleen voor dit filmpje bestond. */
+  function vdDagenHtmlMenu(id){
+    var v=vdById(id); if(!v) return '';
+    var cat=vdPlek(v).cat, c=plComp(cat);
+    if(!c){
+      return '<p class="vd-lab vd-lab-uit">Dit filmpje staat bij Overig. Verplaats het naar een '+
+        'onderdeel, dan kun je het hier inplannen.</p>';
+    }
+    var aan=0, h='<p class="vd-lab">Wanneer oefen je dit?</p><div class="ag-chips vd-dagen-kies">';
+    for(var i=0;i<PL_DAYS.length;i++){
+      var d=PL_DAYS[i], on=vdDagAan(id, d.d); if(on) aan++;
+      h+='<button class="ag-chip'+(on?' on':'')+'" data-act="vddag" data-id="'+esc(id)+'" '+
+        'data-d="'+d.d+'" aria-pressed="'+(on?'true':'false')+'" '+
+        'aria-label="'+esc(d.label)+'">'+esc(d.s)+'</button>';
+    }
+    h+='<button class="ag-chip'+(aan===PL_DAYS.length?' on':'')+'" data-act="vddag" '+
+      'data-id="'+esc(id)+'" data-d="alle" aria-label="Alle dagen">Alle</button></div>'+
+      '<p class="vd-lab vd-lab-uit">Komt bij '+esc(c.label)+' op die dag te staan.</p>';
+    return h;
+  }
   function vdMenuHtml(id){
-    return '<button class="vd-mi" data-act="vdedit" data-id="'+esc(id)+'">Bewerken</button>'+
+    return vdDagenHtmlMenu(id)+
+      '<button class="vd-mi" data-act="vdedit" data-id="'+esc(id)+'">Bewerken</button>'+
       '<button class="vd-mi danger" data-act="vddelvraag" data-id="'+esc(id)+'">Verwijderen</button>'+
       '<button class="vd-mi cancel" data-act="vdmclose">Annuleer</button>';
+  }
+  function vdDagAan(vid, d){
+    var l=plDay(d);
+    for(var i=0;i<l.length;i++) if((l[i].vids||[]).indexOf(vid)>=0) return true;
+    return false;
+  }
+  function vdZetDag(vid, d, aan){
+    var v=vdById(vid); if(!v) return;
+    var cat=vdPlek(v).cat, l=plDay(d), i;
+    if(aan){
+      if(vdDagAan(vid, d)) return;
+      for(i=0;i<l.length;i++){
+        if(l[i].k===cat && (l[i].vids||[]).length<8){ l[i].vids.push(vid); plSave(); return; }
+      }
+      if(!plComp(cat)) return;
+      var it=plNieuwItem(cat); it.vids=[vid]; it.auto=1;
+      var plek=l.length;
+      for(i=0;i<l.length;i++) if(l[i].k===cat) plek=i+1;
+      l.splice(plek, 0, it);
+    } else {
+      for(i=l.length-1;i>=0;i--){
+        var vs=l[i].vids||[], j=vs.indexOf(vid);
+        if(j<0) continue;
+        vs.splice(j,1);
+        if(l[i].auto && !vs.length) l.splice(i,1);
+      }
+    }
+    plSave();
+  }
+  function vdWisselDag(id, dag){
+    if(dag==='alle'){
+      var alles=true, i;
+      for(i=0;i<PL_DAYS.length;i++) if(!vdDagAan(id, PL_DAYS[i].d)) alles=false;
+      for(i=0;i<PL_DAYS.length;i++) vdZetDag(id, PL_DAYS[i].d, !alles);
+    } else {
+      var d=parseInt(dag,10); if(!(d>=0&&d<=6)) return;
+      vdZetDag(id, d, !vdDagAan(id, d));
+    }
+    var b=vdMenuSheet && vdMenuSheet.querySelector('#vd-menu-body');
+    if(b) b.innerHTML=vdMenuHtml(id);
+    vdRefresh(); buzz(10);
   }
   function vdDelVraagHtml(id){
     var v=vdById(id);
@@ -6962,6 +7084,19 @@
     if(it.k==='taeryon' && plTaeryon(it.sub)) return plTaeryon(it.sub).label;
     return c.label;
   }
+  /* Wat er op de kaart staat. Alleen het onderdeel noemen gaf een lijst waarop vier keer
+     "Poomsae" stond; wat je dan eigenlijk gaat doen — dat ene filmpje, of dat je touwtje gaat
+     springen — moest je erbij onthouden. Dus komt het achter de naam van het onderdeel te
+     staan: je eigen omschrijving als je er een gaf, anders het filmpje dat eraan hangt. */
+  function plItemToevoeging(it){
+    if(it.naam) return it.naam;
+    var v=(it.vids||[]).length===1 ? vdById(it.vids[0]) : null;
+    return v ? (v.title||'') : '';
+  }
+  function plKaartTitel(it){
+    var basis=plItemNaam(it), extra=plItemToevoeging(it);
+    return extra ? basis+' · '+extra : basis;
+  }
   function plFmtSec(sec){
     if(sec<60) return sec+' sec';
     var m=Math.floor(sec/60), r=sec%60;
@@ -6995,25 +7130,53 @@
     return rijen.length ? '<div class="plt-vids">'+rijen.join('')+'</div>' : '';
   }
 
-  function plKaartHtml(it, nr, isToday, nuId){
+  var PL_IC_OP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" '+
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg>';
+  var PL_IC_NEER='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" '+
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5.5 12.5 12 19l6.5-6.5"/></svg>';
+  function plKaartHtml(it, nr, isToday, nuId, i, laatste){
     var c=plComp(it.k); if(!c) return '';
     var af = isToday && plIsDone(it.id);
     var nu = it.id===nuId;
     var eis = plEisAantal(it.k, it.sub);
+    var naam = plKaartTitel(it);
     return '<div class="plt-item'+(af?' af':'')+(nu?' nu':'')+'" data-id="'+esc(it.id)+'">'+
       '<span class="plt-dot">'+(af?IC.check:nr)+'</span>'+
       '<div class="plt-card">'+
-        '<button class="plt-pen" data-act="pledit" data-id="'+esc(it.id)+'" '+
-          'aria-label="'+esc(plItemNaam(it))+' aanpassen">'+IC.potlood+'</button>'+
-        '<button class="plt-play" data-act="plstart" data-id="'+esc(it.id)+'" '+
-          'aria-label="'+esc(plItemNaam(it))+' starten">'+
-          '<span class="plt-fluit" aria-hidden="true"></span></button>'+
         '<span class="plt-when">'+esc(plStandTekst(it))+'</span>'+
-        '<b class="plt-ttl">'+esc(plItemNaam(it))+'</b>'+
+        '<b class="plt-ttl">'+esc(naam)+'</b>'+
         (eis?'<span class="plt-eis">'+eis+' afwerkingen volgens je exameneisen</span>':'')+
         plVidRegels(it)+
+        '<div class="plt-acts"><div><div class="plt-strook">'+
+          '<span class="plt-grp">'+
+            '<button class="plt-act" data-act="pledit" data-id="'+esc(it.id)+'" '+
+              'aria-label="'+esc(naam)+' aanpassen">'+IC.potlood+'</button>'+
+            '<button class="plt-act" data-act="plschuif" data-id="'+esc(it.id)+'" data-v="-1"'+
+              (i<=0?' disabled':'')+' aria-label="Eerder in de training">'+PL_IC_OP+'</button>'+
+            '<button class="plt-act" data-act="plschuif" data-id="'+esc(it.id)+'" data-v="1"'+
+              (i>=laatste?' disabled':'')+' aria-label="Later in de training">'+PL_IC_NEER+'</button>'+
+          '</span>'+
+          '<button class="plt-play" data-act="plstart" data-id="'+esc(it.id)+'" '+
+            'aria-label="'+esc(naam)+' starten">'+
+            '<span class="plt-fluit" aria-hidden="true"></span>Start</button>'+
+        '</div></div></div>'+
       '</div>'+
     '</div>';
+  }
+  /* Welke kaart draagt de knoppen: de bovenste waarvan de kop nog helemaal in beeld staat.
+     Precies dezelfde regel als op de tijdlijn, zodat de twee lijsten zich hetzelfde gedragen. */
+  function plAtop(sc){
+    if(!sc) sc=stage.querySelector('#pl-scroll');
+    if(!sc) return;
+    var items=sc.querySelectorAll('.plt-item');
+    if(!items.length) return;
+    var box=sc.getBoundingClientRect(), kies=null, i, r;
+    for(i=0;i<items.length;i++){
+      r=items[i].getBoundingClientRect();
+      if(r.top>=box.top-2 && r.top<box.bottom-40){ kies=items[i]; break; }
+    }
+    if(!kies) kies=items[items.length-1];
+    for(i=0;i<items.length;i++) items[i].classList.toggle('plt-atop', items[i]===kies);
   }
 
   /* De onderdeelnaam staat als kop boven zijn kaarten, precies zoals het jaartal boven de
@@ -7028,7 +7191,7 @@
         vorig=it.k;
         h+='<div class="plt-kop"><span>'+esc(c.label)+'</span><i>'+esc(c.han)+'</i></div>';
       }
-      h+=plKaartHtml(it, i+1, isToday, nuId);
+      h+=plKaartHtml(it, i+1, isToday, nuId, i, list.length-1);
     }
     return h+'</div>';
   }
@@ -7051,7 +7214,9 @@
     plSel = (dag!=null && dag>=0 && dag<=6) ? dag : null;
     plDoneLoad();
     var el=document.createElement('div');
-    el.className='session coachscreen'; el.id='coachscreen';
+    // met-pil reserveert de ruimte voor de puntjesbalk én geeft hem zijn hoogte; zonder die
+    // klasse bleef de pil plat en stond er alleen een streepje achter de puntjes.
+    el.className='session coachscreen met-pil'; el.id='coachscreen';
     applyTheme(el, CUR);
     el.innerHTML=
       '<div class="shead">'+
@@ -7070,6 +7235,7 @@
     vdBindThumbs(el);
     plBindSwipe(el);
     plBindSleep(el);
+    plBindAtop(el);
     return el;
   }
   function closeCoach(){
@@ -7094,6 +7260,22 @@
     plVerversDots();
     vdBindThumbs(w); w.scrollTop=y;
     plBindSleep(coachScreen);
+    plAtop(w);
+  }
+  // De knoppenstrook volgt het rollen: tijdens het scrollen geeft elke kaart hem door.
+  function plBindAtop(el){
+    var sc=el.querySelector('#pl-scroll'); if(!sc) return;
+    sc.addEventListener('scroll', function(){ plAtop(sc); }, {passive:true});
+    requestAnimationFrame(function(){ plAtop(sc); });
+  }
+  /* Na het toevoegen wil je zien waar het terechtkwam, anders zoek je je eigen onderdeel terug
+     in een lijst die je net hebt veranderd. De kaart rolt in beeld en draagt meteen de knoppen. */
+  function plToonItem(id){
+    var sc=stage.querySelector('#pl-scroll'); if(!sc) return;
+    var k=sc.querySelector('.plt-item[data-id="'+id+'"]'); if(!k) return;
+    var box=sc.getBoundingClientRect(), r=k.getBoundingClientRect();
+    sc.scrollTo({top: Math.max(0, sc.scrollTop + (r.top-box.top) - 16), behavior:'smooth'});
+    setTimeout(function(){ plAtop(sc); }, 420);
   }
   /* Van dag wisselen: de lijst vervaagt en komt terug, de dagnaam schuift met de veegrichting
      mee naar buiten. Dezelfde beweging als tussen de woordgroepen. */
@@ -7104,12 +7286,12 @@
     plTitelSwap(dir);
     var body=w.querySelector('#pl-body'); if(!body) return;
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-      body.innerHTML=plBodyHtml(); vdBindThumbs(body); plBindSleep(coachScreen); return;
+      body.innerHTML=plBodyHtml(); vdBindThumbs(body); plBindSleep(coachScreen); plAtop(w); return;
     }
     body.classList.add('cs-fading');
     setTimeout(function(){
       body.innerHTML=plBodyHtml(); body.classList.remove('cs-fading');
-      vdBindThumbs(body); plBindSleep(coachScreen); w.scrollTop=0;
+      vdBindThumbs(body); plBindSleep(coachScreen); w.scrollTop=0; plAtop(w);
     }, 170);
   }
   // De dagnaam in de kop schuift met de veegrichting mee naar buiten, net als bij de woorden.
@@ -7245,7 +7427,7 @@
   function plNieuwItem(k){
     var c=plComp(k)||{};
     var it={id:plId(), k:k, mode:'tijd', sec:plClampSec(c.sec||180),
-            reps:10, tempo:2, rondes:2, sub:'', doel:0, vids:[]};
+            reps:10, tempo:2, rondes:2, sub:'', doel:0, naam:'', auto:0, vids:[]};
     // Onderdelen die je telt in plaats van klokt beginnen meteen in de juiste stand.
     if(k==='taeryon'){ it.sub=plTaeryonKeuzes()[0]; it.mode='reps'; it.sec=0; }
     if(k==='hosinsul' || k==='gyeokpa'){ it.mode='reps'; it.sec=0; }
@@ -7327,10 +7509,49 @@
           '<span class="pl-ph">'+esc(c.hint)+'</span></button>';
       }).join('')+'</div>', 'plan-add-ov');
   }
+  /* Een nieuw onderdeel sluit aan achter de onderdelen van dezelfde soort. Onderaan de dag
+     plakken gaf een programma in de volgorde waarin je het invoerde: dan stond je tweede
+     poomsae ineens na de cooling down, en moest je hem alsnog naar boven slepen. */
   function plAdd(k){
     var c=plComp(k); if(!c) return;
-    plDay(plCur()).push(plNieuwItem(k));
-    plSave(); plCloseSheet(); plRefresh(); buzz(14);
+    var list=plDay(plCur()), it=plNieuwItem(k), plek=list.length;
+    for(var i=0;i<list.length;i++) if(list[i].k===k) plek=i+1;
+    list.splice(plek, 0, it);
+    plSave(); plCloseSheet(); plRefresh(); plToonItem(it.id); buzz(14);
+  }
+  // Schuiven vanaf de kaart zelf; de kaart blijft in beeld zodat je hem nog een stap kunt zetten.
+  function plSchuif(id, step){
+    var d=plCur(), list=plDay(d), i=plIdx(d,id), j=i+step;
+    if(i<0 || j<0 || j>=list.length) return;
+    list.splice(j, 0, list.splice(i,1)[0]);
+    plSave(); plRefresh(); plToonItem(id); buzz(12);
+  }
+  /* De kaarten van één onderdeel staan altijd aaneengesloten — daar maakt de kop boven de groep
+     ook gebruik van. Een groep verplaatsen is dus: dit blok voor of achter het buurblok zetten,
+     zodat de hele poomsae-reeks in één keer naar voren schuift in plaats van kaart voor kaart. */
+  function plBlok(d, id){
+    var l=plDay(d), i=plIdx(d,id); if(i<0) return null;
+    var k=l[i].k, a=i, b=i;
+    while(a>0 && l[a-1].k===k) a--;
+    while(b<l.length-1 && l[b+1].k===k) b++;
+    return {a:a, b:b, k:k};
+  }
+  function plGroepSchuif(step){
+    var d=plCur(), l=plDay(d), bl=plBlok(d, plEditId); if(!bl) return;
+    var mijn, doel;
+    if(step<0){
+      if(bl.a===0) return;
+      var st=bl.a-1, kv=l[st].k;
+      while(st>0 && l[st-1].k===kv) st--;
+      mijn=l.splice(bl.a, bl.b-bl.a+1); doel=st;
+    } else {
+      if(bl.b>=l.length-1) return;
+      var en=bl.b+1, kn=l[en].k, lang=bl.b-bl.a+1;
+      while(en<l.length-1 && l[en+1].k===kn) en++;
+      mijn=l.splice(bl.a, lang); doel=en-lang+1;
+    }
+    Array.prototype.splice.apply(l, [doel,0].concat(mijn));
+    plSave(); plEditRefresh(); plRefresh(); buzz(14);
   }
 
   /* ---- Onderdeel bewerken: stand, timer, filmpjes en volgorde in één vel ---- */
@@ -7359,6 +7580,13 @@
         ? 'Je exameneisen vragen '+he+' verdedigingen.'
         : 'Hosinsul staat nog niet in je exameneisen.')+'</p>';
     }
+    /* Een eigen naam maakt van "Opwarmen" jouw opwarming. Zo kun je ook iets plannen waar de
+       app niets van weet — touwtje springen, conditieloopje — zonder dat daar een nieuw soort
+       onderdeel voor hoeft te bestaan. Laat je hem leeg, dan vult de kaart hem zelf met het
+       filmpje dat eraan hangt. */
+    h+='<div class="pl-sect">Eigen naam</div>'+
+      '<input class="ag-title" id="pl-naam" type="text" maxlength="40" autocomplete="off" '+
+        'value="'+esc(it.naam||'')+'" placeholder="Bijvoorbeeld: touwtje springen">';
     h+='<div class="pl-sect">Hoe houd je het bij?</div>'+
       '<div class="pl-seg">'+
         '<button class="'+(it.mode==='tijd'?'on':'')+'" data-act="plmode" data-m="tijd">Duur</button>'+
@@ -7391,15 +7619,32 @@
         }).join('')+'</div>';
     }
     h+='<div class="pl-sect">Filmpjes erbij</div>'+plVidKiezer(it);
-    h+='<div class="pl-ord">'+
+    h+='<div class="pl-sect">Volgorde</div>'+
+    '<div class="pl-ord">'+
       '<button class="vd-mi" data-act="plmove" data-v="-1"'+(i<=0?' disabled':'')+'>Eerder in de training</button>'+
       '<button class="vd-mi" data-act="plmove" data-v="1"'+(i>=last?' disabled':'')+'>Later in de training</button>'+
     '</div>'+
+    plGroepOrdHtml()+
     '<div class="vd-menu">'+
       '<button class="vd-mi danger" data-act="pldel">Verwijderen</button>'+
       '<button class="vd-mi cancel" data-act="plclose">Klaar</button>'+
     '</div>';
     return h;
+  }
+  /* Een onderdeel een plaats opschuiven is één ding; een hele reeks poomsae-blokken naar voren
+     halen was er tot nu toe niet, terwijl je juist dát doet als je merkt dat je liever eerst
+     sparringt. Deze knoppen verzetten het hele blok in één keer, en staan er alleen als er iets
+     is om langs te schuiven. */
+  function plGroepOrdHtml(){
+    var d=plCur(), l=plDay(d), bl=plBlok(d, plEditId); if(!bl) return '';
+    if(bl.a===0 && bl.b>=l.length-1) return '';
+    var c=plComp(bl.k), naam=c?c.label:'';
+    return '<div class="pl-ord">'+
+      '<button class="vd-mi" data-act="plgroep" data-v="-1"'+(bl.a<=0?' disabled':'')+'>'+
+        esc(naam)+' als geheel eerder</button>'+
+      '<button class="vd-mi" data-act="plgroep" data-v="1"'+(bl.b>=l.length-1?' disabled':'')+'>'+
+        esc(naam)+' als geheel later</button>'+
+    '</div>';
   }
   /* Filmpjes kies je per map. De hele verzameling in één lijst werd onvindbaar zodra je er
      twintig had; de map van het onderdeel zelf staat vooraan geselecteerd. */
@@ -7448,19 +7693,31 @@
     var it=plFind(plCur(), id); if(!it || plSheet) return;
     plEditId=id; plVidMap='';
     plOpenSheet(plItemNaam(it), plEditBody(), 'plan-edit-ov');
-    vdBindThumbs(plSheet); plBindDur();
+    vdBindThumbs(plSheet); plBindDur(); plBindNaam();
   }
   // Het vel opnieuw vullen zonder het te sluiten, zodat een keuze meteen zichtbaar is.
   function plEditRefresh(){
     var b=plSheet && plSheet.querySelector('#pl-sheet-body'); if(!b) return;
     var y=b.querySelector('.pl-vlist'), top=y?y.scrollTop:0;
-    b.innerHTML=plEditBody(); vdBindThumbs(b); plBindDur();
+    b.innerHTML=plEditBody(); vdBindThumbs(b); plBindDur(); plBindNaam();
     var n=b.querySelector('.pl-vlist'); if(n) n.scrollTop=top;
     var kop=plSheet.querySelector('.bs-head h3');
     var it=plFind(plCur(), plEditId); if(kop && it) kop.textContent=plItemNaam(it);
   }
   /* De duurschuif geeft bij elke stap meteen terugkoppeling; pas bij loslaten gaat hij de kast
      in, anders schrijven we twintig keer naar de opslag tijdens één beweging. */
+  /* De naam bewaren we bij elke toets, want het vel kan sluiten zonder dat het veld ooit de
+     aandacht verliest. De lijst eronder tekenen we pas als je klaar bent met typen: anders
+     springt de kaart bij elke letter. */
+  function plBindNaam(){
+    var v=plSheet && plSheet.querySelector('#pl-naam'); if(!v) return;
+    v.addEventListener('input', function(){
+      var it=plFind(plCur(), plEditId); if(!it) return;
+      it.naam=v.value.slice(0,40); plSave();
+    });
+    v.addEventListener('change', function(){ plRefresh(); });
+    v.addEventListener('blur', function(){ plRefresh(); });
+  }
   function plBindDur(){
     var r=plSheet && plSheet.querySelector('#pl-dur'); if(!r) return;
     var lab=plSheet.querySelector('#pl-durlab');
@@ -11743,6 +12000,8 @@
     else if(a==='plvmap'){ plZetVidMap(act.getAttribute('data-k')); }
     else if(a==='plvid'){ plToggleVid(act.getAttribute('data-id')); }
     else if(a==='plmove'){ plMove(parseInt(act.getAttribute('data-v'),10)); }
+    else if(a==='plschuif'){ plSchuif(act.getAttribute('data-id'), parseInt(act.getAttribute('data-v'),10)); }
+    else if(a==='plgroep'){ plGroepSchuif(parseInt(act.getAttribute('data-v'),10)); }
     else if(a==='pldel'){ plDelete(); }
     else if(a==='plcheck'){ plToggleDone(act.getAttribute('data-id')); plRefresh(); buzz(14); }
     else if(a==='plmiss'){ closeCoach(); missionGo(act.getAttribute('data-id')); }
@@ -11771,6 +12030,7 @@
     else if(a==='vddelnee'){ vdDelNee(); buzz(8); }
     else if(a==='vdopen'){ openVdCat(act.getAttribute('data-c'), act.getAttribute('data-s')); buzz(10); }
     else if(a==='vdcatclose'){ closeVdCat(); buzz(8); }
+    else if(a==='vddag'){ vdWisselDag(act.getAttribute('data-id'), act.getAttribute('data-d')); }
     else if(a==='vdsort'){ openVdSort(); buzz(10); }
     else if(a==='vdsortclose'){ closeVdSort(); }
     else if(a==='vdsortpick'){ VD_VIEW.sort=act.getAttribute('data-k'); vdViewSave();
