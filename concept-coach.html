@@ -1004,20 +1004,25 @@
     letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
   .plt-kop i{font-style:normal;font-family:var(--cond);font-size:12px;font-weight:700;
     letter-spacing:.04em;color:var(--gray);margin-left:7px}
-  .plt-item{position:relative;margin-bottom:12px}
+  .plt-item{position:relative;margin-bottom:14px}
   /* De halte draagt het nummer van de stap, zodat je onderweg ziet hoe ver je bent. Is het
      onderdeel af, dan staat er een vinkje. Zelfde maat en zelfde plaatsing als op de tijdlijn. */
   .plt-dot{--tlsz:32px;box-sizing:border-box;
-    position:absolute;left:calc(-22px - var(--tlsz) / 2);top:calc(40px - var(--tlsz) / 2);
+    position:absolute;left:calc(-22px - var(--tlsz) / 2);top:calc(46px - var(--tlsz) / 2);
     width:var(--tlsz);height:var(--tlsz);border-radius:50%;
     font-family:var(--cond);font-size:13px;font-weight:800;line-height:30px;
     text-align:center;color:var(--gray);background:var(--surface);border:1px solid var(--line)}
   .plt-dot svg{width:15px;height:15px;vertical-align:-3px}
+  /* De halte streept af. Je hoeft niet elk onderdeel via de timer te lopen — soms doe je iets
+     op je eigen manier en wil je het alleen wegstrepen. */
+  button.plt-dot{padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:transform .18s cubic-bezier(.22,1,.36,1)}
+  button.plt-dot:active{transform:scale(.88)}
   .plt-item.af .plt-dot{background:var(--beltfill,var(--el));border-color:var(--beltfill,var(--el));
     color:var(--beltink,#fff)}
   .plt-item.nu .plt-dot{border-color:var(--blue);color:var(--blue)}
-  .plt-card{position:relative;border:1px solid var(--line);border-radius:16px;
-    padding:14px 15px 13px;background:var(--surface);
+  .plt-card{position:relative;border:1px solid var(--line);border-radius:18px;
+    padding:18px 17px 17px;background:var(--surface);
     transition:background .2s ease,border-color .2s ease,opacity .2s ease}
   /* Het onderdeel dat nu aan de beurt is licht blauw op: je hoeft niet te zoeken waar je was. */
   .plt-item.nu .plt-card{background:rgba(58,92,246,.07);border-color:rgba(58,92,246,.4)}
@@ -1032,8 +1037,10 @@
     transition:grid-template-rows .22s cubic-bezier(.22,1,.36,1), opacity .16s ease}
   .plt-acts > div{overflow:hidden;min-height:0}
   .plt-item.plt-atop .plt-acts{grid-template-rows:1fr;opacity:1;pointer-events:auto}
+  /* Geen streep boven de knoppen: de lucht eronder scheidt al genoeg, en een lijn per kaart
+     maakt van een lijst een formulier. */
   .plt-strook{display:flex;align-items:center;justify-content:space-between;gap:12px;
-    margin-top:11px;padding-top:11px;border-top:1px solid var(--line)}
+    margin-top:26px}
   .plt-grp{display:flex;align-items:center;gap:7px;margin-left:-9px}
   /* Drie rondjes naast elkaar met een vulling erachter lezen als drie knoppen die om aandacht
      vragen; het gaat hier om bijstellen, niet om beginnen. Alleen de tekeningen blijven staan,
@@ -1058,12 +1065,12 @@
   .plt-play:active{transform:scale(.95)}
   .plt-when{display:block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
     color:var(--gray);font-family:var(--cond)}
-  .plt-ttl{display:block;margin-top:3px;font-size:15.5px;font-weight:800;line-height:1.25;color:var(--ink)}
+  .plt-ttl{display:block;margin-top:6px;font-size:15.5px;font-weight:800;line-height:1.3;color:var(--ink)}
   .plt-item.af .plt-ttl{text-decoration:line-through;text-decoration-color:var(--gray)}
-  .plt-eis{display:block;margin-top:3px;font-size:12.5px;color:var(--gray)}
+  .plt-eis{display:block;margin-top:5px;font-size:12.5px;color:var(--gray)}
   /* De filmpjes staan met hun naam onder het onderdeel. Juist die naam maakt duidelijk wát je
      gaat doen; een rij naamloze miniaturen zegt niets. */
-  .plt-vids{display:flex;flex-direction:column;gap:6px;margin-top:9px}
+  .plt-vids{display:flex;flex-direction:column;gap:7px;margin-top:13px}
   .plt-vid{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:11px;
     background:var(--page);padding:5px 10px 5px 5px;color:var(--ink);text-decoration:none;
     cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -4633,6 +4640,20 @@
     plDoneSave();
   }
   function plToggleDone(id){ plZetDone(id, !plIsDone(id)); }
+  /* Een training in één keer wegstrepen. Niet elke training loop je met de timer erbij — train
+     je in de zaal, dan wil je achteraf alleen nog kunnen zeggen dat het gebeurd is. Staat alles
+     al af, dan zet dezelfde tik hem weer open. */
+  function plTrainCheck(){
+    plDoneLoad();
+    var l=plDay(new Date().getDay()), i, alles=l.length>0;
+    for(i=0;i<l.length;i++) if(!plIsDone(l[i].id)) alles=false;
+    for(i=0;i<l.length;i++) plZetDone(l[i].id, !alles);
+    buzz(alles?10:16);
+    // De dagkaart wordt in zijn geheel opnieuw opgebouwd; de leespositie houden we vast.
+    var sc=stage.querySelector('.surface'), y=sc?sc.scrollTop:0;
+    showScreen('today');
+    var ns=stage.querySelector('.surface'); if(ns) ns.scrollTop=y;
+  }
   plDoneLoad();
 
   function geupSpan(fromISO, toISO){
@@ -5896,7 +5917,8 @@
       : 'Nog niets gepland · tik om te vullen';
     return '<div class="td-item td-train'+(klaar?' done':'')+'" '+
         (klaar?'style="--sk:'+strikeVar()+'" ':'')+'data-id="training">'+
-      '<button class="ti-ck" data-act="start" aria-label="Open je '+esc(naam)+'training">'+
+      '<button class="ti-ck" data-act="traincheck" aria-pressed="'+(klaar?'true':'false')+'" '+
+        'aria-label="Je '+esc(naam)+'training '+(klaar?'weer openzetten':'afstrepen')+'">'+
         (klaar?IC.check:'')+'</button>'+
       '<button class="ti-txt" data-act="start" aria-label="Open je '+esc(naam)+'training">'+
         '<span class="ti-t">Je '+esc(naam)+'training</span>'+
@@ -7186,7 +7208,11 @@
     var eis = plEisAantal(it.k, it.sub);
     var naam = plKaartTitel(it);
     return '<div class="plt-item'+(af?' af':'')+(nu?' nu':'')+'" data-id="'+esc(it.id)+'">'+
-      '<span class="plt-dot">'+(af?IC.check:nr)+'</span>'+
+      (isToday
+        ? '<button class="plt-dot" data-act="plcheck" data-id="'+esc(it.id)+'" '+
+            'aria-pressed="'+(af?'true':'false')+'" '+
+            'aria-label="'+esc(naam)+(af?' weer openzetten':' afstrepen')+'">'+(af?IC.check:nr)+'</button>'
+        : '<span class="plt-dot">'+nr+'</span>')+
       '<div class="plt-card">'+
         '<span class="plt-when">'+esc(plStandTekst(it))+'</span>'+
         '<b class="plt-ttl">'+esc(naam)+'</b>'+
@@ -7210,6 +7236,23 @@
   }
   /* Welke kaart draagt de knoppen: de bovenste waarvan de kop nog helemaal in beeld staat.
      Precies dezelfde regel als op de tijdlijn, zodat de twee lijsten zich hetzelfde gedragen. */
+  /* De laatste kaart kon nooit bovenaan komen, en dus verscheen haar knoppenstrook nooit: er
+     was geen ruimte meer om hem naar boven te rollen. Daarom groeit de lege ruimte onder de
+     lijst mee met wat er nog onder de laatste kaart past. */
+  function plVulAan(sc){
+    if(!sc) sc=stage.querySelector('#pl-scroll');
+    if(!sc) return;
+    var items=sc.querySelectorAll('.plt-item'), body=sc.querySelector('#pl-body');
+    if(!body) return;
+    if(!items.length){ body.style.paddingBottom=''; return; }
+    body.style.paddingBottom='0px';
+    var laatste=items[items.length-1];
+    var padCss=parseFloat(getComputedStyle(sc).paddingBottom)||0;
+    // Alles wat er vanaf de bovenrand van de laatste kaart nog onder zit.
+    var onder=body.scrollHeight - (laatste.offsetTop - body.offsetTop);
+    var ruim=Math.max(0, Math.round(sc.clientHeight - onder - padCss - 14));
+    body.style.paddingBottom = ruim+'px';
+  }
   function plAtop(sc){
     if(!sc) sc=stage.querySelector('#pl-scroll');
     if(!sc) return;
@@ -7305,13 +7348,13 @@
     plVerversDots();
     vdBindThumbs(w); w.scrollTop=y;
     plBindSleep(coachScreen);
-    plAtop(w);
+    plVulAan(w); plAtop(w);
   }
   // De knoppenstrook volgt het rollen: tijdens het scrollen geeft elke kaart hem door.
   function plBindAtop(el){
     var sc=el.querySelector('#pl-scroll'); if(!sc) return;
     sc.addEventListener('scroll', function(){ plAtop(sc); }, {passive:true});
-    requestAnimationFrame(function(){ plAtop(sc); });
+    requestAnimationFrame(function(){ plVulAan(sc); plAtop(sc); });
   }
   /* Na het toevoegen wil je zien waar het terechtkwam, anders zoek je je eigen onderdeel terug
      in een lijst die je net hebt veranderd. De kaart rolt in beeld en draagt meteen de knoppen. */
@@ -7320,7 +7363,7 @@
     var k=sc.querySelector('.plt-item[data-id="'+id+'"]'); if(!k) return;
     var box=sc.getBoundingClientRect(), r=k.getBoundingClientRect();
     sc.scrollTo({top: Math.max(0, sc.scrollTop + (r.top-box.top) - 16), behavior:'smooth'});
-    setTimeout(function(){ plAtop(sc); }, 420);
+    setTimeout(function(){ plVulAan(sc); plAtop(sc); }, 420);
   }
   /* Van dag wisselen: de lijst vervaagt en komt terug, de dagnaam schuift met de veegrichting
      mee naar buiten. Dezelfde beweging als tussen de woordgroepen. */
@@ -7331,12 +7374,13 @@
     plTitelSwap(dir);
     var body=w.querySelector('#pl-body'); if(!body) return;
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-      body.innerHTML=plBodyHtml(); vdBindThumbs(body); plBindSleep(coachScreen); plAtop(w); return;
+      body.innerHTML=plBodyHtml(); vdBindThumbs(body); plBindSleep(coachScreen);
+      plVulAan(w); plAtop(w); return;
     }
     body.classList.add('cs-fading');
     setTimeout(function(){
       body.innerHTML=plBodyHtml(); body.classList.remove('cs-fading');
-      vdBindThumbs(body); plBindSleep(coachScreen); w.scrollTop=0; plAtop(w);
+      vdBindThumbs(body); plBindSleep(coachScreen); w.scrollTop=0; plVulAan(w); plAtop(w);
     }, 170);
   }
   // De dagnaam in de kop schuift met de veegrichting mee naar buiten, net als bij de woorden.
@@ -11831,6 +11875,8 @@
     if(!act) return;
     var a = act.getAttribute('data-act');
     if(a==='start'){ openCoach(); }
+    // Het vakje op de dagkaart streept de hele training af; de tekst ernaast opent hem.
+    else if(a==='traincheck'){ plTrainCheck(); }
     else if(a==='startexam'){ openExam(); }
     else if(a==='drill'){ openDrill(act.getAttribute('data-id')); }
     else if(a==='drilldone'){ drillDone(); }
