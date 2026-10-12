@@ -2505,9 +2505,10 @@
   /* ± duration nudgers (Tijd mode): the amount lives inside the button, no floating label */
 
   /* Swap the bottom controls per mode: Herhaal+Tempo for counting, de duurkiezer voor de countdown */
-  .timerscreen[data-mode="time"] .ot-rep,
+  /* De rondeknop en de rustkiezer staan in beide standen; alleen het tempo en de rondeduur
+     horen bij een van de twee. */
   .timerscreen[data-mode="time"] .ot-tempo{display:none}
-  .timerscreen[data-mode="count"] .ot-dur{display:none}
+  .timerscreen[data-mode="count"] .ot-dur:not(.ot-rust){display:none}
 
   /* ===== Oefentimer: duurkiezer (zelfde chrome als de tempokiezer, maar met een baan) =====
      Tempo heeft vier waarden en past dus als losse schijven; de duur loopt van 30s tot 10:00
@@ -2563,10 +2564,10 @@
 
   /* ===== Rondes met rust (Timer-modus) =====
      Een wedstrijdronde duurt doorgaans 60 of 90 seconden; daarna een korte pauze en weer
-     verder. De rondenkiezer draagt dezelfde pil als de duurkiezer, met een baan van 1 tot 10.
-     De rustkiezer verschijnt pas zodra er meer dan een ronde is: anders valt er niets te rusten. */
-  .timerscreen:not(.ot-meer) .ot-rust{display:none}
-  .ot-rnd .ot-dtrack{width:132px}
+     verder. Het aantal rondes kies je met dezelfde lusknop als de herhalingen bij het tellen.
+     De rustkiezer staat er altijd, maar zonder herhaling valt er niets te rusten en is hij op slot:
+     weghalen zou de hele stapel onder je duim laten verspringen. */
+  .ot-rust .ot-dur-fab[disabled]{opacity:.34}
   .ot-uopt{position:relative;width:48px;height:44px;flex:none;border:0;background:transparent;
     color:rgba(var(--tink,255,255,255),.82);cursor:pointer;border-radius:22px;
     font-family:var(--cond);font-weight:800;font-size:19px;letter-spacing:.01em;
@@ -10169,7 +10170,9 @@
     // Restore last-used mode + duration for the Tijd (countdown) mode
     try{ var _sm=localStorage.getItem('poom_ot_mode'); if(_sm==='time'||_sm==='count') otState.mode=_sm; }catch(e){}
     try{ var _sd=parseInt(localStorage.getItem('poom_ot_dur'),10); if(_sd>=30&&_sd<=120) otState.dur=Math.round(_sd/30)*30; }catch(e){}
-    try{ var _sn=parseInt(localStorage.getItem('poom_ot_ronden'),10); if(_sn>=1&&_sn<=10) otState.ronden=_sn; }catch(e){}
+    try{ var _rn=localStorage.getItem('poom_ot_ronden');
+      if(_rn==='inf') otState.ronden=Infinity;
+      else { var _sn=parseInt(_rn,10); if(_sn>=1&&_sn<=10) otState.ronden=_sn; } }catch(e){}
     try{ var _su=parseInt(localStorage.getItem('poom_ot_rust'),10); if(_su>=5&&_su<=60) otState.rust=_su; }catch(e){}
     el.setAttribute('data-mode', otState.mode);
     var _tg = timerGroup();
@@ -10179,15 +10182,7 @@
     var tOpts = OT_TEMPOS.map(function(t){
       return '<button class="ot-topt'+(t.v===otState.speed?' on':'')+'" data-act="otspeed" data-v="'+t.v+'"><span class="ot-tlab">'+t.s+'</span></button>';
     }).join('');
-    var rOpts = OT_REPS.map(function(r){
-      var inf=r.v===Infinity, dv=inf?'inf':String(r.v);
-      var lab=inf?IC.infinity:'<span class="ot-rlab">'+r.v+'<span class="ot-tx">×</span></span>';
-      return '<button class="ot-ropt'+(r.v===otState.reps?' on':'')+(inf?' inf':'')+'" data-act="otrep" data-v="'+dv+'">'+lab+'</button>';
-    }).join('') +
-    // Opnieuw op de actieve waarde tikken zet herhalen ook uit, maar dat raadt niemand.
-    // Daarom een eigen knop, die alleen verschijnt als er iets aan staat.
-    '<button class="ot-ropt off'+(otState.reps?'':' on')+'" data-act="otrepoff" data-v="0" '+
-      'aria-label="Niet herhalen">'+IC.repeatOff+'</button>';
+    var rOpts = otRepOpties();
     // Timer is de standaard en staat daarom links, waar de duim hem het eerst raakt;
     // Herhalingen is de afwijkende keuze en staat rechts.
     var mOpts = [{m:'time',lab:'Timer',aria:'Timer',rev:true},{m:'count',lab:'1-10',aria:'Herhalingen',rev:false}].map(function(o){
@@ -10255,18 +10250,6 @@
             '<button class="ot-fab ot-tempo-fab" data-act="ottempo" aria-label="Tempo">'+
               '<span class="ot-tempo-cur" id="ot-tempo-cur">'+otTempoLabel()+'</span></button>'+
           '</div>'+
-          '<div class="ot-dur ot-rnd">'+
-            '<span class="ot-lab">Rondes</span>'+
-            '<div class="ot-dmenu"><div class="ot-dmenu-inner">'+
-              '<input class="ot-dtrack" id="ot-rtrack" type="range" min="1" max="10" step="1" '+
-                'value="'+otState.ronden+'" aria-label="Aantal rondes">'+
-              '<span class="ot-dnum"><span class="ot-dval" id="ot-rval">'+otState.ronden+'</span></span>'+
-              '<button class="ot-dok" data-act="otrndok" aria-label="Rondes bevestigen">'+IC.check+'</button>'+
-            '</div></div>'+
-            '<button class="ot-fab ot-dur-fab" data-act="otrnd" aria-label="Aantal rondes">'+
-              '<span class="ot-dur-cur"><span id="ot-rnd-cur">'+otState.ronden+'</span>'+
-                '<span class="ot-dx">\u00d7</span></span></button>'+
-          '</div>'+
           '<div class="ot-dur ot-tijd">'+
             '<span class="ot-lab">Secondes per ronde</span>'+
             '<div class="ot-dmenu"><div class="ot-dmenu-inner">'+durOpts+'</div></div>'+
@@ -10301,12 +10284,6 @@
     });
     fnav.classList.add('hide');
     // Tijd mode: sleep over de ring om de rondetijd te kiezen (hele ring = 2:00, stappen van 30s)
-    var _rtr=el.querySelector('#ot-rtrack');
-    if(_rtr){
-      var _rset=function(){ otSetRonden(+_rtr.value); buzz(4); };
-      _rtr.addEventListener('input', _rset);
-      _rtr.addEventListener('change', _rset);
-    }
     var _tap=el.querySelector('.ot-tap');
     if(_tap){
       _tap.addEventListener('pointerdown', function(e){
@@ -10753,7 +10730,35 @@
                     {v:1,s:'1',name:'Normaal'}, {v:2,s:'0,5',name:'Snel'} ];
   /* Herhaal-opties: 2× / 4× / 10× / oneindig. reps=0 = uit (speelt één keer). */
   var OT_REPS = [ {v:2}, {v:4}, {v:10}, {v:Infinity} ];
+  /* De Timer-stand telt rondes in plaats van herhalingen, maar het is dezelfde knop met
+     hetzelfde gebaar: een handvol vaste aantallen, oneindig, en niet herhalen. Een ronde
+     duurt daar minuten in plaats van seconden, dus zijn de aantallen kleiner. */
+  var OT_RONDEN = [ {v:2}, {v:3}, {v:4}, {v:Infinity} ];
   function otRepV(s){ return s==='inf' ? Infinity : parseInt(s,10); }
+  function otRepLijst(){ return otState.mode==='time' ? OT_RONDEN : OT_REPS; }
+  /* Wat er nu gekozen staat, in dezelfde taal voor beide standen: 0 betekent niet herhalen.
+     Bij Tellen is dat reps=0, bij de Timer één ronde. */
+  function otRepNu(){ return otState.mode==='time' ? (otState.ronden>1?otState.ronden:0) : otState.reps; }
+  function otRepZet(v){
+    if(otState.mode==='time'){ otSetRonden(v===0?1:v); return; }
+    otState.reps=v; otState.left=(v===Infinity?Infinity:v);
+  }
+  function otRepOpties(){
+    return otRepLijst().map(function(r){
+      var inf=r.v===Infinity, dv=inf?'inf':String(r.v);
+      var lab=inf?IC.infinity:'<span class="ot-rlab">'+r.v+'<span class="ot-tx">\u00d7</span></span>';
+      return '<button class="ot-ropt'+(r.v===otRepNu()?' on':'')+(inf?' inf':'')+'" data-act="otrep" data-v="'+dv+'">'+lab+'</button>';
+    }).join('') +
+    // Opnieuw op de actieve waarde tikken zet herhalen ook uit, maar dat raadt niemand.
+    // Daarom een eigen knop, die alleen verschijnt als er iets aan staat.
+    '<button class="ot-ropt off'+(otRepNu()?'':' on')+'" data-act="otrepoff" data-v="0" '+
+      'aria-label="Niet herhalen">'+IC.repeatOff+'</button>';
+  }
+  /* Wissel je van stand, dan verandert het rijtje aantallen mee. */
+  function otVulRepMenu(){
+    var inner=timerScreen&&timerScreen.querySelector('.ot-rmenu-inner'); if(!inner) return;
+    inner.innerHTML='<span class="ot-rthumb"></span>'+otRepOpties();
+  }
   /* 1× is one count per second, matching the 준비 lead-in beat. OT_LEADIN holds that same beat
      across the hand-off into the count, so the cadence never jumps. */
   var OT_BASE = 1000, OT_READY = 3, OT_LEADIN = 1000;
@@ -10847,16 +10852,44 @@
      koptelefoon, maar niet uit de luidspreker als de telefoon op stil staat. Daarom zetten we
      de lopende context bij een wissel even stil en starten hem opnieuw, zodat de sessie
      opnieuw wordt geactiveerd — nu onder de nieuwe categorie. */
+  var _sfxWissel=null;
   function sfxSession(wissel){ var w=_sfxLuid?'playback':'ambient';
     try{
       if(!navigator.audioSession || navigator.audioSession.type===w) return;
       navigator.audioSession.type=w;
       if(!wissel) return;
       var ac=_sfxCtx; if(!ac || ac.state!=='running') return;
-      var pr=ac.suspend(); if(pr&&pr.then) pr.then(function(){ return ac.resume(); })['catch'](function(){});
+      var pr=ac.suspend();
+      if(pr&&pr.then){
+        /* Zolang die wissel loopt staat de context stil. Een geluid dat in dat gaatje valt
+           zou je niet horen, dus onthouden we de belofte en wachten we er in sfx() op. */
+        _sfxWissel=pr.then(function(){ return ac.resume(); })['catch'](function(){})
+                     .then(function(){ _sfxWissel=null; });
+      }
       else { try{ ac.resume(); }catch(e){} }
     }catch(e){}
   }
+  /* Een context die niet loopt slikt het geluid zonder iets te zeggen: iOS zet hem stil zodra
+     de app naar de achtergrond gaat, het scherm op slot gaat of een telefoontje hem onderbreekt
+     ('interrupted' in WebKit). Hervatten gaat asynchroon, dus we spelen pas af als hij er
+     weer is — anders mist juist de bel die je wilde horen. */
+  function sfxWek(dan){
+    var ac=sfxCtx(); if(!ac) return false;
+    if(!_sfxWissel && ac.state==='running') return true;
+    var wacht=_sfxWissel||Promise.resolve();
+    wacht.then(function(){
+      if(ac.state==='running'){ dan&&dan(); return; }
+      var pr; try{ pr=ac.resume(); }catch(e){ return; }
+      if(pr&&pr.then) pr.then(function(){ dan&&dan(); })['catch'](function(){});
+      else dan&&dan();
+    })['catch'](function(){});
+    return false;
+  }
+  /* Terug uit de achtergrond: de context meteen weer wakker maken, zodat het eerste geluid
+     daarna niet het geluid is dat we kwijtraken. */
+  try{ document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState==='visible') sfxWek();
+  }); }catch(e){}
   /* Unlock + resume on the first user gesture (fires on pointerdown/touchend,
      before the click that plays a sound); re-resume on later gestures because
      iOS auto-suspends the context after inactivity/backgrounding. */
@@ -10939,7 +10972,10 @@
   function sfx(name){
     var ac=sfxCtx(); if(!ac) return;
     sfxSession();
-    if(ac.state==='suspended'){ try{ ac.resume(); }catch(e){} }
+    if(!sfxWek(function(){ sfxSpeel(name); })) return;
+    sfxSpeel(name);
+  }
+  function sfxSpeel(name){
     try{
       if(name==='check'){ if(!sfxSample('check')){ sfxTone(1760,0,0.045,'triangle',0.08); sfxTone(1046.5,0.02,0.10,'sine',0.17); sfxTone(1568,0.10,0.22,'sine',0.17); sfxTone(2093,0.10,0.15,'sine',0.05); } }
       else if(name==='uncheck'){ sfxTone(420,0,0.11,'sine',0.12); }
@@ -11027,22 +11063,30 @@
     otState._lastFrac=frac;
   }
   function otResettable(){ return otState.running || otState.phase!=='idle' || otState.i>0; }
-  function otSyncControls(){
+  /* De rondeknop staat in beide standen en ziet er in beide hetzelfde uit: het lusje met een
+     badge die aftelt hoeveel er nog komen, of het oneindigteken, of de doorgestreepte lus. */
+  function otSyncRepFab(){
     var host=timerScreen; if(!host) return;
-    otLockControls();
-    var active = otState.reps!==0;
+    var waarde=otRepNu(), active=waarde!==0, tijd=(otState.mode==='time');
+    var resterend = tijd ? Math.max(1, otState.ronden-otState.ronde+1) : otState.left;
     var rb=host.querySelector('#ot-repeat');
-    if(rb){ rb.classList.toggle('is-inf', otState.reps===Infinity);
+    if(rb){ rb.classList.toggle('is-inf', waarde===Infinity);
             rb.classList.toggle('is-noloop', !active); }
     var rw=host.querySelector('.ot-rep'); if(rw) rw.classList.toggle('has-sel', active);
     var badge=host.querySelector('#ot-rep-badge');
-    var showNum = active && otState.reps!==Infinity && otState.left>0;
+    var showNum = active && waarde!==Infinity && resterend>0;
     if(badge){
-      if(showNum){ badge.textContent=String(otState.left); badge.classList.remove('empty'); }
+      if(showNum){ badge.textContent=String(resterend); badge.classList.remove('empty'); }
       else { badge.textContent=''; badge.classList.add('empty'); }
     }
     if(rb) rb.classList.toggle('has-num', showNum);
-    [].forEach.call(host.querySelectorAll('.ot-ropt'),function(o){ o.classList.toggle('on', otRepV(o.getAttribute('data-v'))===otState.reps); });
+    [].forEach.call(host.querySelectorAll('.ot-ropt'),function(o){ o.classList.toggle('on', otRepV(o.getAttribute('data-v'))===waarde); });
+  }
+  function otSyncControls(){
+    var host=timerScreen; if(!host) return;
+    otLockControls();
+    otSyncRepFab();
+    otSyncRondes();
     var canReset=otResettable();
     var rs=host.querySelector('#ot-reset'); if(rs) rs.classList.toggle('is-off', !canReset);
     var rsc=host.querySelector('#ot-reset-ctl'); if(rsc) rsc.classList.toggle('lab-on', canReset);
@@ -11093,6 +11137,36 @@
       otState._lastFrac=frac;
     }, fo);
   }
+  /* Tussen twee herhalingen hoort dezelfde adempauze als tussen twee rondes: de bel sluit
+     de reeks af, de ring dooft, en de laatste drie tellen piepen je de volgende reeks in. */
+  function otCountRust(){
+    var host=timerScreen;
+    var sec=Math.round(otState.rust)||0;
+    if(!host || sec<=0){ otLoopWrap(); otSchedule(); return; }
+    clearTimeout(otState.iv);
+    otState.phase='crust'; otState.crest=sec;
+    sfx('bel'); buzz(20);
+    host.classList.add('ot-rusten');
+    otRenderRust();
+    otState.iv=setTimeout(otTick, 1000);
+  }
+  function otRenderRust(){
+    var host=timerScreen; if(!host) return;
+    var numEl=host.querySelector('#ot-num'), wordEl=host.querySelector('#ot-word');
+    if(numEl) numEl.textContent=String(otState.crest);
+    if(wordEl) wordEl.innerHTML='<span class="w-ko">\uc26c\uc5b4</span><span class="w-dot">\u00b7</span><span class="w-ro">rust</span>';
+  }
+  function otRustTick(){
+    otState.crest--;
+    if(otState.crest<=0){
+      if(timerScreen) timerScreen.classList.remove('ot-rusten');
+      otState.phase='count';
+      otLoopWrap(); otSchedule(); return;
+    }
+    otRenderRust();
+    if(otState.crest<=3){ sfx('beep'); buzz(10); }
+    otState.iv=setTimeout(otTick, 1000);
+  }
   function otTick(){
     if(otState.phase==='ready'){
       otState.ready--;
@@ -11106,11 +11180,12 @@
       }, OT_LEADIN);
       return;
     }
+    if(otState.phase==='crust'){ otRustTick(); return; }
     if(otState.i>=otEind()-1){
-      if(otState.reps===Infinity){ otLoopWrap(); otSchedule(); }
+      if(otState.reps===Infinity){ otCountRust(); }
       else if(otState.reps>0){
         otState.left--;
-        if(otState.left>0){ otLoopWrap(); otSchedule(); otSyncControls(); otBumpBadge(); }
+        if(otState.left>0){ otCountRust(); otSyncControls(); otBumpBadge(); }
         else {                                        // klaar: de keuze blijft staan, alleen de teller staat weer op vol
           otState.left=otState.reps;
           otStop(); otRender(); otSyncControls(); buzz(22); if(Math.random()<0.55) otMascotPeek();
@@ -11261,9 +11336,8 @@
   }
   /* Pick a herhaal count; re-tapping the active value turns repeating off (back to idle). */
   function otPickRep(dv){
-    var v=otRepV(dv), off=(v===otState.reps);
-    if(off){ otState.reps=0; otState.left=0; }
-    else { otState.reps=v; otState.left=(v===Infinity?Infinity:v); }
+    var v=otRepV(dv), off=(v===otRepNu());
+    otRepZet(off ? 0 : v);
     otSyncControls();
     var thumb=timerScreen&&timerScreen.querySelector('.ot-rthumb');
     if(thumb) thumb.style.transition='transform .24s cubic-bezier(.34,1.28,.4,1), width .24s cubic-bezier(.34,1.28,.4,1), opacity .2s ease';
@@ -11275,8 +11349,8 @@
   }
   /* De uit-knop is gewoon de vijfde keuze; hij beweegt dus in hetzelfde ritme als de rest. */
   function otRepOff(){
-    if(!otState.reps){ otCloseReps(); return; }
-    otState.reps=0; otState.left=0;
+    if(!otRepNu()){ otCloseReps(); return; }
+    otRepZet(0);
     otSyncControls(); buzz(10);
     var thumb=timerScreen&&timerScreen.querySelector('.ot-rthumb');
     if(thumb) thumb.style.transition='transform .24s cubic-bezier(.34,1.28,.4,1), width .24s cubic-bezier(.34,1.28,.4,1), opacity .2s ease';
@@ -11400,6 +11474,8 @@
   function otStop(){ if(otState.iv){ clearTimeout(otState.iv); otState.iv=null; }
     if(otState.raf){ cancelAnimationFrame(otState.raf); otState.raf=null; }
     otSheenWeg();
+    if(otState.phase==='crust'){ otState.phase='count'; }
+    if(timerScreen) timerScreen.classList.remove('ot-rusten');
     clearTimeout(otState._wrapT); clearTimeout(otState._windT); otState.running=false; }
   // Tik je midden in een glans op start, dan mag de lichtlaag niet met oude cijfers blijven hangen.
   function otSheenWeg(){
@@ -11427,7 +11503,7 @@
   }
   function otFmtTime(sec){ sec=Math.max(0, Math.round(sec)); var m=Math.floor(sec/60), s=sec%60; return m+':'+(s<10?'0':'')+s; }
   // Welke instelknoppen bij welke stand horen — de moduskiezer zelf blijft altijd staan.
-  var OT_MODE_KNOPPEN={ count:['.ot-rep','.ot-tempo'], time:['.ot-dur'] };
+  var OT_MODE_KNOPPEN={ count:['.ot-tempo'], time:['.ot-dur'] };
   // De vertrekkers moeten gemeten worden vóór data-mode omgaat, de nieuwkomers erna.
   function otModeWissel(vanaf, naar){
     var host=timerScreen; if(!host) return function(){};
@@ -11466,6 +11542,7 @@
       otStop();
       naBinnen=otModeWissel(otState.mode, m);
       otState.mode=m;
+      otVulRepMenu();   // de aantallen verschillen per stand: 2/4/10 bij tellen, 2/3/4 bij rondes
       try{ localStorage.setItem('poom_ot_mode', m); }catch(e){}
       if(timerScreen) timerScreen.setAttribute('data-mode', m);
       if(naBinnen) naBinnen();
@@ -11578,8 +11655,8 @@
      blijft die kiezer weg. De ronde waar je in zit staat boven de klok, want tijdens het
      aftellen is dat het enige dat je nog wilt weten. */
   function otSetRonden(n){
-    otState.ronden=Math.max(1, Math.min(10, Math.round(n)||1));
-    try{ localStorage.setItem('poom_ot_ronden', String(otState.ronden)); }catch(e){}
+    otState.ronden = (n===Infinity) ? Infinity : Math.max(1, Math.min(10, Math.round(n)||1));
+    try{ localStorage.setItem('poom_ot_ronden', otState.ronden===Infinity?'inf':String(otState.ronden)); }catch(e){}
     otSyncRondes();
   }
   function otSetRust(sec){
@@ -11589,22 +11666,22 @@
   }
   function otSyncRondes(){
     var host=timerScreen; if(!host) return;
-    host.classList.toggle('ot-meer', otState.ronden>1);
-    var rc=host.querySelector('#ot-rnd-cur'); if(rc) rc.textContent=String(otState.ronden);
-    var rv=host.querySelector('#ot-rval');    if(rv) rv.textContent=String(otState.ronden);
-    var rt=host.querySelector('#ot-rtrack');
-    if(rt && +rt.value!==otState.ronden) rt.value=String(otState.ronden);
+    var meer = otRepNu()!==0;
+    host.classList.toggle('ot-meer', meer);
     var uc=host.querySelector('#ot-rust-cur'); if(uc) uc.textContent=String(otState.rust);
     [].forEach.call(host.querySelectorAll('.ot-rust .ot-uopt'), function(b){
       b.classList.toggle('on', +b.getAttribute('data-v')===otState.rust); });
     var vrij=(otState.phase==='idle'||otState.phase==='done');
-    [].forEach.call(host.querySelectorAll('.ot-rnd .ot-dur-fab, .ot-rust .ot-dur-fab'), function(b){
-      b.disabled=!vrij; });
+    // Zonder herhaling valt er niets te rusten. De knop blijft dan wel staan — anders
+    // verspringt de hele stapel onder je duim — maar hij is niet in te stellen.
+    var ru=host.querySelector('.ot-rust .ot-dur-fab');
+    if(ru){ ru.disabled=!vrij||!meer; if(!meer) otPilDicht('.ot-rust'); }
     var el=host.querySelector('#ot-ronde');
     if(el){
-      var toon=(otState.ronden>1 && otState.phase!=='idle');
+      var tijd=(otState.mode==='time');
+      var toon=(tijd && otState.ronden>1 && otState.phase!=='idle');
       el.classList.toggle('on', toon);
-      el.textContent = toon ? ('Ronde '+otState.ronde+' / '+otState.ronden) : '';
+      el.textContent = toon ? ('Ronde '+otState.ronde+' / '+(otState.ronden===Infinity?'\u221e':otState.ronden)) : '';
     }
   }
   function otPilOpen(sel){
@@ -11612,7 +11689,6 @@
     var w=host.querySelector(sel); if(!w) return;
     if(w.classList.contains('open')){ otPilDicht(sel); return; }
     otCloseFan(); otCloseReps(); otCloseMode();      // maar één uitklapper tegelijk
-    otPilDicht(sel==='.ot-rnd' ? '.ot-rust' : '.ot-rnd');
     otPilDicht('.ot-tijd');
     otSyncDur();
     var menu=w.querySelector('.ot-dmenu'), inner=w.querySelector('.ot-dmenu-inner');
@@ -11630,14 +11706,14 @@
     var w=host.querySelector('.ot-tijd'); if(!w) return;
     if(w.classList.contains('open')){ otCloseDur(); return; }
     otCloseFan(); otCloseReps(); otCloseMode();      // maar één uitklapper tegelijk
-    otPilDicht('.ot-rnd'); otPilDicht('.ot-rust');
+    otPilDicht('.ot-rust');
     otSyncDur();
     var menu=w.querySelector('.ot-dmenu'), inner=w.querySelector('.ot-dmenu-inner');
     w.classList.add('open');
     if(menu&&inner) otSetPill(w, menu, otInnerBreed(inner)+26);  // 26 = 12px + 14px padding
   }
   function otCloseDur(){
-    otPilDicht('.ot-rnd'); otPilDicht('.ot-rust');
+    otPilDicht('.ot-rust');
     otPilDicht('.ot-tijd');
   }
   function otResettableTime(){ return otState.running || otState.phase==='ready' || otState.phase==='run' || otState.phase==='rust' || otState.phase==='done'; }
@@ -11728,6 +11804,8 @@
   function otSyncTime(){
     var host=timerScreen; if(!host) return;
     otLockControls();
+    otSyncRepFab();
+    otSyncRondes();
     var canReset=otResettableTime();
     var rs=host.querySelector('#ot-reset'); if(rs) rs.classList.toggle('is-off', !canReset);
     var rsc=host.querySelector('#ot-reset-ctl'); if(rsc) rsc.classList.toggle('lab-on', canReset);
@@ -12113,8 +12191,6 @@
     else if(a==='otmodemenu'){ otModeMenu(); buzz(8); }
     else if(a==='otdur'){ otDurMenu(); buzz(8); }
     else if(a==='otpickdur'){ otSetDur(+act.getAttribute('data-v')); otCloseDur(); buzz(10); }
-    else if(a==='otrnd'){ otPilOpen('.ot-rnd'); buzz(8); }
-    else if(a==='otrndok'){ otPilDicht('.ot-rnd'); buzz(10); }
     else if(a==='otrust'){ otPilOpen('.ot-rust'); buzz(8); }
     else if(a==='otpickrust'){ otSetRust(+act.getAttribute('data-v')); otPilDicht('.ot-rust'); buzz(10); }
     else if(a==='otrepeat'){ otRepeatMenu(); }
