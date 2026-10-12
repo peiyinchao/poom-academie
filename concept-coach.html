@@ -891,8 +891,6 @@
   .vdcat .vd-fab{position:fixed;opacity:0;transform:translateY(16px) scale(.88)}
   /* De puntjesbalk staat onderin; de lijst moet erboven uit kunnen rollen en de plusknop mag er
      niet half overheen hangen, dus die schuift een verdieping omhoog. */
-  .vdcat.met-pil .cs-body{padding-bottom:calc(env(safe-area-inset-bottom) + var(--pilh) + 40px)}
-  .vdcat.met-pil .vd-fab{bottom:calc(env(safe-area-inset-bottom) + var(--pilh) + 24px)}
   /* Hetzelfde verloop als op het overzicht: de lijst lost op in de pagina op de hoogte waar de
      puntjesbalk zweeft, in plaats van er onleesbaar onderdoor te schuiven. */
   .vdcat::after{content:"";position:absolute;left:0;right:0;bottom:0;z-index:38;pointer-events:none;
@@ -2550,6 +2548,38 @@
   .ot-dtrack::-moz-range-thumb{width:21px;height:21px;border:0;border-radius:50%;background:rgb(var(--tink,255,255,255));
     box-shadow:0 5px 14px -5px rgba(0,0,0,.5)}
 
+  /* ===== Rondes met rust (Timer-modus) =====
+     Een wedstrijdronde duurt doorgaans 60 of 90 seconden; daarna een korte pauze en weer
+     verder. De rondenkiezer draagt dezelfde pil als de duurkiezer, met een baan van 1 tot 10.
+     De rustkiezer verschijnt pas zodra er meer dan een ronde is: anders valt er niets te rusten. */
+  .timerscreen:not(.ot-meer) .ot-rust{display:none}
+  .ot-rnd .ot-dtrack{width:132px}
+  .ot-uopt{position:relative;width:48px;height:44px;flex:none;border:0;background:transparent;
+    color:rgba(var(--tink,255,255,255),.82);cursor:pointer;border-radius:22px;
+    font-family:var(--cond);font-weight:800;font-size:19px;letter-spacing:.01em;
+    display:grid;place-items:center;font-variant-numeric:tabular-nums;
+    transition:color .3s ease, background .3s ease, transform .16s cubic-bezier(.34,1.4,.4,1)}
+  .ot-uopt.on{color:var(--deep);background:rgb(var(--tink,255,255,255));
+    box-shadow:0 5px 14px -5px rgba(0,0,0,.5)}
+  .ot-uopt:active{transform:scale(.92)}
+  /* Vaste rondetijden staan als knopjes boven de baan: de gangbare keuzes zijn dan een tik,
+     en de baan blijft er voor al het andere. Twee regels passen niet onder het zwevende
+     label, dus dat wijkt zolang de pil openstaat — de knop eronder zei al waar je bent. */
+  .ot-dur.ot-tijd .ot-dmenu{height:100px;border-radius:34px}
+  .ot-dur.ot-tijd .ot-dmenu-inner{flex-direction:column;align-items:stretch;gap:8px;height:auto}
+  .timerscreen .ot-dur.ot-tijd.open .ot-lab{opacity:0}
+  .ot-dvast{display:flex;align-items:center;justify-content:center;gap:6px}
+  .ot-dvast .ot-uopt{width:54px;height:34px;font-size:16px;border-radius:17px}
+  .ot-drij{display:flex;align-items:center;gap:12px;height:44px}
+  /* In welke ronde je zit, boven de klok. */
+  .ot-ronde{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin-top:-84px;
+    font-family:var(--cond);font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;
+    color:rgba(var(--tink,255,255,255),.72);white-space:nowrap;pointer-events:none;
+    opacity:0;transition:opacity .3s ease}
+  .ot-ronde.on{opacity:1}
+  /* Tijdens de rust loopt dezelfde ring, maar ingetogen: het is geen werktijd. */
+  .timerscreen.ot-rusten .pt-prog{opacity:.55}
+
   /* Tijd mode: the dial always shows MM:SS (even while setting) — no Korean word / in-ring prompt */
   /* De klok mag zijn eigen hoogte pakken: daar staat tekst van vier tekens, geen los cijfer. */
   .timerscreen .pt-num.ot-tnum{line-height:1;height:auto}
@@ -3200,6 +3230,18 @@
   .hbcat .hb-exhead{position:sticky;top:0;z-index:4;background:var(--page);
     margin:0 -22px 22px;padding:2px 22px 10px}
   .hbcat .hb-exhead .hb-prog{margin-bottom:0}
+  /* De eisen vertellen wat je moet kunnen; het proefexamen laat je meteen proberen of je de
+     theorie al kent. Die knop hoort dus bij de kop en niet onderaan de lijst, waar je hem pas
+     vindt als je al langs alle eisen bent gerold. */
+  .hb-exstart{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+    margin:12px 2px 0;cursor:pointer;border:0;border-radius:14px;padding:12px 14px;
+    font-family:var(--cond);font-weight:800;font-size:15px;letter-spacing:.2px;color:#fff;
+    background:linear-gradient(135deg,var(--el),var(--deep));
+    box-shadow:0 6px 16px color-mix(in srgb, var(--deep) 32%, transparent);
+    transition:transform .14s ease,box-shadow .18s ease}
+  .hb-exstart:active{transform:scale(.97);
+    box-shadow:0 3px 9px color-mix(in srgb, var(--deep) 26%, transparent)}
+  .hb-exstart svg{width:17px;height:17px}
   .hbcat .hb-exhead::after{content:"";position:absolute;left:0;right:0;top:100%;height:14px;
     background:linear-gradient(var(--page),var(--page0));pointer-events:none}
   .hbcat .hb-exhead::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:18px;
@@ -5930,8 +5972,12 @@
      bekijken. De filmpjeskant wisselt per dag tussen gyeorugi en poomsae, zodat je ze allebei
      langs ziet komen zonder dat de kaart elke dag hetzelfde zegt. */
   function pickExtras(){
-    var vids=['vgyeorugi','vpoomsae'];
-    return ['woorden', vids[dseed()%vids.length]];
+    var vids=['vgyeorugi','vpoomsae'], l=['woorden', vids[dseed()%vids.length]];
+    // In het weekend is er tijd om de theorie te toetsen, dus dan staat het proefexamen er vast
+    // bij. Doordeweeks blijft de kaart kort: je eigen training plus twee dingen ernaast.
+    var d=new Date().getDay();
+    if(d===0 || d===6) l.push('examen');
+    return l;
   }
   /* De dagkaart opent met je eigen training van deze weekdag; daaronder draagt de app nog twee
      dingen aan. Vroeger stond poomsae bovenaan vastgeschroefd — die schuift nu mee in de
@@ -6520,39 +6566,15 @@
     var c=vdCatOf(cat), su=vdSub(c, sub);
     return su ? c.label+' · '+su.label : c.label;
   }
-  /* Alle plekken op een rij, in dezelfde volgorde als het overzicht. Dat is de reeks waar je
-     met een veeg doorheen loopt, en de puntjes onderin tellen hem af. Overig doet alleen mee
-     als er iets in zit — anders veeg je naar een lege bak die er niet eens staat. */
-  function vdPlekken(){
-    var uit=[];
-    VD_CATS.forEach(function(c){
-      if(c.k==='overig') return;
-      if(c.subs) c.subs.forEach(function(su){ uit.push({cat:c.k, sub:su.k}); });
-      else uit.push({cat:c.k, sub:''});
-    });
-    if(vdTel('overig','')) uit.push({cat:'overig', sub:''});
-    return uit.map(function(p){
-      return {id:p.cat+'/'+p.sub, cat:p.cat, sub:p.sub, label:vdTitel(p.cat, p.sub)};
-    });
-  }
-  function vdPlekIndex(cat, sub){
-    var lijst=vdPlekken(), id=cat+'/'+(sub||'');
-    for(var i=0;i<lijst.length;i++) if(lijst[i].id===id) return i;
-    return -1;
-  }
   function openVdCat(cat, sub){
     if(vdCatSheet) return;
     var c=vdCatOf(cat), su=vdSub(c, sub);
     sub = su?su.k:'';
     VD_VIEW.cat=c.k; VD_VIEW.sub=sub; vdViewSave();
     var el=document.createElement('div');
-    el.className='session catsheet hbcat vdcat met-pil';
+    el.className='session catsheet hbcat vdcat';
     el.setAttribute('data-hb', 'vd-geen');
     applyCatAccent(el, c.el);
-    var items=vdPlekken();
-    activePager={ sheet:el, items:items,
-      step:function(dir){ navVdCat(dir); },
-      pick:function(id){ gotoVdCat(id); } };
     el.innerHTML=
       '<div class="cs-hero">'+
         '<button class="cs-x" data-act="vdcatclose" aria-label="Sluiten">'+IC.x+'</button>'+
@@ -6565,53 +6587,18 @@
         '</div>'+
       '</div>'+
       '<div class="cs-body" id="vd-scroll">'+vdSheetBodyHtml(c.k, sub)+'</div>'+
-      '<div class="cs-dotstray">'+buildDotsHtml(items, c.k+'/'+sub)+'</div>'+
       '<button class="tl-fab vd-fab" data-act="vdnew" aria-label="Filmpje toevoegen" title="Filmpje toevoegen">'+
         '<span class="tl-fab-glint" aria-hidden="true"></span>'+IC.plus+'</button>';
     stage.appendChild(el);
     vdCatSheet=el;
-    attachCatSwipe(el);
-    attachDotScrub(el);
     fnav.classList.add('hide');
     vdBindThumbs(el);
     void el.offsetWidth;
     requestAnimationFrame(function(){ el.classList.add('show'); csEdgeFadeAll(el); });
   }
-  /* Van de ene map naar de andere zonder het blad te sluiten: de titel kruist net als bij de
-     woordgroepen, de lijst eronder wisselt met een vervaging. Zo houd je het gevoel dat je
-     langs een reeks loopt in plaats van telkens opnieuw ergens binnen te vallen. */
-  function swapVdCat(cat, sub, dir){
-    if(!vdCatSheet) return;
-    var c=vdCatOf(cat), su=vdSub(c, sub); sub=su?su.k:'';
-    VD_VIEW.cat=c.k; VD_VIEW.sub=sub; vdViewSave();
-    applyCatAccent(vdCatSheet, c.el);
-    csTitleSwap(vdCatSheet, esc(vdTitel(c.k, sub)), dir);
-    fadeSwap(vdCatSheet.querySelector('.cs-body'), vdSheetBodyHtml(c.k, sub));
-    setTimeout(function(){ vdBindThumbs(vdCatSheet); csEdgeFadeAll(vdCatSheet); }, 220);
-    updateDots(c.k+'/'+sub);
-  }
-  /* Voorbij het einde veert het scherm terug; vóór de eerste map is er wél iets achter je,
-     namelijk het overzicht waar je vandaan kwam. Daar terugvegen sluit het blad dus gewoon,
-     zoals een veeg terug overal in de app doet. */
-  function navVdCat(dir){
-    if(!vdCatSheet) return;
-    var lijst=vdPlekken(), i=vdPlekIndex(VD_VIEW.cat, VD_VIEW.sub);
-    if(i<0) return;
-    var j=i+dir;
-    if(j<0){ closeVdCat(); return; }
-    if(j>=lijst.length){ catEdgeBounce(dir); return; }
-    swapVdCat(lijst[j].cat, lijst[j].sub, dir);
-  }
-  function gotoVdCat(id){
-    if(!vdCatSheet) return;
-    var lijst=vdPlekken(), ci=vdPlekIndex(VD_VIEW.cat, VD_VIEW.sub), ti=-1;
-    for(var i=0;i<lijst.length;i++) if(lijst[i].id===id) ti=i;
-    if(ci<0 || ti<0 || ti===ci) return;
-    swapVdCat(lijst[ti].cat, lijst[ti].sub, ti>ci ? 1 : -1);
-  }
   function closeVdCat(){
     if(!vdCatSheet) return;
-    var s=vdCatSheet; vdCatSheet=null; activePager=null;
+    var s=vdCatSheet; vdCatSheet=null;
     if(s._pmResize){ window.removeEventListener('resize', s._pmResize); s._pmResize=null; }
     s.classList.remove('show');
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 400);
@@ -6623,14 +6610,6 @@
   function vdRefresh(){
     vdHubRefresh();
     if(!vdCatSheet) return;
-    // Overig verschijnt en verdwijnt met zijn inhoud, dus de reeks puntjes kan korter of langer
-    // worden terwijl het blad openstaat.
-    var tray=vdCatSheet.querySelector('.cs-dotstray'), items=vdPlekken();
-    if(tray && activePager && activePager.items.length!==items.length){
-      activePager.items=items;
-      tray.innerHTML=buildDotsHtml(items, VD_VIEW.cat+'/'+(VD_VIEW.sub||''));
-      attachDotScrub(vdCatSheet);
-    }
     var oudTools=vdCatSheet.querySelector('.vd-tools');
     if(oudTools){ var n=document.createElement('div'); n.innerHTML=vdToolsHtml();
       oudTools.parentNode.replaceChild(n.firstChild, oudTools); }
@@ -7547,7 +7526,7 @@
         otState.reps=w.rondes; otState.left=w.rondes;
         otState.upto=w.upto; otState.speed=1/w.tempo;
       } else {
-        otSetMode('time'); otSetDur(w.sec);
+        otSetMode('time'); otSetDur(w.sec); otSetRonden(1);
       }
     }catch(e){}
   }
@@ -9208,6 +9187,8 @@
             '<p class="hb-bron">Gebaseerd op de exameneisen van TKD-vereniging Kawarmala.</p>'+
             '<div class="hb-prog"><div class="hb-prog-bar"><i style="width:'+pct+'%"></i></div>'+
             '<span class="hb-prog-n">'+done+'/'+ond.length+'</span></div>'+
+            '<button class="hb-exstart" data-act="hbexam" aria-label="Start het proefexamen">'+
+              IC.play+'Start proefexamen</button>'+
             '</div>';
     var rows = ond.map(function(o){
       var dn = !!EXAM_CHK[o.id];
@@ -10156,6 +10137,8 @@
     // Restore last-used mode + duration for the Tijd (countdown) mode
     try{ var _sm=localStorage.getItem('poom_ot_mode'); if(_sm==='time'||_sm==='count') otState.mode=_sm; }catch(e){}
     try{ var _sd=parseInt(localStorage.getItem('poom_ot_dur'),10); if(_sd>=30&&_sd<=600) otState.dur=Math.round(_sd/30)*30; }catch(e){}
+    try{ var _sn=parseInt(localStorage.getItem('poom_ot_ronden'),10); if(_sn>=1&&_sn<=10) otState.ronden=_sn; }catch(e){}
+    try{ var _su=parseInt(localStorage.getItem('poom_ot_rust'),10); if(_su>=5&&_su<=60) otState.rust=_su; }catch(e){}
     el.setAttribute('data-mode', otState.mode);
     var _tg = timerGroup();
     applyTimerTheme(el);
@@ -10180,6 +10163,12 @@
       return '<button class="ot-mopt'+(on?' on':'')+'" data-act="otmode" data-m="'+o.m+'" role="tab" '+
         'aria-selected="'+on+'" aria-label="'+o.lab+'">'+otModeIcon(o.m)+
         '<span class="ot-mword">'+o.lab+'</span></button>';
+    }).join('');
+    var durOpts = OT_DUREN.map(function(d){
+      return '<button class="ot-uopt'+(d===otState.dur?' on':'')+'" data-act="otpickdur" data-v="'+d+'">'+d+'</button>';
+    }).join('');
+    var rustOpts = OT_RUSTEN.map(function(r){
+      return '<button class="ot-uopt'+(r===otState.rust?' on':'')+'" data-act="otpickrust" data-v="'+r+'">'+r+'</button>';
     }).join('');
     var c0 = COUNT[0];
     var mSlug = mascotBelt(geupInfo(GEUP_I));
@@ -10210,6 +10199,7 @@
                 '<span class="w-dot">·</span><span class="w-ro">'+c0[1]+'</span></div>'+
               '<div class="pt-start" id="ot-start">Tik om te starten</div>'+
             '</div>'+
+            '<div class="ot-ronde" id="ot-ronde" aria-live="polite"></div>'+
           '</div>'+
           '<div class="pt-hint" id="ot-hint">tik om te starten</div>'+
         '</div>'+
@@ -10233,14 +10223,37 @@
             '<button class="ot-fab ot-tempo-fab" data-act="ottempo" aria-label="Tempo">'+
               '<span class="ot-tempo-cur" id="ot-tempo-cur">'+otTempoLabel()+'</span></button>'+
           '</div>'+
-          '<div class="ot-dur">'+
+          '<div class="ot-dur ot-rnd">'+
+            '<span class="ot-lab">Rondes</span>'+
+            '<div class="ot-dmenu"><div class="ot-dmenu-inner">'+
+              '<input class="ot-dtrack" id="ot-rtrack" type="range" min="1" max="10" step="1" '+
+                'value="'+otState.ronden+'" aria-label="Aantal rondes">'+
+              '<span class="ot-dnum"><span class="ot-dval" id="ot-rval">'+otState.ronden+'</span>'+
+                '<span class="ot-dunit">rondes</span></span>'+
+              '<button class="ot-dok" data-act="otrndok" aria-label="Rondes bevestigen">'+IC.check+'</button>'+
+            '</div></div>'+
+            '<button class="ot-fab ot-dur-fab" data-act="otrnd" aria-label="Aantal rondes">'+
+              '<span class="ot-dur-cur" id="ot-rnd-cur">'+otState.ronden+'</span>'+
+              '<span class="ot-dunit">rondes</span></button>'+
+          '</div>'+
+          '<div class="ot-dur ot-rust">'+
+            '<span class="ot-lab">Rust</span>'+
+            '<div class="ot-dmenu"><div class="ot-dmenu-inner">'+rustOpts+'</div></div>'+
+            '<button class="ot-fab ot-dur-fab" data-act="otrust" aria-label="Rust tussen de rondes">'+
+              '<span class="ot-dur-cur" id="ot-rust-cur">'+otState.rust+'</span>'+
+              '<span class="ot-dunit">sec</span></button>'+
+          '</div>'+
+          '<div class="ot-dur ot-tijd">'+
             '<span class="ot-lab">Duur</span>'+
             '<div class="ot-dmenu"><div class="ot-dmenu-inner">'+
-              '<input class="ot-dtrack" id="ot-dtrack" type="range" min="30" max="600" step="30" '+
-                'value="'+otState.dur+'" aria-label="Duur in minuten">'+
-              '<span class="ot-dnum"><span class="ot-dval" id="ot-dval">'+otFmtTime(otState.dur)+'</span>'+
-                '<span class="ot-dunit">min</span></span>'+
-              '<button class="ot-dok" data-act="otdurok" aria-label="Duur bevestigen">'+IC.check+'</button>'+
+              '<div class="ot-dvast">'+durOpts+'</div>'+
+              '<div class="ot-drij">'+
+                '<input class="ot-dtrack" id="ot-dtrack" type="range" min="30" max="600" step="30" '+
+                  'value="'+otState.dur+'" aria-label="Duur in minuten">'+
+                '<span class="ot-dnum"><span class="ot-dval" id="ot-dval">'+otFmtTime(otState.dur)+'</span>'+
+                  '<span class="ot-dunit">min</span></span>'+
+                '<button class="ot-dok" data-act="otdurok" aria-label="Duur bevestigen">'+IC.check+'</button>'+
+              '</div>'+
             '</div></div>'+
             '<button class="ot-fab ot-dur-fab" data-act="otdur" aria-label="Duur instellen">'+
               '<span class="ot-dur-cur" id="ot-dur-cur">'+otFmtTime(otState.dur)+'</span>'+
@@ -10271,6 +10284,12 @@
       var _dset=function(){ otSetDur(+_dtr.value); buzz(4); };
       _dtr.addEventListener('input', _dset);
       _dtr.addEventListener('change', _dset);
+    }
+    var _rtr=el.querySelector('#ot-rtrack');
+    if(_rtr){
+      var _rset=function(){ otSetRonden(+_rtr.value); buzz(4); };
+      _rtr.addEventListener('input', _rset);
+      _rtr.addEventListener('change', _rset);
     }
     var _tap=el.querySelector('.ot-tap');
     if(_tap){
@@ -10725,8 +10744,11 @@
      en niet bij het tempo waarin je telt: op "4 sec / tel" bleef hij anders seconden nadraaien.
      OT_WIS is het tempo van de snelste stand, 0,5 seconde per tel. */
   var OT_WIS = OT_BASE / 2;
+  /* Vaste rondetijden en rustpauzes. Een wedstrijdronde is typisch 60 of 90 seconden. */
+  var OT_DUREN = [30,60,90,120], OT_RUSTEN = [10,20,30];
   var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, reps:0, left:0, upto:0, _lastFrac:0, _wrapT:null,
-                  mode:'time', dur:60, total:0, endAt:0, raf:null, _lastSec:0, _dragged:false, _windT:null, dragC:null, _pd:null };
+                  mode:'time', dur:60, total:0, endAt:0, raf:null, _lastSec:0, _dragged:false, _windT:null, dragC:null, _pd:null,
+                  ronden:1, rust:30, ronde:1 };
   var otTmT=null; // tempo fold-out collapse/close timer
   var otRepT=null; // herhaal fold-out close timer
   var otModeT=null; // modus fold-out close timer
@@ -10830,9 +10852,10 @@
     rate1:   'assets/sounds/vadim_makes_sound-achievement-badge-pop-sound-1-547860.mp3',
     rate2:   'assets/sounds/soundshelfstudio-mission-complete-chime-534595.mp3',
     thud:    'assets/sounds/universfield-power-punch-192118.mp3',
-    flip:    'assets/sounds/oxidvideos-taking-playing-card-2-522516.mp3'
+    flip:    'assets/sounds/oxidvideos-taking-playing-card-2-522516.mp3',
+    bel:     'assets/sounds/u_7xr5ffk4oq-opening-bell-421471.mp3'
   };
-  var SFX_GAIN={check:0.95, complete:0.85, chime:0.85, correct:0.9, wrong:0.85, exampass:0.9, examfail:0.85, beep:0.5, rate0:0.8, rate1:0.85, rate2:0.85, thud:0.95, flip:0.8};
+  var SFX_GAIN={check:0.95, complete:0.85, chime:0.85, correct:0.9, wrong:0.85, exampass:0.9, examfail:0.85, beep:0.5, rate0:0.8, rate1:0.85, rate2:0.85, thud:0.95, flip:0.8, bel:0.95};
   var _sfxBuf={}, _sfxLoading={};
   function sfxLoad(name){
     var ac=sfxCtx(); if(!ac) return;
@@ -10851,13 +10874,25 @@
     } else { viaXHR(); }
   }
   function sfxPreload(){ for(var k in SFX_SAMPLES){ sfxLoad(k); } }
-  function sfxSample(name, gain, dur){
+  /* Met 'uit' loopt het staartje van een opname zacht weg in plaats van er bruut afgehakt
+     te worden: een bel die midden in zijn naklank stopt, klinkt als een fout. */
+  function sfxSample(name, gain, dur, uit){
     var ac=sfxCtx(); if(!ac) return false;
     var buf=_sfxBuf[name]; if(!buf){ sfxLoad(name); return false; }
     try{
       var src=ac.createBufferSource(), g=ac.createGain();
-      src.buffer=buf; g.gain.value=(gain!=null?gain:(SFX_GAIN[name]||0.85));
+      var piek=(gain!=null?gain:(SFX_GAIN[name]||0.85));
+      src.buffer=buf; g.gain.value=piek;
       src.connect(g); g.connect(ac.destination);
+      if(uit>0){
+        var lang=(dur!=null?dur:buf.duration), nu=ac.currentTime, in0=Math.max(0, lang-uit);
+        /* Een rechtstreekse helling naar nul klinkt alsnog als een deur die dichtvalt: het
+           laatste stuk gaat dan zo steil dat je het hoort. Daarom zakt hij eerst rustig naar
+           een paar procent en pas in de laatste tel recht naar stil. */
+        g.gain.setValueAtTime(piek, nu+in0);
+        g.gain.exponentialRampToValueAtTime(piek*0.06, nu+lang-0.06);
+        g.gain.linearRampToValueAtTime(0.0001, nu+lang);
+      }
       if(dur!=null) src.start(0,0,dur); else src.start(0);
       return true;
     }catch(e){ return false; }
@@ -10879,6 +10914,11 @@
       else if(name==='wrong'){ if(!sfxSample('wrong')){ sfxTone(311,0,0.14,'sawtooth',0.10); sfxTone(233,0.10,0.20,'sawtooth',0.10); } }
       else if(name==='exampass'){ if(!sfxSample('exampass')){ sfxTone(1046.5,0,0.12,'sine',0.17); sfxTone(1318.5,0.10,0.12,'sine',0.17); sfxTone(1568,0.20,0.14,'sine',0.17); sfxTone(2093,0.30,0.30,'sine',0.16); } }
       else if(name==='examfail'){ if(!sfxSample('examfail')){ sfxTone(392,0,0.16,'sine',0.13); sfxTone(311,0.14,0.16,'sine',0.13); sfxTone(233,0.28,0.28,'sine',0.13); } }
+      /* De opname is 1,18 sec en wordt nog midden in de naklank afgebroken; de laatste
+         halve seconde laten we daarom zelf uitdoven, zodat de bel netjes wegsterft. */
+      else if(name==='bel'){ if(!sfxSample('bel', null, null, 0.5)){ [0,0.46].forEach(function(t){
+        sfxTone(830,t,1.5,'sine',0.20); sfxTone(1245,t,1.1,'sine',0.12);
+        sfxTone(2200,t,0.55,'sine',0.07); sfxTone(3320,t,0.30,'triangle',0.035); }); } }
       else if(name==='beep'){ if(!sfxSample('beep', null, 0.26)){ sfxTone(880,0,0.09,'sine',0.13); } }
       else if(name==='rate0'){ if(!sfxSample('rate0')){ sfxTone(311,0,0.14,'sawtooth',0.10); sfxTone(233,0.10,0.20,'sawtooth',0.10); } }
       else if(name==='rate1'){ if(!sfxSample('rate1')){ sfxTone(660,0,0.05,'sine',0.13); sfxTone(1046.5,0.05,0.12,'sine',0.12); } }
@@ -11482,26 +11522,80 @@
     var tr=host.querySelector('#ot-dtrack');
     if(tr && +tr.value!==otState.dur) tr.value=String(otState.dur);
     // Instellen kan alleen als de klok stilstaat; tijdens de aanloop en het aftellen niet.
-    var fab=host.querySelector('.ot-dur-fab');
-    if(fab) fab.disabled=!(otState.phase==='idle'||otState.phase==='done');
+    var vrij=(otState.phase==='idle'||otState.phase==='done');
+    var fab=host.querySelector('.ot-tijd .ot-dur-fab');
+    if(fab) fab.disabled=!vrij;
+    [].forEach.call(host.querySelectorAll('.ot-tijd .ot-uopt'), function(b){
+      b.classList.toggle('on', +b.getAttribute('data-v')===otState.dur); });
+    otSyncRondes();
+  }
+  /* Rondes en rust horen bij elkaar: zonder tweede ronde valt er niets te rusten, dus dan
+     blijft die kiezer weg. De ronde waar je in zit staat boven de klok, want tijdens het
+     aftellen is dat het enige dat je nog wilt weten. */
+  function otSetRonden(n){
+    otState.ronden=Math.max(1, Math.min(10, Math.round(n)||1));
+    try{ localStorage.setItem('poom_ot_ronden', String(otState.ronden)); }catch(e){}
+    otSyncRondes();
+  }
+  function otSetRust(sec){
+    otState.rust=Math.max(5, Math.min(60, Math.round(sec)||30));
+    try{ localStorage.setItem('poom_ot_rust', String(otState.rust)); }catch(e){}
+    otSyncRondes();
+  }
+  function otSyncRondes(){
+    var host=timerScreen; if(!host) return;
+    host.classList.toggle('ot-meer', otState.ronden>1);
+    var rc=host.querySelector('#ot-rnd-cur'); if(rc) rc.textContent=String(otState.ronden);
+    var rv=host.querySelector('#ot-rval');    if(rv) rv.textContent=String(otState.ronden);
+    var rt=host.querySelector('#ot-rtrack');
+    if(rt && +rt.value!==otState.ronden) rt.value=String(otState.ronden);
+    var uc=host.querySelector('#ot-rust-cur'); if(uc) uc.textContent=String(otState.rust);
+    [].forEach.call(host.querySelectorAll('.ot-rust .ot-uopt'), function(b){
+      b.classList.toggle('on', +b.getAttribute('data-v')===otState.rust); });
+    var vrij=(otState.phase==='idle'||otState.phase==='done');
+    [].forEach.call(host.querySelectorAll('.ot-rnd .ot-dur-fab, .ot-rust .ot-dur-fab'), function(b){
+      b.disabled=!vrij; });
+    var el=host.querySelector('#ot-ronde');
+    if(el){
+      var toon=(otState.ronden>1 && otState.phase!=='idle');
+      el.classList.toggle('on', toon);
+      el.textContent = toon ? ('Ronde '+otState.ronde+' / '+otState.ronden) : '';
+    }
+  }
+  function otPilOpen(sel){
+    var host=timerScreen; if(!host) return;
+    var w=host.querySelector(sel); if(!w) return;
+    if(w.classList.contains('open')){ otPilDicht(sel); return; }
+    otCloseFan(); otCloseReps(); otCloseMode();      // maar één uitklapper tegelijk
+    otPilDicht(sel==='.ot-rnd' ? '.ot-rust' : '.ot-rnd');
+    otPilDicht('.ot-tijd');
+    otSyncDur();
+    var menu=w.querySelector('.ot-dmenu'), inner=w.querySelector('.ot-dmenu-inner');
+    w.classList.add('open');
+    if(menu&&inner) otSetPill(w, menu, inner.offsetWidth+26);
+  }
+  function otPilDicht(sel){
+    var host=timerScreen; if(!host) return;
+    var w=host.querySelector(sel); if(!w || !w.classList.contains('open')) return;
+    w.classList.remove('open');
+    var menu=w.querySelector('.ot-dmenu'); if(menu){ menu.style.transition=''; menu.style.width=''; }
   }
   function otDurMenu(){
     var host=timerScreen; if(!host) return;
-    var w=host.querySelector('.ot-dur'); if(!w) return;
+    var w=host.querySelector('.ot-tijd'); if(!w) return;
     if(w.classList.contains('open')){ otCloseDur(); return; }
     otCloseFan(); otCloseReps(); otCloseMode();      // maar één uitklapper tegelijk
+    otPilDicht('.ot-rnd'); otPilDicht('.ot-rust');
     otSyncDur();
     var menu=w.querySelector('.ot-dmenu'), inner=w.querySelector('.ot-dmenu-inner');
     w.classList.add('open');
     if(menu&&inner) otSetPill(w, menu, inner.offsetWidth+26);  // 26 = 12px + 14px padding
   }
   function otCloseDur(){
-    var host=timerScreen; if(!host) return;
-    var w=host.querySelector('.ot-dur'); if(!w || !w.classList.contains('open')) return;
-    w.classList.remove('open');
-    var menu=w.querySelector('.ot-dmenu'); if(menu){ menu.style.transition=''; menu.style.width=''; }
+    otPilDicht('.ot-rnd'); otPilDicht('.ot-rust');
+    otPilDicht('.ot-tijd');
   }
-  function otResettableTime(){ return otState.running || otState.phase==='ready' || otState.phase==='run' || otState.phase==='done'; }
+  function otResettableTime(){ return otState.running || otState.phase==='ready' || otState.phase==='run' || otState.phase==='rust' || otState.phase==='done'; }
   /* ---- De zandloper op de moduskiezer loopt mee met de aftelling ----
      Het bovenste zand loopt leeg richting de hals, het onderste groeit vanaf de bodem. Beide
      vormen zijn elkaars spiegelbeeld, dus na een halve slag neemt de een de rol van de ander
@@ -11576,7 +11670,8 @@
         prog=host.querySelector('#ot-prog'), knobg=host.querySelector('#ot-knobg'),
         hint=host.querySelector('#ot-hint'), dial=host.querySelector('.ptimer');
     if(!numEl) return;
-    var idle=(otState.phase==='idle'), running=(otState.phase==='run'), done=(otState.phase==='done');
+    var idle=(otState.phase==='idle'), rust=(otState.phase==='rust'), done=(otState.phase==='done');
+    var running=(otState.phase==='run'||rust);
     var ready=(otState.phase==='ready');
     otZandloper(idle ? 0 : (ready ? 1 : (otState.total>0 ? Math.max(0, otState.left/otState.total) : 0)));
     otStroom(running && otState.running);
@@ -11605,11 +11700,13 @@
     if(wordEl){
       wordEl.innerHTML = idle
         ? '<span class="ot-tsub">Tik om te starten</span>'
-        : (running ? '<span class="ot-tcue" aria-hidden="true">'+(otState.running?IC.pause:IC.play)+'</span>' : '');
+        : (rust ? '<span class="ot-tsub">Rust</span>'
+                : (running ? '<span class="ot-tcue" aria-hidden="true">'+(otState.running?IC.pause:IC.play)+'</span>' : ''));
       // Alleen als het teken er staat mag de regel geen hoogte pakken: zo blijven de
       // cijfers netjes in het midden van de ring staan.
-      wordEl.classList.toggle('ot-cueonly', !idle && running);
+      wordEl.classList.toggle('ot-cueonly', !idle && running && !rust);
     }
+    host.classList.toggle('ot-rusten', rust);
     var frac = idle ? (otState.dur/600) : (otState.total>0 ? Math.max(0, otState.left/otState.total) : 0);
     var C=666, noTrans=!!(opts&&opts.noTrans);
     if(prog){ if(noTrans) prog.style.transition='none'; prog.style.strokeDashoffset=String(C*(1-frac)); }
@@ -11628,6 +11725,7 @@
     otDraaiZandloper(false, 0);                  // het glas draait terug en is weer uitgelopen
     if(timerScreen) timerScreen.classList.remove('ot-paused','running');
     otState.phase='idle'; otState.left=otState.dur; otState._lastSec=0; otState._dragged=false;
+    otState.ronde=1; if(timerScreen) timerScreen.classList.remove('ot-rusten');
     var pr=timerScreen&&timerScreen.querySelector('#ot-prog'), kg=timerScreen&&timerScreen.querySelector('#ot-knobg');
     if(pr){ pr.style.opacity=''; pr.style.transition='none'; }
     if(kg){ kg.style.opacity=''; kg.style.transition='none'; }
@@ -11641,7 +11739,7 @@
     // Eerst drie tellen Junbi, eindigend op Sijak — precies zoals bij Tellen, zodat je
     // je klaar kunt zetten voordat de tijd loopt.
     otState.phase='ready'; otState.ready=OT_READY; otState.running=true;
-    otState._dragged=false;
+    otState._dragged=false; otState.ronde=1; host.classList.remove('ot-rusten');
     otDraaiZandloper(true, 1);                   // het glas gaat om: het zand begint straks te lopen
     var pr0=host.querySelector('#ot-prog'), kg0=host.querySelector('#ot-knobg');
     if(pr0){ pr0.style.transition='none'; pr0.style.strokeDashoffset='666'; }
@@ -11663,6 +11761,7 @@
   function otRunTime(){
     var host=timerScreen; if(!host) return;
     var dial=host.querySelector('.ptimer'); if(dial) dial.classList.remove('idle','ready');
+    host.classList.remove('ot-rusten');
     otState.phase='run'; otState.running=true;
     otState.total=otState.dur; otState.left=otState.dur; otState._lastSec=Math.ceil(otState.dur);
     var numEl=host.querySelector('#ot-num'); if(numEl){ numEl.classList.add('ot-tnum'); numEl.textContent=otFmtTime(otState.dur); }
@@ -11688,7 +11787,8 @@
     }, WIND);
   }
   function otCountFrame(){
-    if(!timerScreen || otState.mode!=='time' || !otState.running || otState.phase!=='run'){ return; }
+    if(!timerScreen || otState.mode!=='time' || !otState.running ||
+       (otState.phase!=='run' && otState.phase!=='rust')){ return; }
     var left=Math.max(0, (otState.endAt-performance.now())/1000);
     otState.left=left;
     otRenderTime({noTrans:true});
@@ -11697,7 +11797,28 @@
       if(sec>=1 && sec<=3){ sfx('beep'); buzz(10); }     // 3 · 2 · 1 lead-out before zero
       otState._lastSec=sec;
     }
-    if(left<=0.001){ otFinishTime(); return; }
+    if(left<=0.001){ otFaseKlaar(); return; }
+    otState.raf=requestAnimationFrame(otCountFrame);
+  }
+  /* Einde van een ronde: de bel luidt, de rust telt af — en omdat de laatste drie tellen al
+     piepen, loopt die rust vanzelf uit op een 3-2-1 naar de volgende ronde toe. Pas na de
+     laatste ronde is de oefening echt klaar. */
+  function otFaseKlaar(){
+    if(otState.phase==='rust'){ otState.ronde++; sfx('bel'); buzz(20); otRunTime(); return; }
+    if(otState.ronde < otState.ronden){ sfx('bel'); buzz(20); otRustTime(); return; }
+    otFinishTime();
+  }
+  function otRustTime(){
+    var host=timerScreen; if(!host) return;
+    if(otState.raf){ cancelAnimationFrame(otState.raf); otState.raf=null; }
+    clearTimeout(otState._windT);
+    otState.phase='rust'; otState.running=true;
+    otState.total=otState.rust; otState.left=otState.rust; otState._lastSec=Math.ceil(otState.rust);
+    var prog=host.querySelector('#ot-prog'), knobg=host.querySelector('#ot-knobg');
+    if(prog) prog.style.transition='none';
+    if(knobg) knobg.style.transition='none';
+    otState.endAt=performance.now()+otState.rust*1000;
+    otRenderTime({noTrans:true}); otSyncTime();
     otState.raf=requestAnimationFrame(otCountFrame);
   }
   function otFinishTime(){
@@ -11705,9 +11826,12 @@
     if(otState.raf){ cancelAnimationFrame(otState.raf); otState.raf=null; }
     clearTimeout(otState._windT);
     otState.running=false; otState.phase='done'; otState.left=0;
+    host.classList.remove('ot-rusten');
     otRenderTime({noTrans:true});
     host.classList.remove('running');
-    sfx('complete'); buzz(30);
+    /* Draaide je rondes, dan sluit de bel ook de laatste af: een jubelend geluidje erachteraan
+       klinkt alsof er iets anders klaar is dan waar je mee bezig was. */
+    sfx(otState.mode==='time' && otState.ronden>1 ? 'bel' : 'complete'); buzz(30);
     otSyncTime();
     if(Math.random()<0.6) otMascotPeek();
     plTimerKlaar();
@@ -11731,14 +11855,14 @@
   }
   function otTapTime(e){
     if(otState._dragged){ otState._dragged=false; return; }   // swallow the click that ends a ring-drag
-    var wd=timerScreen&&timerScreen.querySelector('.ot-dur');
-    if(wd && wd.classList.contains('open')){ otCloseDur(); return; }  // eerst de uitklapper wegdoen
+    var wd=timerScreen&&timerScreen.querySelector('.ot-dur.open');
+    if(wd){ otCloseDur(); return; }                                   // eerst de uitklapper wegdoen
     var wm2=timerScreen&&timerScreen.querySelector('.ot-mode');
     if(wm2 && wm2.classList.contains('open')){ otCloseMode(); return; }
     if(!otInDial(e)) return;
     if(otState.phase==='ready'){ otResetTime(); buzz(10); return; }  // tik tijdens Junbi → afbreken
     if(otState.running){ otPauseTime(); return; }
-    if(otState.phase==='run'){ otResumeTime(); return; }       // paused mid-countdown
+    if(otState.phase==='run'||otState.phase==='rust'){ otResumeTime(); return; }   // paused mid-countdown
     otStartTime();                                             // idle or finished → (re)start
   }
   /* When a set finishes, now and then a mascot rises from the bottom to greet Jayden — large face,
@@ -11909,6 +12033,11 @@
     else if(a==='otmodemenu'){ otModeMenu(); buzz(8); }
     else if(a==='otdur'){ otDurMenu(); buzz(8); }
     else if(a==='otdurok'){ otCloseDur(); buzz(10); }
+    else if(a==='otpickdur'){ otSetDur(+act.getAttribute('data-v')); otCloseDur(); buzz(10); }
+    else if(a==='otrnd'){ otPilOpen('.ot-rnd'); buzz(8); }
+    else if(a==='otrndok'){ otPilDicht('.ot-rnd'); buzz(10); }
+    else if(a==='otrust'){ otPilOpen('.ot-rust'); buzz(8); }
+    else if(a==='otpickrust'){ otSetRust(+act.getAttribute('data-v')); otPilDicht('.ot-rust'); buzz(10); }
     else if(a==='otrepeat'){ otRepeatMenu(); }
     else if(a==='otrep'){ otPickRep(act.getAttribute('data-v')); }
     else if(a==='otrepoff'){ otRepOff(); }
@@ -12041,14 +12170,16 @@
         var _pk=bpPending.k, _pd=bpPending.date; bpPending=null;
         GEUP_DATES[_pk]=_pd; gdSave(); setBelt(_pk, true); bpRenderGrad(_pk);
         var ge=stage.querySelector('#bp-grad'); if(ge) bpFlash(ge,'pop');
-        buzz(20); try{ sfx('complete'); }catch(_e){}
+        /* Alleen een trilling: dat deuntje hoort bij het afstrepen van woorden, niet bij
+           het vastleggen van een gebeurtenis op de tijdlijn. */
+        buzz(20);
       } }
     else if(a==='gxcancel'){ closeGradeSheet(); buzz(10); }
     else if(a==='gxphdel' || a==='gx2phdel'){ phDelSleuf(a.replace('phdel','')); }
     else if(a==='gxphfit' || a==='gx2phfit'){ phSetFit(a.replace('phfit',''), act.getAttribute('data-fit')); }
     else if(a==='gxsave'){ gxSync();
       if(gxDraft && gxDraft.date){
-        var _gk=gxDraft.k, _had=!!GEUP_DATES[_gk];
+        var _gk=gxDraft.k;
         GEUP_DATES[_gk]=gxDraft.date; gdSave();
         gmSet(_gk, {exam:gxDraft.exam});
         phBewaarPaar('g'+_gk, gxDraft, function(ok){
@@ -12057,8 +12188,7 @@
         // Sta je lager ingesteld dan wat je net invulde, dan klopt je graad niet meer.
         if(_gk>GEUP_I) setBelt(_gk, true);
         bpRenderGrad(bpCurK());
-        // Zelfde afspraak als bij de agenda: alleen een nieuwe graduatie is een mijlpaal.
-        buzz(20); if(!_had){ try{ sfx('complete'); }catch(_e){} }
+        buzz(20);
         closeGradeSheet();
       } }
     else if(a==='gxdel'){
@@ -12148,6 +12278,7 @@
     else if(a==='hardterm'){ toggleHardTerm(act.getAttribute('data-k'), act); }
     else if(a==='setmastery'){ setCatStage(act.getAttribute('data-groep'), +act.getAttribute('data-stage'), act); }
     else if(a==='examchk'){ toggleExamChk(act.getAttribute('data-k')); }
+    else if(a==='hbexam'){ openExam(); }
     else if(a==='openhb'){ openHb(act.getAttribute('data-hb')); }
     else if(a==='hbclose'){ closeHb(); }
     else if(a==='openpoom'){ openPoomDetail(act.getAttribute('data-id')); }
