@@ -4586,7 +4586,10 @@
     {k:'hosinsul', label:'Hosinsul',     han:'호신술', hint:'Zelfverdediging'},
     {k:'taeryon',  label:'Taeryon',      han:'대련',   hint:'Stapsparren met een partner'},
     {k:'gyeokpa',  label:'Gyeokpa',      han:'격파',   hint:'Breektest'},
-    {k:'cooling',  label:'Cooling down', han:'정리',   hint:'Rustig uitlopen',                  sec:180}
+    {k:'cooling',  label:'Cooling down', han:'정리',   hint:'Rustig uitlopen',                  sec:180},
+    /* Het proefexamen is geen oefening met een klok eromheen maar de meerkeuzetoets uit het
+       Handboek. Het staat hier zodat je de theorie net zo goed kunt inplannen als het sparren. */
+    {k:'examen',   label:'Proefexamen',  han:'시험',   hint:'Toets je theorie met meerkeuzevragen'}
   ];
   function plComp(k){
     for(var i=0;i<PL_COMPS.length;i++) if(PL_COMPS[i].k===k) return PL_COMPS[i];
@@ -5972,12 +5975,11 @@
      bekijken. De filmpjeskant wisselt per dag tussen gyeorugi en poomsae, zodat je ze allebei
      langs ziet komen zonder dat de kaart elke dag hetzelfde zegt. */
   function pickExtras(){
-    var vids=['vgyeorugi','vpoomsae'], l=['woorden', vids[dseed()%vids.length]];
-    // In het weekend is er tijd om de theorie te toetsen, dus dan staat het proefexamen er vast
-    // bij. Doordeweeks blijft de kaart kort: je eigen training plus twee dingen ernaast.
-    var d=new Date().getDay();
-    if(d===0 || d===6) l.push('examen');
-    return l;
+    var vids=['vgyeorugi','vpoomsae'], d=new Date().getDay();
+    // De kaart houdt het op drie regels: je eigen training plus twee dingen ernaast. In het
+    // weekend is er tijd om de theorie te toetsen, dus dan neemt het proefexamen de plek van
+    // het techniekfilmpje in — en niet die van de woorden, want die bevraagt het examen juist.
+    return ['woorden', (d===0 || d===6) ? 'examen' : vids[dseed()%vids.length]];
   }
   /* De dagkaart opent met je eigen training van deze weekdag; daaronder draagt de app nog twee
      dingen aan. Vroeger stond poomsae bovenaan vastgeschroefd — die schuift nu mee in de
@@ -7149,6 +7151,7 @@
   function plTempoTekst(t){ return (t===0.5?'0,5':String(t).replace('.',','))+' sec per tel'; }
   // De regel boven de titel vertelt in één blik hoe lang het duurt of hoe vaak je het doet.
   function plStandTekst(it){
+    if(it.k==='examen'){ var n=examRule().total; return n+' vragen · meerkeuze'; }
     if(it.mode==='reps') return it.reps+'× · '+it.rondes+(it.rondes===1?' ronde':' rondes')+' · '+plTempoTekst(it.tempo);
     return it.sec ? plFmtSec(it.sec) : 'Geen timer';
   }
@@ -7497,6 +7500,7 @@
     // Onderdelen die je telt in plaats van klokt beginnen meteen in de juiste stand.
     if(k==='taeryon'){ it.sub=plTaeryonKeuzes()[0]; it.mode='reps'; it.sec=0; }
     if(k==='hosinsul' || k==='gyeokpa'){ it.mode='reps'; it.sec=0; }
+    if(k==='examen'){ it.mode='tijd'; it.sec=0; }
     return it;
   }
 
@@ -7508,6 +7512,8 @@
   function plStart(id){
     var it=plFind(plCur(), id); if(!it) return;
     plLopendId = (plCur()===plToday()) ? id : null;
+    // Het proefexamen heeft zijn eigen scherm; de oefentimer heeft er niets te zoeken.
+    if(it.k==='examen'){ openExam(); return; }
     // De timer herstelt bij het openen zijn eigen laatste stand; deze wens zetten we daar
     // overheen zodat je precies krijgt wat er op de kaart staat.
     PL_WENS = it.mode==='reps'
@@ -7532,6 +7538,14 @@
   }
   /* De timer meldt dat hij klaar is. Was hij gestart vanuit de coach, dan strepen we het
      onderdeel af en gaan we terug naar het programma: de volgende kaart licht dan vanzelf op. */
+  /* Het examen meldt zelf dat je geslaagd bent. Alleen dan strepen we de kaart af: zakken is
+     geen reden om het onderdeel als gedaan te beschouwen, dan probeer je het gewoon nog eens. */
+  function plExamenKlaar(){
+    if(!plLopendId) return;
+    var id=plLopendId; plLopendId=null;
+    plZetDone(id, true);
+    if(coachScreen) plRefresh();
+  }
   function plTimerKlaar(){
     if(!plLopendId) return;
     var id=plLopendId; plLopendId=null;
@@ -7653,6 +7667,11 @@
     h+='<div class="pl-sect">Eigen naam</div>'+
       '<input class="ag-title" id="pl-naam" type="text" maxlength="40" autocomplete="off" '+
         'value="'+esc(it.naam||'')+'" placeholder="Bijvoorbeeld: touwtje springen">';
+    // Het examen stelt zijn eigen aantal vragen in op je graad; daar valt niets te klokken.
+    if(it.k==='examen'){
+      h+='<p class="pl-uit" style="margin-top:2px">Het proefexamen stelt je '+examRule().total+
+         ' meerkeuzevragen. Slaag je, dan streept dit onderdeel zichzelf af.</p>';
+    } else {
     h+='<div class="pl-sect">Hoe houd je het bij?</div>'+
       '<div class="pl-seg">'+
         '<button class="'+(it.mode==='tijd'?'on':'')+'" data-act="plmode" data-m="tijd">Duur</button>'+
@@ -7684,7 +7703,8 @@
             esc(t.l)+'</button>';
         }).join('')+'</div>';
     }
-    h+='<div class="pl-sect">Filmpjes erbij</div>'+plVidKiezer(it);
+    }
+    if(it.k!=='examen') h+='<div class="pl-sect">Filmpjes erbij</div>'+plVidKiezer(it);
     h+='<div class="pl-sect">Volgorde</div>'+
     '<div class="pl-ord">'+
       '<button class="vd-mi" data-act="plmove" data-v="-1"'+(i<=0?' disabled':'')+'>Eerder in de training</button>'+
@@ -10038,6 +10058,8 @@
     var body = examEl.querySelector('#ex-body');
     var foot = examEl.querySelector('#ex-foot');
     if(passed && ('examen' in missionDone)){ missionDone.examen = true; missionsSave(); }
+    // Stond het examen als onderdeel in je training, dan streept slagen die kaart ook af.
+    if(passed) plExamenKlaar();
     var mSlug = mascotBelt(geupInfo(GEUP_I));   // result hero belt matches the profile grade
     var coachFace = (s.goed >= Math.ceil(s.pass*0.6)) ? 'coach-point' : 'coach-point-serious'; // gentle when close, calm-serious when the score was low
     var hero = passed
