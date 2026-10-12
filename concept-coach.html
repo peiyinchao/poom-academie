@@ -2515,6 +2515,9 @@
     font-variant-numeric:tabular-nums}
   .ot-dunit{font-family:var(--cond);font-weight:800;font-size:9.5px;line-height:1;letter-spacing:.06em;
     text-transform:lowercase;opacity:.62}
+  /* Rondes draagt geen eenheid maar een maalteken achter het getal — zelfde taal als de
+     herhaalknop bij Tellen, waar "6×" ook al zes keer betekent. */
+  .ot-dur-cur .ot-dx{font-size:12px;opacity:.7;margin-left:1px}
   .ot-dmenu{position:absolute;left:0;bottom:3px;height:58px;width:64px;z-index:2;overflow:hidden;
     display:flex;align-items:center;justify-content:flex-start;padding:6px 14px 6px 12px;box-sizing:border-box;
     border-radius:29px;background:rgba(16,8,4,.52);border:1px solid rgba(var(--tink,255,255,255),.24);
@@ -2562,15 +2565,11 @@
   .ot-uopt.on{color:var(--deep);background:rgb(var(--tink,255,255,255));
     box-shadow:0 5px 14px -5px rgba(0,0,0,.5)}
   .ot-uopt:active{transform:scale(.92)}
-  /* Vaste rondetijden staan als knopjes boven de baan: de gangbare keuzes zijn dan een tik,
-     en de baan blijft er voor al het andere. Twee regels passen niet onder het zwevende
-     label, dus dat wijkt zolang de pil openstaat — de knop eronder zei al waar je bent. */
-  .ot-dur.ot-tijd .ot-dmenu{height:100px;border-radius:34px}
-  .ot-dur.ot-tijd .ot-dmenu-inner{flex-direction:column;align-items:stretch;gap:8px;height:auto}
-  .timerscreen .ot-dur.ot-tijd.open .ot-lab{opacity:0}
-  .ot-dvast{display:flex;align-items:center;justify-content:center;gap:6px}
-  .ot-dvast .ot-uopt{width:54px;height:34px;font-size:16px;border-radius:17px}
-  .ot-drij{display:flex;align-items:center;gap:12px;height:44px}
+  /* Een ronde duurt 30, 60, 90 of 120 seconden; langer is geen ronde meer. Vier knopjes dus,
+     net als bij de rust — en omdat er geen baan meer naast staat, past het label "Secondes per
+     ronde" er nog naast. Daarvoor staan de knopjes wel iets dichter op elkaar. */
+  .ot-dur.ot-tijd .ot-dmenu-inner{gap:6px}
+  .ot-dur.ot-tijd .ot-uopt{width:46px}
   /* In welke ronde je zit, boven de klok. */
   .ot-ronde{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin-top:-84px;
     font-family:var(--cond);font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;
@@ -7532,7 +7531,7 @@
         otState.reps=w.rondes; otState.left=w.rondes;
         otState.upto=w.upto; otState.speed=1/w.tempo;
       } else {
-        otSetMode('time'); otSetDur(w.sec); otSetRonden(1);
+        otSetMode('time'); otSetDur(w.sec, true); otSetRonden(1);
       }
     }catch(e){}
   }
@@ -10158,7 +10157,7 @@
     el.className='session timerscreen'; el.id='timerscreen';
     // Restore last-used mode + duration for the Tijd (countdown) mode
     try{ var _sm=localStorage.getItem('poom_ot_mode'); if(_sm==='time'||_sm==='count') otState.mode=_sm; }catch(e){}
-    try{ var _sd=parseInt(localStorage.getItem('poom_ot_dur'),10); if(_sd>=30&&_sd<=600) otState.dur=Math.round(_sd/30)*30; }catch(e){}
+    try{ var _sd=parseInt(localStorage.getItem('poom_ot_dur'),10); if(_sd>=30&&_sd<=120) otState.dur=Math.round(_sd/30)*30; }catch(e){}
     try{ var _sn=parseInt(localStorage.getItem('poom_ot_ronden'),10); if(_sn>=1&&_sn<=10) otState.ronden=_sn; }catch(e){}
     try{ var _su=parseInt(localStorage.getItem('poom_ot_rust'),10); if(_su>=5&&_su<=60) otState.rust=_su; }catch(e){}
     el.setAttribute('data-mode', otState.mode);
@@ -10180,10 +10179,10 @@
       'aria-label="Niet herhalen">'+IC.repeatOff+'</button>';
     // Timer is de standaard en staat daarom links, waar de duim hem het eerst raakt;
     // Herhalingen is de afwijkende keuze en staat rechts.
-    var mOpts = [{m:'time',lab:'Timer',rev:true},{m:'count',lab:'Herhalingen',rev:false}].map(function(o){
+    var mOpts = [{m:'time',lab:'Timer',aria:'Timer',rev:true},{m:'count',lab:'1-10',aria:'Herhalingen',rev:false}].map(function(o){
       var on=otState.mode===o.m;
       return '<button class="ot-mopt'+(on?' on':'')+'" data-act="otmode" data-m="'+o.m+'" role="tab" '+
-        'aria-selected="'+on+'" aria-label="'+o.lab+'">'+otModeIcon(o.m)+
+        'aria-selected="'+on+'" aria-label="'+o.aria+'">'+otModeIcon(o.m)+
         '<span class="ot-mword">'+o.lab+'</span></button>';
     }).join('');
     var durOpts = OT_DUREN.map(function(d){
@@ -10250,42 +10249,32 @@
             '<div class="ot-dmenu"><div class="ot-dmenu-inner">'+
               '<input class="ot-dtrack" id="ot-rtrack" type="range" min="1" max="10" step="1" '+
                 'value="'+otState.ronden+'" aria-label="Aantal rondes">'+
-              '<span class="ot-dnum"><span class="ot-dval" id="ot-rval">'+otState.ronden+'</span>'+
-                '<span class="ot-dunit">rondes</span></span>'+
+              '<span class="ot-dnum"><span class="ot-dval" id="ot-rval">'+otState.ronden+'</span></span>'+
               '<button class="ot-dok" data-act="otrndok" aria-label="Rondes bevestigen">'+IC.check+'</button>'+
             '</div></div>'+
             '<button class="ot-fab ot-dur-fab" data-act="otrnd" aria-label="Aantal rondes">'+
-              '<span class="ot-dur-cur" id="ot-rnd-cur">'+otState.ronden+'</span>'+
-              '<span class="ot-dunit">rondes</span></button>'+
-          '</div>'+
-          '<div class="ot-dur ot-rust">'+
-            '<span class="ot-lab">Rust</span>'+
-            '<div class="ot-dmenu"><div class="ot-dmenu-inner">'+rustOpts+'</div></div>'+
-            '<button class="ot-fab ot-dur-fab" data-act="otrust" aria-label="Rust tussen de rondes">'+
-              '<span class="ot-dur-cur" id="ot-rust-cur">'+otState.rust+'</span>'+
-              '<span class="ot-dunit">sec</span></button>'+
+              '<span class="ot-dur-cur"><span id="ot-rnd-cur">'+otState.ronden+'</span>'+
+                '<span class="ot-dx">\u00d7</span></span></button>'+
           '</div>'+
           '<div class="ot-dur ot-tijd">'+
-            '<span class="ot-lab">Duur</span>'+
-            '<div class="ot-dmenu"><div class="ot-dmenu-inner">'+
-              '<div class="ot-dvast">'+durOpts+'</div>'+
-              '<div class="ot-drij">'+
-                '<input class="ot-dtrack" id="ot-dtrack" type="range" min="30" max="600" step="30" '+
-                  'value="'+otState.dur+'" aria-label="Duur in minuten">'+
-                '<span class="ot-dnum"><span class="ot-dval" id="ot-dval">'+otFmtTime(otState.dur)+'</span>'+
-                  '<span class="ot-dunit">min</span></span>'+
-                '<button class="ot-dok" data-act="otdurok" aria-label="Duur bevestigen">'+IC.check+'</button>'+
-              '</div>'+
-            '</div></div>'+
-            '<button class="ot-fab ot-dur-fab" data-act="otdur" aria-label="Duur instellen">'+
-              '<span class="ot-dur-cur" id="ot-dur-cur">'+otFmtTime(otState.dur)+'</span>'+
-              '<span class="ot-dunit">min</span></button>'+
+            '<span class="ot-lab">Secondes per ronde</span>'+
+            '<div class="ot-dmenu"><div class="ot-dmenu-inner">'+durOpts+'</div></div>'+
+            '<button class="ot-fab ot-dur-fab" data-act="otdur" aria-label="Secondes per ronde">'+
+              '<span class="ot-dur-cur" id="ot-dur-cur">'+otState.dur+'</span>'+
+              '<span class="ot-dunit">sec.</span></button>'+
+          '</div>'+
+          '<div class="ot-dur ot-rust">'+
+            '<span class="ot-lab">Secondes rust</span>'+
+            '<div class="ot-dmenu"><div class="ot-dmenu-inner">'+rustOpts+'</div></div>'+
+            '<button class="ot-fab ot-dur-fab" data-act="otrust" aria-label="Secondes rust tussen de rondes">'+
+              '<span class="ot-dur-cur" id="ot-rust-cur">'+otState.rust+'</span>'+
+              '<span class="ot-dunit">sec. rust</span></button>'+
           '</div>'+
           '<div class="ot-mode">'+
             '<div class="ot-mmenu"><div class="ot-mmenu-inner"><span class="ot-mthumb"></span>'+mOpts+'</div></div>'+
             '<button class="ot-fab ot-mode-fab" id="ot-mode" data-act="otmodemenu" aria-label="'+otModeAria()+'">'+
               '<span class="ot-mico count">'+otModeIcon('count')+'<span class="ot-mcap">1-10</span></span>'+
-              '<span class="ot-mico time">'+otModeIcon('time')+'</span></button>'+
+              '<span class="ot-mico time">'+otModeIcon('time')+'<span class="ot-mcap">Timer</span></span></button>'+
           '</div>'+
         '</div>'+
         '<div class="ot-ctl" id="ot-reset-ctl"><span class="ot-lab">Opnieuw</span>'+
@@ -10300,13 +10289,7 @@
       var a=new Image(); a.src=s; var b2=new Image(); b2.src=s.replace(/\.png$/,'-blink.png');
     });
     fnav.classList.add('hide');
-    // Tijd mode: drag anywhere on the dial to set the duration (full ring = 10:00, snaps to 30s)
-    var _dtr=el.querySelector('#ot-dtrack');
-    if(_dtr){
-      var _dset=function(){ otSetDur(+_dtr.value); buzz(4); };
-      _dtr.addEventListener('input', _dset);
-      _dtr.addEventListener('change', _dset);
-    }
+    // Tijd mode: sleep over de ring om de rondetijd te kiezen (hele ring = 2:00, stappen van 30s)
     var _rtr=el.querySelector('#ot-rtrack');
     if(_rtr){
       var _rset=function(){ otSetRonden(+_rtr.value); buzz(4); };
@@ -10406,6 +10389,7 @@
   }
   function closeTimer(){
     if(!timerScreen) return;
+    sfxLuid(false);
     otStop(); otCloseReps(); otCloseDur(); otCloseMode();
     clearTimeout(otGlintT); clearTimeout(otRepT); clearTimeout(otModeT);
     setTopBar();                       // restore the cream top bar
@@ -10767,7 +10751,7 @@
      OT_WIS is het tempo van de snelste stand, 0,5 seconde per tel. */
   var OT_WIS = OT_BASE / 2;
   /* Vaste rondetijden en rustpauzes. Een wedstrijdronde is typisch 60 of 90 seconden. */
-  var OT_DUREN = [30,60,90,120], OT_RUSTEN = [10,20,30];
+  var OT_DUREN = [30,60,90,120], OT_RUSTEN = [10,20,30], OT_DUUR_MAX = 120;
   var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, reps:0, left:0, upto:0, _lastFrac:0, _wrapT:null,
                   mode:'time', dur:60, total:0, endAt:0, raf:null, _lastSec:0, _dragged:false, _windT:null, dragC:null, _pd:null,
                   ronden:1, rust:30, ronde:1 };
@@ -10842,7 +10826,13 @@
      other audio and — crucially — is silenced by the ring/silent switch and never
      registers as "now playing", so checking a box no longer wakes the Dynamic Island.
      (The spoken timer countdown uses speechSynthesis, which stays audible regardless.) */
-  function sfxSession(){ try{ if(navigator.audioSession && navigator.audioSession.type!=='ambient'){ navigator.audioSession.type='ambient'; } }catch(e){} }
+  /* Eén uitzondering: een rondetimer die je niet hoort is geen timer. Zolang die loopt zetten
+     we de sessie op 'playback', zodat de bel ook klinkt als de telefoon op stil staat. Daarbuiten
+     blijft alles 'ambient', want een vinkje hoort het belsignaal niet te negeren. */
+  var _sfxLuid=false;
+  function sfxLuid(aan){ _sfxLuid=!!aan; sfxSession(); }
+  function sfxSession(){ var w=_sfxLuid?'playback':'ambient';
+    try{ if(navigator.audioSession && navigator.audioSession.type!==w){ navigator.audioSession.type=w; } }catch(e){} }
   /* Unlock + resume on the first user gesture (fires on pointerdown/touchend,
      before the click that plays a sound); re-resume on later gestures because
      iOS auto-suspends the context after inactivity/backgrounding. */
@@ -11507,13 +11497,13 @@
     var r=svg.getBoundingClientRect();
     return { x:r.left+r.width/2, y:r.top+r.height/2 };
   }
-  var OT_MIN_DEG=30/600*360;                       // 0:30 — the floor of the dial
+  var OT_MIN_DEG=30/OT_DUUR_MAX*360;               // 30 sec — de ondergrens van de ring
   function otAngleDeg(x,y,c){
     var ang=Math.atan2(y-c.y, x-c.x);              // 0 = 3 o'clock
     return (ang*180/Math.PI + 90 + 360)%360;       // 0 at 12 o'clock, clockwise
   }
   function otDegDur(deg){
-    return Math.max(30, Math.min(600, Math.round(deg/360*600/30)*30));
+    return Math.max(30, Math.min(OT_DUUR_MAX, Math.round(deg/360*OT_DUUR_MAX/30)*30));
   }
   function otAngleDur(x,y,c){ return otDegDur(otAngleDeg(x,y,c)); }
   // Unwrap a drag so it cannot jump the 12 o'clock seam: track the travelled angle and
@@ -11528,8 +11518,10 @@
     }
     return pd.cont;
   }
-  function otSetDur(sec){
-    otState.dur=Math.max(30, Math.min(600, Math.round(sec/30)*30));
+  /* De kiezer gaat tot twee minuten; een trainingsonderdeel uit de coach mag langer
+     duren en komt binnen met ruim=true. */
+  function otSetDur(sec, ruim){
+    otState.dur=Math.max(30, Math.min(ruim?600:OT_DUUR_MAX, Math.round(sec/30)*30));
     try{ localStorage.setItem('poom_ot_dur', String(otState.dur)); }catch(e){}
     otSyncDur();
     if(otState.phase==='idle') otRenderTime({noTrans:true});
@@ -11538,11 +11530,7 @@
      opties — twintig schijven zouden nooit op een telefoon passen. */
   function otSyncDur(){
     var host=timerScreen; if(!host) return;
-    var lbl=otFmtTime(otState.dur);
-    var cur=host.querySelector('#ot-dur-cur'); if(cur) cur.textContent=lbl;
-    var val=host.querySelector('#ot-dval');    if(val) val.textContent=lbl;
-    var tr=host.querySelector('#ot-dtrack');
-    if(tr && +tr.value!==otState.dur) tr.value=String(otState.dur);
+    var cur=host.querySelector('#ot-dur-cur'); if(cur) cur.textContent=String(otState.dur);
     // Instellen kan alleen als de klok stilstaat; tijdens de aanloop en het aftellen niet.
     var vrij=(otState.phase==='idle'||otState.phase==='done');
     var fab=host.querySelector('.ot-tijd .ot-dur-fab');
@@ -11729,7 +11717,7 @@
       wordEl.classList.toggle('ot-cueonly', !idle && running && !rust);
     }
     host.classList.toggle('ot-rusten', rust);
-    var frac = idle ? (otState.dur/600) : (otState.total>0 ? Math.max(0, otState.left/otState.total) : 0);
+    var frac = idle ? Math.min(1, otState.dur/OT_DUUR_MAX) : (otState.total>0 ? Math.max(0, otState.left/otState.total) : 0);
     var C=666, noTrans=!!(opts&&opts.noTrans);
     if(prog){ if(noTrans) prog.style.transition='none'; prog.style.strokeDashoffset=String(C*(1-frac)); }
     if(knobg){ if(noTrans) knobg.style.transition='none'; knobg.style.transform='rotate('+(frac*360).toFixed(2)+'deg)'; }
@@ -11746,6 +11734,7 @@
     otStop(); otCloseDur();
     otDraaiZandloper(false, 0);                  // het glas draait terug en is weer uitgelopen
     if(timerScreen) timerScreen.classList.remove('ot-paused','running');
+    sfxLuid(false);
     otState.phase='idle'; otState.left=otState.dur; otState._lastSec=0; otState._dragged=false;
     otState.ronde=1; if(timerScreen) timerScreen.classList.remove('ot-rusten');
     var pr=timerScreen&&timerScreen.querySelector('#ot-prog'), kg=timerScreen&&timerScreen.querySelector('#ot-knobg');
@@ -11761,6 +11750,7 @@
     // Eerst drie tellen Junbi, eindigend op Sijak — precies zoals bij Tellen, zodat je
     // je klaar kunt zetten voordat de tijd loopt.
     otState.phase='ready'; otState.ready=OT_READY; otState.running=true;
+    sfxLuid(true);                               // de bel moet ook door de stilleschakelaar heen
     otState._dragged=false; otState.ronde=1; host.classList.remove('ot-rusten');
     otDraaiZandloper(true, 1);                   // het glas gaat om: het zand begint straks te lopen
     var pr0=host.querySelector('#ot-prog'), kg0=host.querySelector('#ot-knobg');
@@ -11792,7 +11782,7 @@
     host.classList.add('running'); buzz(16); otSyncTime(); otSyncDur();
     // Wind the ring UP from the set fraction to full, then start draining over the set time
     var prog=host.querySelector('#ot-prog'), knobg=host.querySelector('#ot-knobg');
-    var frac0=otState.dur/600, C=666, WIND=480;
+    var frac0=Math.min(1, otState.dur/OT_DUUR_MAX), C=666, WIND=480;
     if(prog){ prog.style.transition='none'; prog.style.strokeDashoffset=String(C*(1-frac0)); }
     if(knobg){ knobg.style.transition='none'; knobg.style.transform='rotate('+(frac0*360).toFixed(2)+'deg)'; }
     void host.offsetWidth;
@@ -11854,6 +11844,7 @@
     /* Draaide je rondes, dan sluit de bel ook de laatste af: een jubelend geluidje erachteraan
        klinkt alsof er iets anders klaar is dan waar je mee bezig was. */
     sfx(otState.mode==='time' && otState.ronden>1 ? 'bel' : 'complete'); buzz(30);
+    setTimeout(function(){ sfxLuid(false); }, 2000);   // pas als de bel is uitgeklonken
     otSyncTime();
     if(Math.random()<0.6) otMascotPeek();
     plTimerKlaar();
@@ -12054,7 +12045,6 @@
     else if(a==='otmode'){ otPickMode(act.getAttribute('data-m')); buzz(10); }
     else if(a==='otmodemenu'){ otModeMenu(); buzz(8); }
     else if(a==='otdur'){ otDurMenu(); buzz(8); }
-    else if(a==='otdurok'){ otCloseDur(); buzz(10); }
     else if(a==='otpickdur'){ otSetDur(+act.getAttribute('data-v')); otCloseDur(); buzz(10); }
     else if(a==='otrnd'){ otPilOpen('.ot-rnd'); buzz(8); }
     else if(a==='otrndok'){ otPilDicht('.ot-rnd'); buzz(10); }
