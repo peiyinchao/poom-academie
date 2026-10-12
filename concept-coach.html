@@ -10153,6 +10153,7 @@
   // Standalone practice timer — reachable any time via the round nav button (reuses the pt-* engine)
   function openTimer(){
     if(timerScreen) return;
+    sfxLuid(true);          // vanaf hier moet de bel door de stilteschakelaar heen kunnen
     var el = document.createElement('div');
     el.className='session timerscreen'; el.id='timerscreen';
     // Restore last-used mode + duration for the Tijd (countdown) mode
@@ -10830,9 +10831,22 @@
      we de sessie op 'playback', zodat de bel ook klinkt als de telefoon op stil staat. Daarbuiten
      blijft alles 'ambient', want een vinkje hoort het belsignaal niet te negeren. */
   var _sfxLuid=false;
-  function sfxLuid(aan){ _sfxLuid=!!aan; sfxSession(); }
-  function sfxSession(){ var w=_sfxLuid?'playback':'ambient';
-    try{ if(navigator.audioSession && navigator.audioSession.type!==w){ navigator.audioSession.type=w; } }catch(e){} }
+  function sfxLuid(aan){ aan=!!aan; if(aan===_sfxLuid) return; _sfxLuid=aan; sfxSession(true); }
+  /* iOS koppelt de categorie op het moment dat de audiosessie geactiveerd wordt. Een context
+     die al draait blijft daardoor in de oude categorie hangen: je hoort de bel wel in een
+     koptelefoon, maar niet uit de luidspreker als de telefoon op stil staat. Daarom zetten we
+     de lopende context bij een wissel even stil en starten hem opnieuw, zodat de sessie
+     opnieuw wordt geactiveerd — nu onder de nieuwe categorie. */
+  function sfxSession(wissel){ var w=_sfxLuid?'playback':'ambient';
+    try{
+      if(!navigator.audioSession || navigator.audioSession.type===w) return;
+      navigator.audioSession.type=w;
+      if(!wissel) return;
+      var ac=_sfxCtx; if(!ac || ac.state!=='running') return;
+      var pr=ac.suspend(); if(pr&&pr.then) pr.then(function(){ return ac.resume(); })['catch'](function(){});
+      else { try{ ac.resume(); }catch(e){} }
+    }catch(e){}
+  }
   /* Unlock + resume on the first user gesture (fires on pointerdown/touchend,
      before the click that plays a sound); re-resume on later gestures because
      iOS auto-suspends the context after inactivity/backgrounding. */
@@ -11734,7 +11748,6 @@
     otStop(); otCloseDur();
     otDraaiZandloper(false, 0);                  // het glas draait terug en is weer uitgelopen
     if(timerScreen) timerScreen.classList.remove('ot-paused','running');
-    sfxLuid(false);
     otState.phase='idle'; otState.left=otState.dur; otState._lastSec=0; otState._dragged=false;
     otState.ronde=1; if(timerScreen) timerScreen.classList.remove('ot-rusten');
     var pr=timerScreen&&timerScreen.querySelector('#ot-prog'), kg=timerScreen&&timerScreen.querySelector('#ot-knobg');
@@ -11844,7 +11857,6 @@
     /* Draaide je rondes, dan sluit de bel ook de laatste af: een jubelend geluidje erachteraan
        klinkt alsof er iets anders klaar is dan waar je mee bezig was. */
     sfx(otState.mode==='time' && otState.ronden>1 ? 'bel' : 'complete'); buzz(30);
-    setTimeout(function(){ sfxLuid(false); }, 2000);   // pas als de bel is uitgeklonken
     otSyncTime();
     if(Math.random()<0.6) otMascotPeek();
     plTimerKlaar();
