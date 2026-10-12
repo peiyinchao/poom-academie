@@ -2439,13 +2439,12 @@
      hangt daarna bovenin klaar om te lopen, dus de draai doet al het werk en er hoeft op dat
      moment niets aan het zand te veranderen. Het glas is puntsymmetrisch om zijn hals, dus
      de omtrek valt na de halve slag exact op zichzelf: je ziet alleen het zand verspringen. */
+  /* Het glas draait altijd dezelfde kant op, tegen de klok in, en de slagen tellen op: een
+     halve slag bij de start, een kwartslag als het voor de rust op zijn kant gaat en nog een
+     kwartslag als de volgende ronde begint. Daarom staat de stand als doorlopende hoek in de
+     code (otGlasStand) en niet als een aan/uit-klasse hier. Pauzeer je, dan legt het glas zich
+     ook neer: de hals staat dan niet meer onder het zand en de zwaartekracht houdt op te trekken. */
   .ot-mode-fab .ot-mhour{transition:transform .62s cubic-bezier(.45,.02,.2,1)}
-  .ot-mode-fab .ot-mhour.om{transform:rotate(180deg)}
-  /* Pauzeer je, dan legt het glas zich op zijn kant: zo staat de hals niet meer onder het
-     zand en houdt de zwaartekracht op te trekken. Het zand blijft in de kamer waar het zat.
-     Ga je verder, dan komt het glas terug in zijn oude stand en loopt het weer. */
-  .timerscreen.ot-paused .ot-mode-fab .ot-mhour{transform:rotate(90deg)}
-  .timerscreen.ot-paused .ot-mode-fab .ot-mhour.om{transform:rotate(270deg)}
   .ot-mode-fab .ot-mhour .hg-top,.ot-mode-fab .ot-mhour .hg-bot{transition:transform .9s linear,opacity .26s ease .2s}
   /* Ligt het glas op zijn kant, dan hangt het zand niet langer rond de hals maar zakt het naar
      de onderste wand, met een waterpas oppervlak. Dat is een heel andere vorm dan het staande
@@ -2454,15 +2453,18 @@
      op als een sprong maar leest hij als zand dat verschuift. */
   .ot-mhour .hg-pool{opacity:0}
   .ot-mode-fab .ot-mhour .hg-pool{transition:opacity .26s ease .2s}
-  .timerscreen.ot-paused .ot-mode-fab .ot-mhour .hg-pool{opacity:1}
+  .timerscreen.ot-paused .ot-mode-fab .ot-mhour .hg-pool,
+  .timerscreen.ot-rusten .ot-mode-fab .ot-mhour .hg-pool{opacity:1}
   .timerscreen.ot-paused .ot-mode-fab .ot-mhour .hg-top,
-  .timerscreen.ot-paused .ot-mode-fab .ot-mhour .hg-bot{opacity:0}
+  .timerscreen.ot-paused .ot-mode-fab .ot-mhour .hg-bot,
+  .timerscreen.ot-rusten .ot-mode-fab .ot-mhour .hg-top,
+  .timerscreen.ot-rusten .ot-mode-fab .ot-mhour .hg-bot{opacity:0}
   /* De straal door de hals: drie haarlijntjes met streepjes die langs hun eigen pad schuiven.
      Samen geven ze de korrel van vallend zand, zonder dat je losse korrels hoeft te tekenen.
      Ze staan vóór het zand in de tekenvolgorde, zodat het groeiende hoopje de straal opslokt. */
   .ot-mhour .hg-val{opacity:0}
   .ot-mode-fab .ot-mhour .hg-val{transition:opacity .3s ease}
-  .ot-mode-fab .ot-mhour.om.stroomt .hg-val{opacity:.9}
+  .ot-mode-fab .ot-mhour.stroomt .hg-val{opacity:.9}
   @keyframes hgVal{to{stroke-dashoffset:-12}}
   @media (prefers-reduced-motion:no-preference){
     .ot-mode-fab .ot-mhour .hg-v1{animation:hgVal .75s linear infinite}
@@ -10308,7 +10310,7 @@
       _tap.addEventListener('pointermove', function(e){
         var pd=otState._pd; if(!pd || !otState.dragC) return;
         var dx=e.clientX-pd.x, dy=e.clientY-pd.y;
-        if(!pd.moved && (dx*dx+dy*dy)<16) return;      // ~4px slop before it counts as a drag
+        if(!pd.moved && (dx*dx+dy*dy)<144) return;     // pas vanaf ~12px is het een sleep en geen tik
         pd.moved=true; otState._dragged=true;
         if(otState.phase==='done') otState.phase='idle';
         var nd=otDegDur(otDragDeg(pd, otAngleDeg(e.clientX, e.clientY, otState.dragC)));
@@ -10755,7 +10757,7 @@
   var OT_DUREN = [30,60,90,120], OT_RUSTEN = [10,20,30], OT_DUUR_MAX = 120;
   var otState = { phase:'idle', ready:OT_READY, i:0, running:false, iv:null, speed:1, reps:0, left:0, upto:0, _lastFrac:0, _wrapT:null,
                   mode:'time', dur:60, total:0, endAt:0, raf:null, _lastSec:0, _dragged:false, _windT:null, dragC:null, _pd:null,
-                  ronden:1, rust:30, ronde:1 };
+                  ronden:1, rust:30, ronde:1, hoek:0 };
   var otTmT=null; // tempo fold-out collapse/close timer
   var otRepT=null; // herhaal fold-out close timer
   var otModeT=null; // modus fold-out close timer
@@ -11187,6 +11189,11 @@
   }
   /* De uitklappil groeit naar rechts; het zwevende label leest die breedte uit --pw en
      gaat er netjes naast staan. */
+  /* De uitklapper zit in een pil die dicht nog maar 64px breed is en zijn inhoud afsnijdt.
+     offsetWidth geeft dan de breedte van die pil terug in plaats van die van de opties, en de
+     pil werd te smal: rechts bleef er te weinig lucht over. scrollWidth telt wél door tot het
+     laatste knopje. */
+  function otInnerBreed(inner){ return Math.max(inner.scrollWidth, inner.offsetWidth); }
   function otSetPill(wrap, menu, px){
     menu.style.width=px+'px';
     if(wrap) wrap.style.setProperty('--pw', px+'px');
@@ -11198,7 +11205,7 @@
     otCloseFan(); otCloseDur(); otCloseMode();       // only one fold-out open at a time
     var menu=w.querySelector('.ot-rmenu'), inner=w.querySelector('.ot-rmenu-inner');
     w.classList.add('open');
-    if(menu&&inner) otSetPill(w, menu, inner.offsetWidth+14); // +14 = 2×(1px border + 6px padding)
+    if(menu&&inner) otSetPill(w, menu, otInnerBreed(inner)+14); // +14 = 2×(1px border + 6px padding)
     moveRepThumb(false);
   }
   function otCloseReps(){
@@ -11277,7 +11284,7 @@
     otCloseReps(); otCloseDur(); otCloseMode();      // only one fold-out open at a time
     var menu=w.querySelector('.ot-tmenu'), inner=w.querySelector('.ot-tmenu-inner');
     w.classList.add('open');
-    if(menu&&inner) otSetPill(w, menu, inner.offsetWidth+14); // +14 = 2×(1px border + 6px padding)
+    if(menu&&inner) otSetPill(w, menu, otInnerBreed(inner)+14); // +14 = 2×(1px border + 6px padding)
     moveTempoThumb(false);
   }
   function otCloseFan(){
@@ -11485,7 +11492,7 @@
     otCloseFan(); otCloseReps(); otCloseDur();       // only one fold-out open at a time
     var menu=w.querySelector('.ot-mmenu'), inner=w.querySelector('.ot-mmenu-inner');
     w.classList.add('open');
-    if(menu&&inner) otSetPill(w, menu, inner.offsetWidth+14);
+    if(menu&&inner) otSetPill(w, menu, otInnerBreed(inner)+14);
     moveModeThumb(false);
   }
   function otCloseMode(){
@@ -11520,10 +11527,16 @@
     return Math.max(30, Math.min(OT_DUUR_MAX, Math.round(deg/360*OT_DUUR_MAX/30)*30));
   }
   function otAngleDur(x,y,c){ return otDegDur(otAngleDeg(x,y,c)); }
-  // Unwrap a drag so it cannot jump the 12 o'clock seam: track the travelled angle and
-  // let it stick at 0:30 / 10:00 instead of flipping to the other end of the dial.
+  /* Slepen over de ring verzet de duur, maar het springt niet naar je vinger: het begint bij
+     de duur die er al stond en verschuift mee met hoever je draait. Sprong het wél, dan zette
+     een tik die net iets uitschoot de duur meteen op een heel andere waarde — precies waar de
+     ring te gevoelig van werd. De afgelegde hoek wordt uitgerold, zodat de naad bij twaalf uur
+     geen sprong naar de andere kant van de wijzerplaat geeft. */
   function otDragDeg(pd,deg){
-    if(pd.cont==null){ pd.cont=deg; pd.deg=deg; }  // first move jumps to the finger, as before
+    if(pd.cont==null){
+      pd.cont=Math.max(OT_MIN_DEG, Math.min(360, otState.dur/OT_DUUR_MAX*360));
+      pd.deg=deg;
+    }
     else{
       var d=deg-pd.deg;
       if(d>180) d-=360; else if(d<-180) d+=360;    // shortest way round = the way the finger actually went
@@ -11596,7 +11609,7 @@
     otSyncDur();
     var menu=w.querySelector('.ot-dmenu'), inner=w.querySelector('.ot-dmenu-inner');
     w.classList.add('open');
-    if(menu&&inner) otSetPill(w, menu, inner.offsetWidth+26);
+    if(menu&&inner) otSetPill(w, menu, otInnerBreed(inner)+26);
   }
   function otPilDicht(sel){
     var host=timerScreen; if(!host) return;
@@ -11613,7 +11626,7 @@
     otSyncDur();
     var menu=w.querySelector('.ot-dmenu'), inner=w.querySelector('.ot-dmenu-inner');
     w.classList.add('open');
-    if(menu&&inner) otSetPill(w, menu, inner.offsetWidth+26);  // 26 = 12px + 14px padding
+    if(menu&&inner) otSetPill(w, menu, otInnerBreed(inner)+26);  // 26 = 12px + 14px padding
   }
   function otCloseDur(){
     otPilDicht('.ot-rnd'); otPilDicht('.ot-rust');
@@ -11641,7 +11654,7 @@
       var el=glas.querySelector('.'+klas); if(!el) return;
       s=Math.max(0.001, Math.min(1, s)*HG_MAX);   // nul geeft een matrix die niet te keren is
       el.setAttribute('transform','translate(12 '+oy+') scale('+s.toFixed(3)+') translate(-12 -'+oy+')');
-      plas(glas.querySelector('.'+klas+'-p'), s, om);
+      plas(glas.querySelector('.'+klas+'-p'), s, otGlasRechts());
     }
     /* Legt het glas zich op zijn kant, dan zoekt hetzelfde zand een nieuw evenwicht: het zakt
        naar de onderste wand en zijn oppervlak komt waterpas te liggen. Er gaat geen korrel bij
@@ -11649,12 +11662,12 @@
        hoopje. De kamer loopt taps toe, dus dat vlak groeit met het kwadraat van de breedte —
        vandaar de wortel. r loopt van 0 (leeg) tot 2 (de hele kamer vol).
        Het glas kantelt naar links of naar rechts, en dat bepaalt welke kant nu beneden is. */
-    function plas(el, s, om){
+    function plas(el, s, rechts){
       if(!el) return;
       var deel=s*s;                                                     // het hoopje is de kamer, s keer verkleind
       var r=deel<=0.5 ? Math.sqrt(2*deel) : 2-Math.sqrt(2*(1-deel));
       var pct=((1-r/2)*100).toFixed(1);
-      el.style.clipPath = om ? 'inset(0 '+pct+'% 0 0)' : 'inset(0 0 0 '+pct+'%)';
+      el.style.clipPath = rechts ? 'inset(0 0 0 '+pct+'%)' : 'inset(0 '+pct+'% 0 0)';
     }
   }
   // De straal loopt alleen terwijl de tijd echt wegtikt: in rust, tijdens Junbi en op pauze staat hij stil.
@@ -11663,10 +11676,33 @@
     var glas=host.querySelector('.ot-mode-fab .ot-mhour'); if(!glas) return;
     glas.classList.toggle('stroomt', !!aan);
   }
-  function otDraaiZandloper(om, frac){
+  /* Ligt het glas, dan is de vraag welke kant beneden is. Dat volgt uit de stand zelf en niet
+     uit welke kamer bovenin hing: een kwartslag met de klok mee laat het zand naar rechts
+     zakken, een kwartslag tegen de klok in naar links. */
+  function otGlasRechts(){
+    var host=timerScreen;
+    var lig=(host&&host.classList.contains('ot-paused')&&otState.phase!=='rust') ? -90 : 0;
+    return ((otState.hoek+lig)%360+360)%360===90;
+  }
+  function otGlasOm(){
+    var g=timerScreen&&timerScreen.querySelector('.ot-mode-fab .ot-mhour');
+    return !!(g&&g.classList.contains('om'));
+  }
+  /* Zet het glas in een stand. De hoek telt door — elke slag gaat tegen de klok in, zodat het
+     glas nooit terugdraait maar steeds verder omrolt, net als wanneer je het zelf omkeert.
+     Op pauze legt het glas zich een kwartslag neer; in rust ligt het al, dus dan niet nog eens. */
+  function otGlasStand(){
     var host=timerScreen; if(!host) return;
     var glas=host.querySelector('.ot-mode-fab .ot-mhour'); if(!glas) return;
-    glas.classList.toggle('om', om);
+    var lig=(host.classList.contains('ot-paused') && otState.phase!=='rust') ? -90 : 0;
+    glas.style.transform='rotate('+(otState.hoek+lig)+'deg)';
+  }
+  function otDraaiZandloper(hoek, om, frac){
+    otState.hoek=hoek;
+    var host=timerScreen; if(!host) return;
+    var glas=host.querySelector('.ot-mode-fab .ot-mhour'); if(!glas) return;
+    if(typeof om==='boolean') glas.classList.toggle('om', om);   // welke kamer nu bovenin hangt
+    otGlasStand();
     otZandloper(frac);
   }
   /* Terwijl de timer loopt staan de instellingen op slot: dan kun je alleen nog pauzeren
@@ -11697,8 +11733,9 @@
     var idle=(otState.phase==='idle'), rust=(otState.phase==='rust'), done=(otState.phase==='done');
     var running=(otState.phase==='run'||rust);
     var ready=(otState.phase==='ready');
-    otZandloper(idle ? 0 : (ready ? 1 : (otState.total>0 ? Math.max(0, otState.left/otState.total) : 0)));
-    otStroom(running && otState.running);
+    // In rust loopt er niets: het glas ligt op zijn kant en al het zand ligt in de onderste kamer.
+    otZandloper(idle ? 0 : (ready ? 1 : (rust ? 0 : (otState.total>0 ? Math.max(0, otState.left/otState.total) : 0))));
+    otStroom(otState.phase==='run' && otState.running);
     otSyncDur();
     if(dial){ dial.classList.toggle('ready', ready); dial.classList.toggle('idle', idle); }
     if(ready){
@@ -11746,7 +11783,7 @@
   }
   function otResetTime(){
     otStop(); otCloseDur();
-    otDraaiZandloper(false, 0);                  // het glas draait terug en is weer uitgelopen
+    otDraaiZandloper(0, false, 0);               // het glas staat weer rechtop en is uitgelopen
     if(timerScreen) timerScreen.classList.remove('ot-paused','running');
     otState.phase='idle'; otState.left=otState.dur; otState._lastSec=0; otState._dragged=false;
     otState.ronde=1; if(timerScreen) timerScreen.classList.remove('ot-rusten');
@@ -11765,7 +11802,7 @@
     otState.phase='ready'; otState.ready=OT_READY; otState.running=true;
     sfxLuid(true);                               // de bel moet ook door de stilleschakelaar heen
     otState._dragged=false; otState.ronde=1; host.classList.remove('ot-rusten');
-    otDraaiZandloper(true, 1);                   // het glas gaat om: het zand begint straks te lopen
+    otDraaiZandloper(-180, true, 1);             // het glas gaat om: het zand begint straks te lopen
     var pr0=host.querySelector('#ot-prog'), kg0=host.querySelector('#ot-knobg');
     if(pr0){ pr0.style.transition='none'; pr0.style.strokeDashoffset='666'; }
     if(kg0){ kg0.style.transition='none'; kg0.style.transform='rotate(0deg)'; }
@@ -11829,7 +11866,12 @@
      piepen, loopt die rust vanzelf uit op een 3-2-1 naar de volgende ronde toe. Pas na de
      laatste ronde is de oefening echt klaar. */
   function otFaseKlaar(){
-    if(otState.phase==='rust'){ otState.ronde++; sfx('bel'); buzz(20); otRunTime(); return; }
+    if(otState.phase==='rust'){
+      otState.ronde++; sfx('bel'); buzz(20);
+      // Tweede kwartslag: het glas komt weer rechtop, met het zand van zojuist nu bovenin.
+      otDraaiZandloper(otState.hoek-90, !otGlasOm(), 1);
+      otRunTime(); return;
+    }
     if(otState.ronde < otState.ronden){ sfx('bel'); buzz(20); otRustTime(); return; }
     otFinishTime();
   }
@@ -11838,6 +11880,9 @@
     if(otState.raf){ cancelAnimationFrame(otState.raf); otState.raf=null; }
     clearTimeout(otState._windT);
     otState.phase='rust'; otState.running=true;
+    // Het glas is leeggelopen en gaat een kwartslag neer: zo staat de hals niet meer onder
+    // het zand en ligt de boel stil zolang de rust duurt.
+    otDraaiZandloper(otState.hoek-90, null, 0);
     otState.total=otState.rust; otState.left=otState.rust; otState._lastSec=Math.ceil(otState.rust);
     var prog=host.querySelector('#ot-prog'), knobg=host.querySelector('#ot-knobg');
     if(prog) prog.style.transition='none';
@@ -11866,12 +11911,14 @@
     clearTimeout(otState._windT);
     otState.running=false;
     if(timerScreen) timerScreen.classList.add('ot-paused');
+    otGlasStand();
     otRenderTime({noTrans:true});
     otSyncTime();
   }
   function otResumeTime(){
     otState.running=true;
     if(timerScreen) timerScreen.classList.remove('ot-paused');
+    otGlasStand();
     otState.endAt=performance.now()+otState.left*1000;
     otState._lastSec=Math.ceil(otState.left - 1e-3);
     otRenderTime({noTrans:true});
