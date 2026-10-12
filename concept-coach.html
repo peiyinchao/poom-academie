@@ -2243,6 +2243,14 @@
   /* Loopt de timer? Dan zijn de instellingen linksonder buiten bedrijf. */
   .timerscreen.ot-locked .ot-left .ot-fab{opacity:.32;pointer-events:none}
   .timerscreen.ot-locked .ot-left .ot-lab{opacity:0}
+  /* De modusknop is de enige die juist tijdens het lopen iets te vertellen heeft: de zandloper
+     draait mee en het praatwolkje telt de herhalingen af. Daarom dooft hier niet de hele knop,
+     maar alleen het schijfje eromheen en het bijschrift — het icoon zelf blijft op volle sterkte.
+     Dimmen gaat dus via de kleuren en niet via opacity, want die zou het icoon meenemen. */
+  .timerscreen.ot-locked .ot-left .ot-mode-fab{opacity:1;
+    border-color:rgba(var(--tink,255,255,255),.09);background:rgba(var(--tink,255,255,255),.045);
+    box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .timerscreen.ot-locked .ot-left .ot-mode-fab .ot-mcap{opacity:.24}
   .ot-bar{position:absolute;left:22px;right:22px;bottom:calc(env(safe-area-inset-bottom) + 20px);z-index:6;
     display:flex;align-items:flex-end;justify-content:space-between;pointer-events:none}
   /* De balk is nu een hoge band over het hele scherm; alleen de knoppen zelf vangen tikken,
