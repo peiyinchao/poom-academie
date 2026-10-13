@@ -1737,6 +1737,26 @@
   .ci-masc{position:absolute;left:0;bottom:-2px;width:56px;height:auto;z-index:2;pointer-events:none;
     filter:drop-shadow(0 3px 5px rgba(0,0,0,.16))}
   .checkin .dot{width:9px;height:9px;border-radius:50%;background:var(--seal);flex:none;animation:blink 1.6s ease-in-out infinite}
+  .weeklist{display:block;cursor:default}
+  .weeklist:active{transform:none}
+  .week-head{display:flex;align-items:center;gap:12px}
+  .week-edit{min-height:44px;border:0;background:transparent;padding:8px 0 8px 8px;cursor:pointer}
+  .week-note{font-size:12px;line-height:1.45;color:var(--gray);margin:8px 0 6px}
+  .week-tasks{list-style:none;padding:0;margin:0}
+  .week-task{display:flex;align-items:center;border-top:1px solid var(--line)}
+  .week-check{display:grid;place-items:center;flex:none;width:44px;min-height:48px;
+    padding:0;border:0;background:transparent;color:var(--gray);cursor:pointer}
+  .week-check span{display:grid;place-items:center;width:24px;height:24px;border:2px solid var(--gray);border-radius:50%}
+  .week-check svg{width:14px;height:14px;visibility:hidden}
+  .week-task.done{padding:0;text-align:left}
+  .week-task.done .week-check span{background:var(--blue);border-color:var(--blue);color:#fff}
+  .week-task.done .week-check svg{visibility:visible}
+  .week-open{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:1;min-width:0;
+    min-height:48px;padding:10px 0 10px 4px;border:0;background:transparent;color:var(--ink);
+    font:inherit;font-size:14px;font-weight:600;text-align:left;cursor:pointer}
+  .week-open svg{width:16px;height:16px;flex:none;color:var(--gray)}
+  .week-task.done .week-open span{text-decoration:line-through;color:var(--gray)}
+  .week-check:focus-visible,.week-open:focus-visible,.week-edit:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
   /* ---- Daily challenges (dagdoel) ---- */
@@ -3702,7 +3722,7 @@
   var STORE_KEYS = ['poom_agenda','poom_videos','poom_belt','poom_hard','poom_mastery',
                     'poom_missions','poom_ot_mode','poom_ot_dur','poom_plan','poom_plandone',
                     'poom_photos','poom_geup_dates','poom_geupmeta','poom_exam','ciUx',
-                    'poom_vidseen','poom_vidview','poom_vidmig','poom_vidvast'];
+                    'poom_vidseen','poom_vidview','poom_vidmig','poom_vidvast','poom_week'];
   var store = (function(){
     var ok = true;
     try{ localStorage.setItem('poom_probe','1'); localStorage.removeItem('poom_probe'); }
@@ -5697,14 +5717,14 @@
   var WEEK_RATING = null;
   var FOCUS_AREAS = [
     {id:'standen', em:'🦵', label:'Standen'},
-    {id:'trappen', em:'🌀', label:'Trappen'},
-    {id:'blokken', em:'✋', label:'Blokken & stoten'},
-    {id:'termen',  em:'🗣️', label:'Koreaanse termen'},
-    {id:'tempo',   em:'🎵', label:'Tempo & ritme'},
-    {id:'kihap',   em:'🔥', label:'Kracht & kihap'},
-    {id:'balans',  em:'⚖️', label:'Balans'},
-    {id:'blik',    em:'👀', label:'Blik & focus'},
-    {id:'adem',    em:'🌬️', label:'Ademhaling'}
+    {id:'technieken', em:'✋', label:'Technieken'},
+    {id:'poomsae', em:'🥋', label:'Poomsae'},
+    {id:'taeryon', em:'🤝', label:'Taeryon'},
+    {id:'hosinsul', em:'🛡️', label:'Hosinsul'},
+    {id:'gyeorugi', em:'🥊', label:'Gyeorugi'},
+    {id:'gyeokpa', em:'🪵', label:'Gyeokpa'},
+    {id:'examen', em:'📝', label:'Theorie-examen'},
+    {id:'moeilijk', em:'🗣️', label:'Moeilijke woorden'}
   ];
   var FOCUS_MAX = 5;
   function focusLabel(id){ for(var i=0;i<FOCUS_AREAS.length;i++) if(FOCUS_AREAS[i].id===id) return FOCUS_AREAS[i]; return {label:id,em:''}; }
@@ -5714,10 +5734,68 @@
     if(labels.length<=2) return labels.join(' · ');
     return labels.slice(0,2).join(' · ')+' +'+(labels.length-2);
   }
-  var WEEK_MOOD = null;        // goal-phase feeling → weekly challenge level
+  var WEEK_MOOD = null;
   var WEEK_HELP = null;        // reflect-phase: were the suggested trainings helpful
   var weekGoalSet = false;     // goal flow completed this week
   var weekReflected = false;   // reflection completed this week
+  var WEEK_DONE = {};
+  var WEEK_KEY = null;
+  function weekKey(){
+    var d=new Date();
+    d.setDate(d.getDate()-((d.getDay()+6)%7));
+    return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+  }
+  function weekEnsure(){
+    var key=weekKey();
+    if(WEEK_KEY===key) return false;
+    var r=plainObj(store.get('poom_week', null));
+    WEEK_KEY=key; WEEK_FOCUS=[]; WEEK_DONE={};
+    WEEK_MOOD=null; WEEK_RATING=null; WEEK_HELP=null;
+    weekGoalSet=false; weekReflected=false;
+    if(r && r.week===key){
+      var ids=Array.isArray(r.focus)?r.focus:[];
+      WEEK_FOCUS=ids.filter(function(id,i){
+        return ids.indexOf(id)===i && FOCUS_AREAS.some(function(f){ return f.id===id; });
+      }).slice(0,FOCUS_MAX);
+      var done=plainObj(r.done)||{};
+      WEEK_FOCUS.forEach(function(id){ if(done[id]===true) WEEK_DONE[id]=true; });
+      WEEK_MOOD=/^(fit|ok|moe)$/.test(r.mood)?r.mood:null;
+      WEEK_RATING=/^(sterk|oke|pittig)$/.test(r.rating)?r.rating:null;
+      WEEK_HELP=/^(ja|beetje|nee)$/.test(r.help)?r.help:null;
+      weekGoalSet=!!WEEK_FOCUS.length;
+      weekReflected=!!(WEEK_RATING && WEEK_HELP);
+    }
+    return true;
+  }
+  function weekSave(){
+    var ok=store.set('poom_week', {week:WEEK_KEY, focus:WEEK_FOCUS, done:WEEK_DONE,
+      mood:WEEK_MOOD, rating:WEEK_RATING, help:WEEK_HELP});
+    if(!ok) toast('Je weekdoel kon niet worden bewaard. Maak opslagruimte vrij; na herladen kan het verloren gaan.');
+    return ok;
+  }
+  function weekMark(id, done){
+    weekEnsure();
+    if(WEEK_FOCUS.indexOf(id)<0) return;
+    if(done) WEEK_DONE[id]=true; else delete WEEK_DONE[id];
+    weekSave();
+  }
+  function weekChecklistHtml(){
+    var count=WEEK_FOCUS.filter(function(id){ return WEEK_DONE[id]; }).length;
+    var mood=moodInfo(WEEK_MOOD);
+    return '<section class="checkin set weeklist" aria-label="Weekdoel">'+
+      '<div class="week-head"><span class="ci-t"><small><span class="ci-mini doel" aria-hidden="true"></span> Weekdoel · wk '+weekNo()+'</small>'+
+        '<b>'+count+' van '+WEEK_FOCUS.length+' geoefend</b></span>'+
+        '<button class="ci-cta week-edit" data-act="cigoal" aria-label="Wijzig je weekdoel">Wijzig '+IC.chev+'</button></div>'+
+      '<p class="week-note">Vink af waar je deze week aan hebt geoefend.'+(mood?' Je voelt je '+mood.t.toLowerCase()+'.':'')+'</p>'+
+      '<ul class="week-tasks">'+WEEK_FOCUS.map(function(id){
+        var label=focusLabel(id).label, done=!!WEEK_DONE[id];
+        return '<li class="week-task'+(done?' done':'')+'" data-week-id="'+id+'">'+
+          '<button class="week-check" data-act="weekcheck" data-id="'+id+'" aria-pressed="'+done+'" aria-label="'+
+            esc(label+(done?' weer openzetten':' deze week afvinken'))+'"><span>'+IC.check+'</span></button>'+
+          '<button class="week-open" data-act="missgo" data-id="'+id+'" aria-label="Open '+esc(label)+'">'+
+            '<span>'+esc(label)+'</span>'+IC.chev+'</button></li>';
+      }).join('')+'</ul></section>';
+  }
   // ISO-8601 week number (weeks start Monday; week 1 holds the year's first Thursday)
   function weekNo(dt){
     var d = dt ? new Date(dt.getTime()) : new Date();
@@ -5735,16 +5813,16 @@
     {r:'ok',  em:'🙂', t:'Prima', s:'gewoon lekker bezig', ch:'normaal'},
     {r:'moe', em:'😌', t:'Wat moe', s:'even rustig aan', ch:'rustig'}
   ];
-  var CHALLENGE = { pittig:{label:'Pittig', em:'🔥'}, normaal:{label:'Normaal', em:'⚡'}, rustig:{label:'Rustig', em:'🌿'} };
   function moodInfo(r){ for(var i=0;i<MOOD_OPTS.length;i++) if(MOOD_OPTS[i].r===r) return MOOD_OPTS[i]; return null; }
-  function weekChallenge(){ var m=moodInfo(WEEK_MOOD); return m?CHALLENGE[m.ch]:null; }
 
   /* ---- Training van vandaag: missie-assemblage (vervangt de losse dagdoel) ----
      8e t/m 1e geup volgen de Poom 1-eisen; richting 2e poom → zet POOM = "2".
      Alle aantallen komen live uit curriculum.js (examenkaart + naslag). */
   var POOM = "1";
   var MISSION_IDS = ['poomsae','woorden','hosinsul','ilbo','ibo','examen'];
-  var missionDone = {poomsae:false, woorden:false, hosinsul:false, ilbo:false, ibo:false, examen:false};
+  var missionDone = {poomsae:false, woorden:false, hosinsul:false, ilbo:false, ibo:false, examen:false,
+    standen:false, technieken:false, taeryon:false, gyeorugi:false, gyeokpa:false, moeilijk:false,
+    vgyeorugi:false, vpoomsae:false};
   /* De dagkaart is nadrukkelijk van vandaag. De vinkjes moeten een herstart binnen dezelfde dag
      overleven (de app gaat tussendoor dicht), maar morgen weer schoon zijn — daarom staat de datum
      erbij en wordt alles genegeerd zodra die niet meer klopt. */
@@ -5755,6 +5833,12 @@
     for(var k in missionDone) if(d[k] === true) missionDone[k] = true;
   })();
   function missionsSave(){ store.set('poom_missions', {d: todayISO(), done: missionDone}); }
+  var missionsDate=todayISO();
+  function missionsEnsure(){
+    if(missionsDate===todayISO()) return;
+    missionsDate=todayISO();
+    for(var id in missionDone) missionDone[id]=false;
+  }
   // hand-drawn marker cross-out — one style chosen per day, consistent across all items
   var STRIKES = ['strike-loop','strike-scribble','strike-double'];
   function dayStrike(){ return STRIKES[dseed() % STRIKES.length]; }
@@ -6008,6 +6092,7 @@
   }
   function missionMeta(){
     var pk=poomsaeOfDay(), vd=vocabOfDay(), ex=examRule();
+    var hardN=TERMEN.reduce(function(n,g){ return n+catHard(g).length; },0);
     return {
       poomsae: {id:'poomsae', short:'Poomsae', n:pk.length,       label:'Poomsae',           sub:esc(poomsaeLabel(pk))},
       woorden: {id:'woorden', short:'Woorden', n:vd.n,            label:'Koreaanse woorden', sub:woordenSub(vd)},
@@ -6018,7 +6103,14 @@
       hosinsul:{id:'hosinsul',short:'Hosinsul',n:hosinsulCount(), label:'Hosinsul',          sub:hosinsulCount()+' zelfverdedigingen'},
       ilbo:    {id:'ilbo',    short:'Ilbo',    n:ilboCount(),     label:'Ilbo Taeryon',      sub:ilboCount()+' één-stap sparringen'},
       ibo:     {id:'ibo',     short:'Ibo',     n:iboCount(),      label:'Ibo Taeryon',       sub:iboCount()+' twee-stap sparringen'},
-      examen:  {id:'examen',  short:'Examen',  n:ex.total,        label:'Slaag voor een proefexamen', sub:ex.total+' vragen'}
+      examen:  {id:'examen',  short:'Examen',  n:ex.total,        label:'Slaag voor een proefexamen', sub:ex.total+' vragen'},
+      standen: {id:'standen', label:'Oefen je standen', sub:'Bij je weekdoel · handboek'},
+      technieken: {id:'technieken', label:'Oefen je technieken', sub:'Bij je weekdoel · handboek'},
+      taeryon: {id:'taeryon', label:'Oefen taeryon', sub:'Bij je weekdoel · met een partner'},
+      gyeorugi: {id:'gyeorugi', label:'Oefen gyeorugi', sub:'Bij je weekdoel · met je trainer'},
+      gyeokpa: {id:'gyeokpa', label:'Oefen gyeokpa', sub:'Bij je weekdoel · altijd met je trainer'},
+      moeilijk: {id:'moeilijk', label:'Oefen moeilijke woorden',
+        sub:hardN ? hardN+(hardN===1?' gemarkeerd woord':' gemarkeerde woorden') : 'Markeer eerst woorden die je lastig vindt'}
     };
   }
   /* De eerste regel van de dagkaart is je eigen training van deze weekdag. Hij vertelt hoeveel
@@ -6070,15 +6162,23 @@
     '</div>';
   }
 
-  /* Twee suggesties naast je eigen training: woorden om te leren en een techniekfilmpje om te
-     bekijken. De filmpjeskant wisselt per dag tussen gyeorugi en poomsae, zodat je ze allebei
-     langs ziet komen zonder dat de kaart elke dag hetzelfde zegt. */
+  /* Open weektaken krijgen voorrang; de dagrotatie wisselt welke twee bovenaan staan.
+     Zonder open weektaken blijven de gewone suggesties beschikbaar. */
   function pickExtras(){
+    weekEnsure();
+    var open=WEEK_FOCUS.filter(function(id){ return !WEEK_DONE[id]; });
+    var lead=open.length ? dseed()%open.length : 0;
+    var picks=open.slice(lead).concat(open.slice(0,lead)).slice(0,2);
     var vids=['vgyeorugi','vpoomsae'], d=new Date().getDay();
     // De kaart houdt het op drie regels: je eigen training plus twee dingen ernaast. In het
     // weekend is er tijd om de theorie te toetsen, dus dan neemt het proefexamen de plek van
     // het techniekfilmpje in — en niet die van de woorden, want die bevraagt het examen juist.
-    return ['woorden', (d===0 || d===6) ? 'examen' : vids[dseed()%vids.length]];
+    var defaults=['woorden', (d===0 || d===6) ? 'examen' : vids[dseed()%vids.length],
+      vids[(dseed()+1)%vids.length]];
+    defaults.forEach(function(id){
+      if(picks.length<2 && picks.indexOf(id)<0 && !WEEK_DONE[id]) picks.push(id);
+    });
+    return picks;
   }
   /* De dagkaart opent met je eigen training van deze weekdag; daaronder draagt de app nog twee
      dingen aan. Vroeger stond poomsae bovenaan vastgeschroefd — die schuift nu mee in de
@@ -6087,12 +6187,14 @@
   function todaysMissions(){ var meta=missionMeta(); return todayMissionIds().map(function(id){return meta[id];}); }
   /* Waar de tekstkant van een dagkaart-rij heen gaat. De meeste missies hebben een eigen
      Handboek-onderdeel met de stof; ibo heeft er geen, en woorden wonen in hun eigen sectie. */
-  var MISSION_HB = { poomsae:'poomsae', ilbo:'ilbo', hosinsul:'hosinsul' };
+  var MISSION_HB = { poomsae:'poomsae', ilbo:'ilbo', hosinsul:'hosinsul',
+    standen:'standen', technieken:'technieken', taeryon:'ilbo', gyeorugi:'gyeorugi', gyeokpa:'gyeokpa' };
   // Poomsae-ids van vandaag, alleen gezet zolang je het Handboek via de dagkaart opent.
   var hbTodayFocus = null;
   function missionGoLabel(m){
     if(m.id==='examen')  return 'Start '+m.label;
     if(m.id==='woorden') return 'Open Koreaanse woorden';
+    if(m.id==='moeilijk') return 'Open je gemarkeerde moeilijke woorden';
     if(m.id==='vgyeorugi' || m.id==='vpoomsae') return 'Open de filmpjes van '+
       (m.id==='vgyeorugi'?'gyeorugi':'poomsae')+' · techniek';
     if(MISSION_HB[m.id]) return 'Open '+m.label+' in het handboek';
@@ -6108,6 +6210,7 @@
     }
     // Woorden is zelf het tabblad, daar valt niets te sluiten — dus ook niets om naar terug te keren.
     if(id==='woorden'){ showScreen('woorden'); return; }
+    if(id==='moeilijk'){ csEnter('woorden'); openCat('Moeilijk'); return; }
     var hb = MISSION_HB[id];
     if(hb && hbCat(hb)){
       csEnter('handboek');
@@ -6273,6 +6376,8 @@
       '</span></div>';
   }
   function renderToday(){
+    weekEnsure();
+    missionsEnsure();
     var f = byId(CUR), t = th(CUR), bh = beltHero(geupInfo(GEUP_I));
     var doneCount = JOURNEY.filter(function(id){return DONE[id];}).length;
     var curIndex = JOURNEY.indexOf(CUR);
@@ -6294,20 +6399,19 @@
             '<span class="ci-t"><small><span class="ci-mini reflectie" aria-hidden="true"></span> Reflectie · '+ciWk+'</small><b>Hoe ging je training deze week?</b></span>'+
             '<span class="dot"></span></div>';
     } else {
-      var ciCh = weekChallenge();
       checkin = wfSet
-        ? '<div class="checkin set" data-act="cigoal">'+
-            '<span class="ci-t"><small><span class="ci-mini doel" aria-hidden="true"></span> Doelstelling · '+ciWk+(ciCh?' · '+ciCh.em+' '+ciCh.label:'')+'</small><b>'+esc(weekFocusText())+'</b></span>'+
-            '<span class="ci-cta">Wijzig '+IC.chev+'</span></div>'
+        ? ''
         : '<div class="checkin due" data-act="cigoal">'+
             '<span class="ci-t"><small><span class="ci-mini doel" aria-hidden="true"></span> Doelstelling · '+ciWk+'</small><b>Zet je doel voor deze week</b></span>'+
             '<span class="dot"></span></div>';
     }
+    if(wfSet) checkin=weekChecklistHtml()+checkin;
     var missions = todaysMissions();
     var trainRij = tdTrainingHtml();
     var doneN = missions.filter(function(m){return missionDone[m.id];}).length;
     var missionCols = missions.map(function(m){
-      var dn = missionDone[m.id];
+      var weekly=WEEK_FOCUS.indexOf(m.id)>=0;
+      var dn = weekly ? !!WEEK_DONE[m.id] : missionDone[m.id];
       // Het proefexamen is het enige onderdeel waarvan de app de uitslag zelf kent, dus dat vink
       // je niet zelf af: de checkbox start het examen. De rest oefen je in de zaal → zelf afvinken.
       var judged = m.id==='examen';
@@ -6320,7 +6424,7 @@
           '<button class="ti-txt" data-act="missgo" data-id="'+m.id+'" '+
             'aria-label="'+esc(missionGoLabel(m))+'">'+
             '<span class="ti-t">'+esc(m.label)+'</span>'+
-            '<span class="ti-s">'+m.sub+'</span>'+
+            '<span class="ti-s">'+(weekly && !/Bij je weekdoel/.test(m.sub) ? 'Bij je weekdoel · ' : '')+m.sub+'</span>'+
             '<span class="ti-chev" aria-hidden="true">'+IC.chev+'</span>'+
           '</button>'+
         '</div>';
@@ -6536,20 +6640,21 @@
      drie van bovenaan. Is er geen doel of past er niets bij, dan blijft de map gewoon de map. */
   var VD_FOCUS_WOORDEN = {
     standen: ['stand','seogi','stance','kubi','juchum'],
-    trappen: ['trap','chagi','kick','dollyo','yop','naeryo','dwi'],
-    blokken: ['blok','makgi','stoot','jireugi','punch','block','slag','chigi'],
-    tempo:   ['tempo','ritme','snelheid','speed','timing'],
-    kihap:   ['kihap','kracht','power','hard'],
-    balans:  ['balans','balance','stabiel'],
-    blik:    ['blik','focus','kijk'],
-    adem:    ['adem','breath','ademhaling'],
-    termen:  ['term','woord','naam','naming']
+    technieken: ['blok','makgi','stoot','jireugi','punch','block','slag','chigi','trap','chagi','kick','techniek'],
+    poomsae: ['poomsae','taegeuk','jang','koryo'],
+    taeryon: ['taeryon','daeryon','ilbo','ibo','sambo','stapspar'],
+    hosinsul: ['hosinsul','hosin','zelfverdedig'],
+    gyeorugi: ['gyeorugi','kyorugi','spar','fight'],
+    gyeokpa: ['gyeokpa','gyepa','breek','breaking'],
+    examen: ['theorie','examen','quiz'],
+    moeilijk: ['term','woord','naam','naming']
   };
   function vdUitgelicht(cat, sub){
+    weekEnsure();
     if(!WEEK_FOCUS.length) return [];
     var woorden=[], i;
     for(i=0;i<WEEK_FOCUS.length;i++){
-      var w=VD_FOCUS_WOORDEN[WEEK_FOCUS[i]]; if(w) woorden=woorden.concat(w);
+      var w=!WEEK_DONE[WEEK_FOCUS[i]] && VD_FOCUS_WOORDEN[WEEK_FOCUS[i]]; if(w) woorden=woorden.concat(w);
     }
     if(!woorden.length) return [];
     return vdInPlek(cat, sub).filter(function(v){
@@ -9951,12 +10056,14 @@
   }
   // Zet een missie op done + speelt dezelfde feedback als een tik op de rij (geluid, hit-pop, confetti).
   function finishMission(id){
+    missionsEnsure();
     if(!(id in missionDone)) return;
     var todayIds = todayMissionIds();
     var before = todayIds.every(function(x){return missionDone[x];});
     var was = missionDone[id];
     missionDone[id] = true;
     missionsSave();
+    weekMark(id, true);
     var after = todayIds.every(function(x){return missionDone[x];});
     var allDone = after && !before;
     if(!was){ buzz(12); sfx(allDone ? 'complete' : 'check'); }
@@ -10152,7 +10259,9 @@
     var passed = s.fout <= s.maxFout;
     var body = examEl.querySelector('#ex-body');
     var foot = examEl.querySelector('#ex-foot');
+    missionsEnsure();
     if(passed && ('examen' in missionDone)){ missionDone.examen = true; missionsSave(); }
+    weekMark('examen', true);
     // Stond het examen als onderdeel in je training, dan streept slagen die kaart ook af.
     if(passed) plExamenKlaar();
     var mSlug = mascotBelt(geupInfo(GEUP_I));   // result hero belt matches the profile grade
@@ -12180,6 +12289,13 @@
     if(name==='today') scheduleBlink(); else stopBlink();
   }
   window.addEventListener('resize', moveNavHL);
+  function refreshWeekOnReturn(){
+    if(document.visibilityState==='hidden') return;
+    var changed=weekEnsure(), dayChanged=missionsDate!==todayISO();
+    if(state.screen==='today' && (changed || dayChanged)) showScreen('today');
+  }
+  document.addEventListener('visibilitychange', refreshWeekOnReturn);
+  window.addEventListener('focus', refreshWeekOnReturn);
 
   /* ---- greeting mascot: gentle natural eye-blink ---- */
   var blinkTO=null;
@@ -12528,6 +12644,7 @@
     else if(a==='cisubmit'){ ciSubmit(); }
     else if(a==='rclose'){ closeCheckin(); }
     else if(a==='misscheck'){ toggleMission(act.getAttribute('data-id')); }
+    else if(a==='weekcheck'){ toggleWeekTask(act.getAttribute('data-id')); }
     else if(a==='missopen'){ openMission(act.getAttribute('data-id')); }
     else if(a==='missgo'){ missionGo(act.getAttribute('data-id')); }
     else if(a==='mascwink'){ mascWink(); }
@@ -12549,12 +12666,31 @@
   }
 
   /* ---- daily missions ---- */
+  function toggleWeekTask(id){
+    weekEnsure();
+    missionsEnsure();
+    if(WEEK_FOCUS.indexOf(id)<0) return;
+    var done=!WEEK_DONE[id];
+    weekMark(id, done);
+    missionDone[id]=done;
+    missionsSave();
+    buzz(done?12:6); sfx(done?'check':'uncheck');
+    var sc=stage.querySelector('.surface'), top=sc?sc.scrollTop:0;
+    showScreen('today');
+    var next=stage.querySelector('.surface'); if(next) next.scrollTop=top;
+    var btn=stage.querySelector('.week-task[data-week-id="'+id+'"] .week-check');
+    if(btn) btn.focus({preventScroll:true});
+  }
   function toggleMission(id){
     if(!(id in missionDone)) return;
+    missionsEnsure();
     var todayIds = todayMissionIds();
     var before = todayIds.every(function(id){return missionDone[id];});
-    missionDone[id] = !missionDone[id];
+    weekEnsure();
+    var weekly=WEEK_FOCUS.indexOf(id)>=0;
+    missionDone[id] = !(weekly ? WEEK_DONE[id] : missionDone[id]);
     missionsSave();
+    weekMark(id, missionDone[id]);
     var nowOn = missionDone[id];
     var after = todayIds.every(function(id){return missionDone[id];});
     var allDone = after && !before;
@@ -12583,7 +12719,7 @@
   }
 
   /* ---- weekly check-in overlay (goal-setting Mon–Fri · reflective Sat–Sun) ---- */
-  var reflect=null, rfMode='goal', rfRating=null, rfPick=[], rfMood=null, rfHelp=null;
+  var reflect=null, rfMode='goal', rfRating=null, rfPick=[], rfMood=null, rfHelp=null, rfWeekKey=null;
   function togglePick(id){
     var i = rfPick.indexOf(id);
     if(i>=0){ rfPick.splice(i,1); }
@@ -12638,11 +12774,11 @@
   // one shared question model, rendered three ways (page / accordion / swipe)
   function ciQuestions(){
     if(rfMode==='goal') return [
-      { id:'mood', q:'Hoe voel je je deze week?', hint:'Zo stemt je coach de uitdaging af.',
+      { id:'mood', q:'Hoe voel je je deze week?', hint:'Sta even stil bij hoe je je voelt. Je bepaalt zelf je oefentempo.',
         opts:function(){ return '<div class="rate">'+MOOD_OPTS.map(function(o){ return ciOpt(o, rfMood===o.r, 'pickmood'); }).join('')+'</div>'; },
         answered:function(){ return !!rfMood; },
         summary:function(){ var m=moodInfo(rfMood); return m?m.em+' '+m.t:''; } },
-      { id:'focus', q:'Waar wil je op letten?', hint:'Kies er 1 tot 5 om deze week centraal te zetten.',
+      { id:'focus', q:'Wat wil je deze week oefenen?', hint:'Kies 1 tot 5 onderdelen voor je weeklijst. Ze sturen de twee suggesties op je dagkaart.',
         opts:function(){ var full=rfPick.length>=FOCUS_MAX; return '<div class="fchips">'+FOCUS_AREAS.map(function(fa){
             var on=rfPick.indexOf(fa.id)>=0, dis=full&&!on;
             return '<button class="fchip'+(on?' on':'')+(dis?' disabled':'')+'"'+(dis?' disabled':'')+' data-act="pickfocus" data-id="'+fa.id+'">'+
@@ -12652,11 +12788,13 @@
         summary:function(){ return rfPick.length?focusShortFrom(rfPick):''; } }
     ];
     return [
-      { id:'went', q:'Hoe ging je training deze week?', hint:'Eerlijk zijn helpt je coach.',
+      { id:'went', q:'Hoe ging je training deze week?', hint:WEEK_FOCUS.length ?
+          WEEK_FOCUS.filter(function(id){ return WEEK_DONE[id]; }).length+' van '+WEEK_FOCUS.length+' weektaken geoefend. Hoe ging dat?' :
+          'Kijk terug op wat je deze week hebt geoefend.',
         opts:function(){ return '<div class="rate">'+WENT_OPTS.map(function(o){ return ciOpt(o, rfRating===o.r, 'pickwent'); }).join('')+'</div>'; },
         answered:function(){ return !!rfRating; },
         summary:function(){ var o=optInfo(WENT_OPTS,rfRating); return o?o.em+' '+o.t:''; } },
-      { id:'helpful', q:'Hielpen de voorgestelde trainingen?', hint:'Zo weet je coach wat werkt.',
+      { id:'helpful', q:'Hielpen de voorgestelde oefeningen?', hint:'Bewaar je ervaring bij deze week. Dit past je volgende week nog niet automatisch aan.',
         opts:function(){ return '<div class="rate">'+HELP_OPTS.map(function(o){ return ciOpt(o, rfHelp===o.r, 'pickhelp'); }).join('')+'</div>'; },
         answered:function(){ return !!rfHelp; },
         summary:function(){ var o=optInfo(HELP_OPTS,rfHelp); return o?o.em+' '+o.t:''; } }
@@ -12665,13 +12803,15 @@
   function ciMeta(){
     return rfMode==='goal'
       ? { icon:'doel', k:'DOELSTELLING · WK '+weekNo(), h:'Zet je doel voor deze week', sub:'Twee snelle keuzes — daarna kun je los.' }
-      : { icon:'reflectie', k:'REFLECTIE · WK '+weekNo(), h:'Hoe was jouw week?', sub:'Eerlijk zijn helpt je coach je beter te helpen.' };
+      : { icon:'reflectie', k:'REFLECTIE · WK '+weekNo(), h:'Hoe was jouw week?', sub:'Kijk terug op je oefeningen en je weeklijst.' };
   }
   function ciSwitcherInner(){
     var modes=[['page','Pagina'],['accordion','Accordeon'],['swipe','Kaarten']];
     return modes.map(function(m){ return '<button class="uxb'+(CI_UX===m[0]?' on':'')+'" data-act="setux" data-ux="'+m[0]+'">'+m[1]+'</button>'; }).join('');
   }
   function openCheckin(mode){
+    weekEnsure();
+    rfWeekKey=WEEK_KEY;
     rfMode = (mode==='goal'||mode==='reflect') ? mode : weekPhase();
     rfRating = WEEK_RATING; rfPick = WEEK_FOCUS.slice(); rfMood = WEEK_MOOD; rfHelp = WEEK_HELP;
     reflect = document.createElement('div');
@@ -12697,8 +12837,17 @@
     fnav.classList.remove('hide');
   }
   function ciSave(){
-    if(rfMode==='goal'){ WEEK_FOCUS = rfPick.slice(); WEEK_MOOD = rfMood; weekGoalSet = true; }
+    weekEnsure();
+    missionsEnsure();
+    if(rfMode==='goal'){
+      var done={};
+      rfPick.forEach(function(id){ if(WEEK_DONE[id]) done[id]=true; });
+      WEEK_FOCUS = rfPick.slice(); WEEK_DONE=done; WEEK_MOOD = rfMood; weekGoalSet = true;
+      WEEK_FOCUS.forEach(function(id){ missionDone[id]=!!WEEK_DONE[id]; });
+      missionsSave();
+    }
     else { WEEK_RATING = rfRating; WEEK_HELP = rfHelp; weekReflected = true; }
+    weekSave();
   }
   function ciValid(){
     return rfMode==='goal' ? !!(rfMood && rfPick.length) : !!(rfRating && rfHelp);
@@ -12706,6 +12855,12 @@
   // Submit saves every answer at once and drops straight back to Vandaag.
   function ciSubmit(){
     if(!reflect || !ciValid()) return;
+    weekEnsure();
+    if(rfWeekKey!==WEEK_KEY){
+      closeCheckin(); showScreen('today');
+      toast('Er is een nieuwe week begonnen. Kies je weekdoel opnieuw.');
+      return;
+    }
     ciSave(); closeCheckin(); showScreen('today');
   }
   function syncSubmit(){
