@@ -2587,8 +2587,19 @@
     color:rgba(var(--tink,255,255,255),.72);white-space:nowrap;pointer-events:none;
     opacity:0;transition:opacity .3s ease}
   .ot-ronde.on{opacity:1}
-  /* Tijdens de rust loopt dezelfde ring, maar ingetogen: het is geen werktijd. */
-  .timerscreen.ot-rusten .pt-prog{opacity:.55}
+  /* Tijdens de rust pulseert de ring rustig mee op een ademhalingsritme (4s cyclus: 2s in, 2s uit). */
+  .timerscreen.ot-rusten .pt-svg{animation:otRustAdem 4s ease-in-out infinite;transform-origin:120px 120px}
+  .timerscreen.ot-rusten .pt-prog{animation:otRustProg 4s ease-in-out infinite;transform-origin:120px 120px}
+  .timerscreen.ot-rusten .pt-knobg{opacity:0;transition:opacity .3s ease}
+  @keyframes otRustAdem{0%,100%{transform:scale(.96)}50%{transform:scale(1.03)}}
+  @keyframes otRustProg{
+    0%,100%{opacity:.42;stroke-width:4.5px;filter:drop-shadow(0 0 2px rgba(var(--tink,255,255,255),.25))}
+    50%{opacity:.95;stroke-width:7.5px;filter:drop-shadow(0 0 12px rgba(var(--tink,255,255,255),.85))}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .timerscreen.ot-rusten .pt-svg{animation:none}
+    .timerscreen.ot-rusten .pt-prog{animation:none;opacity:.55}
+  }
 
   /* Tijd mode: the dial always shows MM:SS (even while setting) — no Korean word / in-ring prompt */
   /* De klok mag zijn eigen hoogte pakken: daar staat tekst van vier tekens, geen los cijfer. */
@@ -2599,6 +2610,7 @@
   .timerscreen[data-mode="time"] .ptimer.idle .pt-start{display:none}
   .timerscreen .ot-tsub{font-family:var(--cond);font-weight:800;text-transform:uppercase;
     letter-spacing:.14em;font-size:12.5px;color:rgba(var(--tink,255,255,255),.84)}
+  .timerscreen .ot-tsub.ot-tdone{font-size:11.5px;letter-spacing:.09em;white-space:nowrap}
   /* Het pauzeteken onder de tijd wijst aan wáár je tikt; het blijft ingetogen, want de
      cijfers zijn de hoofdzaak. Bij pauze staat er een afspeelteken en licht het wat op.
      Het staat los van de tekstregel en hangt precies halverwege tussen de onderkant van
@@ -10161,8 +10173,6 @@
   // Standalone practice timer — reachable any time via the round nav button (reuses the pt-* engine)
   function openTimer(){
     if(timerScreen) return;
-    sfxLuid(true);          // vanaf hier moet de bel door de stilteschakelaar heen kunnen
-    otAudioPrime();         // binnen de tik die de timer opent, anders mag het element later niet
     var el = document.createElement('div');
     el.className='session timerscreen'; el.id='timerscreen';
     // Restore last-used mode + duration for the Tijd (countdown) mode
@@ -10375,7 +10385,6 @@
   }
   function closeTimer(){
     if(!timerScreen) return;
-    sfxLuid(false);
     otStop(); otCloseReps(); otCloseDur(); otCloseMode();
     clearTimeout(otGlintT); clearTimeout(otRepT); clearTimeout(otModeT);
     setTopBar();                       // restore the cream top bar
@@ -10825,7 +10834,7 @@
      Context is created lazily inside a user gesture so autoplay policies are satisfied. */
   var _sfxCtx=null;
   function sfxCtx(){ if(_sfxCtx) return _sfxCtx;
-    try{ sfxZetType(); }catch(e){}
+    try{ sfxSession(); }catch(e){}
     try{ _sfxCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ _sfxCtx=null; } return _sfxCtx; }
   function sfxTone(freq,start,dur,type,peak){
     var ac=sfxCtx(); if(!ac) return;
@@ -10839,41 +10848,14 @@
     o.start(t0); o.stop(t0+dur+0.03);
   }
   /* iOS: use the "ambient" audio session for our effect sounds. Ambient mixes with
-     other audio and — crucially — is silenced by the ring/silent switch and never
-     registers as "now playing", so checking a box no longer wakes the Dynamic Island.
-     (The spoken timer countdown uses speechSynthesis, which stays audible regardless.) */
-  /* Eén uitzondering: een rondetimer die je niet hoort is geen timer. Zolang die loopt zetten
-     we de sessie op 'playback', zodat de bel ook klinkt als de telefoon op stil staat. Daarbuiten
-     blijft alles 'ambient', want een vinkje hoort het belsignaal niet te negeren. */
-  var _sfxLuid=false;
-  function sfxLuid(aan){ aan=!!aan; if(aan===_sfxLuid) return; _sfxLuid=aan; sfxSession(true); }
-  /* iOS kiest de audiocategorie op het moment dat de context wordt aangemaakt, en houdt daar
-     vervolgens aan vast. Stilzetten en hervatten helpt niet: de context blijft in de categorie
-     waarin hij geboren is. Je hoort de bel dan wel in een koptelefoon — die luistert niet naar
-     de stilteschakelaar — maar niet uit de luidspreker zodra de telefoon op stil staat.
-     Daarom bouwen we bij een wissel een vérse context: alleen zo wordt de sessie opnieuw
-     geactiveerd, nu onder de nieuwe categorie. De ingelezen opnames gaan gewoon mee, want een
-     AudioBuffer hoort bij geen enkele context in het bijzonder. */
-  var _sfxWissel=null;
-  function sfxZetType(){
-    var w=_sfxLuid?'playback':'ambient';
-    if(!navigator.audioSession || navigator.audioSession.type===w) return false;
-    navigator.audioSession.type=w; return true;
-  }
-  function sfxSession(wissel){
+     other audio (Apple Music, Spotify) and — crucially — is silenced by the ring/silent
+     switch and never registers as "now playing", so using the timer never pauses your music
+     and checking a box never wakes the Dynamic Island. */
+  function sfxSession(){
     try{
-      if(!sfxZetType() || !wissel) return;
-      var oud=_sfxCtx; if(!oud) return;
-      _sfxCtx=null; _sfxPrimed=false;
-      var ac=sfxCtx(); if(!ac){ _sfxCtx=oud; return; }
-      /* Een stil buffertje activeert de sessie meteen; zonder dat wacht iOS tot het eerste
-         echte geluid en pakt hij soms alsnog de oude categorie. */
-      try{ var b=ac.createBuffer(1,1,22050), st=ac.createBufferSource();
-           st.buffer=b; st.connect(ac.destination); st.start(0); _sfxPrimed=true; }catch(e){}
-      _sfxWissel=Promise.resolve(ac.state==='running'?null:ac.resume())['catch'](function(){})
-                        .then(function(){ _sfxWissel=null; });
-      // De oude context pas daarna sluiten: anders hapert het geluid in de overgang.
-      setTimeout(function(){ try{ oud.close(); }catch(e){} }, 400);
+      if(navigator.audioSession && navigator.audioSession.type!=='ambient'){
+        navigator.audioSession.type='ambient';
+      }
     }catch(e){}
   }
   /* Een context die niet loopt slikt het geluid zonder iets te zeggen: iOS zet hem stil zodra
@@ -10882,14 +10864,12 @@
      weer is — anders mist juist de bel die je wilde horen. */
   function sfxWek(dan){
     var ac=sfxCtx(); if(!ac) return false;
-    if(!_sfxWissel && ac.state==='running') return true;
-    var wacht=_sfxWissel||Promise.resolve();
-    wacht.then(function(){
-      if(ac.state==='running'){ dan&&dan(); return; }
-      var pr; try{ pr=ac.resume(); }catch(e){ return; }
+    if(ac.state==='running') return true;
+    try{
+      var pr=ac.resume();
       if(pr&&pr.then) pr.then(function(){ dan&&dan(); })['catch'](function(){});
       else dan&&dan();
-    })['catch'](function(){});
+    }catch(e){}
     return false;
   }
   /* Terug uit de achtergrond: de context meteen weer wakker maken, zodat het eerste geluid
@@ -10983,45 +10963,7 @@
   // Warm the sample buffers shortly after load so even the first check has its
   // recorded sound ready (the context stays suspended until the first gesture).
   setTimeout(function(){ try{ sfxPreload(); }catch(e){} }, 1200);
-  /* Web Audio wordt op een iPhone altijd door de stilteschakelaar gesmoord — ook met de
-     sessie op 'playback'. Een gewoon <audio>-element niet: dat speelt door, net als een
-     filmpje. Zolang de timer loopt sturen we de bel en de piepjes daarom langs die weg,
-     zodat een trainer met zijn telefoon op stil toch zijn ronde hoort. */
-  var _otAud={};
-  function otAudio(name){
-    var a=_otAud[name];
-    if(!a && SFX_SAMPLES[name]){
-      try{ a=new Audio(SFX_SAMPLES[name]); a.preload='auto'; a.volume=(SFX_GAIN[name]||0.9);
-           a.setAttribute('playsinline',''); _otAud[name]=a; }catch(e){ a=null; }
-    }
-    return a||null;
-  }
-  /* iOS laat een element alleen spelen als het ooit binnen een aanraking is gestart. Bij het
-     openen van de timer starten we ze daarom even geluidloos, zodat ze later vanzelf mogen. */
-  function otAudioPrime(){
-    ['bel','beep'].forEach(function(n){
-      var a=otAudio(n); if(!a) return;
-      var v=a.volume;
-      try{ a.volume=0; var pr=a.play();
-        var stil=function(){ try{ a.pause(); a.currentTime=0; }catch(e){} a.volume=v; };
-        if(pr&&pr.then) pr.then(stil)['catch'](function(){ a.volume=v; }); else stil();
-      }catch(e){ a.volume=v; }
-    });
-  }
-  var OT_AUD_DUUR={ beep:300 };   // het piepje is een kort tikje uit een langere opname
-  function otAudioSpeel(name){
-    var a=otAudio(name); if(!a) return false;
-    try{
-      a.pause(); a.currentTime=0; a.volume=(SFX_GAIN[name]||0.9);
-      var pr=a.play(); if(pr&&pr['catch']) pr['catch'](function(){});
-      var kap=OT_AUD_DUUR[name];
-      if(kap) setTimeout(function(){ try{ a.pause(); a.currentTime=0; }catch(e){} }, kap);
-      return true;
-    }catch(e){ return false; }
-  }
   function sfx(name){
-    // Tijdens de timer gaan bel en piep langs het element; de rest blijft Web Audio.
-    if(_sfxLuid && (name==='bel'||name==='beep')){ if(otAudioSpeel(name)) return; }
     var ac=sfxCtx(); if(!ac) return;
     sfxSession();
     if(!sfxWek(function(){ sfxSpeel(name); })) return;
@@ -11222,9 +11164,9 @@
   function otTick(){
     if(otState.phase==='ready'){
       otState.ready--;
-      if(otState.ready>0){ otRender(); buzz(6); otSchedule(); return; }
+      if(otState.ready>0){ otRender(); sfx('beep'); buzz(10); otSchedule(); return; }
       // ready hit 0: the last pip drains over its .5s CSS transition, then the count starts on the beat
-      otRender(); buzz(6);
+      otRender(); sfx('beep'); buzz(10);
       clearTimeout(otState.iv);
       otState.iv=setTimeout(function(){
         if(otState.phase!=='ready') return;
@@ -11900,16 +11842,19 @@
     if(wordEl){
       wordEl.innerHTML = idle
         ? '<span class="ot-tsub">Tik om te starten</span>'
-        : (rust ? '<span class="ot-tsub ot-trust">Rust</span>'
-                : (running ? '<span class="ot-tcue" aria-hidden="true">'+(otState.running?IC.pause:IC.play)+'</span>' : ''));
+        : (done
+            ? '<span class="ot-tsub ot-tdone">klaar · tik voor opnieuw</span>'
+            : (rust
+                ? '<span class="ot-tsub ot-trust">Rust</span>'
+                : (running ? '<span class="ot-tcue" aria-hidden="true">'+(otState.running?IC.pause:IC.play)+'</span>' : '')));
       // Alleen als het teken er staat mag de regel geen hoogte pakken: zo blijven de
       // cijfers netjes in het midden van de ring staan.
       // Ook in rust houdt de regel geen hoogte: het woord 'Rust' hangt er los onder, zodat
       // de cijfers niet even omhoog wippen zodra de ronde voorbij is.
-      wordEl.classList.toggle('ot-cueonly', !idle && running);
+      wordEl.classList.toggle('ot-cueonly', !idle && !done && running);
     }
     host.classList.toggle('ot-rusten', rust);
-    var frac = idle ? Math.min(1, otState.dur/OT_DUUR_MAX) : (otState.total>0 ? Math.max(0, otState.left/otState.total) : 0);
+    var frac = idle ? Math.min(1, otState.dur/OT_DUUR_MAX) : (rust ? 1 : (otState.total>0 ? Math.max(0, otState.left/otState.total) : 0));
     var C=666, noTrans=!!(opts&&opts.noTrans);
     if(prog){ if(noTrans) prog.style.transition='none'; prog.style.strokeDashoffset=String(C*(1-frac)); }
     if(knobg){ if(noTrans) knobg.style.transition='none'; knobg.style.transform='rotate('+(frac*360).toFixed(2)+'deg)'; }
@@ -11917,8 +11862,7 @@
       hint.classList.remove('glint');
       if(running && otState.running){ hint.textContent=''; hint.style.opacity='0'; }
       else if(running){ hint.textContent='gepauzeerd — tik om verder te gaan'; hint.style.opacity='1'; }
-      else if(done){ hint.textContent='klaar! · tik voor opnieuw'; hint.style.opacity='1'; }
-      else { hint.textContent=''; hint.style.opacity='0'; }   // stil in rust: de ring zegt het zelf al
+      else { hint.textContent=''; hint.style.opacity='0'; }   // stil in rust en klaar: staat nu ín de ring
     }
     host.classList.toggle('running', running && otState.running);
   }
@@ -11941,8 +11885,6 @@
     // Eerst drie tellen Junbi, eindigend op Sijak — precies zoals bij Tellen, zodat je
     // je klaar kunt zetten voordat de tijd loopt.
     otState.phase='ready'; otState.ready=OT_READY; otState.running=true;
-    sfxLuid(true);                               // de bel moet ook door de stilleschakelaar heen
-    otAudioPrime();                              // de start is een tik: nu mag het element nog
     otState._dragged=false; otState.ronde=1; host.classList.remove('ot-rusten');
     otDraaiZandloper(-180, true, 1);             // het glas gaat om: het zand begint straks te lopen
     var pr0=host.querySelector('#ot-prog'), kg0=host.querySelector('#ot-knobg');
@@ -11955,8 +11897,14 @@
   function otReadyTick(){
     if(!timerScreen || otState.mode!=='time' || otState.phase!=='ready') return;
     otState.ready--;
-    if(otState.ready>0){ otRenderTime({noTrans:true}); buzz(6); otState.iv=setTimeout(otReadyTick, 1000); return; }
-    otRenderTime({noTrans:true}); speak('시작'); buzz(14);
+    if(otState.ready>0){
+      otRenderTime({noTrans:true});
+      sfx('beep'); buzz(10);
+      otState.iv=setTimeout(otReadyTick, 1000);
+      return;
+    }
+    otRenderTime({noTrans:true});
+    sfx('beep'); speak('시작'); buzz(14);
     otState.iv=setTimeout(function(){
       if(!timerScreen || otState.mode!=='time' || otState.phase!=='ready') return;
       otRunTime();
