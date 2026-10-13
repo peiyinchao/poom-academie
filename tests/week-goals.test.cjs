@@ -41,6 +41,12 @@ test('week goals use the nine supported handbook and vocabulary areas', () => {
     ['standen','technieken','poomsae','taeryon','hosinsul','gyeorugi','gyeokpa','examen','moeilijk']);
 });
 
+test('weekly input influences suggestions without rendering a weekly checklist', () => {
+  assert.doesNotMatch(source, /weekChecklistHtml|class="week-task|data-act="weekcheck"/);
+  assert.match(source, /<button class="checkin set" data-act="cigoal"/);
+  assert.match(source, /Je keuzes sturen de twee suggesties op je dagkaart/);
+});
+
 test('goal saving and editing preserve completion only for retained goals', () => {
   const {scope, values} = app();
   scope.rfPick=['standen','technieken','poomsae'];
