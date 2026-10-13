@@ -2611,6 +2611,9 @@
     display:grid;place-items:center;color:rgb(var(--tink,255,255,255));opacity:1;
     transition:opacity .22s ease}
   .timerscreen .ot-tcue svg{width:25px;height:25px;display:block}
+  /* 'Rust' hangt op dezelfde plek als het pauzeteken en dus buiten de tekstregel om. */
+  .timerscreen .ot-trust{position:absolute;left:0;right:0;top:calc(72.0833% + 25px);
+    transform:translateY(-50%);display:grid;place-items:center}
   /* De lichtstreep loopt in één keer over de hele ringinhoud: cijfers én uitnodiging.
      Elk element zijn eigen sweep geven gaf twee losse strepen — over de brede cijfers
      schoof hij trager dan over de smalle regel eronder, en dan leest het niet als één
@@ -9142,7 +9145,6 @@
     // tekst las je hem niet terug tijdens het oefenen, genummerd wel.
     if(n.start) h+=stapLijst('Zo begin je', n.start);
     if(n.aanval) h+=stapLijst('De aanval', n.aanval);
-    if(n.video) h+=reelHtml(n.video);
     return h;
   }
   // De regels dragen bewust eigen opmaak (vette Koreaanse commando's) en komen uit curriculum.js,
@@ -9150,11 +9152,6 @@
   function stapLijst(kop, regels){
     return '<div class="hb-sec"><h4>'+esc(kop)+'</h4><ol class="hb-check hb-steps">'+
       regels.map(function(r){ return '<li>'+r+'</li>'; }).join('')+'</ol></div>';
-  }
-  function reelHtml(v){
-    return '<p class="hb-lead">Voorbeeldvideo: '+
-      '<a class="hb-link" href="'+esc(v.url)+'" target="_blank" rel="noopener">'+esc(v.titel)+'</a>'+
-      ' · '+esc(v.bron)+' · Facebook</p>';
   }
   /* Gyeorugi/Gyeokpa etc.: intro (uitleg) + graad-eis + tips, gebouwd uit C.onderdelen. */
   // Rekwisiet dat onder de tekst meeloopt — alleen voor de onderdelen die er een hebben.
@@ -10165,6 +10162,7 @@
   function openTimer(){
     if(timerScreen) return;
     sfxLuid(true);          // vanaf hier moet de bel door de stilteschakelaar heen kunnen
+    otAudioPrime();         // binnen de tik die de timer opent, anders mag het element later niet
     var el = document.createElement('div');
     el.className='session timerscreen'; el.id='timerscreen';
     // Restore last-used mode + duration for the Tijd (countdown) mode
@@ -10236,14 +10234,6 @@
         '<img class="ot-blink" id="ot-masc-blink" src="'+mBlink+'" alt=""></div></div>'+
       '<div class="ot-bar">'+
         '<div class="ot-left">'+
-          '<div class="ot-rep">'+
-            '<span class="ot-lab">Rondes</span>'+
-            '<div class="ot-rmenu"><div class="ot-rmenu-inner"><span class="ot-rthumb"></span>'+rOpts+'</div></div>'+
-            '<button class="ot-fab ot-rep-fab" id="ot-repeat" data-act="otrepeat" aria-label="Aantal herhalingen">'+
-              '<span class="ot-rico rep">'+IC.repeat+'</span><span class="ot-rico inf">'+IC.infinity+'</span>'+
-              '<span class="ot-rico noloop">'+IC.repeatOff+'</span>'+
-              '<span class="ot-badge empty" id="ot-rep-badge"></span></button>'+
-          '</div>'+
           '<div class="ot-tempo">'+
             '<span class="ot-lab" id="ot-tempo-lab">'+otTempoWoord()+'</span>'+
             '<div class="ot-tmenu"><div class="ot-tmenu-inner"><span class="ot-tthumb"></span>'+tOpts+'</div></div>'+
@@ -10256,6 +10246,14 @@
             '<button class="ot-fab ot-dur-fab" data-act="otdur" aria-label="Secondes per ronde">'+
               '<span class="ot-dur-cur" id="ot-dur-cur">'+otState.dur+'</span>'+
               '<span class="ot-dunit">sec.</span></button>'+
+          '</div>'+
+          '<div class="ot-rep">'+
+            '<span class="ot-lab" id="ot-rep-lab">'+(otState.mode==='time'?'Rondes':'Herhalingen')+'</span>'+
+            '<div class="ot-rmenu"><div class="ot-rmenu-inner"><span class="ot-rthumb"></span>'+rOpts+'</div></div>'+
+            '<button class="ot-fab ot-rep-fab" id="ot-repeat" data-act="otrepeat" aria-label="Aantal herhalingen">'+
+              '<span class="ot-rico rep">'+IC.repeat+'</span><span class="ot-rico inf">'+IC.infinity+'</span>'+
+              '<span class="ot-rico noloop">'+IC.repeatOff+'</span>'+
+              '<span class="ot-badge empty" id="ot-rep-badge"></span></button>'+
           '</div>'+
           '<div class="ot-dur ot-rust">'+
             '<span class="ot-lab">Secondes rust</span>'+
@@ -10826,7 +10824,9 @@
   /* Lightweight offline sound-effects (synthesised via Web Audio — no asset files needed).
      Context is created lazily inside a user gesture so autoplay policies are satisfied. */
   var _sfxCtx=null;
-  function sfxCtx(){ if(_sfxCtx) return _sfxCtx; try{ _sfxCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ _sfxCtx=null; } return _sfxCtx; }
+  function sfxCtx(){ if(_sfxCtx) return _sfxCtx;
+    try{ sfxZetType(); }catch(e){}
+    try{ _sfxCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ _sfxCtx=null; } return _sfxCtx; }
   function sfxTone(freq,start,dur,type,peak){
     var ac=sfxCtx(); if(!ac) return;
     var t0=ac.currentTime+start;
@@ -10847,26 +10847,33 @@
      blijft alles 'ambient', want een vinkje hoort het belsignaal niet te negeren. */
   var _sfxLuid=false;
   function sfxLuid(aan){ aan=!!aan; if(aan===_sfxLuid) return; _sfxLuid=aan; sfxSession(true); }
-  /* iOS koppelt de categorie op het moment dat de audiosessie geactiveerd wordt. Een context
-     die al draait blijft daardoor in de oude categorie hangen: je hoort de bel wel in een
-     koptelefoon, maar niet uit de luidspreker als de telefoon op stil staat. Daarom zetten we
-     de lopende context bij een wissel even stil en starten hem opnieuw, zodat de sessie
-     opnieuw wordt geactiveerd — nu onder de nieuwe categorie. */
+  /* iOS kiest de audiocategorie op het moment dat de context wordt aangemaakt, en houdt daar
+     vervolgens aan vast. Stilzetten en hervatten helpt niet: de context blijft in de categorie
+     waarin hij geboren is. Je hoort de bel dan wel in een koptelefoon — die luistert niet naar
+     de stilteschakelaar — maar niet uit de luidspreker zodra de telefoon op stil staat.
+     Daarom bouwen we bij een wissel een vérse context: alleen zo wordt de sessie opnieuw
+     geactiveerd, nu onder de nieuwe categorie. De ingelezen opnames gaan gewoon mee, want een
+     AudioBuffer hoort bij geen enkele context in het bijzonder. */
   var _sfxWissel=null;
-  function sfxSession(wissel){ var w=_sfxLuid?'playback':'ambient';
+  function sfxZetType(){
+    var w=_sfxLuid?'playback':'ambient';
+    if(!navigator.audioSession || navigator.audioSession.type===w) return false;
+    navigator.audioSession.type=w; return true;
+  }
+  function sfxSession(wissel){
     try{
-      if(!navigator.audioSession || navigator.audioSession.type===w) return;
-      navigator.audioSession.type=w;
-      if(!wissel) return;
-      var ac=_sfxCtx; if(!ac || ac.state!=='running') return;
-      var pr=ac.suspend();
-      if(pr&&pr.then){
-        /* Zolang die wissel loopt staat de context stil. Een geluid dat in dat gaatje valt
-           zou je niet horen, dus onthouden we de belofte en wachten we er in sfx() op. */
-        _sfxWissel=pr.then(function(){ return ac.resume(); })['catch'](function(){})
-                     .then(function(){ _sfxWissel=null; });
-      }
-      else { try{ ac.resume(); }catch(e){} }
+      if(!sfxZetType() || !wissel) return;
+      var oud=_sfxCtx; if(!oud) return;
+      _sfxCtx=null; _sfxPrimed=false;
+      var ac=sfxCtx(); if(!ac){ _sfxCtx=oud; return; }
+      /* Een stil buffertje activeert de sessie meteen; zonder dat wacht iOS tot het eerste
+         echte geluid en pakt hij soms alsnog de oude categorie. */
+      try{ var b=ac.createBuffer(1,1,22050), st=ac.createBufferSource();
+           st.buffer=b; st.connect(ac.destination); st.start(0); _sfxPrimed=true; }catch(e){}
+      _sfxWissel=Promise.resolve(ac.state==='running'?null:ac.resume())['catch'](function(){})
+                        .then(function(){ _sfxWissel=null; });
+      // De oude context pas daarna sluiten: anders hapert het geluid in de overgang.
+      setTimeout(function(){ try{ oud.close(); }catch(e){} }, 400);
     }catch(e){}
   }
   /* Een context die niet loopt slikt het geluid zonder iets te zeggen: iOS zet hem stil zodra
@@ -10925,14 +10932,21 @@
     bel:     'assets/sounds/u_7xr5ffk4oq-opening-bell-421471.mp3'
   };
   var SFX_GAIN={check:0.95, complete:0.85, chime:0.85, correct:0.9, wrong:0.85, exampass:0.9, examfail:0.85, beep:0.5, rate0:0.8, rate1:0.85, rate2:0.85, thud:0.95, flip:0.8, bel:0.95};
-  var _sfxBuf={}, _sfxLoading={};
+  var _sfxBuf={}, _sfxLoading={}, _sfxPoging={};
   function sfxLoad(name){
     var ac=sfxCtx(); if(!ac) return;
     if(_sfxBuf[name]!==undefined || _sfxLoading[name]) return;
     var url=SFX_SAMPLES[name]; if(!url) return;
     _sfxLoading[name]=true;
-    var fail=function(){ _sfxBuf[name]=null; _sfxLoading[name]=false; };
-    var decode=function(ab){ ac.decodeAudioData(ab, function(buf){ _sfxBuf[name]=buf; _sfxLoading[name]=false; }, fail); };
+    /* Een poging kan stuklopen op een context die net vervangen is. Dat mag de opname niet
+       voorgoed de das omdoen, dus laten we hem een paar keer opnieuw proberen. */
+    _sfxPoging[name]=(_sfxPoging[name]||0)+1;
+    var fail=function(){ _sfxLoading[name]=false; if(_sfxPoging[name]>=3) _sfxBuf[name]=null; };
+    var decode=function(ab){
+      var nu=sfxCtx(); if(!nu){ fail(); return; }
+      try{ nu.decodeAudioData(ab, function(buf){ _sfxBuf[name]=buf; _sfxLoading[name]=false; }, fail); }
+      catch(e){ fail(); }
+    };
     /* XHR fallback: a native WKWebView wrap blocks fetch() of bundled file URLs, but
        XMLHttpRequest still loads local assets there. No-op on the web (fetch succeeds). */
     var viaXHR=function(){ try{ var x=new XMLHttpRequest(); x.open('GET',url,true); x.responseType='arraybuffer';
@@ -10969,7 +10983,45 @@
   // Warm the sample buffers shortly after load so even the first check has its
   // recorded sound ready (the context stays suspended until the first gesture).
   setTimeout(function(){ try{ sfxPreload(); }catch(e){} }, 1200);
+  /* Web Audio wordt op een iPhone altijd door de stilteschakelaar gesmoord — ook met de
+     sessie op 'playback'. Een gewoon <audio>-element niet: dat speelt door, net als een
+     filmpje. Zolang de timer loopt sturen we de bel en de piepjes daarom langs die weg,
+     zodat een trainer met zijn telefoon op stil toch zijn ronde hoort. */
+  var _otAud={};
+  function otAudio(name){
+    var a=_otAud[name];
+    if(!a && SFX_SAMPLES[name]){
+      try{ a=new Audio(SFX_SAMPLES[name]); a.preload='auto'; a.volume=(SFX_GAIN[name]||0.9);
+           a.setAttribute('playsinline',''); _otAud[name]=a; }catch(e){ a=null; }
+    }
+    return a||null;
+  }
+  /* iOS laat een element alleen spelen als het ooit binnen een aanraking is gestart. Bij het
+     openen van de timer starten we ze daarom even geluidloos, zodat ze later vanzelf mogen. */
+  function otAudioPrime(){
+    ['bel','beep'].forEach(function(n){
+      var a=otAudio(n); if(!a) return;
+      var v=a.volume;
+      try{ a.volume=0; var pr=a.play();
+        var stil=function(){ try{ a.pause(); a.currentTime=0; }catch(e){} a.volume=v; };
+        if(pr&&pr.then) pr.then(stil)['catch'](function(){ a.volume=v; }); else stil();
+      }catch(e){ a.volume=v; }
+    });
+  }
+  var OT_AUD_DUUR={ beep:300 };   // het piepje is een kort tikje uit een langere opname
+  function otAudioSpeel(name){
+    var a=otAudio(name); if(!a) return false;
+    try{
+      a.pause(); a.currentTime=0; a.volume=(SFX_GAIN[name]||0.9);
+      var pr=a.play(); if(pr&&pr['catch']) pr['catch'](function(){});
+      var kap=OT_AUD_DUUR[name];
+      if(kap) setTimeout(function(){ try{ a.pause(); a.currentTime=0; }catch(e){} }, kap);
+      return true;
+    }catch(e){ return false; }
+  }
   function sfx(name){
+    // Tijdens de timer gaan bel en piep langs het element; de rest blijft Web Audio.
+    if(_sfxLuid && (name==='bel'||name==='beep')){ if(otAudioSpeel(name)) return; }
     var ac=sfxCtx(); if(!ac) return;
     sfxSession();
     if(!sfxWek(function(){ sfxSpeel(name); })) return;
@@ -11543,6 +11595,7 @@
       naBinnen=otModeWissel(otState.mode, m);
       otState.mode=m;
       otVulRepMenu();   // de aantallen verschillen per stand: 2/4/10 bij tellen, 2/3/4 bij rondes
+      var rlab=host&&host.querySelector('#ot-rep-lab'); if(rlab) rlab.textContent=(m==='time'?'Rondes':'Herhalingen');
       try{ localStorage.setItem('poom_ot_mode', m); }catch(e){}
       if(timerScreen) timerScreen.setAttribute('data-mode', m);
       if(naBinnen) naBinnen();
@@ -11847,11 +11900,13 @@
     if(wordEl){
       wordEl.innerHTML = idle
         ? '<span class="ot-tsub">Tik om te starten</span>'
-        : (rust ? '<span class="ot-tsub">Rust</span>'
+        : (rust ? '<span class="ot-tsub ot-trust">Rust</span>'
                 : (running ? '<span class="ot-tcue" aria-hidden="true">'+(otState.running?IC.pause:IC.play)+'</span>' : ''));
       // Alleen als het teken er staat mag de regel geen hoogte pakken: zo blijven de
       // cijfers netjes in het midden van de ring staan.
-      wordEl.classList.toggle('ot-cueonly', !idle && running && !rust);
+      // Ook in rust houdt de regel geen hoogte: het woord 'Rust' hangt er los onder, zodat
+      // de cijfers niet even omhoog wippen zodra de ronde voorbij is.
+      wordEl.classList.toggle('ot-cueonly', !idle && running);
     }
     host.classList.toggle('ot-rusten', rust);
     var frac = idle ? Math.min(1, otState.dur/OT_DUUR_MAX) : (otState.total>0 ? Math.max(0, otState.left/otState.total) : 0);
@@ -11887,6 +11942,7 @@
     // je klaar kunt zetten voordat de tijd loopt.
     otState.phase='ready'; otState.ready=OT_READY; otState.running=true;
     sfxLuid(true);                               // de bel moet ook door de stilleschakelaar heen
+    otAudioPrime();                              // de start is een tik: nu mag het element nog
     otState._dragged=false; otState.ronde=1; host.classList.remove('ot-rusten');
     otDraaiZandloper(-180, true, 1);             // het glas gaat om: het zand begint straks te lopen
     var pr0=host.querySelector('#ot-prog'), kg0=host.querySelector('#ot-knobg');
