@@ -5089,11 +5089,29 @@
       range.addEventListener('change', function(){ var kk=parseInt(range.value,10); bpPending=null; setBelt(kk, true); bpRenderGrad(kk); setTimeout(bpGlintStart, 180); });
     }
     // Een datum kiezen legt nog niets vast; pas de bevestiging eronder promoveert je echt.
-    beltSheet.addEventListener('change', function(e){
-      var inp=e.target.closest && e.target.closest('.bp-graddate'); if(!inp || !inp.value) return;
+    // De datumknop wordt pas na het sluiten van de picker vervangen door de bevestiging,
+    // anders sluit de browser (vooral iOS) de datumkiezer al bij de eerste wielbeweging.
+    function bpApplyGradDate(inp){
+      if(!inp || !inp.value) return;
       bpPending={k:bpCurK(), date:inp.value};
+      if(document.activeElement === inp) return;
       bpRenderGrad(bpPending.k);
       buzz(10);
+    }
+    beltSheet.addEventListener('input', function(e){
+      var inp=e.target.closest && e.target.closest('.bp-graddate');
+      if(inp && inp.value) bpPending={k:bpCurK(), date:inp.value};
+    });
+    beltSheet.addEventListener('change', function(e){
+      var inp=e.target.closest && e.target.closest('.bp-graddate');
+      if(inp) bpApplyGradDate(inp);
+    });
+    beltSheet.addEventListener('focusout', function(e){
+      var inp=e.target.closest && e.target.closest('.bp-graddate');
+      if(inp && bpPending && bpPending.k===bpCurK() && bpPending.date){
+        bpRenderGrad(bpPending.k);
+        buzz(10);
+      }
     });
     requestAnimationFrame(function(){ beltSheet.classList.add('show'); syncTopDim(); beltThumb(GEUP_I); bpGlintStart(); });
   }
@@ -5394,6 +5412,8 @@
     var t=agSheet.querySelector('#ag-title'); if(t) agDraft.title=t.value;
     var x=agSheet.querySelector('#ag-exam'); if(x) agDraft.exam=x.value;
     var w=agSheet.querySelector('#ag-where'); if(w) agDraft.where=w.value;
+    var dInp=agSheet.querySelector('.ag-date input[data-role="start"]'); if(dInp && dInp.value) agDraft.date=dInp.value;
+    var eInp=agSheet.querySelector('.ag-date input[data-role="end"]'); if(eInp) agDraft.end=eInp.value;
     var tr=agSheet.querySelectorAll('[data-role="trainer"]');
     if(tr.length) agDraft.trainers=[].map.call(tr, function(el){ return el.value; });
     // De onderdeel-velden staan naast de plaats-chips, dus ze moeten mee terug voordat een tik
@@ -5444,18 +5464,60 @@
       '</div>';
     stage.appendChild(agSheet);
     fnav.classList.add('hide');
+    function agDateInputHandler(ev){
+      var tg=ev.target;
+      var inp=tg && tg.closest && tg.closest('.ag-date input');
+      if(!inp || !agDraft) return;
+      var role=inp.getAttribute('data-role');
+      if(role==='start'){
+        agDraft.date=inp.value;
+        var startB=inp.parentElement && inp.parentElement.querySelector('b');
+        if(startB){
+          startB.textContent=inp.value ? fmtDateNL(inp.value) : 'Kies…';
+          startB.classList.toggle('dim', !inp.value);
+        }
+        if(agDraft.end && agDraft.end < agDraft.date){
+          agDraft.end='';
+          var endInp=agSheet.querySelector('.ag-date input[data-role="end"]');
+          if(endInp){
+            endInp.value='';
+            var endB=endInp.parentElement && endInp.parentElement.querySelector('b');
+            if(endB){ endB.textContent='—'; endB.classList.add('dim'); }
+          }
+        }
+      } else if(role==='end'){
+        agDraft.end=inp.value;
+        var endB=inp.parentElement && inp.parentElement.querySelector('b');
+        if(endB){
+          endB.textContent=inp.value ? fmtDateNL(inp.value) : '—';
+          endB.classList.toggle('dim', !inp.value);
+        }
+      }
+      var saveBtn=agSheet.querySelector('.ag-save');
+      if(saveBtn) saveBtn.disabled=!agDraft.date;
+    }
+    agSheet.addEventListener('input', agDateInputHandler);
     agSheet.addEventListener('change', function(ev){
       var tg=ev.target;
       if(tg && (tg.id==='ag-photo' || tg.id==='ag2-photo')){ agPickPhoto(tg.files && tg.files[0], tg.id==='ag2-photo'); return; }
-      var inp=tg.closest && tg.closest('.ag-date input'); if(!inp || !agDraft) return;
-      agSync();
-      if(inp.getAttribute('data-role')==='start'){
-        agDraft.date=inp.value;
-        if(agDraft.end && agDraft.end < agDraft.date) agDraft.end='';   // a range can't end before it starts
-      } else {
-        agDraft.end=inp.value;
+      if(tg && tg.closest && tg.closest('.ag-date input')){
+        agDateInputHandler(ev);
+        return;
       }
-      agRender();
+    });
+    agSheet.addEventListener('focusout', function(ev){
+      var tg=ev.target;
+      var inp=tg && tg.closest && tg.closest('.ag-date input');
+      if(!inp || !agDraft) return;
+      // Pas als de kiezer sluit kijken we of uitslag- of fotovakken moeten verschijnen/verdwijnen
+      var hadRes=!!agSheet.querySelector('.ag-res');
+      var wantRes=agDraft.type==='wedstrijd' && agUitslagVeldAan(agDraft);
+      var hadFoto=!!agSheet.querySelector('.ph-box');
+      var wantFoto=agFotoAan(agDraft);
+      if(hadRes!==wantRes || hadFoto!==wantFoto){
+        agSync();
+        agRender();
+      }
     });
     requestAnimationFrame(function(){ agSheet.classList.add('show'); syncTopDim(); });
   }
@@ -5530,6 +5592,7 @@
   function gxSync(){
     if(!gxSheet || !gxDraft) return;
     var e=gxSheet.querySelector('#gx-exam');  if(e) gxDraft.exam=e.value;
+    var dInp=gxSheet.querySelector('#gx-date'); if(dInp && dInp.value) gxDraft.date=dInp.value;
   }
   function gxRender(){
     if(!gxSheet) return;
@@ -5563,10 +5626,23 @@
       '</div>';
     stage.appendChild(gxSheet);
     fnav.classList.add('hide');
+    function gxDateInputHandler(ev){
+      var tg=ev.target;
+      if(!tg || tg.id!=='gx-date' || !gxDraft) return;
+      gxDraft.date=tg.value;
+      var b=tg.parentElement && tg.parentElement.querySelector('b');
+      if(b){
+        b.textContent=tg.value ? fmtDateNL(tg.value) : 'Kies…';
+        b.classList.toggle('dim', !tg.value);
+      }
+      var saveBtn=gxSheet.querySelector('.ag-save');
+      if(saveBtn) saveBtn.disabled=!gxDraft.date;
+    }
+    gxSheet.addEventListener('input', gxDateInputHandler);
     gxSheet.addEventListener('change', function(ev){
       var tg=ev.target;
       if(tg && (tg.id==='gx-photo' || tg.id==='gx2-photo')){ gxPickPhoto(tg.files && tg.files[0], tg.id==='gx2-photo'); return; }
-      if(tg && tg.id==='gx-date' && gxDraft){ gxSync(); gxDraft.date=tg.value; gxRender(); }
+      if(tg && tg.id==='gx-date'){ gxDateInputHandler(ev); return; }
     });
     requestAnimationFrame(function(){ gxSheet.classList.add('show'); syncTopDim(); });
   }
