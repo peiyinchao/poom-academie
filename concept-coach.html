@@ -8287,8 +8287,26 @@
     fnav.classList.add('hide');
     tlLeadLijn(el.querySelector('#tl-lead'));
     tlWire(el);
-    requestAnimationFrame(function(){ el.classList.add('show'); tlNaTekenen(); });
+    requestAnimationFrame(function(){ el.classList.add('show'); tlOpenPositie(); tlNaTekenen(); });
     return el;
+  }
+  function tlLaatsteAfgelopen(items, today){
+    var latest=null;
+    items.forEach(function(it){
+      var end=it.end||it.date;
+      if(end<today && (!latest || end>(latest.end||latest.date))) latest=it;
+    });
+    return latest;
+  }
+  function tlOpenPositie(){
+    if(!tlScreen) return;
+    var sc=tlScreen.querySelector('#tl-scroll'), items=tlItems();
+    var latest=tlLaatsteAfgelopen(items, todayISO());
+    if(!sc || !latest) return;
+    var row=sc.querySelectorAll('.tl-item')[items.indexOf(latest)];
+    if(!row) return;
+    // Laat een randje van de volgende gebeurtenis boven de actieve kaart staan.
+    sc.scrollTop+=row.getBoundingClientRect().top-sc.getBoundingClientRect().top-56;
   }
   /* Eén plek waar al het gedrag van het tijdlijnscherm aan elkaar hangt: het potlood dat
      meeloopt met de scroll, de verloopranden en het veeggebaar om te sluiten. */
