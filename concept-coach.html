@@ -529,8 +529,6 @@
   /* Het beeld staat naast de tekst: dan passen er veel meer op een scherm en blijft de titel
      leesbaar. */
   .vd-grid{display:grid;grid-template-columns:1fr;gap:0;padding-top:6px}
-  .vd-uitlab{margin:16px 0 0;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
-  .vd-uitlab:first-child{margin-top:4px}
   .vd-grid .vd-tile{display:grid;grid-template-columns:104px 1fr;gap:12px;align-items:center;
     padding:10px 0;border-bottom:1px solid var(--line)}
   .vd-grid .vd-tt{margin-top:0;-webkit-line-clamp:2;font-size:14px}
@@ -6047,8 +6045,6 @@
   function vidMissieSub(cat, sub){
     var n=vdTel(cat, sub);
     if(!n) return 'Nog geen filmpjes · tik om er een toe te voegen';
-    var top=vdUitgelicht(cat, sub);
-    if(top.length) return top.length+' uitgelicht · '+weekFocusShort();
     return n+(n===1?' filmpje':' filmpjes')+' · techniek';
   }
   function woordenSub(vd){
@@ -6601,10 +6597,8 @@
     return '<p class="vd-empty">Nog geen filmpjes bij <b>'+esc(vdPlekLabel(cat, sub))+'</b>.<br>'+
       'Druk op + om er een toe te voegen.</p>';
   }
-  /* Een map met elf techniekfilmpjes is geen opdracht maar een archief: "bekijk techniek" zegt
-     dan nog steeds niet waar je vandaag naar moet kijken. Daarom zoeken we er de filmpjes uit
-     die bij je doel van deze week horen — op wat er in de titel staat — en zetten we er hooguit
-     drie van bovenaan. Is er geen doel of past er niets bij, dan blijft de map gewoon de map. */
+  /* De weekselectie staat los van de gewone mappen. Elke passende plek komt om de beurt
+     aan bod, zodat één volle techniekmap de andere subcategorieën niet verdringt. */
   var VD_FOCUS_WOORDEN = {
     standen: ['stand','seogi','stance','kubi','juchum'],
     technieken: ['blok','makgi','stoot','jireugi','punch','block','slag','chigi','trap','chagi','kick','techniek'],
@@ -6616,32 +6610,52 @@
     examen: ['theorie','examen','quiz'],
     moeilijk: ['term','woord','naam','naming']
   };
-  function vdUitgelicht(cat, sub){
+  function vdWeekSelectie(){
     weekEnsure();
     if(!WEEK_FOCUS.length) return [];
-    var woorden=[], i;
-    for(i=0;i<WEEK_FOCUS.length;i++){
-      var w=!WEEK_DONE[WEEK_FOCUS[i]] && VD_FOCUS_WOORDEN[WEEK_FOCUS[i]]; if(w) woorden=woorden.concat(w);
+    var buckets=[], keys=[], seen={}, out=[];
+    vdAlles().forEach(function(v){
+      var p=vdPlek(v), text=String((v.title||'')+' '+vdSource(v)).toLowerCase();
+      var matches=WEEK_FOCUS.some(function(id){
+        if(p.cat===id) return true;
+        return (VD_FOCUS_WOORDEN[id]||[]).some(function(word){ return text.indexOf(word)>=0; });
+      });
+      if(!matches || seen[v.id]) return;
+      seen[v.id]=true;
+      var key=p.cat+'/'+p.sub, index=keys.indexOf(key);
+      if(index<0){ index=keys.length; keys.push(key); buckets.push([]); }
+      buckets[index].push(v);
+    });
+    buckets=keys.map(function(key,i){ return {key:key, list:buckets[i]}; })
+      .sort(function(a,b){ return a.key.localeCompare(b.key); })
+      .map(function(bucket){ return bucket.list; });
+    buckets.forEach(function(list){
+      list.sort(function(a,b){
+        return hashStr(WEEK_KEY+'|'+a.id)-hashStr(WEEK_KEY+'|'+b.id) ||
+          String(a.id).localeCompare(String(b.id));
+      });
+    });
+    var depth=0, added=true;
+    while(out.length<10 && added){
+      added=false;
+      for(var i=0;i<buckets.length && out.length<10;i++){
+        if(buckets[i][depth]){ out.push(buckets[i][depth]); added=true; }
+      }
+      depth++;
     }
-    if(!woorden.length) return [];
-    return vdInPlek(cat, sub).filter(function(v){
-      var t=String((v.title||'')+' '+vdSource(v)).toLowerCase();
-      for(var j=0;j<woorden.length;j++) if(t.indexOf(woorden[j])>=0) return true;
-      return false;
-    }).slice(0,3);
+    return out;
   }
   function vdBodyHtml(cat, sub){
+    if(cat==='weekdoel'){
+      var weekly=vdSorted(vdWeekSelectie());
+      if(!weekly.length) return '<p class="vd-empty">'+(WEEK_FOCUS.length ?
+        'Nog geen filmpjes die bij je weekdoel passen. Voeg ze toe in de gewone mappen.' :
+        'Kies eerst je weekdoel op Vandaag. Hier verschijnen daarna maximaal 10 passende filmpjes.')+'</p>';
+      return '<div class="vd-grid">'+weekly.map(vdTileHtml).join('')+'</div>';
+    }
     var items=vdInPlek(cat, sub);
     if(!items.length) return vdLeegHtml(cat, sub);
-    var top=vdUitgelicht(cat, sub);
-    if(!top.length) return '<div class="vd-grid">'+items.map(vdTileHtml).join('')+'</div>';
-    var ids=top.map(function(v){return v.id;});
-    var rest=items.filter(function(v){ return ids.indexOf(v.id)<0; });
-    var h='<p class="vd-lab vd-uitlab">Bij je weekdoel · '+esc(weekFocusShort())+'</p>'+
-      '<div class="vd-grid vd-uit">'+top.map(vdTileHtml).join('')+'</div>';
-    if(rest.length) h+='<p class="vd-lab vd-uitlab">De rest van deze map</p>'+
-      '<div class="vd-grid">'+rest.map(vdTileHtml).join('')+'</div>';
-    return h;
+    return '<div class="vd-grid">'+items.map(vdTileHtml).join('')+'</div>';
   }
   /* A thumbnail can fail in two ways. A real network error fires `error`, but a removed clip gets a
      120x90 grey "not found" tile from YouTube that loads fine, so size is the only tell (a genuine
@@ -6674,6 +6688,14 @@
   }
   function vdHubHtml(){
     var uit='';
+    weekEnsure();
+    if(WEEK_FOCUS.length){
+      var count=vdWeekSelectie().length;
+      uit+='<div class="wlist vdlist"><button class="wrow" data-act="vdopen" data-c="weekdoel" '+
+        'aria-label="Weekdoel filmpjes — '+count+' filmpjes">'+
+        '<span class="wrow-tx"><span class="wrow-t">Weekdoel filmpjes</span></span>'+
+        '<span class="wrow-n">'+count+'</span><span class="wrow-ch">'+IC.chev+'</span></button></div>';
+    }
     VD_CATS.forEach(function(c){
       if(c.k==='overig') return;
       if(c.subs){
@@ -6738,17 +6760,20 @@
      alleen zegt niet of je bij Poomsae of bij Gyeorugi zit, en dat is precies de vraag als je
      er met een veeg in beland bent. Het onderdeel zonder hoekjes houdt zijn eigen naam. */
   function vdTitel(cat, sub){
+    if(cat==='weekdoel') return 'Weekdoel filmpjes';
     var c=vdCatOf(cat), su=vdSub(c, sub);
     return su ? c.label+' · '+su.label : c.label;
   }
   function openVdCat(cat, sub){
     if(vdCatSheet) return;
-    var c=vdCatOf(cat), su=vdSub(c, sub);
+    var weekly=cat==='weekdoel';
+    var c=weekly ? {k:'weekdoel',el:UI_BLUE} : vdCatOf(cat), su=vdSub(c, sub);
     sub = su?su.k:'';
-    VD_VIEW.cat=c.k; VD_VIEW.sub=sub; vdViewSave();
+    if(!weekly){ VD_VIEW.cat=c.k; VD_VIEW.sub=sub; vdViewSave(); }
     var el=document.createElement('div');
     el.className='session catsheet hbcat vdcat';
     el.setAttribute('data-hb', 'vd-geen');
+    if(weekly) el.setAttribute('data-weekdoel', '1');
     applyCatAccent(el, c.el);
     el.innerHTML=
       '<div class="cs-hero">'+
@@ -6762,8 +6787,8 @@
         '</div>'+
       '</div>'+
       '<div class="cs-body" id="vd-scroll">'+vdSheetBodyHtml(c.k, sub)+'</div>'+
-      '<button class="tl-fab vd-fab" data-act="vdnew" aria-label="Filmpje toevoegen" title="Filmpje toevoegen">'+
-        '<span class="tl-fab-glint" aria-hidden="true"></span>'+IC.plus+'</button>';
+      (weekly ? '' : '<button class="tl-fab vd-fab" data-act="vdnew" aria-label="Filmpje toevoegen" title="Filmpje toevoegen">'+
+        '<span class="tl-fab-glint" aria-hidden="true"></span>'+IC.plus+'</button>');
     stage.appendChild(el);
     vdCatSheet=el;
     fnav.classList.add('hide');
@@ -6790,7 +6815,8 @@
       oudTools.parentNode.replaceChild(n.firstChild, oudTools); }
     var grid=vdCatSheet.querySelector('.vd-grid'), leeg=vdCatSheet.querySelector('.vd-empty');
     var oudLijst=grid||leeg;
-    var nw=document.createElement('div'); nw.innerHTML=vdBodyHtml(VD_VIEW.cat, VD_VIEW.sub);
+    var nw=document.createElement('div'); nw.innerHTML=vdBodyHtml(
+      vdCatSheet.hasAttribute('data-weekdoel')?'weekdoel':VD_VIEW.cat, VD_VIEW.sub);
     if(oudLijst) oudLijst.parentNode.replaceChild(nw.firstChild, oudLijst);
     else vdCatSheet.querySelector('.cs-body').appendChild(nw.firstChild);
     vdBindThumbs(vdCatSheet);
