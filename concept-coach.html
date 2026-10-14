@@ -529,6 +529,8 @@
   /* Het beeld staat naast de tekst: dan passen er veel meer op een scherm en blijft de titel
      leesbaar. */
   .vd-grid{display:grid;grid-template-columns:1fr;gap:0;padding-top:6px}
+  .vd-week-heading{margin:24px 0 0;font-size:13px;font-weight:700;color:var(--ink)}
+  .vd-week-heading:first-child{margin-top:6px}
   .vd-grid .vd-tile{display:grid;grid-template-columns:104px 1fr;gap:12px;align-items:center;
     padding:10px 0;border-bottom:1px solid var(--line)}
   .vd-grid .vd-tt{margin-top:0;-webkit-line-clamp:2;font-size:14px}
@@ -6647,11 +6649,23 @@
   }
   function vdBodyHtml(cat, sub){
     if(cat==='weekdoel'){
-      var weekly=vdSorted(vdWeekSelectie());
+      var weekly=vdWeekSelectie();
       if(!weekly.length) return '<p class="vd-empty">'+(WEEK_FOCUS.length ?
         'Nog geen filmpjes die bij je weekdoel passen. Voeg ze toe in de gewone mappen.' :
         'Kies eerst je weekdoel op Vandaag. Hier verschijnen daarna maximaal 10 passende filmpjes.')+'</p>';
-      return '<div class="vd-grid">'+weekly.map(vdTileHtml).join('')+'</div>';
+      var groups='';
+      VD_CATS.forEach(function(c){
+        (c.subs||[{k:''}]).forEach(function(su){
+          var items=weekly.filter(function(v){
+            var p=vdPlek(v);
+            return p.cat===c.k && p.sub===su.k;
+          });
+          if(!items.length) return;
+          groups+='<h3 class="vd-week-heading">'+esc(vdPlekLabel(c.k,su.k))+'</h3>'+
+            '<div class="vd-grid">'+items.map(vdTileHtml).join('')+'</div>';
+        });
+      });
+      return '<div class="vd-week-groups">'+groups+'</div>';
     }
     var items=vdInPlek(cat, sub);
     if(!items.length) return vdLeegHtml(cat, sub);
@@ -6754,7 +6768,7 @@
      pagina waar je op staat. */
   var vdCatSheet=null;
   function vdSheetBodyHtml(cat, sub){
-    return vdToolsHtml() + vdBodyHtml(cat, sub);
+    return (cat==='weekdoel'?'':vdToolsHtml()) + vdBodyHtml(cat, sub);
   }
   /* De titel van een onderdeel dat is opgesplitst noemt eerst het onderdeel zelf: "Techniek"
      alleen zegt niet of je bij Poomsae of bij Gyeorugi zit, en dat is precies de vraag als je
@@ -6814,7 +6828,7 @@
     if(oudTools){ var n=document.createElement('div'); n.innerHTML=vdToolsHtml();
       oudTools.parentNode.replaceChild(n.firstChild, oudTools); }
     var grid=vdCatSheet.querySelector('.vd-grid'), leeg=vdCatSheet.querySelector('.vd-empty');
-    var oudLijst=grid||leeg;
+    var oudLijst=vdCatSheet.querySelector('.vd-week-groups')||grid||leeg;
     var nw=document.createElement('div'); nw.innerHTML=vdBodyHtml(
       vdCatSheet.hasAttribute('data-weekdoel')?'weekdoel':VD_VIEW.cat, VD_VIEW.sub);
     if(oudLijst) oudLijst.parentNode.replaceChild(nw.firstChild, oudLijst);

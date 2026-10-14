@@ -55,3 +55,34 @@ test('ordinary folders no longer have inline week-goal sections', () => {
   assert.doesNotMatch(source,/De rest van deze map|function vdUitgelicht/);
   assert.match(source,/Weekdoel filmpjes/);
 });
+
+test('weekly sheet groups clips in category order without sorting controls', () => {
+  const scope={
+    WEEK_FOCUS:['gyeorugi'], vdWeekSelectie:()=>clips.slice(0,8).reverse(),
+    VD_CATS:[{k:'gyeorugi',subs:[
+      {k:'techniek'},{k:'aanval'},{k:'counter'},{k:'wedstrijden'}
+    ]},{k:'hosinsul'}],
+    vdPlek:v=>({cat:v.cat,sub:v.sub||''}),
+    vdPlekLabel:(cat,sub)=>cat+(sub?' · '+sub:''),
+    esc:s=>s, vdTileHtml:v=>'<div data-id="'+v.id+'"></div>',
+    vdToolsHtml:()=>'<button data-act="vdsort">Sort</button>',
+    vdInPlek:()=>[clips[0]]
+  };
+  runInNewContext(source.slice(source.indexOf('  function vdBodyHtml('),
+    source.indexOf('  /* A thumbnail')),scope);
+  runInNewContext(source.slice(source.indexOf('  function vdSheetBodyHtml('),
+    source.indexOf('  /* De titel van een onderdeel')),scope);
+  const html=scope.vdSheetBodyHtml('weekdoel','');
+  assert.doesNotMatch(html,/vdsort/);
+  assert.match(html,/class="vd-week-groups"/);
+  assert.equal((html.match(/class="vd-week-heading"/g)||[]).length,4);
+  assert.equal((html.match(/data-id=/g)||[]).length,8);
+  const headings=Array.from(html.matchAll(/<h3[^>]*>(.*?)<\/h3>/g),m=>m[1]);
+  assert.deepEqual(headings,['gyeorugi · techniek','gyeorugi · aanval',
+    'gyeorugi · counter','gyeorugi · wedstrijden']);
+  assert.match(scope.vdSheetBodyHtml('gyeorugi','techniek'),/vdsort/);
+  scope.vdWeekSelectie=()=>[{id:'h',cat:'hosinsul',title:'Verdediging'}];
+  assert.match(scope.vdBodyHtml('weekdoel',''),/>hosinsul<\/h3>/);
+  scope.vdWeekSelectie=()=>[];
+  assert.match(scope.vdBodyHtml('weekdoel',''),/class="vd-empty"/);
+});
