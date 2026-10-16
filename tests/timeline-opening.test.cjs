@@ -37,12 +37,13 @@ test('event icons belong in the card, with a decorative dot on the line', () => 
     assert.doesNotMatch(html,/tl-dot|<custom>/);
   }
   assert.match(source,/'<span class="tl-dot" aria-hidden="true"><\/span>'/);
-  assert.match(source,/tlIconHtml\(it\)\+esc\(it.title\)/);
+  assert.match(source,/\(fut\?tlIconHtml\(it\):''\)\+esc\(it.title\)/);
 });
 
 test('scroll focus enlarges only the currently readable moment', () => {
   const items=[10,150,300].map(top=>({
     getBoundingClientRect:()=>({top}),
+    querySelector:()=>null,
     classList:{},
   }));
   items.forEach(item=>{item.classList.toggle=(name,on)=>{item.focused=on;};});
