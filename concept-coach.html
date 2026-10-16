@@ -767,18 +767,15 @@
   .tl-item{position:relative;margin-bottom:12px}
   /* Een geplande gebeurtenis mag zichtbaar zijn: de stippellijn was zo licht dat je hem niet zag. */
   .tl-item.fut{opacity:.94}
-  /* Het hart blijft op de bandkleurwissel; alleen de halte in leesfocus groeit. */
-  .tl-dot{--tlsz:12px;box-sizing:border-box;
+  /* Alle haltes houden dezelfde maat, met hun hart op de datum en bandkleurwissel. */
+  .tl-dot{--tlsz:15px;box-sizing:border-box;
     position:absolute;left:calc(-22px - var(--tlsz) / 2);top:calc(var(--tl-node-y,35px) - var(--tlsz) / 2);
     width:var(--tlsz);height:var(--tlsz);border-radius:50%;font-size:13px;line-height:var(--tlsz);
-    text-align:center;background:var(--tlcol,var(--line));border:2px solid var(--page);
-    transition:width .22s ease,height .22s ease,left .22s ease,top .22s ease}
-  .tl-item.tl-atop .tl-dot{--tlsz:18px}
+    text-align:center;background:var(--tlcol,var(--line));border:2px solid var(--page)}
   .tl-card-icon{display:inline-flex;vertical-align:middle;width:28px;height:28px;
     align-items:center;justify-content:center;margin:-5px 5px -5px -4px;font-size:18px}
   .tl-ico{display:block;width:28px;height:28px;background:var(--ink);
     -webkit-mask:center/contain no-repeat;mask:center/contain no-repeat}
-  @media(prefers-reduced-motion:reduce){.tl-dot{transition:none}}
   .ic-tl-wedstrijd{-webkit-mask-image:url('assets/icons/Wedstrijd.png');mask-image:url('assets/icons/Wedstrijd.png')}
   .ic-tl-examen{-webkit-mask-image:url('assets/icons/Examen.png');mask-image:url('assets/icons/Examen.png')}
   .ic-tl-cursus{-webkit-mask-image:url('assets/icons/Cursus.png');mask-image:url('assets/icons/Cursus.png')}

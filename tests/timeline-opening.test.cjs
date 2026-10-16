@@ -40,7 +40,7 @@ test('event icons belong in the card, with a decorative dot on the line', () => 
   assert.match(source,/\(fut\?tlIconHtml\(it\):''\)\+esc\(it.title\)/);
 });
 
-test('scroll focus enlarges only the currently readable moment', () => {
+test('scroll focus tracks the readable moment without resizing timeline dots', () => {
   const items=[10,150,300].map(top=>({
     getBoundingClientRect:()=>({top}),
     querySelector:()=>null,
@@ -56,5 +56,6 @@ test('scroll focus enlarges only the currently readable moment', () => {
   assert.deepEqual(items.map(i=>i.focused),[true,false,false]);
   top=100;scope.tlAtop(sc);
   assert.deepEqual(items.map(i=>i.focused),[false,true,false]);
-  assert.match(source,/\.tl-item\.tl-atop \.tl-dot\{--tlsz:18px\}/);
+  assert.match(source,/\.tl-dot\{--tlsz:15px/);
+  assert.doesNotMatch(source,/\.tl-item\.tl-atop \.tl-dot/);
 });
