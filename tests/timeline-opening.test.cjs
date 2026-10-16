@@ -26,3 +26,34 @@ test('keeps the default top position when no moment has finished', () => {
     {date:'2026-10-14'}, {date:'2026-10-20'}
   ], '2026-10-14'), null);
 });
+
+test('event icons belong in the card, with a decorative dot on the line', () => {
+  const icons={esc:s=>String(s).replace(/</g,'&lt;')};
+  runInNewContext(source.slice(source.indexOf('  var TL_ICOS ='),
+    source.indexOf('  function tlItemHtml(')),icons);
+  for(const item of [{tk:'wedstrijd'},{tk:'examen'},{tk:'cursus'},{kind:'graad'},{ico:'<custom>'}]){
+    const html=icons.tlIconHtml(item);
+    assert.match(html,/class="tl-card-icon" aria-hidden="true"/);
+    assert.doesNotMatch(html,/tl-dot|<custom>/);
+  }
+  assert.match(source,/'<span class="tl-dot" aria-hidden="true"><\/span>'/);
+  assert.match(source,/tlIconHtml\(it\)\+esc\(it.title\)/);
+});
+
+test('scroll focus enlarges only the currently readable moment', () => {
+  const items=[10,150,300].map(top=>({
+    getBoundingClientRect:()=>({top}),
+    classList:{},
+  }));
+  items.forEach(item=>{item.classList.toggle=(name,on)=>{item.focused=on;};});
+  const scope={};
+  runInNewContext(source.slice(source.indexOf('  function tlAtop('),
+    source.indexOf('  /* Naar rechts vegen')),scope);
+  let top=0;
+  const sc={querySelectorAll:()=>items,getBoundingClientRect:()=>({top,bottom:500})};
+  scope.tlAtop(sc);
+  assert.deepEqual(items.map(i=>i.focused),[true,false,false]);
+  top=100;scope.tlAtop(sc);
+  assert.deepEqual(items.map(i=>i.focused),[false,true,false]);
+  assert.match(source,/\.tl-item\.tl-atop \.tl-dot\{--tlsz:18px\}/);
+});

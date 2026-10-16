@@ -769,34 +769,18 @@
   .tl-item{position:relative;margin-bottom:12px}
   /* Een geplande gebeurtenis mag zichtbaar zijn: de stippellijn was zo licht dat je hem niet zag. */
   .tl-item.fut{opacity:.94}
-  /* De halte staat op de lijn, niet ernaast: dezelfde middellijn. Hij is gemaakt als de kaarten
-     ernaast — een wit vlak met een haarlijn eromheen — zodat lijn en halte niet om aandacht
-     vechten. De bandkleur zit al in de lijn zelf en in de witte strepen erboven; die nog eens
-     in een dikke gekleurde ring herhalen maakte van elke halte een tweede accent naast de kaart.
-     De halte wordt vanuit zijn HART geplaatst: -22px en 40px zijn de coördinaten van dat hart,
-     precies het hart van de lijn (37 - 25 + 3) en het hart van de titelregel. Verander je de
-     maat, dan groeit hij symmetrisch naar buiten en blijft hij vanzelf op de lijn liggen.
-     32px bij een lijn van 6px blijkt de prettigste verhouding — ruim vijf keer de lijndikte.
-     De halte staat op ooghoogte met de titel, niet met de datum: de titel is
-     waar je naar kijkt. 25px = 1px rand + 13px binnenmarge + de datumregel + het hart van de
-     titel, min de halve halte. Bij een grotere halte moet die 25 dus mee omlaag, anders zakt de
-     halte onder de titel weg. */
-  .tl-dot{--tlsz:32px;box-sizing:border-box;
+  /* Het hart blijft op de bandkleurwissel; alleen de halte in leesfocus groeit. */
+  .tl-dot{--tlsz:12px;box-sizing:border-box;
     position:absolute;left:calc(-22px - var(--tlsz) / 2);top:calc(40px - var(--tlsz) / 2);
     width:var(--tlsz);height:var(--tlsz);border-radius:50%;font-size:13px;line-height:var(--tlsz);
-    text-align:center;background:var(--surface);border:1px solid var(--line)}
-  /* Het tekentje in de halte is een getekend icoon en geen emoji: emoji dragen hun eigen kleur
-     en hun eigen witruimte mee, en op zo'n klein vlak werd dat een vlekje. Als masker neemt het
-     de inkt van de pagina over, net als de iconen in de navigatiebalk.
-     De tekeningen zijn getekend op de volle halte van 32px (op een doek van 64px, dus dubbele
-     dichtheid) en dragen hun eigen witruimte al mee. Ze gaan daarom op ware grootte over de hele
-     halte heen; schalen zou de maatvoering van de tekenaar overdoen.
-     Vanuit het hart geplaatst en niet als rooster-kind: een kind dat groter is dan het vlak
-     waarin het gecentreerd wordt, valt in een grid terug op de linkerbovenhoek. Het tekentje
-     stond daardoor 1px naar rechtsonder — precies de haarlijn eromheen. */
-  .tl-ico{position:absolute;left:50%;top:50%;width:var(--tlsz);height:var(--tlsz);
-    margin:calc(var(--tlsz) / -2) 0 0 calc(var(--tlsz) / -2);background:var(--ink);
+    text-align:center;background:var(--tlcol,var(--line));border:2px solid var(--page);
+    transition:width .22s ease,height .22s ease,left .22s ease,top .22s ease}
+  .tl-item.tl-atop .tl-dot{--tlsz:18px}
+  .tl-card-icon{display:inline-flex;vertical-align:middle;width:28px;height:28px;
+    align-items:center;justify-content:center;margin:-5px 5px -5px -4px;font-size:18px}
+  .tl-ico{display:block;width:28px;height:28px;background:var(--ink);
     -webkit-mask:center/contain no-repeat;mask:center/contain no-repeat}
+  @media(prefers-reduced-motion:reduce){.tl-dot{transition:none}}
   .ic-tl-wedstrijd{-webkit-mask-image:url('assets/icons/Wedstrijd.png');mask-image:url('assets/icons/Wedstrijd.png')}
   .ic-tl-examen{-webkit-mask-image:url('assets/icons/Examen.png');mask-image:url('assets/icons/Examen.png')}
   .ic-tl-cursus{-webkit-mask-image:url('assets/icons/Cursus.png');mask-image:url('assets/icons/Cursus.png')}
@@ -8198,11 +8182,10 @@
      ze het moment waarop je je band verdiende. De andere twee soorten hebben hun eigen tekening.
      Kent een soort er geen, dan valt hij terug op het teken uit de agenda zelf. */
   var TL_ICOS = {wedstrijd:'ic-tl-wedstrijd', examen:'ic-tl-examen', cursus:'ic-tl-cursus'};
-  function tlDotHtml(it){
-    /* De bandkleur zit in de lijn en in de ring, dus de halte hoeft hem niet nog eens te dragen. */
+  function tlIconHtml(it){
     var k = it.kind==='graad' ? 'examen' : it.tk;
-    if(TL_ICOS[k]) return '<span class="tl-dot"><i class="tl-ico '+TL_ICOS[k]+'"></i></span>';
-    return '<span class="tl-dot">'+(it.ico||'🎓')+'</span>';
+    if(TL_ICOS[k]) return '<span class="tl-card-icon" aria-hidden="true"><i class="tl-ico '+TL_ICOS[k]+'"></i></span>';
+    return '<span class="tl-card-icon" aria-hidden="true">'+esc(it.ico||'🎓')+'</span>';
   }
   function tlItemHtml(it, today){
     var ph = phGet(it.id), foc = phFoc(it.id);
@@ -8228,13 +8211,13 @@
     var gr = it.kind==='graad';
     return '<div class="tl-item'+(fut?' fut':'')+(gr?' tl-omslag':'')+tlStreepKlas(it)+'"'+
       (gr?tlOmslagStijl(it):tlKleurStijl(it.date))+'>'+
-      tlDotHtml(it)+
+      '<span class="tl-dot" aria-hidden="true"></span>'+
       '<div class="tl-card">'+
         '<button class="tl-pen" '+ed+' aria-label="'+esc(edit)+'" title="'+esc(edit)+'">'+IC.potlood+'</button>'+
         '<span class="tl-date">'+esc(tlWhen(it))+
           (tlGeleden(it.date,today)?' <i class="tl-sinds">&middot; '+esc(tlGeleden(it.date,today))+'</i>':'')+
         '</span>'+
-        '<b class="tl-ttl" role="button" tabindex="0" '+ed+'>'+esc(it.title)+'</b>'+
+        '<b class="tl-ttl" role="button" tabindex="0" '+ed+'>'+tlIconHtml(it)+esc(it.title)+'</b>'+
         (meta.length?'<span class="tl-meta">'+meta.join(' · ')+'</span>':'')+
         // Elke podiumplaats krijgt zijn eigen medaille en zijn eigen pil. Eén pil met twee
         // plaatsen erin leest als één uitslag, terwijl het er echt twee zijn — op een toernooi
