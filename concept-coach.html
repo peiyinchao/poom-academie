@@ -506,6 +506,48 @@
   /* Het overzicht bestaat uit aparte kaarten per categorie, net als het Handboek en de
      Woordenschat. De twee onderdelen met een eigen indeling (Gyeorugi en Poomsae) dragen hun
      groepsregel ín de kaart, met hun eigen regels ingesprongen eronder. */
+  /* ---- Filmpjesoverzicht in beeld ---- */
+  .vd-sh{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 10px}
+  .vd-sh h2{margin:0;font-family:var(--cond);text-transform:uppercase;font-size:21px;letter-spacing:.02em;line-height:1;color:var(--ink)}
+  .vd-sh-all{border:0;background:none;padding:6px 0 6px 12px;font:700 13px/1 var(--text);color:var(--gray)}
+  .vd-plank{display:flex;gap:12px;overflow-x:auto;margin:0 -22px;padding:0 22px 4px;scroll-padding:0 22px;
+    scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  .vd-plank::-webkit-scrollbar{display:none}
+  .vd-wk{position:relative;flex:none;width:min(68vw,250px);aspect-ratio:1/1;border-radius:18px;overflow:hidden;
+    scroll-snap-align:start;background:#2A2620 repeating-linear-gradient(135deg,rgba(255,255,255,.04) 0 10px,transparent 10px 20px);
+    color:#fff;text-decoration:none;-webkit-tap-highlight-color:transparent}
+  .vd-wk:active{transform:scale(.985)}
+  .vd-wk-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  .vd-wk-img img.yt{transform:scale(1.36)}
+  .vd-wk::after{content:"";position:absolute;inset:auto 0 0 0;height:66%;background:linear-gradient(0deg,rgba(14,12,9,.94) 0,rgba(14,12,9,.78) 38%,rgba(14,12,9,0))}
+  .vd-wk-ov{position:absolute;z-index:1;left:14px;right:14px;bottom:13px;display:flex;flex-direction:column}
+  .vd-wk-eye{font-family:var(--cond);font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+  .vd-wk-tt{font-size:17px;font-weight:800;line-height:1.18;margin-top:3px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .vd-wk-ft{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px}
+  .vd-wk-src{font-size:12px;font-weight:700;opacity:.85;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .vd-wk-play{flex:none;background:#fff;color:var(--ink);border-radius:14px;padding:6px 11px;font-size:12px;font-weight:800}
+  .vd-tegels{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .vd-tegels.oneven>:first-child{grid-column:1/-1;height:138px}
+  .vd-tg{position:relative;height:124px;border:0;padding:0;border-radius:16px;overflow:hidden;text-align:left;cursor:pointer;
+    background:#2A2620 repeating-linear-gradient(135deg,rgba(255,255,255,.04) 0 10px,transparent 10px 20px);color:#fff;
+    -webkit-tap-highlight-color:transparent}
+  .vd-tg:active{transform:scale(.985)}
+  .vd-tg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  .vd-tg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(14,12,9,.84) 0,rgba(14,12,9,.12) 72%)}
+  .vd-tg-t{position:absolute;z-index:1;left:12px;right:12px;bottom:10px;display:flex;flex-direction:column}
+  .vd-tg-t b{font-family:var(--cond);font-size:23px;font-weight:800;text-transform:uppercase;line-height:.95;letter-spacing:.01em}
+  .vd-tg-t small{font-size:11.5px;font-weight:700;opacity:.85;margin-top:3px}
+  .vd-tg-t .vd-tg-eye{font-family:var(--cond);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 2px}
+  .vd-tegels.vd-leeg{margin-top:10px}
+  .vd-tg-leeg{position:relative;height:76px;border:1.5px dashed #CFC6B6;border-radius:14px;background:transparent;
+    padding:0;overflow:hidden;text-align:left;cursor:pointer;color:var(--ink);-webkit-tap-highlight-color:transparent}
+  .vd-tg-leeg:active{background:var(--soft)}
+  .vd-tg-leeg .vd-tg-t{top:10px;bottom:auto;right:56px}
+  .vd-tg-leeg .vd-tg-t b{font-size:18px}
+  .vd-tg-leeg .vd-tg-t small{color:var(--gray);opacity:1}
+  .vd-tg-leeg img{position:absolute;right:-2px;bottom:-4px;height:62px;pointer-events:none}
+  .vdlib .tl-backup{margin-top:26px}
   .vdlist .wrow{padding:12px 16px}
   /* Zonder tekentje links hoort de scheidslijn ook links te beginnen, anders zweeft hij. */
   .vdlist .wrow + .wrow::before{left:16px}
@@ -6702,48 +6744,85 @@
   }
 
   /* ---- Het overzicht ----
-     Een lijst, net als het Handboek en de Woordenschat, in plaats van een balk met pillen die
-     je horizontaal moet doorzoeken. Je ziet in één blik alle onderdelen én hoeveel er in elk
-     zitten, en je hoeft niets weg te schuiven om te weten wat er is. De onderdelen die zelf
-     zijn opgesplitst krijgen een eigen blok met hun naam erboven, zodat "Techniek" niet in de
-     lucht hangt. */
-  function vdRowHtml(cat, sub, label, klas){
-    var n=vdTel(cat, sub);
-    return '<button class="wrow'+(klas?' '+klas:'')+'" data-act="vdopen" data-c="'+esc(cat)+'" data-s="'+esc(sub||'')+'" '+
-      'aria-label="'+esc(vdPlekLabel(cat, sub))+' — '+n+(n===1?' filmpje':' filmpjes')+'">'+
-      '<span class="wrow-tx"><span class="wrow-t">'+esc(label)+'</span></span>'+
-      '<span class="wrow-n">'+(n||'')+'</span>'+
-      '<span class="wrow-ch">'+IC.chev+'</span>'+
+     Beeld in plaats van een tekstlijst. Bovenaan een plank met grote kaarten voor je weekdoel
+     — daar begin je meestal — en daaronder elk onderdeel als een foto uit zijn eigen filmpjes.
+     Een onderdeel zonder filmpjes heeft geen foto en hoeft ook niet de ruimte van een foto te
+     krijgen: dat wordt een klein gestippeld vakje dat uitnodigt om iets toe te voegen. */
+  var VD_MASCOT={gyeorugi:'gyeorugi-pair', taeryon:'ilbo-taeryon', hosinsul:'kid-kick', opwarmen:'kid-cheer'};
+  // Breed beeld voor een tegel: mqdefault is 16:9 zonder zwarte balken, hqdefault heeft ze wel.
+  function vdBeeld(v, breed){
+    if(v.vid) return 'https://i.ytimg.com/vi/'+v.vid+'/'+(breed?'mqdefault':'hqdefault')+'.jpg';
+    return v.poster||'';
+  }
+  function vdPlekBeeld(cat, sub){
+    var l=vdInPlek(cat, sub);
+    for(var i=0;i<l.length;i++){ var b=vdBeeld(l[i], true); if(b) return {src:b, yt:!!l[i].vid}; }
+    return null;
+  }
+  function vdWeekKaartHtml(v){
+    var b=vdBeeld(v,false), p=vdPlek(v), src=vdSource(v), title=v.title||vdUrl(v);
+    return '<a class="vd-wk" href="'+esc(vdUrl(v))+'" data-act="vdplay" data-id="'+esc(v.id)+'" '+
+        'target="_blank" rel="noopener noreferrer" aria-label="'+esc(title)+'">'+
+      '<span class="vd-wk-img">'+(b?'<img class="'+(v.vid?'yt':'')+'" src="'+esc(b)+'" alt="" loading="lazy" decoding="async">':'')+'</span>'+
+      '<span class="vd-wk-ov">'+
+        '<span class="vd-wk-eye">'+esc(vdPlekLabel(p.cat, p.sub))+'</span>'+
+        '<span class="vd-wk-tt">'+esc(title)+'</span>'+
+        '<span class="vd-wk-ft"><span class="vd-wk-src">'+esc(src)+'</span>'+
+          '<span class="vd-wk-play" aria-hidden="true">▶ Speel</span></span>'+
+      '</span>'+
+    '</a>';
+  }
+  function vdTegelHtml(cat, sub, naam, boven){
+    var n=vdTel(cat, sub), b=vdPlekBeeld(cat, sub);
+    var aria=vdPlekLabel(cat, sub)+' — '+n+(n===1?' filmpje':' filmpjes');
+    return '<button class="vd-tg" data-act="vdopen" data-c="'+esc(cat)+'" data-s="'+esc(sub||'')+'" aria-label="'+esc(aria)+'">'+
+      (b?'<img class="'+(b.yt?'yt':'')+'" src="'+esc(b.src)+'" alt="" loading="lazy" decoding="async">':'')+
+      '<span class="vd-tg-t">'+(boven?'<small class="vd-tg-eye">'+esc(boven)+'</small>':'')+
+        '<b>'+esc(naam)+'</b><small>'+n+(n===1?' filmpje':' filmpjes')+'</small></span>'+
+    '</button>';
+  }
+  function vdLeegTegelHtml(cat, sub, naam, boven){
+    var m=!sub && VD_MASCOT[cat];
+    return '<button class="vd-tg-leeg" data-act="vdopen" data-c="'+esc(cat)+'" data-s="'+esc(sub||'')+'" '+
+        'aria-label="'+esc(vdPlekLabel(cat, sub))+' — nog leeg">'+
+      '<span class="vd-tg-t">'+(boven?'<small class="vd-tg-eye">'+esc(boven)+'</small>':'')+
+        '<b>'+esc(naam)+'</b><small>Nog leeg · ＋</small></span>'+
+      (m?'<img src="assets/mascot/'+m+'.png" alt="" aria-hidden="true">':'')+
     '</button>';
   }
   function vdHubHtml(){
     var uit='';
     weekEnsure();
-    if(WEEK_FOCUS.length){
-      var count=vdWeekSelectie().length;
-      uit+='<div class="wlist vdlist"><button class="wrow" data-act="vdopen" data-c="weekdoel" '+
-        'aria-label="Weekdoel filmpjes — '+count+' filmpjes">'+
-        '<span class="wrow-tx"><span class="wrow-t">Weekdoel filmpjes</span></span>'+
-        '<span class="wrow-n">'+count+'</span><span class="wrow-ch">'+IC.chev+'</span></button></div>';
+    var wk=WEEK_FOCUS.length ? vdWeekSelectie() : [];
+    if(wk.length){
+      uit+='<div class="vd-sh"><h2>Voor je weekdoel</h2>'+
+        '<button class="vd-sh-all" data-act="vdopen" data-c="weekdoel">Alle '+wk.length+' ›</button></div>'+
+        '<div class="vd-plank">'+wk.map(vdWeekKaartHtml).join('')+'</div>';
     }
+    var vol=[], leeg=[];
     VD_CATS.forEach(function(c){
-      if(c.k==='overig') return;
-      if(c.subs){
-        // De naam van het onderdeel staat als groepsregel ín de kaart, met zijn eigen regels
-        // ingesprongen eronder: zo hoort zichtbaar bij elkaar wat bij elkaar hoort.
-        uit+='<div class="wlist vdlist">'+
-          '<div class="wrow wrow-grp"><span class="wrow-gt">'+esc(c.label)+'</span></div>'+
-          c.subs.map(function(su){
-            return vdRowHtml(c.k, su.k, su.label, 'vd-in');
-          }).join('')+
-        '</div>';
-      } else {
-        uit+='<div class="wlist vdlist">'+vdRowHtml(c.k, '', c.label)+'</div>';
-      }
+      if(c.k==='overig' && !vdTel('overig','')) return;
+      (c.subs||[null]).forEach(function(su){
+        var sub=su?su.k:'', naam=su?su.label:c.label, boven=su?c.label:'';
+        if(vdTel(c.k, sub)) vol.push(vdTegelHtml(c.k, sub, naam, boven));
+        else leeg.push(vdLeegTegelHtml(c.k, sub, naam, boven));
+      });
     });
-    // Overig hoort er alleen te staan als er iets in zit: een leeg vangnet is ruis.
-    if(vdTel('overig','')) uit+='<div class="wlist vdlist">'+vdRowHtml('overig','','Overig')+'</div>';
+    uit+='<div class="vd-sh"><h2>Onderdelen</h2></div>';
+    // Bij een oneven aantal krijgt de eerste foto de hele breedte, zodat het raster sluit.
+    if(vol.length) uit+='<div class="vd-tegels'+(vol.length%2?' oneven':'')+'">'+vol.join('')+'</div>';
+    if(leeg.length) uit+='<div class="vd-tegels vd-leeg">'+leeg.join('')+'</div>';
     return uit;
+  }
+  // Een filmpje dat van YouTube is gehaald laat een grijs vlakje achter; dan liever geen beeld.
+  function vdBindHubBeeld(root){
+    (root||stage).querySelectorAll('.vd-tg img, .vd-wk-img img').forEach(function(im){
+      var drop=function(){ if(im.parentNode) im.remove(); };
+      var check=function(){ if(im.naturalWidth<=160) drop(); };
+      if(im.complete){ if(im.naturalWidth===0) drop(); else check(); return; }
+      im.addEventListener('error', drop, {once:true});
+      im.addEventListener('load', check, {once:true});
+    });
   }
   /* De reservekopie staat onderaan, net als op de tijdlijn: eerst je verzameling, dan pas het
      veiligstellen ervan. Het is één bestand voor de hele app, dus een kopie die je hier maakt
@@ -6764,17 +6843,24 @@
       '<div class="whead">'+
         '<div class="jhead"><div class="jk"><span class="han-lab">영상 · Yeongsang</span></div>'+
           '<h1>Filmpjes</h1>'+
-          '<div class="js">Kies een onderdeel en bewaar wat je wilt naspelen.</div></div>'+
+          '<div class="js">Kijk, kies een onderdeel en bewaar wat je wilt naspelen.</div></div>'+
         '<span class="whead-masc whead-film" aria-hidden="true"><img src="assets/mascot/film-3d.png" alt=""><img class="whead-brow" src="assets/mascot/film-3d-brow.png" alt=""></span>'+
       '</div>'+
       '<div class="wscroll" id="vd-hub">'+vdHubHtml()+vdBackupHtml()+'</div>'+
     '</div>';
     stage.insertAdjacentHTML('beforeend', wrapScreen(html));
-    return stage.lastElementChild;
+    var scr=stage.lastElementChild;
+    vdBindHubBeeld(scr);
+    return scr;
   }
   function vdHubRefresh(){
     var h=stage.querySelector('#vd-hub');
-    if(h) h.innerHTML=vdHubHtml()+vdBackupHtml();
+    if(!h) return;
+    // De weekplank onthoudt waar je was: opnieuw tekenen mag je niet terug naar het begin gooien.
+    var pl=h.querySelector('.vd-plank'), x=pl?pl.scrollLeft:0;
+    h.innerHTML=vdHubHtml()+vdBackupHtml();
+    pl=h.querySelector('.vd-plank'); if(pl) pl.scrollLeft=x;
+    vdBindHubBeeld(h);
   }
 
   /* ---- De pagina van één onderdeel ----
