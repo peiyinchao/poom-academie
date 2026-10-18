@@ -588,6 +588,41 @@
   .vd-pcap{position:absolute;left:16px;right:70px;top:calc(env(safe-area-inset-top) + 18px);
     color:rgba(255,255,255,.82);font-size:13px;font-weight:700;line-height:1.3;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  /* Het voorbeeldkaartje: kleiner dan de speler, de app blijft er gedimd achter zichtbaar. */
+  .vd-prev{position:absolute;inset:0;z-index:125;display:grid;place-items:center;padding:18px;
+    background:rgba(16,20,26,0);transition:background .26s;-webkit-tap-highlight-color:transparent}
+  .vd-prev.show{background:rgba(16,20,26,.58)}
+  .vd-prev-card{position:relative;width:100%;max-width:440px;background:var(--page);border-radius:22px;overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.32);opacity:0;transform:translateY(14px) scale(.97);
+    transition:opacity .24s ease,transform .32s cubic-bezier(.22,1,.36,1)}
+  .vd-prev.show .vd-prev-card{opacity:1;transform:none}
+  .vd-prev-box{position:relative;aspect-ratio:16/9;background:#000 center/cover no-repeat}
+  .vd-prev-box iframe,.vd-prev-box video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;object-fit:contain;background:transparent}
+  .vd-prev-leeg{position:absolute;inset:0;display:grid;place-items:center;margin:0;padding:20px;text-align:center;color:rgba(255,255,255,.8);font-size:13.5px;font-weight:600}
+  .vd-prev-snd{position:absolute;right:10px;bottom:10px;width:38px;height:38px;border:0;border-radius:50%;
+    background:rgba(20,17,13,.55);color:#fff;display:grid;place-items:center}
+  .vd-prev-snd svg{width:19px;height:19px}
+  .vd-prev-head{display:flex;align-items:flex-start;gap:12px}
+  .vd-prev-head>div{flex:1;min-width:0}
+  .vd-prev-x{flex:0 0 auto;width:36px;height:36px;margin:-4px -6px 0 0;border:0;border-radius:50%;
+    background:var(--soft);color:var(--ink);display:grid;place-items:center}
+  .vd-prev-x svg{width:18px;height:18px}
+  .vd-prev-body{padding:14px 16px 16px}
+  .vd-prev-tt{margin:0;font-size:17px;font-weight:800;line-height:1.25;color:var(--ink)}
+  .vd-prev-ts{margin:3px 0 0;font-size:13px;color:var(--gray)}
+  .vd-prev-lab{margin:14px 0 6px;font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+  .vd-prev-lab span{color:var(--gray);font-weight:600}
+  .vd-prev-scrub{width:100%;margin:0 0 8px;accent-color:var(--blue)}
+  .vd-prev-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+  .vd-prev-fr{aspect-ratio:16/10;border:0;padding:0;border-radius:6px;background:var(--soft) center/cover no-repeat;
+    box-shadow:inset 0 0 0 2px transparent;transition:box-shadow .15s}
+  .vd-prev-fr.on{box-shadow:inset 0 0 0 2.5px var(--blue)}
+  .vd-prev-acts{display:flex;gap:8px;margin-top:14px}
+  .vd-prev-b{flex:1;min-height:46px;border:0;border-radius:14px;background:var(--soft);color:var(--ink);
+    font:700 14.5px/1 var(--text)}
+  .vd-prev-b.pri{background:var(--blue);color:#fff}
+  .vd-prev-b.ok{background:#2E7D4F}
+  .vd-prev-b:active{opacity:.75}
   /* Acht onderdelen passen niet als gelijke delen op één regel; ze mogen doorlopen naar de
      volgende en houden hun eigen breedte, anders wordt "Cooling down" een streepje. */
   .vd-chips{flex-wrap:wrap;gap:7px}
@@ -6823,7 +6858,7 @@
      (die weigert in een frame te staan), dus die gaat wél naar buiten. */
   var vdPlayer=null, vdPlayUrl='';
   function vdKanInApp(v){ return !!(v && (v.vid || v.film)); }
-  function vdPlay(v){
+  function vdPlay(v, vanaf){
     if(!v || vdPlayer) return;
     vdMarkSeen(v.id);
     vdPlayer=document.createElement('div');
@@ -6847,6 +6882,9 @@
         if(!vdPlayer || !blob){ if(vdPlayer) box.innerHTML='<p class="vd-pcap">Dit filmpje staat niet meer op dit toestel.</p>'; return; }
         try{ vdPlayUrl=URL.createObjectURL(blob); }catch(e){ return; }
         box.innerHTML='<video src="'+vdPlayUrl+'" controls autoplay playsinline></video>';
+        // Uit het voorbeeld verder waar je was, niet terug naar het begin.
+        if(vanaf>0.3){ var _pv=box.querySelector('video');
+          _pv.addEventListener('loadedmetadata', function(){ try{ _pv.currentTime=vanaf; }catch(e){} }, {once:true}); }
       });
     }
     requestAnimationFrame(function(){ vdPlayer.classList.add('show'); syncTopDim(); });
@@ -6860,6 +6898,162 @@
     setTimeout(function(){ if(s&&s.parentNode) s.parentNode.removeChild(s); }, 320);
     fnav.classList.remove('hide');
     vdRefresh();
+  }
+
+  /* ---- Voorbeeld in een kaartje ----
+     Een tik op een filmpje opent eerst een kaartje dat meteen zonder geluid speelt: zo zie je
+     of het het goede filmpje is zonder dat je scherm in één keer zwart wordt. Volledig scherm is
+     een eigen knop. Bij een filmpje van je telefoon kies je hier ook je omslag, net als in
+     Keynote: sleep naar het mooiste moment, of tik op een van de beeldjes eronder. */
+  var vdPrev=null, vdPrevUrl='', vdPrevV=null, vdPrevStrip=null;
+  function vdPrevMagOmslag(v){ return !!(v && v.film && !v.vast); }
+  function vdVoorbeeld(v){
+    if(!v || vdPrev || vdPlayer) return;
+    vdPrevV=v; vdMarkSeen(v.id);
+    var omslag=vdPrevMagOmslag(v), src=vdSource(v);
+    vdPrev=document.createElement('div');
+    vdPrev.className='vd-prev'; vdPrev.id='vd-prev';
+    vdPrev.innerHTML=
+      '<div class="vd-prev-card" role="dialog" aria-label="Voorbeeld: '+esc(v.title||'filmpje')+'">'+
+        '<div class="vd-prev-box" id="vd-prev-box"></div>'+
+        '<div class="vd-prev-body">'+
+          '<div class="vd-prev-head"><div>'+
+            '<p class="vd-prev-tt">'+esc(v.title||vdUrl(v))+'</p>'+
+            (src?'<p class="vd-prev-ts">'+esc(src)+'</p>':'')+
+          '</div><button class="vd-prev-x" data-act="vdprevclose" aria-label="Sluiten">'+IC.x+'</button></div>'+
+          (omslag?
+            '<p class="vd-prev-lab">Omslag kiezen <span>— sleep of tik op een beeld</span></p>'+
+            '<input class="vd-prev-scrub" id="vd-prev-scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="Kies een moment">'+
+            '<div class="vd-prev-strip" id="vd-prev-strip" aria-hidden="true"></div>':'')+
+          '<div class="vd-prev-acts">'+
+            '<button class="vd-prev-b" data-act="vdprevfull">Volledig scherm</button>'+
+            (omslag?'<button class="vd-prev-b pri" data-act="vdprevomslag" id="vd-prev-omslag">Gebruik dit beeld</button>':'')+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    vdPrev.addEventListener('click', function(ev){ if(ev.target===vdPrev) closeVdVoorbeeld(); });
+    stage.appendChild(vdPrev);
+    var box=vdPrev.querySelector('#vd-prev-box');
+    // Het stilstaande beeld eronder, zodat het kaartje niet zwart is zolang de speler laadt.
+    var th=vdThumb(v); if(th) box.style.backgroundImage='url("'+th.replace(/"/g,'%22')+'")';
+    if(v.vid){
+      box.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+esc(v.vid)+
+        '?rel=0&modestbranding=1&autoplay=1&mute=1&playsinline=1" title="'+esc(v.title||'Filmpje')+'" '+
+        'allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+    } else if(v.film){
+      var eigen=vdPrev;
+      filmDB.haal(v.film).then(function(blob){
+        if(vdPrev!==eigen) return;
+        if(!blob){ box.innerHTML='<p class="vd-prev-leeg">Dit filmpje staat niet meer op dit toestel.</p>'; vdPrevOmslagUit(); return; }
+        try{ vdPrevUrl=URL.createObjectURL(blob); }catch(e){ return; }
+        box.innerHTML='<video src="'+vdPrevUrl+'" muted autoplay loop playsinline></video>'+
+          '<button class="vd-prev-snd" data-act="vdprevsnd" aria-label="Geluid aan">'+vdSndSvg(true)+'</button>';
+        var vd=box.querySelector('video');
+        vd.muted=true;
+        vd.addEventListener('click', function(){ if(vd.paused) vd.play().catch(function(){}); else vd.pause(); });
+        if(omslag) vdPrevKoppel(vd, vdPrevUrl);
+      });
+    }
+    requestAnimationFrame(function(){ if(vdPrev){ vdPrev.classList.add('show'); syncTopDim(); } });
+  }
+  function vdSndSvg(stil){
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
+      '<path d="M4 9v6h4l5 4V5L8 9H4z"/>'+(stil?'<path d="M17 9l5 6M22 9l-5 6"/>':'<path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>')+'</svg>';
+  }
+  function vdPrevOmslagUit(){
+    if(!vdPrev) return;
+    ['#vd-prev-omslag','#vd-prev-scrub','#vd-prev-strip','.vd-prev-lab'].forEach(function(s){
+      var n=vdPrev.querySelector(s); if(n) n.remove();
+    });
+  }
+  /* Schuifje en strook lopen met het filmpje mee. Zodra je zelf schuift staat het filmpje stil
+     op dat beeld, want dan ben je aan het kiezen en niet meer aan het kijken. */
+  function vdPrevKoppel(vd, url){
+    var scrub=vdPrev.querySelector('#vd-prev-scrub'), strip=vdPrev.querySelector('#vd-prev-strip');
+    if(!scrub) return;
+    var sleept=false;
+    vd.addEventListener('timeupdate', function(){
+      if(sleept || !vd.duration) return;
+      scrub.value=Math.round(1000*vd.currentTime/vd.duration);
+    });
+    scrub.addEventListener('input', function(){
+      sleept=true; vd.pause();
+      if(vd.duration) try{ vd.currentTime=vd.duration*scrub.value/1000; }catch(e){}
+    });
+    scrub.addEventListener('change', function(){ sleept=false; });
+    var maak=function(){ vdPrevStrook(url, vd.duration, strip, function(t){
+      vd.pause(); try{ vd.currentTime=t; }catch(e){}
+      if(vd.duration) scrub.value=Math.round(1000*t/vd.duration);
+    }); };
+    if(vd.readyState>=1) maak(); else vd.addEventListener('loadedmetadata', maak, {once:true});
+  }
+  /* Zes beeldjes verspreid over het filmpje, één voor één uit een tweede, onzichtbare speler —
+     de grote blijft gewoon doorspelen terwijl de strook zich vult. */
+  function vdPrevStrook(url, dur, strip, kies){
+    if(!strip || !dur || !isFinite(dur)) return;
+    var N=6, tijden=[];
+    for(var i=0;i<N;i++) tijden.push(Math.min(dur-0.05, Math.max(0.1, dur*(i+0.5)/N)));
+    strip.innerHTML=tijden.map(function(t,i){
+      return '<button class="vd-prev-fr" data-i="'+i+'" tabindex="-1"></button>';
+    }).join('');
+    Array.prototype.forEach.call(strip.children, function(b,i){
+      b.addEventListener('click', function(){
+        Array.prototype.forEach.call(strip.children, function(x){ x.classList.remove('on'); });
+        b.classList.add('on'); kies(tijden[i]); buzz(8);
+      });
+    });
+    var hulp=document.createElement('video'), k=0, eigen=vdPrev;
+    vdPrevStrip=hulp;
+    hulp.muted=true; hulp.playsInline=true; hulp.preload='auto'; hulp.src=url;
+    function volgende(){
+      if(vdPrev!==eigen || k>=N){ hulp.removeAttribute('src'); try{ hulp.load(); }catch(e){} return; }
+      try{ hulp.currentTime=tijden[k]; }catch(e){}
+    }
+    hulp.onseeked=function(){
+      if(vdPrev!==eigen) return;
+      try{
+        var h=72, w=Math.round(h*(hulp.videoWidth||16)/(hulp.videoHeight||9));
+        var c=document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(hulp,0,0,w,h);
+        var b=strip.children[k]; if(b) b.style.backgroundImage='url('+c.toDataURL('image/jpeg',.6)+')';
+      }catch(e){}
+      k++; volgende();
+    };
+    hulp.onloadeddata=volgende;
+  }
+  function vdPrevOmslagZet(){
+    var v=vdPrevV; if(!vdPrev || !v) return;
+    var vd=vdPrev.querySelector('#vd-prev-box video'); if(!vd || !vd.videoWidth) return;
+    try{
+      var br=480, hg=Math.round(br*vd.videoHeight/vd.videoWidth);
+      var c=document.createElement('canvas'); c.width=br; c.height=hg;
+      c.getContext('2d').drawImage(vd,0,0,br,hg);
+      var data=c.toDataURL('image/jpeg',.72);
+      for(var i=0;i<VIDEOS.length;i++) if(VIDEOS[i].id===v.id){ VIDEOS[i].poster=data; break; }
+      v.poster=data; vdSave();
+    }catch(e){ return; }
+    var b=vdPrev.querySelector('#vd-prev-omslag');
+    if(b){ b.textContent='Omslag bewaard ✓'; b.classList.add('ok');
+      setTimeout(function(){ if(b.isConnected){ b.textContent='Gebruik dit beeld'; b.classList.remove('ok'); } }, 1600); }
+    buzz(12);
+  }
+  function closeVdVoorbeeld(stil){
+    if(!vdPrev) return;
+    var s=vdPrev; vdPrev=null; vdPrevV=null;
+    s.classList.remove('show'); syncTopDim();
+    var vd=s.querySelector('video'); if(vd) try{ vd.pause(); }catch(e){}
+    var fr=s.querySelector('iframe'); if(fr) fr.src='about:blank';
+    if(vdPrevStrip){ vdPrevStrip.removeAttribute('src'); vdPrevStrip=null; }
+    var u=vdPrevUrl; vdPrevUrl='';
+    setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); if(u) try{ URL.revokeObjectURL(u); }catch(e){} }, 300);
+    if(!stil) vdRefresh();
+  }
+  function vdPrevVolledig(){
+    var v=vdPrevV; if(!v) return;
+    var vd=vdPrev && vdPrev.querySelector('#vd-prev-box video');
+    var t=vd ? vd.currentTime : 0;
+    closeVdVoorbeeld(true);
+    vdPlay(v, t);
   }
 
   /* ---- Filmpje toevoegen/bewerken ----
@@ -10352,7 +10546,7 @@
     // Ook de filmpjesspeler: die legt zich over de hele app, dus moet de strook boven de
     // iOS-statusbalk net zo goed meedoven — anders blijft er een lichte reep boven het beeld.
     var film = !!document.querySelector('.vd-player.show');
-    var aan = film || !!document.querySelector('.beltsheet-ov.show');
+    var aan = film || !!document.querySelector('.beltsheet-ov.show, .vd-prev.show');
     // De speler dekt het scherm veel dieper af dan een kaartje. Zou de strook op de lichtere
     // waarde van een kaartje blijven staan, dan zie je boven het beeld precies de band die we
     // hier wegwerken — dus volgt hij de donkerte van de laag die eronder ligt.
@@ -12631,10 +12825,16 @@
     else if(a==='vdbron'){ if(vdDraft){ vdDraft.bron=act.getAttribute('data-b'); vdDraft.stap='velden'; vdTeken(); buzz(10); } }
     else if(a==='vdposterdel'){ if(vdDraft){ vdDraft.poster=''; vdTeken(); buzz(10); } }
     else if(a==='vdpclose'){ closeVdPlayer(); }
+    else if(a==='vdprevclose'){ closeVdVoorbeeld(); }
+    else if(a==='vdprevfull'){ vdPrevVolledig(); buzz(10); }
+    else if(a==='vdprevomslag'){ vdPrevOmslagZet(); }
+    else if(a==='vdprevsnd'){ var _sv=vdPrev&&vdPrev.querySelector('#vd-prev-box video');
+      if(_sv){ _sv.muted=!_sv.muted; if(_sv.paused) _sv.play().catch(function(){});
+        act.innerHTML=vdSndSvg(_sv.muted); act.setAttribute('aria-label', _sv.muted?'Geluid aan':'Geluid uit'); } }
     // Een filmpje dat we zelf kunnen afspelen blijft in de app; een Facebook-link weigert in een
     // frame te staan en gaat daarom wél naar buiten — dan laten we de link zijn werk doen.
     else if(a==='vdplay'){ var _vp=vdById(act.getAttribute('data-id'));
-      if(_vp && vdKanInApp(_vp)){ e.preventDefault(); vdPlay(_vp); buzz(10); }
+      if(_vp && vdKanInApp(_vp)){ e.preventDefault(); vdVoorbeeld(_vp); buzz(10); }
       else if(_vp){ vdMarkSeen(_vp.id); } }
     else if(a==='opencat'){ openCat(act.getAttribute('data-groep')); }
     else if(a==='openhard'){ openCat('Moeilijk'); }
