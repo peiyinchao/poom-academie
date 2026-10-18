@@ -32,12 +32,15 @@ test('event icons belong in the card, with a decorative dot on the line', () => 
   runInNewContext(source.slice(source.indexOf('  var TL_ICOS ='),
     source.indexOf('  function tlItemHtml(')),icons);
   for(const item of [{tk:'wedstrijd'},{tk:'examen'},{tk:'cursus'},{kind:'graad'},{ico:'<custom>'}]){
-    const html=icons.tlIconHtml(item);
+    const html=icons.tlIconHtml(item,true);
     assert.match(html,/class="tl-card-icon" aria-hidden="true"/);
     assert.doesNotMatch(html,/tl-dot|<custom>/);
   }
   assert.match(source,/'<span class="tl-dot" aria-hidden="true"><\/span>'/);
-  assert.match(source,/\(fut\?tlIconHtml\(it\):''\)\+esc\(it.title\)/);
+  assert.match(icons.tlIconHtml({tk:'wedstrijd'},false),/ic-tl-wedstrijd/);
+  assert.equal(icons.tlIconHtml({ico:'🏅'},false),'');
+  assert.match(source,/'<span class="tl-date">'\+tlIconHtml\(it, fut\)/);
+  assert.match(source,/'>'\+esc\(it.title\)\+'<\/b>'/);
 });
 
 test('scroll focus tracks the readable moment without resizing timeline dots', () => {
@@ -56,6 +59,6 @@ test('scroll focus tracks the readable moment without resizing timeline dots', (
   assert.deepEqual(items.map(i=>i.focused),[true,false,false]);
   top=100;scope.tlAtop(sc);
   assert.deepEqual(items.map(i=>i.focused),[false,true,false]);
-  assert.match(source,/\.tl-dot\{--tlsz:15px/);
+  assert.match(source,/\.tl-dot\{--tlsz:14px/);
   assert.doesNotMatch(source,/\.tl-item\.tl-atop \.tl-dot/);
 });

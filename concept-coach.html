@@ -767,14 +767,15 @@
   .tl-item{position:relative;margin-bottom:12px}
   /* Een geplande gebeurtenis mag zichtbaar zijn: de stippellijn was zo licht dat je hem niet zag. */
   .tl-item.fut{opacity:.94}
-  /* Alle haltes houden dezelfde maat, met hun hart op de datum en bandkleurwissel. */
-  .tl-dot{--tlsz:15px;box-sizing:border-box;
+  /* Alle haltes houden dezelfde kleine stip (8px kleur) met een dikkere rand in paginakleur,
+     zodat de stip los van de lijn komt te staan. Het hart ligt op de datum en bandkleurwissel. */
+  .tl-dot{--tlsz:14px;box-sizing:border-box;
     position:absolute;left:calc(-22px - var(--tlsz) / 2);top:calc(var(--tl-node-y,35px) - var(--tlsz) / 2);
     width:var(--tlsz);height:var(--tlsz);border-radius:50%;font-size:13px;line-height:var(--tlsz);
-    text-align:center;background:var(--tlcol,var(--line));border:2px solid var(--page)}
-  .tl-card-icon{display:inline-flex;vertical-align:middle;width:28px;height:28px;
-    align-items:center;justify-content:center;margin:-5px 5px -5px -4px;font-size:18px}
-  .tl-ico{display:block;width:28px;height:28px;background:var(--ink);
+    text-align:center;background:var(--tlcol,var(--line));border:3px solid var(--page)}
+  .tl-card-icon{display:inline-flex;vertical-align:middle;width:20px;height:16px;
+    align-items:center;justify-content:center;margin:-2px 5px 0 -3px;font-size:13px;color:var(--ink)}
+  .tl-ico{display:block;width:20px;height:20px;flex:none;background:var(--ink);
     -webkit-mask:center/contain no-repeat;mask:center/contain no-repeat}
   .ic-tl-wedstrijd{-webkit-mask-image:url('assets/icons/Wedstrijd.png');mask-image:url('assets/icons/Wedstrijd.png')}
   .ic-tl-examen{-webkit-mask-image:url('assets/icons/Examen.png');mask-image:url('assets/icons/Examen.png')}
@@ -8176,9 +8177,11 @@
      ze het moment waarop je je band verdiende. De andere twee soorten hebben hun eigen tekening.
      Kent een soort er geen, dan valt hij terug op het teken uit de agenda zelf. */
   var TL_ICOS = {wedstrijd:'ic-tl-wedstrijd', examen:'ic-tl-examen', cursus:'ic-tl-cursus'};
-  function tlIconHtml(it){
+  function tlIconHtml(it, fut){
     var k = it.kind==='graad' ? 'examen' : it.tk;
     if(TL_ICOS[k]) return '<span class="tl-card-icon" aria-hidden="true"><i class="tl-ico '+TL_ICOS[k]+'"></i></span>';
+    // Emoji horen alleen bij wat nog komt; terugblikken blijven sober.
+    if(!fut) return '';
     return '<span class="tl-card-icon" aria-hidden="true">'+esc(it.ico||'🎓')+'</span>';
   }
   function tlItemHtml(it, today){
@@ -8208,10 +8211,10 @@
       '<span class="tl-dot" aria-hidden="true"></span>'+
       '<div class="tl-card">'+
         '<button class="tl-pen" '+ed+' aria-label="'+esc(edit)+'" title="'+esc(edit)+'">'+IC.potlood+'</button>'+
-        '<span class="tl-date">'+esc(tlWhen(it))+
+        '<span class="tl-date">'+tlIconHtml(it, fut)+esc(tlWhen(it))+
           (tlGeleden(it.date,today)?' <i class="tl-sinds">&middot; '+esc(tlGeleden(it.date,today))+'</i>':'')+
         '</span>'+
-        '<b class="tl-ttl" role="button" tabindex="0" '+ed+'>'+(fut?tlIconHtml(it):'')+esc(it.title)+'</b>'+
+        '<b class="tl-ttl" role="button" tabindex="0" '+ed+'>'+esc(it.title)+'</b>'+
         (meta.length?'<span class="tl-meta">'+meta.join(' · ')+'</span>':'')+
         // Elke podiumplaats krijgt zijn eigen medaille en zijn eigen pil. Eén pil met twee
         // plaatsen erin leest als één uitslag, terwijl het er echt twee zijn — op een toernooi
