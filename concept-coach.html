@@ -1128,6 +1128,17 @@
     background:var(--page);padding:5px 10px 5px 5px;color:var(--ink);text-decoration:none;
     cursor:pointer;-webkit-tap-highlight-color:transparent}
   .plt-vid:active{opacity:.65}
+  /* De greep is een eigen, ruim vlak aan de rechterkant: groot genoeg voor een duim, en
+     touch-action:none zodat de lijst niet meerolt zodra je hem pakt. */
+  .plt-vid:has(.plt-vgreep){padding-right:0}
+  .plt-vgreep{flex:none;align-self:stretch;display:flex;align-items:center;justify-content:center;
+    width:40px;margin:-5px 0;color:#B3AA9B;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none}
+  .plt-vgreep svg{width:18px;height:18px}
+  .plt-vid.sleep{position:relative;z-index:3;opacity:1;background:var(--surface);
+    box-shadow:0 10px 22px -10px rgba(26,23,18,.45);transition:none}
+  .plt-vid.sleep .plt-vgreep{color:var(--ink);cursor:grabbing}
+  .vsleept .plt-vid:not(.sleep){transition:transform .16s ease}
+  .vsleept, .vsleept *{-webkit-user-select:none;user-select:none}
   .plt-vth{flex:none;width:46px;height:29px;border-radius:7px;object-fit:cover;display:block;
     background:repeating-linear-gradient(135deg,var(--soft) 0 6px,rgba(20,17,13,.04) 6px 12px)}
   .plt-vt{flex:1;min-width:0;font-size:12.5px;font-weight:700;line-height:1.25;
@@ -7639,16 +7650,35 @@
     return null;
   }
 
+  /* Met twee of meer filmpjes krijgt elke regel rechts een greep. Daaraan pak je hem meteen
+     vast en schuif je hem omhoog of omlaag; de rest van de regel blijft gewoon afspelen. */
+  var PL_IC_GREEP='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'+
+    '<circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/>'+
+    '<circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
   function plVidRegels(it){
-    var rijen=(it.vids||[]).map(function(vid){
-      var v=vdById(vid); if(!v) return '';
+    var vs=(it.vids||[]).map(vdById).filter(Boolean), greep=vs.length>1;
+    var rijen=vs.map(function(v){
       var th=vdThumb(v);
       return '<a class="plt-vid" href="'+esc(vdUrl(v))+'" data-act="vdplay" data-id="'+esc(v.id)+'" '+
         'target="_blank" rel="noopener noreferrer">'+
         '<img class="plt-vth" src="'+esc(th||'')+'" alt="" loading="lazy" decoding="async">'+
-        '<span class="plt-vt">'+esc(v.title||'Filmpje')+'</span></a>';
-    }).filter(Boolean);
-    return rijen.length ? '<div class="plt-vids">'+rijen.join('')+'</div>' : '';
+        '<span class="plt-vt">'+esc(v.title||'Filmpje')+'</span>'+
+        (greep?'<span class="plt-vgreep" aria-hidden="true" title="Sleep om te verplaatsen">'+PL_IC_GREEP+'</span>':'')+
+      '</a>';
+    });
+    return rijen.length ? '<div class="plt-vids" data-item="'+esc(it.id)+'">'+rijen.join('')+'</div>' : '';
+  }
+  // Zet de filmpjes van een onderdeel in een nieuwe volgorde. Een filmpje dat niet meer in je
+  // verzameling staat wordt niet getoond; dat schuift achteraan mee zodat er niets verdwijnt.
+  function plVidVerplaats(it, van, naar){
+    var zicht=(it.vids||[]).filter(function(id){ return !!vdById(id); });
+    var rest=(it.vids||[]).filter(function(id){ return !vdById(id); });
+    if(van<0||van>=zicht.length) return false;
+    naar=Math.max(0, Math.min(zicht.length-1, naar));
+    if(naar===van) return false;
+    zicht.splice(naar, 0, zicht.splice(van,1)[0]);
+    it.vids=zicht.concat(rest);
+    return true;
   }
 
   var PL_IC_OP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" '+
@@ -7776,7 +7806,7 @@
     requestAnimationFrame(function(){ el.classList.add('show'); });
     vdBindThumbs(el);
     plBindSwipe(el);
-    plBindSleep(el);
+    plBindSleep(el); plBindVidSleep(el);
     plBindAtop(el);
     return el;
   }
@@ -7801,7 +7831,7 @@
     if(body) body.innerHTML=plBodyHtml();
     plVerversDots();
     vdBindThumbs(w); w.scrollTop=y;
-    plBindSleep(coachScreen);
+    plBindSleep(coachScreen); plBindVidSleep(coachScreen);
     plVulAan(w); plAtop(w);
   }
   // De knoppenstrook volgt het rollen: tijdens het scrollen geeft elke kaart hem door.
@@ -7828,13 +7858,13 @@
     plTitelSwap(dir);
     var body=w.querySelector('#pl-body'); if(!body) return;
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-      body.innerHTML=plBodyHtml(); vdBindThumbs(body); plBindSleep(coachScreen);
+      body.innerHTML=plBodyHtml(); vdBindThumbs(body); plBindSleep(coachScreen); plBindVidSleep(coachScreen);
       plVulAan(w); plAtop(w); return;
     }
     body.classList.add('cs-fading');
     setTimeout(function(){
       body.innerHTML=plBodyHtml(); body.classList.remove('cs-fading');
-      vdBindThumbs(body); plBindSleep(coachScreen); w.scrollTop=0; plVulAan(w); plAtop(w);
+      vdBindThumbs(body); plBindSleep(coachScreen); plBindVidSleep(coachScreen); w.scrollTop=0; plVulAan(w); plAtop(w);
     }, 170);
   }
   // De dagnaam in de kop schuift met de veegrichting mee naar buiten, net als bij de woorden.
@@ -7959,6 +7989,63 @@
     line.addEventListener('pointercancel', function(){ opruimen(); });
     // Tijdens het slepen mag de lijst niet meerollen.
     line.addEventListener('touchmove', function(e){ if(kaart) e.preventDefault(); }, {passive:false});
+  }
+
+  /* ---- Slepen: een filmpje binnen een onderdeel verplaatsen ----
+     Aan de greep hoef je niet eerst vast te houden: hij doet niets anders, dus hij volgt je
+     vinger meteen. De buren schuiven op zodat je ziet waar het filmpje terechtkomt. */
+  function plBindVidSleep(el){
+    var line=el && el.querySelector('#pl-line'); if(!line || line._plVidGebonden) return;
+    line._plVidGebonden=true;
+    var rij=null, rijen=null, van=-1, y0=0, dy=0, stap=36, pid=null;
+    function naarIdx(){ return Math.max(0, Math.min(rijen.length-1, van+Math.round(dy/stap))); }
+    function opruimen(){
+      if(rijen) rijen.forEach(function(r){ r.style.transform=''; r.classList.remove('sleep'); });
+      line.classList.remove('vsleept');
+      rij=null; rijen=null; pid=null; plSleep.actief=false;
+    }
+    line.addEventListener('pointerdown', function(e){
+      var g=e.target.closest && e.target.closest('.plt-vgreep'); if(!g) return;
+      if(e.pointerType==='mouse' && e.button!==0) return;
+      e.preventDefault(); e.stopPropagation();
+      rij=g.closest('.plt-vid');
+      rijen=[].slice.call(rij.parentNode.querySelectorAll('.plt-vid'));
+      van=rijen.indexOf(rij); y0=e.clientY; dy=0; pid=e.pointerId;
+      stap=rij.getBoundingClientRect().height+7;
+      try{ g.setPointerCapture(pid); }catch(_){}
+      rij.classList.add('sleep'); line.classList.add('vsleept');
+      plSleep.actief=true; buzz(10);
+    });
+    line.addEventListener('pointermove', function(e){
+      if(!rij || e.pointerId!==pid) return;
+      e.preventDefault();
+      dy=e.clientY-y0;
+      var min=-van*stap, max=(rijen.length-1-van)*stap;
+      dy=Math.max(min-stap*.4, Math.min(max+stap*.4, dy));
+      rij.style.transform='translateY('+dy+'px)';
+      var naar=naarIdx();
+      rijen.forEach(function(r,i){
+        if(i===van) return;
+        var v=0;
+        if(naar>van && i>van && i<=naar) v=-stap;
+        else if(naar<van && i<van && i>=naar) v=stap;
+        r.style.transform = v ? 'translateY('+v+'px)' : '';
+      });
+    });
+    function los(e){
+      if(!rij || e.pointerId!==pid) return;
+      var naar=naarIdx(), id=rij.parentNode.getAttribute('data-item');
+      opruimen();
+      var it=plFind(plCur(), id);
+      if(it && plVidVerplaats(it, van, naar)){ plSave(); buzz(14); plRefresh(); }
+    }
+    line.addEventListener('pointerup', los);
+    line.addEventListener('pointercancel', function(e){ if(rij && e.pointerId===pid) opruimen(); });
+    line.addEventListener('touchmove', function(e){ if(rij) e.preventDefault(); }, {passive:false});
+    // De greep zit in de regel die het filmpje afspeelt; een tik erop mag dat niet doen.
+    line.addEventListener('click', function(e){
+      if(e.target.closest && e.target.closest('.plt-vgreep')){ e.preventDefault(); e.stopPropagation(); }
+    }, true);
   }
 
   // Een eerste dag in één tik: opwarmen, een poomsae-ronde en uitlopen.
